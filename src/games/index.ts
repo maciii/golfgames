@@ -13,4 +13,9 @@ export function getGame(gameId: string): GameDefinition {
   return GAMES.find((g) => g.id === gameId) ?? bestAggregate
 }
 
-export type { GameDefinition, StandingRow } from './types'
+export type {
+  GameDefinition,
+  HoleSummary,
+  StandingRow,
+  StandingsSection,
+} from './types'

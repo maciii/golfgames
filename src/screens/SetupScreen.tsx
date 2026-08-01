@@ -4,34 +4,49 @@ import { DEFAULT_GAME_ID, GAMES, getGame } from '../games'
 const MAX_PLAYERS = 4
 const HOLE_OPTIONS = [9, 18]
 
+/** Tři možná rozdělení čtyř hráčů do dvojic. */
+const PAIRINGS: number[][][] = [
+  [
+    [0, 1],
+    [2, 3],
+  ],
+  [
+    [0, 2],
+    [1, 3],
+  ],
+  [
+    [0, 3],
+    [1, 2],
+  ],
+]
+
 interface Props {
-  onStart: (gameId: string, playerNames: string[], holeCount: number) => void
+  onStart: (
+    gameId: string,
+    playerNames: string[],
+    holeCount: number,
+    teamIndices?: number[][],
+  ) => void
 }
 
 export default function SetupScreen({ onStart }: Props) {
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
-  const [playerCount, setPlayerCount] = useState(2)
+  const [playerCount, setPlayerCount] = useState(getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2)
   const [names, setNames] = useState<string[]>(Array(MAX_PLAYERS).fill(''))
   const [holeCount, setHoleCount] = useState(18)
+  const [pairing, setPairing] = useState(0)
 
   const game = getGame(gameId)
-  const counts = Array.from(
-    { length: game.maxPlayers - game.minPlayers + 1 },
-    (_, i) => game.minPlayers + i,
-  )
-  const allowedCounts = game.playerCounts ?? counts
+  const displayName = (index: number) => names[index]?.trim() || `Hráč ${index + 1}`
+  const needsPairing = game.teamBased && playerCount === 4
 
   function selectGame(id: string) {
     setGameId(id)
     const next = getGame(id)
-    const allowed = next.playerCounts ?? [
-      ...Array.from(
-        { length: next.maxPlayers - next.minPlayers + 1 },
-        (_, i) => next.minPlayers + i,
-      ),
-    ]
     // Přepnutí hry nesmí nechat nepovolený počet hráčů.
-    if (!allowed.includes(playerCount)) setPlayerCount(allowed[0] ?? 2)
+    if (!next.playerCounts.includes(playerCount)) {
+      setPlayerCount(next.playerCounts[0] ?? 2)
+    }
   }
 
   function updateName(index: number, value: string) {
@@ -39,7 +54,11 @@ export default function SetupScreen({ onStart }: Props) {
   }
 
   function start() {
-    onStart(gameId, names.slice(0, playerCount), holeCount)
+    let teamIndices: number[][] | undefined
+    if (game.teamBased) {
+      teamIndices = playerCount === 4 ? PAIRINGS[pairing] : [[0, 1]]
+    }
+    onStart(gameId, names.slice(0, playerCount), holeCount, teamIndices)
   }
 
   return (
@@ -72,7 +91,7 @@ export default function SetupScreen({ onStart }: Props) {
         <section className="section">
           <h2 className="section-title">Hráči</h2>
           <div className="segmented">
-            {allowedCounts.map((count) => (
+            {game.playerCounts.map((count) => (
               <button
                 key={count}
                 type="button"
@@ -100,6 +119,36 @@ export default function SetupScreen({ onStart }: Props) {
             ))}
           </div>
         </section>
+
+        {needsPairing && (
+          <section className="section">
+            <h2 className="section-title">Dvojice</h2>
+            <div className="game-list">
+              {PAIRINGS.map((option, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`game-card${index === pairing ? ' selected' : ''}`}
+                  onClick={() => setPairing(index)}
+                  aria-pressed={index === pairing}
+                >
+                  <span className="pairing-line">
+                    {(option[0] ?? []).map(displayName).join(' + ')}
+                    <span className="pairing-vs">vs</span>
+                    {(option[1] ?? []).map(displayName).join(' + ')}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {game.teamBased && playerCount === 2 && (
+          <p className="hint">
+            Dva hráči tvoří jednu dvojici – uvidíš její lepší míč i součet, ale
+            bez soupeřícího týmu. Pro souboj dvojic zvol 4 hráče.
+          </p>
+        )}
 
         <section className="section">
           <h2 className="section-title">Počet jamek</h2>

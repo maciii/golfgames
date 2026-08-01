@@ -189,6 +189,21 @@ button {
   color: var(--text-dim);
 }
 
+.pairing-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 550;
+}
+
+.pairing-vs {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
 /* --- segmentovaný přepínač ---------------------------------------------- */
 
 .segmented {
@@ -304,6 +319,42 @@ button {
 }
 
 /* --- zápis skóre -------------------------------------------------------- */
+
+.team-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 0 4px;
+}
+
+.team-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.team-summary {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.team-metric strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  margin-left: 3px;
+}
 
 .player-list {
   list-style: none;

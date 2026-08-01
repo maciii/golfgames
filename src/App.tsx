@@ -18,8 +18,13 @@ export default function App() {
   }, [round])
 
   const startRound = useCallback(
-    (gameId: string, playerNames: string[], holeCount: number) => {
-      setRound(createRound(gameId, playerNames, holeCount))
+    (
+      gameId: string,
+      playerNames: string[],
+      holeCount: number,
+      teamIndices?: number[][],
+    ) => {
+      setRound(createRound(gameId, playerNames, holeCount, teamIndices))
       setView('play')
     },
     [],

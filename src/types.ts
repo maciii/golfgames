@@ -5,12 +5,19 @@ export interface Player {
   name: string
 }
 
+export interface Team {
+  id: string
+  playerIds: PlayerId[]
+}
+
 export interface Round {
   id: string
   gameId: string
   createdAt: string
   finishedAt?: string
   players: Player[]
+  /** Prázdné u her, které se hrají za jednotlivce. */
+  teams: Team[]
   holeCount: number
   /** Par každé jamky, délka === holeCount. */
   pars: number[]
@@ -26,6 +33,8 @@ export function createRound(
   gameId: string,
   playerNames: string[],
   holeCount: number,
+  /** Rozdělení do týmů po indexech hráčů, např. [[0, 1], [2, 3]]. */
+  teamIndices?: number[][],
 ): Round {
   const players: Player[] = playerNames.map((name, i) => ({
     id: `p${i + 1}`,
@@ -37,16 +46,31 @@ export function createRound(
     scores[player.id] = Array<number | null>(holeCount).fill(null)
   }
 
+  const teams: Team[] = (teamIndices ?? []).map((indices, i) => ({
+    id: `t${i + 1}`,
+    playerIds: indices
+      .map((index) => players[index]?.id)
+      .filter((id): id is PlayerId => id !== undefined),
+  }))
+
   return {
     id: `${Date.now()}`,
     gameId,
     createdAt: new Date().toISOString(),
     players,
+    teams,
     holeCount,
     pars: Array<number>(holeCount).fill(DEFAULT_PAR),
     scores,
     currentHole: 0,
   }
+}
+
+/** Tým se pojmenovává podle hráčů, ať se drží v souladu se zadanými jmény. */
+export function teamName(round: Round, team: Team): string {
+  return team.playerIds
+    .map((id) => round.players.find((p) => p.id === id)?.name ?? '?')
+    .join(' + ')
 }
 
 export function scoreAt(round: Round, playerId: PlayerId, hole: number): number | null {

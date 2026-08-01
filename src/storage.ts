@@ -29,7 +29,8 @@ export function loadCurrentRound(): Round | null {
   // spadli při renderu.
   if (!round || !Array.isArray(round.players) || !round.players.length) return null
   if (!Array.isArray(round.pars) || typeof round.scores !== 'object') return null
-  return round
+  // Kola uložená před zavedením týmů `teams` nemají.
+  return { ...round, teams: Array.isArray(round.teams) ? round.teams : [] }
 }
 
 export function saveCurrentRound(round: Round | null): void {

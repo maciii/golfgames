@@ -1,4 +1,4 @@
-import type { PlayerId, Round } from '../types'
+import type { Player, PlayerId, Round } from '../types'
 import {
   holesPlayed,
   isHoleComplete,
@@ -7,7 +7,9 @@ import {
   parForPlayedHoles,
   scoreAt,
   strokeTotal,
+  teamName,
 } from '../types'
+import { getGame } from '../games'
 
 const PAR_OPTIONS = [3, 4, 5]
 const MAX_STROKES = 20
@@ -34,17 +36,67 @@ export default function PlayScreen({
   onFinish,
   onShowResults,
 }: Props) {
+  const game = getGame(round.gameId)
   const hole = round.currentHole
   const par = parAt(round, hole)
   const isLastHole = hole === round.holeCount - 1
   const holeDone = isHoleComplete(round, hole)
   const roundDone = isRoundComplete(round)
+  const summaries = game.holeSummary?.(round, hole) ?? []
 
   function adjust(playerId: PlayerId, delta: number) {
     const current = scoreAt(round, playerId, hole)
     // Z prázdné buňky skáčeme rovnou na par - to je nejčastější zápis.
     const next = current === null ? par + (delta > 0 ? 0 : -1) : current + delta
     onSetScore(playerId, hole, Math.max(1, Math.min(MAX_STROKES, next)))
+  }
+
+  function renderPlayer(player: Player) {
+    const score = scoreAt(round, player.id, hole)
+    const played = holesPlayed(round, player.id)
+    const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
+    const diff = score === null ? null : score - par
+
+    return (
+      <li key={player.id} className="player-row">
+        <div className="player-info">
+          <span className="player-name">{player.name}</span>
+          <span className="player-total">
+            {played === 0
+              ? 'zatím bez zápisu'
+              : `${strokeTotal(round, player.id)} ran · ${formatToPar(toPar)}`}
+          </span>
+        </div>
+        <div className="stepper">
+          <button
+            type="button"
+            className="step-button"
+            onClick={() => adjust(player.id, -1)}
+            aria-label={`${player.name}: ubrat ránu`}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className={`score-value${diff === null ? ' empty' : ''}${
+              diff !== null && diff < 0 ? ' under' : ''
+            }${diff !== null && diff > 0 ? ' over' : ''}`}
+            onClick={() => onSetScore(player.id, hole, null)}
+            aria-label={`${player.name}: smazat zápis`}
+          >
+            {score ?? '–'}
+          </button>
+          <button
+            type="button"
+            className="step-button"
+            onClick={() => adjust(player.id, 1)}
+            aria-label={`${player.name}: přidat ránu`}
+          >
+            +
+          </button>
+        </div>
+      </li>
+    )
   }
 
   return (
@@ -92,55 +144,34 @@ export default function PlayScreen({
           </div>
         </div>
 
-        <ul className="player-list">
-          {round.players.map((player) => {
-            const score = scoreAt(round, player.id, hole)
-            const played = holesPlayed(round, player.id)
-            const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
-            const diff = score === null ? null : score - par
+        {round.teams.length > 0 ? (
+          round.teams.map((team) => {
+            const summary = summaries.find((s) => s.id === team.id)
+            const players = team.playerIds
+              .map((id) => round.players.find((p) => p.id === id))
+              .filter((p): p is Player => p !== undefined)
 
             return (
-              <li key={player.id} className="player-row">
-                <div className="player-info">
-                  <span className="player-name">{player.name}</span>
-                  <span className="player-total">
-                    {played === 0
-                      ? 'zatím bez zápisu'
-                      : `${strokeTotal(round, player.id)} ran · ${formatToPar(toPar)}`}
-                  </span>
+              <section key={team.id} className="team-block">
+                <div className="team-header">
+                  <span className="team-name">{teamName(round, team)}</span>
+                  {summary && (
+                    <span className="team-summary">
+                      {summary.entries.map((entry) => (
+                        <span key={entry.label} className="team-metric">
+                          {entry.label} <strong>{entry.value}</strong>
+                        </span>
+                      ))}
+                    </span>
+                  )}
                 </div>
-                <div className="stepper">
-                  <button
-                    type="button"
-                    className="step-button"
-                    onClick={() => adjust(player.id, -1)}
-                    aria-label={`${player.name}: ubrat ránu`}
-                  >
-                    −
-                  </button>
-                  <button
-                    type="button"
-                    className={`score-value${diff === null ? ' empty' : ''}${
-                      diff !== null && diff < 0 ? ' under' : ''
-                    }${diff !== null && diff > 0 ? ' over' : ''}`}
-                    onClick={() => onSetScore(player.id, hole, null)}
-                    aria-label={`${player.name}: smazat zápis`}
-                  >
-                    {score ?? '–'}
-                  </button>
-                  <button
-                    type="button"
-                    className="step-button"
-                    onClick={() => adjust(player.id, 1)}
-                    aria-label={`${player.name}: přidat ránu`}
-                  >
-                    +
-                  </button>
-                </div>
-              </li>
+                <ul className="player-list">{players.map(renderPlayer)}</ul>
+              </section>
             )
-          })}
-        </ul>
+          })
+        ) : (
+          <ul className="player-list">{round.players.map(renderPlayer)}</ul>
+        )}
 
         <p className="hint">Klepnutím na číslo zápis smažeš.</p>
 
