@@ -8,6 +8,7 @@
   --accent: #4ade80;
   --accent-dark: #16a34a;
   --under: #7dd3fc;
+  --eagle: #fcd34d;
   --over: #fca5a5;
   --tap: 48px;
 }
@@ -52,8 +53,8 @@ button {
   flex-direction: column;
   min-height: 100dvh;
   /* Výřez nahoře a home indikátor dole nesmí překrývat ovládání. */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 .app-header {
@@ -494,11 +495,159 @@ button {
   font-size: 22px;
 }
 
-.standing-topar {
+.standing-secondary {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+/* --- seznam uložených hráčů --------------------------------------------- */
+
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.roster-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.roster-toggle {
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--accent);
+  padding: 6px 4px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 20px;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.chip.removable {
+  border-color: var(--over);
+  color: var(--over);
+}
+
+.chip-x {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* --- shrnutí jamky u her bez dvojic -------------------------------------- */
+
+.game-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
   font-size: 14px;
   color: var(--text-dim);
-  min-width: 30px;
-  text-align: right;
+}
+
+/* --- archiv -------------------------------------------------------------- */
+
+.archive-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.archive-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.archive-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.archive-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.archive-game {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.archive-date {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.archive-winner {
+  font-size: 15px;
+  color: var(--accent);
+  font-weight: 550;
+}
+
+.archive-players {
+  font-size: 13px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-delete {
+  width: var(--tap);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* --- verze --------------------------------------------------------------- */
+
+.version {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
 }
 
 /* --- scorecard ---------------------------------------------------------- */
@@ -547,6 +696,12 @@ button {
 .scorecard td.under {
   color: var(--under);
   font-weight: 600;
+}
+
+/* Eagle a lepší - v Best Aggregate stojí 3 body, ať je vidět na první pohled. */
+.scorecard td.eagle {
+  color: var(--eagle);
+  font-weight: 700;
 }
 
 .scorecard td.over {

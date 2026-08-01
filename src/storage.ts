@@ -1,11 +1,22 @@
 import type { Round } from './types'
 
-const CURRENT_KEY = 'golfgames.currentRound.v1'
-const HISTORY_KEY = 'golfgames.history.v1'
-const HISTORY_LIMIT = 20
+/**
+ * Perzistence v localStorage.
+ *
+ * Aplikace nemá server ani účty - všechno zůstává v telefonu. Klíče nesou
+ * verzi (`.v1`), aby šlo případnou změnu tvaru dat poznat a odbavit.
+ *
+ * Zápis skóre je důležitější než ukládání, takže selhání localStorage
+ * (privátní režim, plná kvóta) se tiše ignoruje a hra běží dál.
+ */
 
-// localStorage může selhat (privátní režim, plná kvóta). Zápis skóre je
-// důležitější než perzistence, takže chyby jen spolkneme.
+const CURRENT_KEY = 'golfgames.currentRound.v1'
+const ARCHIVE_KEY = 'golfgames.archive.v1'
+const ROSTER_KEY = 'golfgames.roster.v1'
+
+/** Kolik odehraných kol se drží v archivu. */
+export const ARCHIVE_LIMIT = 100
+
 function read<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key)
@@ -19,38 +30,111 @@ function write(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {
-    /* offline zápis skóre běží dál i bez uložení */
+    /* zápis skóre běží dál i bez uložení */
   }
 }
 
-export function loadCurrentRound(): Round | null {
-  const round = read<Round>(CURRENT_KEY)
-  // Hrubá kontrola tvaru: starší/poškozená data radši zahodíme, než abychom
-  // spadli při renderu.
-  if (!round || !Array.isArray(round.players) || !round.players.length) return null
-  if (!Array.isArray(round.pars) || typeof round.scores !== 'object') return null
-  // Kola uložená před zavedením týmů `teams` nemají.
+function remove(key: string): void {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Hrubá kontrola tvaru: poškozená data radši zahodíme, než spadnout. */
+function isValidRound(round: unknown): round is Round {
+  if (!round || typeof round !== 'object') return false
+  const r = round as Partial<Round>
+  return (
+    Array.isArray(r.players) &&
+    r.players.length > 0 &&
+    Array.isArray(r.pars) &&
+    typeof r.scores === 'object' &&
+    r.scores !== null
+  )
+}
+
+/** Doplní pole, která ve starších uložených kolech chybí. */
+function normalize(round: Round): Round {
   return { ...round, teams: Array.isArray(round.teams) ? round.teams : [] }
 }
 
+// --- rozehrané kolo -------------------------------------------------------
+
+export function loadCurrentRound(): Round | null {
+  const round = read<Round>(CURRENT_KEY)
+  return isValidRound(round) ? normalize(round) : null
+}
+
 export function saveCurrentRound(round: Round | null): void {
-  if (round === null) {
-    try {
-      localStorage.removeItem(CURRENT_KEY)
-    } catch {
-      /* ignore */
-    }
-    return
+  if (round === null) remove(CURRENT_KEY)
+  else write(CURRENT_KEY, round)
+}
+
+// --- archiv odehraných kol ------------------------------------------------
+
+export function loadArchive(): Round[] {
+  const archive = read<Round[]>(ARCHIVE_KEY)
+  if (!Array.isArray(archive)) return []
+  return archive.filter(isValidRound).map(normalize)
+}
+
+/**
+ * Uloží kolo do archivu. Opakované uložení téhož kola (např. po dodatečné
+ * opravě skóre) starý záznam přepíše místo zdvojení.
+ */
+export function archiveRound(round: Round): void {
+  const rest = loadArchive().filter((r) => r.id !== round.id)
+  write(ARCHIVE_KEY, [round, ...rest].slice(0, ARCHIVE_LIMIT))
+}
+
+export function deleteArchivedRound(roundId: string): void {
+  write(
+    ARCHIVE_KEY,
+    loadArchive().filter((r) => r.id !== roundId),
+  )
+}
+
+// --- seznam hráčů ---------------------------------------------------------
+
+export interface RosterEntry {
+  id: string
+  name: string
+}
+
+/** Uložení spoluhráči, seřazení podle abecedy. */
+export function loadRoster(): RosterEntry[] {
+  const roster = read<RosterEntry[]>(ROSTER_KEY)
+  if (!Array.isArray(roster)) return []
+  return roster
+    .filter((e): e is RosterEntry => Boolean(e && typeof e.name === 'string' && e.name))
+    .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+}
+
+/**
+ * Doplní jména do seznamu hráčů. Volá se při startu kola, takže spoluhráči
+ * přibývají sami a nikde se nemusí zakládat ručně. Duplicity (bez ohledu na
+ * velikost písmen) se ignorují.
+ */
+export function addToRoster(names: string[]): RosterEntry[] {
+  const roster = loadRoster()
+  const known = new Set(roster.map((e) => e.name.trim().toLowerCase()))
+
+  for (const raw of names) {
+    const name = raw.trim()
+    if (!name || known.has(name.toLowerCase())) continue
+    known.add(name.toLowerCase())
+    roster.push({ id: `r${Date.now()}${Math.random().toString(36).slice(2, 6)}`, name })
   }
-  write(CURRENT_KEY, round)
+
+  const sorted = roster.sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+  write(ROSTER_KEY, sorted)
+  return sorted
 }
 
-export function loadHistory(): Round[] {
-  const history = read<Round[]>(HISTORY_KEY)
-  return Array.isArray(history) ? history : []
-}
-
-export function addToHistory(round: Round): void {
-  const history = loadHistory().filter((r) => r.id !== round.id)
-  write(HISTORY_KEY, [round, ...history].slice(0, HISTORY_LIMIT))
+export function removeFromRoster(entryId: string): RosterEntry[] {
+  const roster = loadRoster().filter((e) => e.id !== entryId)
+  write(ROSTER_KEY, roster)
+  return roster
 }

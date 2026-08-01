@@ -1,17 +1,33 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { PlayerId, Round } from './types'
 import { createRound } from './types'
-import { addToHistory, loadCurrentRound, saveCurrentRound } from './storage'
+import {
+  addToRoster,
+  archiveRound,
+  deleteArchivedRound,
+  loadArchive,
+  loadCurrentRound,
+  saveCurrentRound,
+} from './storage'
 import SetupScreen from './screens/SetupScreen'
 import PlayScreen from './screens/PlayScreen'
 import ResultsScreen from './screens/ResultsScreen'
+import ArchiveScreen from './screens/ArchiveScreen'
 
-type View = 'play' | 'results'
+type View = 'setup' | 'play' | 'results' | 'archive'
 
+/**
+ * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
+ *
+ * Navigace je záměrně plochá - aplikace se ovládá jednou rukou na hřišti,
+ * takže se nikam nezanořuje a router by byl zbytečná váha.
+ */
 export default function App() {
-  // Rozehrané kolo přežije zavření appky i restart telefonu.
+  // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
   const [view, setView] = useState<View>('play')
+  const [archive, setArchive] = useState<Round[]>(() => loadArchive())
+  const [openArchiveId, setOpenArchiveId] = useState<string | null>(null)
 
   useEffect(() => {
     saveCurrentRound(round)
@@ -24,6 +40,8 @@ export default function App() {
       holeCount: number,
       teamIndices?: number[][],
     ) => {
+      // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
+      addToRoster(playerNames)
       setRound(createRound(gameId, playerNames, holeCount, teamIndices))
       setView('play')
     },
@@ -54,8 +72,7 @@ export default function App() {
   const goToHole = useCallback((hole: number) => {
     setRound((prev) => {
       if (!prev) return prev
-      const clamped = Math.max(0, Math.min(prev.holeCount - 1, hole))
-      return { ...prev, currentHole: clamped }
+      return { ...prev, currentHole: Math.max(0, Math.min(prev.holeCount - 1, hole)) }
     })
   }, [])
 
@@ -63,7 +80,10 @@ export default function App() {
     setRound((prev) => {
       if (!prev) return prev
       const finished = { ...prev, finishedAt: new Date().toISOString() }
-      addToHistory(finished)
+      // Stejné id přepíše dřívější záznam, takže dodatečná oprava skóre
+      // archiv nezdvojí.
+      archiveRound(finished)
+      setArchive(loadArchive())
       return finished
     })
     setView('results')
@@ -76,11 +96,54 @@ export default function App() {
 
   const discardRound = useCallback(() => {
     setRound(null)
-    setView('play')
+    setView('setup')
   }, [])
 
+  const removeArchived = useCallback(
+    (roundId: string) => {
+      deleteArchivedRound(roundId)
+      setArchive(loadArchive())
+      if (openArchiveId === roundId) setOpenArchiveId(null)
+    },
+    [openArchiveId],
+  )
+
+  const openArchive = useCallback(() => {
+    setArchive(loadArchive())
+    setOpenArchiveId(null)
+    setView('archive')
+  }, [])
+
+  const leaveArchive = useCallback(() => {
+    setOpenArchiveId(null)
+    setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')
+  }, [round])
+
+  if (view === 'archive') {
+    const opened = archive.find((r) => r.id === openArchiveId)
+    if (opened) {
+      return (
+        <ResultsScreen round={opened} readOnly onBack={() => setOpenArchiveId(null)} />
+      )
+    }
+    return (
+      <ArchiveScreen
+        rounds={archive}
+        onOpen={setOpenArchiveId}
+        onDelete={removeArchived}
+        onBack={leaveArchive}
+      />
+    )
+  }
+
   if (!round) {
-    return <SetupScreen onStart={startRound} />
+    return (
+      <SetupScreen
+        onStart={startRound}
+        onOpenArchive={openArchive}
+        archiveCount={archive.length}
+      />
+    )
   }
 
   if (view === 'results') {
@@ -89,6 +152,7 @@ export default function App() {
         round={round}
         onResume={resumeRound}
         onNewRound={discardRound}
+        onOpenArchive={openArchive}
       />
     )
   }

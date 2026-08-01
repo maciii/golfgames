@@ -1,45 +1,58 @@
 import type { Round } from '../types'
-import { parAt, scoreAt, strokeTotal } from '../types'
+import { formatRoundDate, parAt, scoreAt, strokeTotal } from '../types'
 import { getGame } from '../games'
+import { APP_VERSION } from '../version'
 
 interface Props {
   round: Round
-  onResume: () => void
-  onNewRound: () => void
-}
-
-function formatToPar(toPar: number): string {
-  if (toPar === 0) return 'E'
-  return toPar > 0 ? `+${toPar}` : `${toPar}`
+  /** Archivní kolo se jen prohlíží - nejde v něm pokračovat ani ho mazat. */
+  readOnly?: boolean
+  onResume?: () => void
+  onNewRound?: () => void
+  onOpenArchive?: () => void
+  onBack?: () => void
 }
 
 /** Barevné odlišení birdie/bogey ve scorecardu. */
 function scoreClass(score: number | null, par: number): string {
   if (score === null) return 'empty'
+  if (score <= par - 2) return 'eagle'
   if (score < par) return 'under'
   if (score > par) return 'over'
   return ''
 }
 
-export default function ResultsScreen({ round, onResume, onNewRound }: Props) {
+/** Výsledky kola: tabulky podle pravidel hry plus kompletní scorecard. */
+export default function ResultsScreen({
+  round,
+  readOnly = false,
+  onResume,
+  onNewRound,
+  onOpenArchive,
+  onBack,
+}: Props) {
   const game = getGame(round.gameId)
   const sections = game.computeStandings(round)
   const finished = Boolean(round.finishedAt)
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
-  // U jediného týmu není co poměřovat, pořadí by bylo jen matoucí.
+  // Při jediném řádku není co poměřovat a pořadí by jen mátlo.
   const showPositions = sections.some((s) => s.rows.length > 1)
 
   function newRound() {
     if (finished || confirm('Rozehrané kolo se smaže. Opravdu chceš začít nové?')) {
-      onNewRound()
+      onNewRound?.()
     }
   }
 
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{finished ? 'Výsledky' : 'Průběžné výsledky'}</h1>
-        <p className="subtitle">{game.name}</p>
+        <h1>
+          {readOnly ? 'Archivní kolo' : finished ? 'Výsledky' : 'Průběžné výsledky'}
+        </h1>
+        <p className="subtitle">
+          {game.name} · {formatRoundDate(round)}
+        </p>
       </header>
 
       <main className="content">
@@ -60,8 +73,10 @@ export default function ResultsScreen({ round, onResume, onNewRound }: Props) {
                     {row.detail && <span className="standing-detail">{row.detail}</span>}
                   </span>
                   <span className="standing-score">
-                    <strong>{row.strokes}</strong>
-                    <span className="standing-topar">{formatToPar(row.toPar)}</span>
+                    <strong>{row.valueLabel}</strong>
+                    {row.secondary && (
+                      <span className="standing-secondary">{row.secondary}</span>
+                    )}
                   </span>
                 </li>
               ))}
@@ -70,7 +85,7 @@ export default function ResultsScreen({ round, onResume, onNewRound }: Props) {
           </section>
         ))}
 
-        {!finished && (
+        {!finished && !readOnly && (
           <p className="hint">Počítají se jen jamky, které už mají zápis.</p>
         )}
 
@@ -117,22 +132,36 @@ export default function ResultsScreen({ round, onResume, onNewRound }: Props) {
             </table>
           </div>
         </section>
+
+        {!readOnly && onOpenArchive && (
+          <button type="button" className="link-button" onClick={onOpenArchive}>
+            Archiv odehraných kol
+          </button>
+        )}
       </main>
 
-      <footer className="app-footer footer-row">
-        {!finished && (
-          <button type="button" className="primary-button" onClick={onResume}>
-            Zpět do hry
-          </button>
-        )}
-        {finished && (
-          <button type="button" className="secondary-button" onClick={onResume}>
-            Upravit skóre
-          </button>
-        )}
-        <button type="button" className="secondary-button" onClick={newRound}>
-          Nové kolo
-        </button>
+      <footer className="app-footer">
+        <div className="footer-row">
+          {readOnly ? (
+            <button type="button" className="primary-button" onClick={onBack}>
+              Zpět do archivu
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={finished ? 'secondary-button' : 'primary-button'}
+                onClick={onResume}
+              >
+                {finished ? 'Upravit skóre' : 'Zpět do hry'}
+              </button>
+              <button type="button" className="secondary-button" onClick={newRound}>
+                Nové kolo
+              </button>
+            </>
+          )}
+        </div>
+        <p className="version">verze {APP_VERSION}</p>
       </footer>
     </div>
   )

@@ -93,7 +93,8 @@ function drawIcon(size, ballRatio) {
           const d = Math.hypot(px - cx, py - cy)
           if (d < r) {
             // míček se stínováním zleva nahoře
-            const shade = (px - cx + r) / (2 * r) * 0.5 + ((py - cy + r) / (2 * r)) * 0.5
+            const shade =
+              ((px - cx + r) / (2 * r)) * 0.5 + ((py - cy + r) / (2 * r)) * 0.5
             let ball = mix([255, 255, 255], [206, 216, 208], shade)
             for (const [dx, dy] of dimples) {
               if (Math.hypot(px - dx, py - dy) < dimpleR) {

@@ -1,13 +1,24 @@
-import { defineConfig } from 'vite'
+import { readFileSync } from 'node:fs'
+// defineConfig z vitest/config, aby prošla i sekce `test`.
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// GitHub Pages serves the app from /<repo>/, jiné hostingy (Cloudflare, Netlify)
-// z kořene. Přepíná se přes BASE_PATH při buildu.
+// GitHub Pages servíruje aplikaci z /<repo>/, jiné hostingy (Cloudflare,
+// Netlify) z kořene. Přepíná se přes BASE_PATH při buildu.
 const base = process.env.BASE_PATH ?? '/golfgames/'
+
+// Verze se čte z package.json a vpéká do bundlu, aby ji šlo zobrazit v UI.
+// Zvedá ji scripts/bump-version.mjs při každém lokálním buildu.
+const { version } = JSON.parse(readFileSync('./package.json', 'utf8')) as {
+  version: string
+}
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -37,9 +48,14 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // Celá appka je offline-first: bez signálu na hřišti musí jít zapisovat.
+        // Celá aplikace je offline-first: bez signálu na hřišti musí jít
+        // zapisovat skóre.
         navigateFallback: `${base}index.html`,
       },
     }),
   ],
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+  },
 })

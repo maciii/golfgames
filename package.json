@@ -1,15 +1,23 @@
 {
   "name": "golfgames",
-  "version": "0.1.0",
-  "description": "Zápis golfového skóre po jamkách pro 2-4 hráče, vyhodnocení různých typů her",
+  "version": "0.2.1",
+  "description": "Zápis golfového skóre po jamkách pro 2-4 hráče a vyhodnocení různých typů golfových her",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/bump-version.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "icons": "node scripts/gen-icons.mjs"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run test && npm run format:check",
+    "icons": "node scripts/gen-icons.mjs",
+    "bump:minor": "node scripts/bump-version.mjs minor",
+    "bump:major": "node scripts/bump-version.mjs major"
   },
   "repository": {
     "type": "git",
@@ -25,8 +33,10 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2",
     "vite": "^8.2.0",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10"
   }
 }

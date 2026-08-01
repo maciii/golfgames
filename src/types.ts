@@ -1,3 +1,10 @@
+/**
+ * Datový model jednoho kola a základní výpočty nad ním.
+ *
+ * Model je záměrně společný pro všechny hry - hry se liší jen tím, jak z
+ * uložených ran spočítají výsledek (viz src/games/).
+ */
+
 export type PlayerId = string
 
 export interface Player {
@@ -5,6 +12,7 @@ export interface Player {
   name: string
 }
 
+/** Dvojice hráčů u týmových her. */
 export interface Team {
   id: string
   playerIds: PlayerId[]
@@ -13,7 +21,9 @@ export interface Team {
 export interface Round {
   id: string
   gameId: string
+  /** ISO timestamp založení kola. */
   createdAt: string
+  /** ISO timestamp ukončení; dokud chybí, je kolo rozehrané. */
   finishedAt?: string
   players: Player[]
   /** Prázdné u her, které se hrají za jednotlivce. */
@@ -28,6 +38,9 @@ export interface Round {
 }
 
 export const DEFAULT_PAR = 4
+
+/** Nejvyšší zapsatelný počet ran na jamce - pojistka proti překliku. */
+export const MAX_STROKES = 20
 
 export function createRound(
   gameId: string,
@@ -54,7 +67,7 @@ export function createRound(
   }))
 
   return {
-    id: `${Date.now()}`,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     gameId,
     createdAt: new Date().toISOString(),
     players,
@@ -73,12 +86,22 @@ export function teamName(round: Round, team: Team): string {
     .join(' + ')
 }
 
+export function playerName(round: Round, playerId: PlayerId): string {
+  return round.players.find((p) => p.id === playerId)?.name ?? '?'
+}
+
 export function scoreAt(round: Round, playerId: PlayerId, hole: number): number | null {
   return round.scores[playerId]?.[hole] ?? null
 }
 
 export function parAt(round: Round, hole: number): number {
   return round.pars[hole] ?? DEFAULT_PAR
+}
+
+/** Rány vůči paru na jedné jamce; null, když hráč jamku nezapsal. */
+export function diffToPar(round: Round, playerId: PlayerId, hole: number): number | null {
+  const score = scoreAt(round, playerId, hole)
+  return score === null ? null : score - parAt(round, hole)
 }
 
 /** Součet ran hráče přes zapsané jamky. */
@@ -91,7 +114,7 @@ export function holesPlayed(round: Round, playerId: PlayerId): number {
   return (round.scores[playerId] ?? []).filter((s) => s !== null).length
 }
 
-/** Součet parů jen za jamky, které hráč skutečně zapsal - kvůli férovému "vs par". */
+/** Součet parů jen za jamky, které hráč zapsal - kvůli férovému "vs par". */
 export function parForPlayedHoles(round: Round, playerId: PlayerId): number {
   return (round.scores[playerId] ?? []).reduce<number>(
     (sum, s, hole) => (s === null ? sum : sum + parAt(round, hole)),
@@ -108,4 +131,26 @@ export function isRoundComplete(round: Round): boolean {
     if (!isHoleComplete(round, hole)) return false
   }
   return true
+}
+
+/** Hráči daného týmu v pořadí, v jakém jsou v týmu uvedení. */
+export function teamPlayers(round: Round, team: Team): Player[] {
+  return team.playerIds
+    .map((id) => round.players.find((p) => p.id === id))
+    .filter((p): p is Player => p !== undefined)
+}
+
+/** Formátuje rozdíl vůči paru: -2 -> "-2", 0 -> "E", 3 -> "+3". */
+export function formatToPar(toPar: number): string {
+  if (toPar === 0) return 'E'
+  return toPar > 0 ? `+${toPar}` : `${toPar}`
+}
+
+/** Datum kola v českém formátu pro archiv. */
+export function formatRoundDate(round: Round): string {
+  return new Date(round.createdAt).toLocaleDateString('cs-CZ', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  })
 }

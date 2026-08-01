@@ -26,7 +26,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+
+      - name: Kontrola typů
+        run: npm run typecheck
+      - name: Testy pravidel her
+        run: npm run test
+      - name: Kontrola formátování
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build
+
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3

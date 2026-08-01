@@ -1,5 +1,7 @@
 import type { Player, PlayerId, Round } from '../types'
 import {
+  MAX_STROKES,
+  formatToPar,
   holesPlayed,
   isHoleComplete,
   isRoundComplete,
@@ -8,11 +10,11 @@ import {
   scoreAt,
   strokeTotal,
   teamName,
+  teamPlayers,
 } from '../types'
 import { getGame } from '../games'
 
 const PAR_OPTIONS = [3, 4, 5]
-const MAX_STROKES = 20
 
 interface Props {
   round: Round
@@ -23,11 +25,12 @@ interface Props {
   onShowResults: () => void
 }
 
-function formatToPar(toPar: number): string {
-  if (toPar === 0) return 'E'
-  return toPar > 0 ? `+${toPar}` : `${toPar}`
-}
-
+/**
+ * Zápis skóre po jamkách.
+ *
+ * Ovládání je stavěné na hraní jednou rukou: velká tlačítka −/+, žádné
+ * klávesnice a průběžný stav rovnou u zapisované jamky.
+ */
 export default function PlayScreen({
   round,
   onSetScore,
@@ -43,6 +46,8 @@ export default function PlayScreen({
   const holeDone = isHoleComplete(round, hole)
   const roundDone = isRoundComplete(round)
   const summaries = game.holeSummary?.(round, hole) ?? []
+  // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
+  const gameSummary = summaries.find((s) => s.id === '_game')
 
   function adjust(playerId: PlayerId, delta: number) {
     const current = scoreAt(round, playerId, hole)
@@ -144,13 +149,19 @@ export default function PlayScreen({
           </div>
         </div>
 
+        {gameSummary && (
+          <div className="game-summary">
+            {gameSummary.entries.map((entry) => (
+              <span key={entry.label} className="team-metric">
+                {entry.label} <strong>{entry.value}</strong>
+              </span>
+            ))}
+          </div>
+        )}
+
         {round.teams.length > 0 ? (
           round.teams.map((team) => {
             const summary = summaries.find((s) => s.id === team.id)
-            const players = team.playerIds
-              .map((id) => round.players.find((p) => p.id === id))
-              .filter((p): p is Player => p !== undefined)
-
             return (
               <section key={team.id} className="team-block">
                 <div className="team-header">
@@ -165,7 +176,9 @@ export default function PlayScreen({
                     </span>
                   )}
                 </div>
-                <ul className="player-list">{players.map(renderPlayer)}</ul>
+                <ul className="player-list">
+                  {teamPlayers(round, team).map(renderPlayer)}
+                </ul>
               </section>
             )
           })
@@ -188,7 +201,7 @@ export default function PlayScreen({
             onClick={onFinish}
             disabled={!roundDone}
           >
-            {roundDone ? 'Ukončit kolo' : 'Doplň zbývající jamky'}
+            {roundDone ? 'Ukončit a uložit kolo' : 'Doplň zbývající jamky'}
           </button>
         ) : (
           <button
