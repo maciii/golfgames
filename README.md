@@ -22,8 +22,9 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 
 ## Co aplikace umí
 
-- **Zápis po jamkách** velkými tlačítky `−`/`+`, par 3/4/5 se nastavuje
-  u každé jamky přímo při hře
+- **Zápis po jamkách** na jedno klepnutí – prostřední tlačítko vloží par,
+  `+` bogey, `−` birdie, další klepnutí posouvají po ránách; par 3/4/5 se
+  nastavuje u každé jamky přímo při hře
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
 - **Scorecard** se značkami podle golfové konvence – birdie v kroužku, bogey
   ve čtverečku – a u týmových her se sloupcem bodů dvojice za každou jamku

@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.3.1] – 2026-08-01
+
+### Změněno
+
+- **Rychlejší zápis skóre.** Z prázdné buňky zapíše `+` bogey, `−` birdie
+  a klepnutí doprostřed par – tři nejčastější výsledky jsou na jedno
+  klepnutí. Dřív `+` zapsal par a `−` birdie.
+- Mazání zápisu se přesunulo z klepnutí na **přidržení čísla** (půl sekundy),
+  protože krátké klepnutí teď vkládá par.
+
 ## [0.3.0] – 2026-08-01
 
 ### Přidáno

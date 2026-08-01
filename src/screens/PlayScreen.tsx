@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
@@ -15,6 +16,9 @@ import {
 import { getGame } from '../games'
 
 const PAR_OPTIONS = [3, 4, 5]
+
+/** Jak dlouho se drží číslo, než se zápis smaže. */
+const LONG_PRESS_MS = 500
 
 interface Props {
   round: Round
@@ -39,6 +43,12 @@ export default function PlayScreen({
   onFinish,
   onShowResults,
 }: Props) {
+  // Na dotyku běží vždy jen jedno přidržení, takže stačí jeden ref pro celou
+  // obrazovku.
+  const longPress = useRef<{ timer: number | null; fired: boolean }>({
+    timer: null,
+    fired: false,
+  })
   const game = getGame(round.gameId)
   const hole = round.currentHole
   const par = parAt(round, hole)
@@ -49,11 +59,43 @@ export default function PlayScreen({
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
 
+  /**
+   * Z prázdné buňky zapíše "+" bogey a "−" birdie; par se vkládá klepnutím
+   * doprostřed. Tři nejčastější výsledky jsou tak na jedno klepnutí.
+   */
   function adjust(playerId: PlayerId, delta: number) {
     const current = scoreAt(round, playerId, hole)
-    // Z prázdné buňky skáčeme rovnou na par - to je nejčastější zápis.
-    const next = current === null ? par + (delta > 0 ? 0 : -1) : current + delta
+    const next = current === null ? par + delta : current + delta
     onSetScore(playerId, hole, Math.max(1, Math.min(MAX_STROKES, next)))
+  }
+
+  /**
+   * Přidržení čísla zápis smaže. Krátké klepnutí je obsazené vkládáním paru,
+   * takže mazání potřebuje vlastní gesto.
+   */
+  function startLongPress(playerId: PlayerId) {
+    cancelLongPress()
+    longPress.current.fired = false
+    longPress.current.timer = window.setTimeout(() => {
+      longPress.current.fired = true
+      onSetScore(playerId, hole, null)
+    }, LONG_PRESS_MS)
+  }
+
+  function cancelLongPress() {
+    if (longPress.current.timer !== null) {
+      clearTimeout(longPress.current.timer)
+      longPress.current.timer = null
+    }
+  }
+
+  function handleScoreTap(playerId: PlayerId) {
+    // Po smazání přidržením nesmí doběhlý click zapsat par zpátky.
+    if (longPress.current.fired) {
+      longPress.current.fired = false
+      return
+    }
+    onSetScore(playerId, hole, par)
   }
 
   function renderPlayer(player: Player) {
@@ -77,7 +119,7 @@ export default function PlayScreen({
             type="button"
             className="step-button"
             onClick={() => adjust(player.id, -1)}
-            aria-label={`${player.name}: ubrat ránu`}
+            aria-label={`${player.name}: ubrat ránu, z prázdné buňky birdie`}
           >
             −
           </button>
@@ -86,8 +128,13 @@ export default function PlayScreen({
             className={`score-value${diff === null ? ' empty' : ''}${
               diff !== null && diff < 0 ? ' under' : ''
             }${diff !== null && diff > 0 ? ' over' : ''}`}
-            onClick={() => onSetScore(player.id, hole, null)}
-            aria-label={`${player.name}: smazat zápis`}
+            onClick={() => handleScoreTap(player.id)}
+            onPointerDown={() => startLongPress(player.id)}
+            onPointerUp={cancelLongPress}
+            onPointerLeave={cancelLongPress}
+            onPointerCancel={cancelLongPress}
+            onContextMenu={(e) => e.preventDefault()}
+            aria-label={`${player.name}: zapsat par, přidržením smazat zápis`}
           >
             {score ?? '–'}
           </button>
@@ -95,7 +142,7 @@ export default function PlayScreen({
             type="button"
             className="step-button"
             onClick={() => adjust(player.id, 1)}
-            aria-label={`${player.name}: přidat ránu`}
+            aria-label={`${player.name}: přidat ránu, z prázdné buňky bogey`}
           >
             +
           </button>
@@ -186,7 +233,10 @@ export default function PlayScreen({
           <ul className="player-list">{round.players.map(renderPlayer)}</ul>
         )}
 
-        <p className="hint">Klepnutím na číslo zápis smažeš.</p>
+        <p className="hint">
+          Klepnutím doprostřed zapíšeš par ({par}), tlačítkem − birdie a tlačítkem +
+          bogey. Přidržením čísla zápis smažeš.
+        </p>
 
         <button type="button" className="link-button" onClick={onShowResults}>
           Průběžné výsledky

@@ -422,6 +422,10 @@ button {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: center;
+  /* Přidržení maže zápis, takže nesmí spustit výběr textu ani iOS nabídku. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .score-value.empty {
