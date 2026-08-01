@@ -11,6 +11,26 @@ Společné pro všechny hry:
   dává smysl i uprostřed kola.
 - Kolo lze hrát na 9 nebo 18 jamek.
 
+## Značky ve scorekartě
+
+Skóre se ve scorekartě značí golfovou konvencí – tvar nese informaci i bez
+barvy, takže je čitelná i pro barvoslepé a na tisku:
+
+| Skóre             | Značka                       | Barva     |
+| ----------------- | ---------------------------- | --------- |
+| Eagle a lepší     | kroužek s dvojitým obrysem   | červená   |
+| Birdie            | kroužek                      | červená   |
+| Par               | bez značky                   | neutrální |
+| Bogey             | čtvereček                    | modrá     |
+| Dvojbogey a horší | čtvereček s dvojitým obrysem | modrá     |
+
+Barevné rozdělení (podpar červeně, nadpar modře) odpovídá turnajovým
+scorekartám. Par se záměrně nijak nezvýrazňuje – tvar má upozorňovat na to,
+co se od paru liší.
+
+Hra může do scorekarty přidat vlastní sloupce (`scorecardColumns`) – Best
+Aggregate takhle ukazuje body dvojice na každé jamce, Skins rozdané skiny.
+
 ---
 
 ## Best Aggregate

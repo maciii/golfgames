@@ -85,6 +85,16 @@ describe('Skins - pořadí', () => {
     expect(section?.description).toContain('1')
   })
 
+  it('má ve scorekartě sloupec s rozdanými skiny', () => {
+    const round = sampleRound()
+    const [column] = skins.scorecardColumns?.(round) ?? []
+
+    expect(column?.label).toBe('Skin')
+    expect(column?.cell(round, 0)).toBe('') // dělená jamka
+    expect(column?.cell(round, 1)).toBe('2') // včetně přeneseného skinu
+    expect(column?.total(round)).toBe('2')
+  })
+
   it('jde hrát ve dvou až čtyřech a bez dvojic', () => {
     expect(skins.playerCounts).toEqual([2, 3, 4])
     expect(skins.usesTeams(4)).toBe(false)

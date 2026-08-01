@@ -1,7 +1,8 @@
 import type { Round } from '../types'
-import { formatRoundDate, parAt, scoreAt, strokeTotal } from '../types'
+import { formatRoundDate } from '../types'
 import { getGame } from '../games'
 import { APP_VERSION } from '../version'
+import Scorecard from './Scorecard'
 
 interface Props {
   round: Round
@@ -11,15 +12,6 @@ interface Props {
   onNewRound?: () => void
   onOpenArchive?: () => void
   onBack?: () => void
-}
-
-/** Barevné odlišení birdie/bogey ve scorecardu. */
-function scoreClass(score: number | null, par: number): string {
-  if (score === null) return 'empty'
-  if (score <= par - 2) return 'eagle'
-  if (score < par) return 'under'
-  if (score > par) return 'over'
-  return ''
 }
 
 /** Výsledky kola: tabulky podle pravidel hry plus kompletní scorecard. */
@@ -34,7 +26,6 @@ export default function ResultsScreen({
   const game = getGame(round.gameId)
   const sections = game.computeStandings(round)
   const finished = Boolean(round.finishedAt)
-  const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
   // Při jediném řádku není co poměřovat a pořadí by jen mátlo.
   const showPositions = sections.some((s) => s.rows.length > 1)
 
@@ -89,49 +80,7 @@ export default function ResultsScreen({
           <p className="hint">Počítají se jen jamky, které už mají zápis.</p>
         )}
 
-        <section className="section">
-          <h2 className="section-title">Scorecard</h2>
-          <div className="scorecard-wrap">
-            <table className="scorecard">
-              <thead>
-                <tr>
-                  <th scope="col">J</th>
-                  <th scope="col">Par</th>
-                  {round.players.map((p) => (
-                    <th key={p.id} scope="col">
-                      {p.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: round.holeCount }, (_, hole) => (
-                  <tr key={hole}>
-                    <th scope="row">{hole + 1}</th>
-                    <td className="par-cell">{parAt(round, hole)}</td>
-                    {round.players.map((p) => {
-                      const score = scoreAt(round, p.id, hole)
-                      return (
-                        <td key={p.id} className={scoreClass(score, parAt(round, hole))}>
-                          {score ?? '–'}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th scope="row">Σ</th>
-                  <td className="par-cell">{parTotal}</td>
-                  {round.players.map((p) => (
-                    <td key={p.id}>{strokeTotal(round, p.id)}</td>
-                  ))}
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </section>
+        <Scorecard round={round} />
 
         {!readOnly && onOpenArchive && (
           <button type="button" className="link-button" onClick={onOpenArchive}>

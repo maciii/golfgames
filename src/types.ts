@@ -140,6 +140,18 @@ export function teamPlayers(round: Round, team: Team): Player[] {
     .filter((p): p is Player => p !== undefined)
 }
 
+/**
+ * Hráči v pořadí pro scorekartu: u týmových her po dvojicích, ať jsou rány
+ * partnerů vedle sebe a body dvojice stály hned za nimi.
+ */
+export function scorecardPlayers(round: Round): Player[] {
+  if (round.teams.length === 0) return round.players
+  const ordered = round.teams.flatMap((team) => teamPlayers(round, team))
+  // Hráč mimo dvojici by jinak ze scorekarty zmizel.
+  const missing = round.players.filter((p) => !ordered.some((o) => o.id === p.id))
+  return [...ordered, ...missing]
+}
+
 /** Formátuje rozdíl vůči paru: -2 -> "-2", 0 -> "E", 3 -> "+3". */
 export function formatToPar(toPar: number): string {
   if (toPar === 0) return 'E'

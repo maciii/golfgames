@@ -1,6 +1,11 @@
 import type { PlayerId, Round } from '../types'
 import { isHoleComplete, playerName, scoreAt, strokeTotal } from '../types'
-import type { GameDefinition, HoleSummary, StandingsSection } from './types'
+import type {
+  GameDefinition,
+  HoleSummary,
+  ScorecardColumn,
+  StandingsSection,
+} from './types'
 import { rankRows } from './types'
 
 /**
@@ -109,6 +114,21 @@ export const skins: GameDefinition = {
             ? `V banku zůstává ${pending} nerozdělených skinů.`
             : 'Shoda na jamce skin nepřidělí a přenese ho do další.',
         rows: rankRows(rows, 'highest'),
+      },
+    ]
+  },
+
+  /** Sloupec se skiny rozdanými na jamce; prázdný, když se jamka dělila. */
+  scorecardColumns(): ScorecardColumn[] {
+    return [
+      {
+        id: 'skins',
+        label: 'Skin',
+        cell: (round, hole) => {
+          const result = skinResults(round)[hole]
+          return result?.winnerId ? `${result.skins}` : ''
+        },
+        total: (round) => `${skinResults(round).reduce((sum, r) => sum + r.skins, 0)}`,
       },
     ]
   },

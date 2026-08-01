@@ -8,8 +8,12 @@
   --accent: #4ade80;
   --accent-dark: #16a34a;
   --under: #7dd3fc;
-  --eagle: #fcd34d;
   --over: #fca5a5;
+  /* Značky ve scorekartě: podpar červeně, nadpar modře - jako na turnajových
+     scorekartách. Odstíny jsou zesvětlené, aby držely kontrast na tmavém
+     podkladu. */
+  --score-under: #e63946;
+  --score-over: #2f6fd0;
   --tap: 48px;
 }
 
@@ -662,14 +666,24 @@ button {
   width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
-  font-size: 15px;
+  /* Úzké buňky, ať se na telefon vejdou hráči i sloupce s body bez rolování. */
+  font-size: 14px;
 }
 
 .scorecard th,
 .scorecard td {
-  padding: 8px 6px;
+  padding: 8px 4px;
   text-align: center;
   border-bottom: 1px solid var(--line);
+}
+
+.col-name {
+  display: block;
+  max-width: 56px;
+  margin: 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .scorecard thead th {
@@ -693,23 +707,102 @@ button {
   color: var(--text-dim);
 }
 
-.scorecard td.under {
-  color: var(--under);
+/* Nadřazený řádek se jmény dvojic nad jejich sloupci. */
+.scorecard .group-row th {
+  font-size: 11px;
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+/* Sloupce s body dvojice / skiny - odsazené od ran svislou linkou. */
+.scorecard .extra-col {
+  border-left: 1px solid var(--line);
+  color: var(--accent);
   font-weight: 600;
 }
 
-/* Eagle a lepší - v Best Aggregate stojí 3 body, ať je vidět na první pohled. */
-.scorecard td.eagle {
-  color: var(--eagle);
-  font-weight: 700;
+.scorecard thead th.extra-col {
+  color: var(--text-dim);
 }
 
-.scorecard td.over {
-  color: var(--over);
-}
-
-.scorecard td.empty {
+.scorecard td.extra-col.empty {
   color: var(--line);
+  font-weight: 400;
+}
+
+/* --- značky skóre ------------------------------------------------------- */
+
+/*
+ * Tvar nese informaci i bez barvy (kvůli barvosleposti a tisku):
+ * kroužek = pod par, čtvereček = nad par, dvojitý rám = eagle / dvojbogey.
+ */
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.mark.birdie,
+.mark.eagle {
+  background: var(--score-under);
+  color: #fff;
+  border-radius: 50%;
+}
+
+.mark.bogey,
+.mark.double {
+  background: var(--score-over);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Vnější prstenec: mezera barvou podkladu, pak druhý obrys. */
+.mark.eagle {
+  box-shadow:
+    0 0 0 2px var(--bg-elevated),
+    0 0 0 3.5px var(--score-under);
+}
+
+.mark.double {
+  box-shadow:
+    0 0 0 2px var(--bg-elevated),
+    0 0 0 3.5px var(--score-over);
+}
+
+.mark.par {
+  color: var(--text);
+}
+
+.mark.empty {
+  color: var(--line);
+}
+
+/* Dvojité rámečky potřebují kolem sebe místo, ať se neořežou. */
+.scorecard tbody td {
+  padding: 9px 5px;
+}
+
+/* --- legenda ------------------------------------------------------------ */
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .scorecard tfoot td,

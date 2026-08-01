@@ -7,6 +7,26 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.3.0] – 2026-08-01
+
+### Přidáno
+
+- **Značky ve scorekartě** podle golfové konvence: birdie v kroužku, bogey
+  ve čtverečku, eagle a dvojbogey s dvojitým orámováním. Podpar červeně,
+  nadpar modře, par bez zvýraznění.
+- **Body dvojice u každé jamky** – scorekarta má za každou dvojicí sloupec
+  s body získanými na dané jamce, včetně celkového součtu v posledním řádku.
+- Skins mají ve scorekartě sloupec s rozdanými skiny.
+- Legenda značek pod scorekartou.
+
+### Změněno
+
+- Scorekarta je u týmových her seřazená po dvojicích a nad jejich sloupci má
+  nadpis se jménem dvojice.
+- Užší buňky a zkracování dlouhých jmen, aby se scorekarta vešla na šířku
+  telefonu i s osmi sloupci.
+- Scorekarta se přesunula do vlastní komponenty `src/screens/Scorecard.tsx`.
+
 ## [0.2.0] – 2026-08-01
 
 ### Přidáno

@@ -1,6 +1,11 @@
 import type { Round, Team } from '../types'
-import { diffToPar, teamName, teamPlayers } from '../types'
-import type { GameDefinition, HoleSummary, StandingsSection } from './types'
+import { diffToPar, scoreAt, teamName, teamPlayers } from '../types'
+import type {
+  GameDefinition,
+  HoleSummary,
+  ScorecardColumn,
+  StandingsSection,
+} from './types'
 import { rankRows } from './types'
 import { lowerWins, teamAggregate, teamBestBall, teamStrokeTotal } from './shared'
 
@@ -145,6 +150,25 @@ export const bestAggregate: GameDefinition = {
         rows: rankRows(rows, 'highest'),
       },
     ]
+  },
+
+  /**
+   * Ke každé dvojici přidá sloupec s body, které na jamce získala - stojí
+   * hned za rány obou partnerů, ať je vidět, odkud se bod vzal.
+   */
+  scorecardColumns(round: Round): ScorecardColumn[] {
+    return round.teams.map((team, index) => ({
+      id: `points-${team.id}`,
+      label: 'Body',
+      afterPlayerId: team.playerIds[team.playerIds.length - 1],
+      cell: (r, hole) => {
+        // Prázdná buňka, dokud dvojice jamku vůbec nezapsala.
+        const played = team.playerIds.some((id) => scoreAt(r, id, hole) !== null)
+        if (!played) return ''
+        return `${holePoints(r, hole)[index]?.total ?? 0}`
+      },
+      total: (r) => `${totalPoints(r)[index]?.total ?? 0}`,
+    }))
   },
 
   holeSummary(round: Round, hole: number): HoleSummary[] {

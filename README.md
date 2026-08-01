@@ -25,7 +25,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Zápis po jamkách** velkými tlačítky `−`/`+`, par 3/4/5 se nastavuje
   u každé jamky přímo při hře
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
-- **Scorecard** s barevným odlišením birdie, eagle a bogey
+- **Scorecard** se značkami podle golfové konvence – birdie v kroužku, bogey
+  ve čtverečku – a u týmových her se sloupcem bodů dvojice za každou jamku
 - **Archiv odehraných kol** – dohraná kola se ukládají a jde se k nim vracet
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím

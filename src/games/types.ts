@@ -41,6 +41,24 @@ export interface HoleSummary {
   entries: { label: string; value: string }[]
 }
 
+/**
+ * Vlastní sloupec ve scorekartě - typicky body, které hra rozdala na jamce.
+ * Scorekarta sama o pravidlech nic neví, jen sloupce vykreslí.
+ */
+export interface ScorecardColumn {
+  id: string
+  label: string
+  /**
+   * Id hráče, za jehož sloupcem se tenhle zobrazí. Díky tomu stojí body
+   * dvojice hned vedle ran obou partnerů. Bez hodnoty se řadí na konec.
+   */
+  afterPlayerId?: string
+  /** Obsah buňky v řádku jamky; prázdný řetězec nechá buňku prázdnou. */
+  cell(round: Round, hole: number): string
+  /** Obsah buňky v součtovém řádku. */
+  total(round: Round): string
+}
+
 export interface GameDefinition {
   id: string
   name: string
@@ -54,6 +72,8 @@ export interface GameDefinition {
   usesTeams(playerCount: number): boolean
   computeStandings(round: Round): StandingsSection[]
   holeSummary?(round: Round, hole: number): HoleSummary[]
+  /** Nepovinné sloupce navíc ve scorekartě (body dvojic, skiny apod.). */
+  scorecardColumns?(round: Round): ScorecardColumn[]
 }
 
 /** Směr řazení: u ran vyhrává nejnižší, u bodů nejvyšší hodnota. */

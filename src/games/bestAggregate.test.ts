@@ -120,3 +120,48 @@ describe('Best Aggregate - celkové pořadí', () => {
     expect(bestAggregate.usesTeams(4)).toBe(true)
   })
 })
+
+describe('Best Aggregate - sloupce ve scorekartě', () => {
+  it('přidá sloupec bodů za každou dvojici, hned za jejího druhého hráče', () => {
+    const round = sampleRound()
+    const columns = bestAggregate.scorecardColumns?.(round) ?? []
+
+    expect(columns).toHaveLength(2)
+    expect(columns.map((c) => c.afterPlayerId)).toEqual(['p2', 'p4'])
+    expect(columns.every((c) => c.label === 'Body')).toBe(true)
+  })
+
+  it('ukazuje body získané na konkrétní jamce', () => {
+    const round = sampleRound()
+    const [teamA, teamB] = bestAggregate.scorecardColumns?.(round) ?? []
+
+    expect(teamA?.cell(round, 0)).toBe('0')
+    expect(teamB?.cell(round, 0)).toBe('3')
+    expect(teamA?.cell(round, 1)).toBe('5')
+  })
+
+  it('v součtovém řádku má celkové body dvojice', () => {
+    const round = sampleRound()
+    const [teamA, teamB] = bestAggregate.scorecardColumns?.(round) ?? []
+
+    expect(teamA?.total(round)).toBe('5')
+    expect(teamB?.total(round)).toBe('3')
+  })
+
+  it('nechá buňku prázdnou, dokud dvojice jamku nezapsala', () => {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[null], [null], [4], [4]],
+    })
+    const [teamA, teamB] = bestAggregate.scorecardColumns?.(round) ?? []
+
+    expect(teamA?.cell(round, 0)).toBe('')
+    expect(teamB?.cell(round, 0)).toBe('0')
+  })
+})
