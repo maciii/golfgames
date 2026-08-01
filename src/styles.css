@@ -1,0 +1,513 @@
+:root {
+  --bg: #0f1c14;
+  --bg-elevated: #17281d;
+  --bg-input: #1e3326;
+  --line: #2a4433;
+  --text: #eef4ef;
+  --text-dim: #9fb4a6;
+  --accent: #4ade80;
+  --accent-dark: #16a34a;
+  --under: #7dd3fc;
+  --over: #fca5a5;
+  --tap: 48px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  /* Bez odskoku při přetažení - appka nemá být "webová stránka". */
+  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* --- rozvržení obrazovky ------------------------------------------------ */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  /* Výřez nahoře a home indikátor dole nesmí překrývat ovládání. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.app-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.app-footer {
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  position: sticky;
+  bottom: 0;
+}
+
+.footer-row {
+  display: flex;
+  gap: 10px;
+}
+
+.footer-row > button {
+  flex: 1;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* --- tlačítka ----------------------------------------------------------- */
+
+.primary-button,
+.secondary-button {
+  width: 100%;
+  min-height: var(--tap);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.primary-button {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+.primary-button:disabled {
+  background: var(--bg-input);
+  color: var(--text-dim);
+}
+
+.secondary-button {
+  background: var(--bg-input);
+  color: var(--text);
+}
+
+.link-button {
+  align-self: center;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 550;
+  padding: 8px;
+  min-height: var(--tap);
+}
+
+/* --- výběr hry ---------------------------------------------------------- */
+
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1.5px solid transparent;
+}
+
+.game-card.selected {
+  border-color: var(--accent);
+  background: var(--bg-input);
+}
+
+.game-name {
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.game-tagline {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* --- segmentovaný přepínač ---------------------------------------------- */
+
+.segmented {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-elevated);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.segment {
+  flex: 1;
+  min-height: var(--tap);
+  border-radius: 9px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.segment.selected {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+.segmented.compact {
+  flex: 0 0 auto;
+  width: 180px;
+}
+
+.segmented.compact .segment {
+  min-height: 40px;
+}
+
+/* --- jména hráčů -------------------------------------------------------- */
+
+.name-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.name-input {
+  min-height: var(--tap);
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-input);
+  color: var(--text);
+  /* 16px brání iOS Safari v automatickém zoomu při zaostření pole. */
+  font-size: 16px;
+}
+
+.name-input::placeholder {
+  color: var(--text-dim);
+}
+
+.name-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* --- hlavička jamky ----------------------------------------------------- */
+
+.hole-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nav-arrow {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.nav-arrow:disabled {
+  opacity: 0.3;
+}
+
+.hole-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hole-number {
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.hole-of {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.par-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.par-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+/* --- zápis skóre -------------------------------------------------------- */
+
+.player-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.player-name {
+  font-size: 17px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-total {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.step-button {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 12px;
+  background: var(--bg-input);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.score-value {
+  min-width: 46px;
+  height: var(--tap);
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.score-value.empty {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.score-value.under {
+  color: var(--under);
+}
+
+.score-value.over {
+  color: var(--over);
+}
+
+/* --- výsledky ----------------------------------------------------------- */
+
+.standings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.standing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 1.5px solid transparent;
+}
+
+.standing.leader {
+  border-color: var(--accent);
+}
+
+.position {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dim);
+  min-width: 26px;
+}
+
+.standing.leader .position {
+  color: var(--accent);
+}
+
+.standing-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.standing-detail {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.standing-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-score strong {
+  font-size: 22px;
+}
+
+.standing-topar {
+  font-size: 14px;
+  color: var(--text-dim);
+  min-width: 30px;
+  text-align: right;
+}
+
+/* --- scorecard ---------------------------------------------------------- */
+
+.scorecard-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.scorecard {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+
+.scorecard th,
+.scorecard td {
+  padding: 8px 6px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.scorecard thead th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  /* Jména hráčů zůstanou čitelná i při dlouhém scorecardu. */
+  position: sticky;
+  top: 0;
+  background: var(--bg-elevated);
+}
+
+.scorecard tbody th {
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.scorecard .par-cell {
+  color: var(--text-dim);
+}
+
+.scorecard td.under {
+  color: var(--under);
+  font-weight: 600;
+}
+
+.scorecard td.over {
+  color: var(--over);
+}
+
+.scorecard td.empty {
+  color: var(--line);
+}
+
+.scorecard tfoot td,
+.scorecard tfoot th {
+  font-weight: 700;
+  border-bottom: none;
+}
