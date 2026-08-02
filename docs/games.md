@@ -112,11 +112,12 @@ scorekartě i při zápisu skóre, takže je výsledek poznat hned.
 Tvar nese informaci i bez barvy (podpar do kroužku, nadpar do čtverečku),
 takže scorekarta zůstane čitelná i pro barvoslepé.
 
-Dvě odchylky od předlohy, obojí kvůli tmavému motivu aplikace:
+Vícenásobné obrysy se kreslí **dovnitř** značky, takže všechny značky mají
+stejný vnější rozměr a mřížka scorekarty zůstane pravidelná.
 
-- **Par nemá barevný štítek**, jen modré číslo – je to nejčastější výsledek
-  a plný štítek na každé druhé jamce by scorekartu zahltil.
-- **Černá má světlý obrys**, jinak by na tmavém pozadí splynula.
+Jedna odchylka od předlohy kvůli tmavému motivu aplikace: mezery v trojitém
+obrysu u černé jsou světlé. Kdyby měly barvu podkladu, černá značka by
+s tmavým pozadím splynula a obrys by nebyl vidět.
 
 Barvy jsou v `src/styles.css` jako proměnné `--score-*`, klasifikace
 v `scoreCategory()` v [`src/types.ts`](../src/types.ts).

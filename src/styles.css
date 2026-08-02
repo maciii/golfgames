@@ -17,14 +17,16 @@
   --score-birdie: #e8402a;
   --score-birdie-ink: #fff;
   --score-par: #3b9ce8;
+  --score-par-ink: #14210f;
   --score-bogey: #5bb85b;
   --score-bogey-ink: #14210f;
   --score-double: #8a8a8a;
   --score-double-ink: #fff;
-  /* Černá by na tmavém podkladu zanikla, proto dostane světlý obrys. */
   --score-triple: #1c1c1c;
   --score-triple-ink: #fff;
-  --score-triple-edge: #6a6a6a;
+  /* Mezery v trojitém obrysu jsou u černé světlé - kdyby měly barvu podkladu,
+     černá značka by na tmavém pozadí splynula a obrys by nebyl vidět. */
+  --score-triple-gap: #8a8a8a;
   --tap: 48px;
 }
 
@@ -862,19 +864,25 @@ button {
   border-radius: 50%;
 }
 
+.mark.par,
 .mark.bogey,
 .mark.double,
 .mark.triple {
   border-radius: 3px;
 }
 
+/*
+ * Vícenásobné obrysy se kreslí dovnitř značky (inset stíny), ne ven - značka
+ * si tak drží stejný vnější rozměr jako jednoduchá a nerozhazuje mřížku
+ * scorekarty. Stíny uvedené dřív se kreslí navrch, takže se řadí od nejmenšího
+ * odsazení: barva, mezera, barva...
+ */
 .mark.eagle {
   background: var(--score-eagle);
   color: var(--score-eagle-ink);
-  /* Dvojitý obrys: mezera barvou podkladu, pak druhý prstenec. */
   box-shadow:
-    0 0 0 2px var(--bg-elevated),
-    0 0 0 3.5px var(--score-eagle);
+    inset 0 0 0 2px var(--score-eagle),
+    inset 0 0 0 3.5px var(--bg-elevated);
 }
 
 .mark.birdie {
@@ -882,9 +890,9 @@ button {
   color: var(--score-birdie-ink);
 }
 
-/* Par se nezvýrazňuje štítkem, jen barvou čísla - je nejčastější. */
 .mark.par {
-  color: var(--score-par);
+  background: var(--score-par);
+  color: var(--score-par-ink);
 }
 
 .mark.bogey {
@@ -896,17 +904,19 @@ button {
   background: var(--score-double);
   color: var(--score-double-ink);
   box-shadow:
-    0 0 0 2px var(--bg-elevated),
-    0 0 0 3.5px var(--score-double);
+    inset 0 0 0 2px var(--score-double),
+    inset 0 0 0 3.5px var(--bg-elevated);
 }
 
+/* Trojitý obrys: tři pruhy barvy oddělené dvěma mezerami. */
 .mark.triple {
   background: var(--score-triple);
   color: var(--score-triple-ink);
   box-shadow:
-    0 0 0 1px var(--score-triple-edge),
-    0 0 0 2.5px var(--bg-elevated),
-    0 0 0 4px var(--score-triple-edge);
+    inset 0 0 0 1.5px var(--score-triple),
+    inset 0 0 0 2.5px var(--score-triple-gap),
+    inset 0 0 0 4px var(--score-triple),
+    inset 0 0 0 5px var(--score-triple-gap);
 }
 
 .mark.empty {

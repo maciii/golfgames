@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.7.1] – 2026-08-02
+
+### Změněno
+
+- Par má modrý čtvereček stejně jako ostatní výsledky, ne jen barevné číslo.
+- Trojbogey a horší má trojitý obrys místo dvojitého, takže se liší od
+  dvojbogey i tvarem, nejen barvou.
+- **Vícenásobné obrysy se kreslí dovnitř značky.** Dřív rostly ven, takže
+  značky s dvojitým obrysem byly větší než ostatní a rozhazovaly mřížku
+  scorekarty; teď mají všechny stejný vnější rozměr.
+
 ## [0.7.0] – 2026-08-02
 
 ### Změněno
