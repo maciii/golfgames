@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { BonusId, GameOptions } from '../types'
-import { BONUSES } from '../types'
+import type { BonusId, GameOptions, ResultTier } from '../types'
+import { BONUSES, RESULT_TIERS } from '../types'
 import { getGame } from '../games'
 import { loadGameOptions, saveGameOptions } from '../storage'
 import { APP_VERSION } from '../version'
@@ -23,7 +23,15 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
   const [texts, setTexts] = useState<Record<string, string>>(() => {
     const initial = loadGameOptions(gameId)
     const entries = BONUSES.map((b) => [b.id, `${initial.bonusValues[b.id] ?? 0}`])
-    return Object.fromEntries([...entries, ['doubleBest', `${initial.doubleBest}`]])
+    const tiers = RESULT_TIERS.map((t) => [
+      `tier-${t.id}`,
+      `${initial.resultMultipliers[t.id]}`,
+    ])
+    return Object.fromEntries([
+      ...entries,
+      ...tiers,
+      ['doubleBest', `${initial.doubleBest}`],
+    ])
   })
 
   function update(next: GameOptions) {
@@ -31,13 +39,25 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
     saveGameOptions(gameId, next)
   }
 
+  function parse(text: string): number {
+    const parsed = Number.parseFloat(text.replace(',', '.'))
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+  }
+
   function setValue(key: BonusId | 'doubleBest', text: string) {
     setTexts((prev) => ({ ...prev, [key]: text }))
-    const parsed = Number.parseFloat(text.replace(',', '.'))
-    const value = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+    const value = parse(text)
 
     if (key === 'doubleBest') update({ ...options, doubleBest: value })
     else update({ ...options, bonusValues: { ...options.bonusValues, [key]: value } })
+  }
+
+  function setTier(tier: ResultTier, text: string) {
+    setTexts((prev) => ({ ...prev, [`tier-${tier}`]: text }))
+    update({
+      ...options,
+      resultMultipliers: { ...options.resultMultipliers, [tier]: parse(text) },
+    })
   }
 
   const pointBonuses = BONUSES.filter((b) => b.kind === 'points')
@@ -53,7 +73,7 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
       <main className="content">
         <p className="hint">
           Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota
-          platí za par, dvojnásobek za birdie a trojnásobek za eagle; při bogey a horším
+          platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším
           se extra bod nepočítá. Bonus vždy získává celá dvojice.
         </p>
 
@@ -81,7 +101,34 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
         </section>
 
         <section className="section">
-          <h2 className="section-title">Násobiče</h2>
+          <h2 className="section-title">Násobiče za výsledek</h2>
+          <p className="hint">
+            Kolikrát se hodnota extra bodu počítá, když hráč jamku zahraje pod par. Par
+            platí vždy jednou.
+          </p>
+          {RESULT_TIERS.map((tier) => (
+            <label key={tier.id} className="field">
+              <span className="field-label">
+                {tier.name}
+                <span className="field-note">{tier.note}</span>
+              </span>
+              <span className="field-input">
+                <input
+                  className="name-input value-input"
+                  type="text"
+                  inputMode="decimal"
+                  value={texts[`tier-${tier.id}`] ?? '1'}
+                  onChange={(e) => setTier(tier.id, e.target.value)}
+                  aria-label={`Násobič za ${tier.name}`}
+                />
+                <span className="field-suffix">×</span>
+              </span>
+            </label>
+          ))}
+        </section>
+
+        <section className="section">
+          <h2 className="section-title">Další volby</h2>
           {multiplierBonuses.map((bonus) => (
             <label key={bonus.id} className="switch">
               <input

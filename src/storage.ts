@@ -1,5 +1,9 @@
 import type { GameOptions, Round, RoundSettings } from './types'
-import { DEFAULT_GAME_OPTIONS, DEFAULT_SETTINGS } from './types'
+import {
+  DEFAULT_GAME_OPTIONS,
+  DEFAULT_RESULT_MULTIPLIERS,
+  DEFAULT_SETTINGS,
+} from './types'
 
 /**
  * Perzistence v localStorage.
@@ -67,7 +71,14 @@ function normalize(round: Round): Round {
     bonuses: round.bonuses ?? {},
     settings: {
       ...settings,
-      options: { ...DEFAULT_GAME_OPTIONS, ...(settings.options ?? {}) },
+      options: {
+        ...DEFAULT_GAME_OPTIONS,
+        ...(settings.options ?? {}),
+        resultMultipliers: {
+          ...DEFAULT_RESULT_MULTIPLIERS,
+          ...(settings.options?.resultMultipliers ?? {}),
+        },
+      },
     },
   }
 }
@@ -135,6 +146,10 @@ export function loadGameOptions(gameId: string): GameOptions {
     bonusValues: {
       ...DEFAULT_GAME_OPTIONS.bonusValues,
       ...(stored.bonusValues ?? {}),
+    },
+    resultMultipliers: {
+      ...DEFAULT_RESULT_MULTIPLIERS,
+      ...(stored.resultMultipliers ?? {}),
     },
   }
 }

@@ -91,7 +91,7 @@ export const BONUSES: BonusDefinition[] = [
     name: 'Double bunker',
     description: 'Dva bunkery na jedné jamce.',
     kind: 'points',
-    defaultValue: 1,
+    defaultValue: 3,
   },
   {
     id: 'water',
@@ -120,15 +120,38 @@ export function getBonus(id: BonusId): BonusDefinition | undefined {
   return BONUSES.find((b) => b.id === id)
 }
 
+/** Výsledky, které extra bod znásobují. Par je vždy jednonásobek. */
+export type ResultTier = 'birdie' | 'eagle' | 'albatross' | 'condor'
+
+export const RESULT_TIERS: { id: ResultTier; name: string; note: string }[] = [
+  { id: 'birdie', name: 'Birdie', note: 'jedna rána pod par' },
+  { id: 'eagle', name: 'Eagle', note: 'dvě rány pod par' },
+  { id: 'albatross', name: 'Albatros', note: 'tři rány pod par' },
+  { id: 'condor', name: 'Condor', note: 'čtyři a víc ran pod par' },
+]
+
+export const DEFAULT_RESULT_MULTIPLIERS: Record<ResultTier, number> = {
+  birdie: 2,
+  eagle: 3,
+  albatross: 10,
+  condor: 1000,
+}
+
 /**
  * Kolikrát se extra bod počítá podle výsledku hráče na jamce.
- * Bogey a horší extra bod neuhraje.
+ * Par platí jednou, lepší výsledky podle nastavených násobičů, bogey a horší
+ * extra bod neuhraje.
  */
-export function bonusMultiplier(diff: number): number {
-  if (diff <= -2) return 3
-  if (diff === -1) return 2
+export function bonusMultiplier(
+  diff: number,
+  multipliers: Record<ResultTier, number> = DEFAULT_RESULT_MULTIPLIERS,
+): number {
+  if (diff > 0) return 0
   if (diff === 0) return 1
-  return 0
+  if (diff === -1) return multipliers.birdie
+  if (diff === -2) return multipliers.eagle
+  if (diff === -3) return multipliers.albatross
+  return multipliers.condor
 }
 
 /** Volby bodování konkrétní hry. */
@@ -143,6 +166,8 @@ export interface GameOptions {
   confirmLongest: boolean
   /** Nearest platí jen při paru a lepším, jinak bod bere soupeř. */
   confirmNearest: boolean
+  /** Kolikrát se extra bod násobí podle výsledku na jamce. */
+  resultMultipliers: Record<ResultTier, number>
 }
 
 export const DEFAULT_GAME_OPTIONS: GameOptions = {
@@ -152,8 +177,9 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   >,
   doubleBest: 1,
   noDoubleBonuses: false,
-  confirmLongest: false,
-  confirmNearest: false,
+  confirmLongest: true,
+  confirmNearest: true,
+  resultMultipliers: DEFAULT_RESULT_MULTIPLIERS,
 }
 
 export type Currency = 'CZK' | 'EUR'
@@ -266,6 +292,7 @@ export function createRound({
       options: {
         ...settings.options,
         bonusValues: { ...settings.options.bonusValues },
+        resultMultipliers: { ...settings.options.resultMultipliers },
       },
     },
   }
@@ -322,7 +349,12 @@ export function playerBonusPoints(
     const bonus = getBonus(bonusId)
     if (!bonus || bonus.kind === 'multiplier') continue
     const value = values[bonusId] ?? 0
-    total += bonus.exclusive ? value : value * (diff === null ? 0 : bonusMultiplier(diff))
+    total += bonus.exclusive
+      ? value
+      : value *
+        (diff === null
+          ? 0
+          : bonusMultiplier(diff, round.settings.options.resultMultipliers))
   }
   return total
 }

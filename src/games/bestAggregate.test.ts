@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { BonusId } from '../types'
-import { DEFAULT_GAME_OPTIONS, availableBonuses, toggleBonus } from '../types'
+import {
+  DEFAULT_GAME_OPTIONS,
+  DEFAULT_RESULT_MULTIPLIERS,
+  availableBonuses,
+  toggleBonus,
+} from '../types'
 import { bestAggregate, holePoints, totalPoints } from './bestAggregate'
 import { makeRound } from './fixtures'
 
@@ -668,5 +673,55 @@ describe('Best Aggregate - násobení doublů', () => {
   it('tři doubly na dvojnásobné jamce znásobí šestnáctkrát', () => {
     const { round, hole } = doubles(3, true)
     expect(holePoints(round, hole)[0]?.total).toBe(32)
+  })
+})
+
+describe('Best Aggregate - násobiče za výsledek', () => {
+  /** Adam má bunker za 1 bod a zahraje zadané skóre na par 5. */
+  function withResult(score: number, resultMultipliers = DEFAULT_RESULT_MULTIPLIERS) {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [5],
+      scores: [[score], [6], [6], [6]],
+      settings: { options: { ...BASE_OPTIONS, resultMultipliers } },
+    })
+    round.bonuses.p1 = [['bunker']]
+    return round
+  }
+
+  it('par počítá hodnotu jednou', () => {
+    expect(holePoints(withResult(5), 0)[0]?.extra).toBe(1)
+  })
+
+  it('výchozí násobiče: birdie 2×, eagle 3×, albatros 10×, condor 1000×', () => {
+    expect(holePoints(withResult(4), 0)[0]?.extra).toBe(2)
+    expect(holePoints(withResult(3), 0)[0]?.extra).toBe(3)
+    expect(holePoints(withResult(2), 0)[0]?.extra).toBe(10)
+    expect(holePoints(withResult(1), 0)[0]?.extra).toBe(1000)
+  })
+
+  it('respektuje vlastní nastavení násobičů', () => {
+    const custom = { birdie: 5, eagle: 7, albatross: 11, condor: 13 }
+
+    expect(holePoints(withResult(4, custom), 0)[0]?.extra).toBe(5)
+    expect(holePoints(withResult(3, custom), 0)[0]?.extra).toBe(7)
+  })
+
+  it('bogey a horší extra bod nepočítá', () => {
+    expect(holePoints(withResult(6), 0)[0]?.extra).toBe(0)
+  })
+
+  it('výchozí hodnota Double bunkeru je 3 body', () => {
+    expect(DEFAULT_GAME_OPTIONS.bonusValues.doubleBunker).toBe(3)
+  })
+
+  it('potvrzování Longestu i Nearestu je ve výchozím stavu zapnuté', () => {
+    expect(DEFAULT_GAME_OPTIONS.confirmLongest).toBe(true)
+    expect(DEFAULT_GAME_OPTIONS.confirmNearest).toBe(true)
   })
 })

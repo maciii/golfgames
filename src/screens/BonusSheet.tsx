@@ -78,8 +78,8 @@ export default function BonusSheet({
         )}
 
         <p className="hint">
-          Extra bod se počítá celé dvojici. Hodnota platí za par, dvojnásobek za birdie a
-          trojnásobek za eagle; při bogey a horším se nepočítá.
+          Extra bod se počítá celé dvojici. Hodnota platí za par, lepší výsledek ji
+          znásobí podle nastavení hry; při bogey a horším se nepočítá.
         </p>
 
         <button type="button" className="primary-button" onClick={onClose}>

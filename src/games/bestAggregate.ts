@@ -94,7 +94,7 @@ function extraPoints(round: Round, team: Team, hole: number): number {
   for (const player of teamPlayers(round, team)) {
     const diff = diffToPar(round, player.id, hole)
     if (diff === null) continue
-    const multiplier = bonusMultiplier(diff)
+    const multiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
     if (multiplier === 0) continue
 
     for (const bonusId of bonusesAt(round, player.id, hole)) {
