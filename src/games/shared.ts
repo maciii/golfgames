@@ -30,20 +30,54 @@ export function teamBestBall(round: Round, team: Team, hole: number): number | n
   return entered.length > 0 ? Math.min(...entered) : CONCEDED
 }
 
+/** Součet dvojice na jamce: kolik míčů dohrála a kolik to dalo ran. */
+export interface AggregateResult {
+  played: number
+  strokes: number
+}
+
 /**
  * Součet ran dvojice na jamce.
  *
- * Na rozdíl od lepšího míče ho dvojice ztrácí, jakmile jeden z partnerů jamku
- * nedohraje - součet totiž nejde dopočítat a soupeř ho tím pádem bere.
+ * Kdo jamku vzdal, se do součtu nepočítá - sčítají se rány těch, kdo dohráli.
  * Vrací null, dokud se na jamce vůbec nehrálo.
  */
-export function teamAggregate(round: Round, team: Team, hole: number): number | null {
+export function teamAggregate(
+  round: Round,
+  team: Team,
+  hole: number,
+): AggregateResult | null {
   if (!isHoleStarted(round, hole)) return null
 
-  const scores = team.playerIds.map((id) => scoreAt(round, id, hole))
-  if (scores.some((s) => s === null)) return CONCEDED
+  const entered = team.playerIds
+    .map((id) => scoreAt(round, id, hole))
+    .filter((s): s is number => s !== null)
 
-  return scores.reduce<number>((sum, s) => sum + (s ?? 0), 0)
+  return {
+    played: entered.length,
+    strokes: entered.reduce((sum, s) => sum + s, 0),
+  }
+}
+
+/**
+ * Porovná součty dvojic. Přednost má dvojice s víc dohranými míči; při stejném
+ * počtu rozhoduje nižší součet. Škrtnutím míče si tak dvojice nepomůže.
+ * Vrací index vítěze, nebo null při shodě či nerozehrané jamce.
+ */
+export function aggregateWins(
+  a: AggregateResult | null,
+  b: AggregateResult | null,
+): 0 | 1 | null {
+  if (!a || !b) return null
+  if (a.played !== b.played) return a.played > b.played ? 0 : 1
+  if (a.strokes === b.strokes) return null
+  return a.strokes < b.strokes ? 0 : 1
+}
+
+/** Hodnota součtu do UI. */
+export function formatAggregate(result: AggregateResult | null): string {
+  if (!result) return '–'
+  return result.played === 0 ? 'vzdáno' : `${result.strokes}`
 }
 
 /** Součet ran dvojice přes celé kolo (jen za zapsané jamky). */

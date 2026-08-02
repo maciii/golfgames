@@ -1,5 +1,5 @@
 import type { Round, RoundSettings } from '../types'
-import { createRound } from '../types'
+import { DEFAULT_SETTINGS, createRound } from '../types'
 
 /**
  * Pomocník pro testy: postaví kolo s předvyplněnými pary a skóre.
@@ -15,8 +15,8 @@ export function makeRound(options: {
   scores: (number | null)[][]
   /** Rozdělení do dvojic po indexech hráčů. */
   teams?: number[][]
-  /** Nastavení sázky; bez něj se použije výchozí. */
-  settings?: RoundSettings
+  /** Nastavení sázky; chybějící pole se doplní výchozími. */
+  settings?: Partial<RoundSettings>
 }): Round {
   const { gameId, players, pars, scores, teams, settings } = options
   const round = createRound({
@@ -24,7 +24,7 @@ export function makeRound(options: {
     playerNames: players,
     holeCount: pars.length,
     teamIndices: teams,
-    settings,
+    settings: { ...DEFAULT_SETTINGS, ...settings },
   })
 
   round.pars = [...pars]

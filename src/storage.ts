@@ -1,5 +1,5 @@
-import type { Round, RoundSettings } from './types'
-import { DEFAULT_SETTINGS } from './types'
+import type { GameOptions, Round, RoundSettings } from './types'
+import { DEFAULT_GAME_OPTIONS, DEFAULT_SETTINGS } from './types'
 
 /**
  * Perzistence v localStorage.
@@ -15,6 +15,7 @@ const CURRENT_KEY = 'golfgames.currentRound.v1'
 const ARCHIVE_KEY = 'golfgames.archive.v1'
 const ROSTER_KEY = 'golfgames.roster.v1'
 const SETTINGS_KEY = 'golfgames.settings.v1'
+const GAME_OPTIONS_KEY = 'golfgames.gameOptions.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -59,10 +60,15 @@ function isValidRound(round: unknown): round is Round {
 
 /** Doplní pole, která ve starších uložených kolech chybí. */
 function normalize(round: Round): Round {
+  const settings = { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) }
   return {
     ...round,
     teams: Array.isArray(round.teams) ? round.teams : [],
-    settings: { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) },
+    bonuses: round.bonuses ?? {},
+    settings: {
+      ...settings,
+      options: { ...DEFAULT_GAME_OPTIONS, ...(settings.options ?? {}) },
+    },
   }
 }
 
@@ -114,6 +120,28 @@ export function loadSettings(): RoundSettings {
 
 export function saveSettings(settings: RoundSettings): void {
   write(SETTINGS_KEY, settings)
+}
+
+/**
+ * Volby bodování se pamatují zvlášť pro každou hru - Best Aggregate a Skins
+ * mají jiné extra body a nemá smysl je přepisovat jedno druhým.
+ */
+export function loadGameOptions(gameId: string): GameOptions {
+  const all = read<Record<string, GameOptions>>(GAME_OPTIONS_KEY) ?? {}
+  const stored: Partial<GameOptions> = all[gameId] ?? {}
+  return {
+    ...DEFAULT_GAME_OPTIONS,
+    ...stored,
+    bonusValues: {
+      ...DEFAULT_GAME_OPTIONS.bonusValues,
+      ...(stored.bonusValues ?? {}),
+    },
+  }
+}
+
+export function saveGameOptions(gameId: string, options: GameOptions): void {
+  const all = read<Record<string, GameOptions>>(GAME_OPTIONS_KEY) ?? {}
+  write(GAME_OPTIONS_KEY, { ...all, [gameId]: options })
 }
 
 // --- seznam hráčů ---------------------------------------------------------

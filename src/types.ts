@@ -27,7 +27,14 @@ export interface Team {
  * hry, které se přidají později.)
  */
 export type BonusId =
-  'double' | 'longest' | 'bunker' | 'doubleBunker' | 'water' | 'barkie' | 'arnie'
+  | 'double'
+  | 'longest'
+  | 'nearest'
+  | 'bunker'
+  | 'doubleBunker'
+  | 'water'
+  | 'barkie'
+  | 'arnie'
 
 export interface BonusDefinition {
   id: BonusId
@@ -50,6 +57,13 @@ export const BONUSES: BonusDefinition[] = [
     id: 'longest',
     name: 'Longest',
     description: 'Nejdelší odpal na jamce.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'nearest',
+    name: 'Nearest',
+    description: 'Nejbližší rána k jamce.',
     kind: 'points',
     defaultValue: 1,
   },
@@ -126,13 +140,15 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
 
 export type Currency = 'CZK' | 'EUR'
 
-/** Nastavení bodování a sázky, společné všem hrám. */
+/** Nastavení bodování a sázky. */
 export interface RoundSettings {
   currency: Currency
   /** Kolik peněz je jeden bod (skin, vyhraná jamka). */
   pointValue: number
   /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
   doubleClosingHoles: boolean
+  /** Volby bodování konkrétní hry (extra body, Double Best). */
+  options: GameOptions
 }
 
 /** Obvyklá sázka podle měny: desetikoruna, nebo euro za bod. */
@@ -145,6 +161,7 @@ export const DEFAULT_SETTINGS: RoundSettings = {
   currency: 'CZK',
   pointValue: DEFAULT_POINT_VALUE.CZK,
   doubleClosingHoles: false,
+  options: DEFAULT_GAME_OPTIONS,
 }
 
 /** Jamky, které se při zapnuté volbě počítají dvojnásobně (1-based). */
@@ -165,6 +182,8 @@ export interface Round {
   pars: number[]
   /** scores[playerId][holeIndex] === null znamená "zatím nezapsáno". */
   scores: Record<PlayerId, (number | null)[]>
+  /** bonuses[playerId][holeIndex] = extra body, které hráč na jamce uhrál. */
+  bonuses: Record<PlayerId, BonusId[][]>
   /** Jamka zobrazená naposledy, 0-based. */
   currentHole: number
   /** Bodování a sázka; kolo si je nese, ať archiv sedí i po změně předvoleb. */
@@ -198,8 +217,10 @@ export function createRound({
   }))
 
   const scores: Record<PlayerId, (number | null)[]> = {}
+  const bonuses: Record<PlayerId, BonusId[][]> = {}
   for (const player of players) {
     scores[player.id] = Array<number | null>(holeCount).fill(null)
+    bonuses[player.id] = Array.from({ length: holeCount }, () => [])
   }
 
   const teams: Team[] = (teamIndices ?? []).map((indices, i) => ({
@@ -218,6 +239,7 @@ export function createRound({
     holeCount,
     pars: Array<number>(holeCount).fill(DEFAULT_PAR),
     scores,
+    bonuses,
     currentHole: 0,
     settings: { ...settings },
   }
@@ -225,10 +247,42 @@ export function createRound({
 
 /**
  * Kolikrát se jamka počítá. Devátá a osmnáctá mohou být za dvojnásobek -
- * u devítijamkového kola tak dvojnásobí poslední jamku.
+ * u devítijamkového kola tak dvojnásobí poslední jamku. Zvolený extra bod
+ * "double" násobí navíc, takže dvojnásobná jamka s doublem je za čtyřnásobek.
  */
 export function holeMultiplier(round: Round, hole: number): number {
-  return round.settings.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
+  const closing =
+    round.settings.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
+  return closing * doubleCallMultiplier(round, hole)
+}
+
+/** Zvolil někdo na jamce extra bod "double"? Platí pro obě dvojice. */
+export function doubleCallMultiplier(round: Round, hole: number): number {
+  if ((round.settings.options.bonusValues.double ?? 0) <= 0) return 1
+  return round.players.some((p) => bonusesAt(round, p.id, hole).includes('double'))
+    ? 2
+    : 1
+}
+
+/** Extra body, které má hráč zapsané na jamce. */
+export function bonusesAt(round: Round, playerId: PlayerId, hole: number): BonusId[] {
+  return round.bonuses?.[playerId]?.[hole] ?? []
+}
+
+/** Přepne extra bod u hráče na jamce. */
+export function toggleBonus(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+  bonusId: BonusId,
+): Round {
+  const perPlayer = round.bonuses[playerId] ?? []
+  const holes = Array.from({ length: round.holeCount }, (_, i) => perPlayer[i] ?? [])
+  const current = holes[hole] ?? []
+  holes[hole] = current.includes(bonusId)
+    ? current.filter((b) => b !== bonusId)
+    : [...current, bonusId]
+  return { ...round, bonuses: { ...round.bonuses, [playerId]: holes } }
 }
 
 /** Tým se pojmenovává podle hráčů, ať se drží v souladu se zadanými jmény. */

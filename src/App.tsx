@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { CreateRoundOptions, PlayerId, Round } from './types'
-import { createRound } from './types'
+import type { BonusId, CreateRoundOptions, PlayerId, Round } from './types'
+import { createRound, toggleBonus } from './types'
 import {
   addToRoster,
   archiveRound,
@@ -13,8 +13,9 @@ import SetupScreen from './screens/SetupScreen'
 import PlayScreen from './screens/PlayScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import ArchiveScreen from './screens/ArchiveScreen'
+import GameSettingsScreen from './screens/GameSettingsScreen'
 
-type View = 'setup' | 'play' | 'results' | 'archive'
+type View = 'setup' | 'play' | 'results' | 'archive' | 'gameSettings'
 
 /**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
@@ -28,6 +29,8 @@ export default function App() {
   const [view, setView] = useState<View>('play')
   const [archive, setArchive] = useState<Round[]>(() => loadArchive())
   const [openArchiveId, setOpenArchiveId] = useState<string | null>(null)
+  // Hra, jejíž bodování se právě nastavuje.
+  const [settingsGameId, setSettingsGameId] = useState<string | null>(null)
 
   useEffect(() => {
     saveCurrentRound(round)
@@ -51,6 +54,10 @@ export default function App() {
     },
     [],
   )
+
+  const setBonus = useCallback((playerId: PlayerId, hole: number, bonusId: BonusId) => {
+    setRound((prev) => (prev ? toggleBonus(prev, playerId, hole, bonusId) : prev))
+  }, [])
 
   const setPar = useCallback((hole: number, par: number) => {
     setRound((prev) => {
@@ -111,6 +118,18 @@ export default function App() {
     setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')
   }, [round])
 
+  if (view === 'gameSettings' && settingsGameId) {
+    return (
+      <GameSettingsScreen
+        gameId={settingsGameId}
+        onBack={() => {
+          setSettingsGameId(null)
+          setView(round ? 'play' : 'setup')
+        }}
+      />
+    )
+  }
+
   if (view === 'archive') {
     const opened = archive.find((r) => r.id === openArchiveId)
     if (opened) {
@@ -133,6 +152,10 @@ export default function App() {
       <SetupScreen
         onStart={startRound}
         onOpenArchive={openArchive}
+        onOpenGameSettings={(gameId) => {
+          setSettingsGameId(gameId)
+          setView('gameSettings')
+        }}
         archiveCount={archive.length}
       />
     )
@@ -153,6 +176,7 @@ export default function App() {
     <PlayScreen
       round={round}
       onSetScore={setScore}
+      onToggleBonus={setBonus}
       onSetPar={setPar}
       onGoToHole={goToHole}
       onFinish={finishRound}

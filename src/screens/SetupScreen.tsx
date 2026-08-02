@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { DEFAULT_GAME_ID, GAMES, getGame } from '../games'
 import type { RosterEntry } from '../storage'
-import { loadRoster, loadSettings, removeFromRoster, saveSettings } from '../storage'
+import {
+  loadGameOptions,
+  loadRoster,
+  loadSettings,
+  removeFromRoster,
+  saveSettings,
+} from '../storage'
 import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
@@ -34,11 +40,17 @@ const PAIRINGS: number[][][] = [
 interface Props {
   onStart: (options: CreateRoundOptions) => void
   onOpenArchive: () => void
+  onOpenGameSettings: (gameId: string) => void
   archiveCount: number
 }
 
 /** Nastavení nového kola: hra, hráči, dvojice a počet jamek. */
-export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Props) {
+export default function SetupScreen({
+  onStart,
+  onOpenArchive,
+  onOpenGameSettings,
+  archiveCount,
+}: Props) {
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
     getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
@@ -130,6 +142,8 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
     const effective: RoundSettings = {
       ...settings,
       doubleClosingHoles: game.supportsDoubleHoles && settings.doubleClosingHoles,
+      // Volby bodování se berou z nastavení zvolené hry.
+      options: loadGameOptions(gameId),
     }
     saveSettings(effective)
     onStart({
@@ -166,6 +180,13 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
             ))}
           </div>
           <p className="hint">{game.rules}</p>
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => onOpenGameSettings(gameId)}
+          >
+            Nastavení bodování hry
+          </button>
         </section>
 
         <section className="section">

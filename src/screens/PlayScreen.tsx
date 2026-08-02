@@ -1,7 +1,8 @@
-import { useRef } from 'react'
-import type { Player, PlayerId, Round } from '../types'
+import { useRef, useState } from 'react'
+import type { BonusId, Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
+  bonusesAt,
   formatHoleList,
   formatToPar,
   holesPlayed,
@@ -16,6 +17,7 @@ import {
   teamPlayers,
 } from '../types'
 import { getGame } from '../games'
+import BonusSheet from './BonusSheet'
 
 const PAR_OPTIONS = [3, 4, 5]
 
@@ -25,6 +27,7 @@ const LONG_PRESS_MS = 500
 interface Props {
   round: Round
   onSetScore: (playerId: PlayerId, hole: number, value: number | null) => void
+  onToggleBonus: (playerId: PlayerId, hole: number, bonusId: BonusId) => void
   onSetPar: (hole: number, par: number) => void
   onGoToHole: (hole: number) => void
   onFinish: () => void
@@ -40,6 +43,7 @@ interface Props {
 export default function PlayScreen({
   round,
   onSetScore,
+  onToggleBonus,
   onSetPar,
   onGoToHole,
   onFinish,
@@ -51,6 +55,8 @@ export default function PlayScreen({
     timer: null,
     fired: false,
   })
+  // Hráč, pro kterého je otevřený výběr extra bodů.
+  const [bonusFor, setBonusFor] = useState<Player | null>(null)
   const game = getGame(round.gameId)
   const hole = round.currentHole
   const par = parAt(round, hole)
@@ -131,6 +137,7 @@ export default function PlayScreen({
     const score = scoreAt(round, player.id, hole)
     const played = holesPlayed(round, player.id)
     const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
+    const bonuses = bonusesAt(round, player.id, hole)
 
     return (
       <li key={player.id} className="player-row">
@@ -142,6 +149,14 @@ export default function PlayScreen({
               : `${strokeTotal(round, player.id)} ran · ${formatToPar(toPar)}`}
           </span>
         </div>
+        <button
+          type="button"
+          className={`bonus-button${bonuses.length > 0 ? ' active' : ''}`}
+          onClick={() => setBonusFor(player)}
+          aria-label={`${player.name}: extra body`}
+        >
+          {bonuses.length > 0 ? bonuses.length : '★'}
+        </button>
         <div className="stepper">
           <button
             type="button"
@@ -298,6 +313,17 @@ export default function PlayScreen({
           </button>
         )}
       </footer>
+
+      {bonusFor && (
+        <BonusSheet
+          playerName={bonusFor.name}
+          hole={hole}
+          options={round.settings.options}
+          selected={bonusesAt(round, bonusFor.id, hole)}
+          onToggle={(bonusId) => onToggleBonus(bonusFor.id, hole, bonusId)}
+          onClose={() => setBonusFor(null)}
+        />
+      )}
     </div>
   )
 }

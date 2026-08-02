@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { balances, formatMoney, settleRound } from './money'
 import type { RoundSettings } from './types'
+import { DEFAULT_SETTINGS } from './types'
 import { makeRound } from './games/fixtures'
 
-const CZK: RoundSettings = { currency: 'CZK', pointValue: 10, doubleClosingHoles: false }
+const CZK: RoundSettings = { ...DEFAULT_SETTINGS, pointValue: 10 }
 
 /** Kolo dvou dvojic; skóre není podstatné, body dodáváme přímo. */
-function pairRound(settings: RoundSettings = CZK) {
+function pairRound(settings: Partial<RoundSettings> = CZK) {
   return makeRound({
     gameId: 'best-aggregate',
     players: ['Hráč 1', 'Hráč 2', 'Hráč 3', 'Hráč 4'],
