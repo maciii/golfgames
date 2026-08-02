@@ -64,19 +64,36 @@ i notaci `3&2`.
 
 ### Jak se počítají peníze
 
-Každý bod navíc zaplatí soupeř. Při dvou stranách (dvě dvojice, dva hráči
-v match play) je to prostě **rozdíl bodů × hodnota bodu** – prohrávající
-strana platí vítězné.
+Výpočet je v [`src/money.ts`](../src/money.ts) a pokrytý testy. Liší se podle
+toho, jestli se hraje ve dvojicích.
 
-U tří a čtyř hráčů ve Skins platí stejný princip vůči každému soupeři
-zvlášť: kdo bere skin, inkasuje ho od všech ostatních. Pro stranu `i` tedy
+#### Dvojice (Best Aggregate, four-ball match play)
+
+Spočítá se rozdíl bodů obou dvojic a přepočte se na peníze. Takhle
+spočítanou částku pak platí **každý hráč prohrávající dvojice zvlášť** svému
+protějšku ve vítězné dvojici – protějšky se párují podle pořadí ve dvojici,
+takže první platí prvnímu a druhý druhému.
+
+Příklad: dvojice Hráč 1 + Hráč 3 má 10 bodů, dvojice Hráč 2 + Hráč 4 tři
+body. Rozdíl je 7 bodů, při desetikoruně za bod tedy 70 Kč:
+
+| Platí  | Dostává | Částka |
+| ------ | ------- | ------ |
+| Hráč 2 | Hráč 1  | 70 Kč  |
+| Hráč 4 | Hráč 3  | 70 Kč  |
+
+Vítězná dvojice tedy dostane dohromady 140 Kč, každý z jejích hráčů 70 Kč.
+
+#### Jednotlivci (Skins, match play dvou hráčů)
+
+Každý bod navíc inkasuje hráč od každého soupeře zvlášť. Pro hráče `i` tedy
 
 ```
-částka = hodnota bodu × (body_i × (počet stran − 1) − součet bodů ostatních)
+částka = hodnota bodu × (body_i × (počet hráčů − 1) − součet bodů ostatních)
 ```
 
-Součet všech částek je vždy nula. Výpočet je v
-[`src/money.ts`](../src/money.ts) a pokrytý testy.
+Součet všech částek je vždy nula. Při dvou hráčích se výraz zjednoduší na
+rozdíl bodů × hodnota bodu.
 
 ## Značky ve scorekartě
 

@@ -655,6 +655,12 @@ button {
   white-space: nowrap;
 }
 
+/* Šipka odděluje plátce od příjemce: "Bára → Adam". */
+.settlement-arrow {
+  color: var(--text-dim);
+  margin: 0 8px;
+}
+
 .settlement-amount {
   font-size: 18px;
   font-weight: 700;

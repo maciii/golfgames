@@ -7,6 +7,23 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.6.0] – 2026-08-02
+
+### Opraveno
+
+- **Vyrovnání u dvojic se počítalo v poloviční výši.** Rozdíl bodů přepočtený
+  na peníze platí _každý_ hráč prohrávající dvojice svému protějšku, ne
+  dvojice jako celek. Při rozdílu 7 bodů a desetikoruně za bod tedy platí
+  70 Kč první hráč prvnímu soupeři a 70 Kč druhý hráč druhému; vítězná
+  dvojice dostane 140 Kč. Dřív se přesouvalo jen 70 Kč.
+
+### Změněno
+
+- Vyrovnání u dvojic ukazuje konkrétní platby („Hráč 2 → Hráč 1 70 Kč“)
+  místo zůstatku celé dvojice; protějšky se párují podle pořadí ve dvojici.
+- Vyrovnání jednotlivců (Skins, match play dvou hráčů) zůstává jako zůstatek
+  na hráče a počítá se beze změny.
+
 ## [0.5.0] – 2026-08-02
 
 ### Změněno

@@ -1,40 +1,96 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney, settle, settlementSummary } from './money'
+import { balances, formatMoney, settleRound } from './money'
+import type { RoundSettings } from './types'
+import { makeRound } from './games/fixtures'
 
-describe('Vyrovnání mezi dvěma stranami', () => {
+const CZK: RoundSettings = { currency: 'CZK', pointValue: 10, doubleClosingHoles: false }
+
+/** Kolo dvou dvojic; skóre není podstatné, body dodáváme přímo. */
+function pairRound(settings: RoundSettings = CZK) {
+  return makeRound({
+    gameId: 'best-aggregate',
+    players: ['Hráč 1', 'Hráč 2', 'Hráč 3', 'Hráč 4'],
+    teams: [
+      [0, 2],
+      [1, 3],
+    ],
+    pars: [4],
+    scores: [[4], [4], [4], [4]],
+    settings,
+  })
+}
+
+describe('Vyrovnání dvojic', () => {
+  // Dvojice 1+3 má 10 bodů, dvojice 2+4 tři body -> rozdíl 7 bodů = 70 Kč.
   const parties = [
-    { id: 't1', name: 'Adam + Alena', units: 9 },
-    { id: 't2', name: 'Bára + Bořek', units: 3 },
+    { id: 't1', name: 'Hráč 1 + Hráč 3', units: 10 },
+    { id: 't2', name: 'Hráč 2 + Hráč 4', units: 3 },
   ]
 
-  it('prohrávající dvojice platí rozdíl bodů krát hodnota bodu', () => {
-    const rows = settle(parties, 10)
+  it('částku platí každý hráč prohrávající dvojice zvlášť', () => {
+    const result = settleRound(pairRound(), parties)
 
-    expect(rows.map((r) => r.amount)).toEqual([60, -60])
+    expect(result.kind).toBe('transfers')
+    if (result.kind !== 'transfers') return
+    expect(result.unitDiff).toBe(7)
+    expect(result.perPlayer).toBe(70)
+  })
+
+  it('páruje protějšky podle pořadí ve dvojici', () => {
+    const result = settleRound(pairRound(), parties)
+
+    if (result.kind !== 'transfers') throw new Error('čekány platby')
+    expect(result.transfers.map((t) => [t.fromName, t.toName, t.amount])).toEqual([
+      ['Hráč 2', 'Hráč 1', 70],
+      ['Hráč 4', 'Hráč 3', 70],
+    ])
+  })
+
+  it('vítězná dvojice dostane dvojnásobek rozdílu', () => {
+    const result = settleRound(pairRound(), parties)
+
+    if (result.kind !== 'transfers') throw new Error('čekány platby')
+    const total = result.transfers.reduce((sum, t) => sum + t.amount, 0)
+    expect(total).toBe(140)
   })
 
   it('při shodě bodů nikdo nic neplatí', () => {
-    const rows = settle(
-      [
-        { id: 't1', name: 'A', units: 5 },
-        { id: 't2', name: 'B', units: 5 },
-      ],
-      10,
-    )
+    const result = settleRound(pairRound(), [
+      { id: 't1', name: 'A', units: 5 },
+      { id: 't2', name: 'B', units: 5 },
+    ])
 
-    expect(rows.map((r) => r.amount)).toEqual([0, 0])
+    if (result.kind !== 'transfers') throw new Error('čekány platby')
+    expect(result.transfers).toEqual([])
+    expect(result.summary).toContain('nedluží')
   })
 
-  it('pojmenuje, kdo komu kolik platí', () => {
-    // Intl vkládá mezi číslo a měnu nezlomitelnou mezeru; pro porovnání ji
-    // srovnáme na obyčejnou.
-    expect(settlementSummary(settle(parties, 10), 'CZK').replace(/ /g, ' ')).toBe(
-      'Bára + Bořek platí Adam + Alena 60 Kč (rozdíl 6 b.).',
-    )
+  it('popíše výpočet i částku na hráče', () => {
+    const result = settleRound(pairRound(), parties)
+
+    expect(
+      result.kind === 'transfers' && result.summary.replace(/[\u00a0\u202f]/g, ' '),
+    ).toBe('Rozdíl 7 b. × 10 Kč = 70 Kč, které platí každý hráč zvlášť.')
+  })
+
+  it('bez sázky se nevyrovnává nic', () => {
+    const free = pairRound({ ...CZK, pointValue: 0 })
+
+    expect(settleRound(free, parties).kind).toBe('none')
   })
 })
 
-describe('Vyrovnání mezi víc hráči', () => {
+describe('Vyrovnání jednotlivců', () => {
+  function soloRound() {
+    return makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril'],
+      pars: [4],
+      scores: [[4], [4], [4]],
+      settings: CZK,
+    })
+  }
+
   const parties = [
     { id: 'p1', name: 'Adam', units: 5 },
     { id: 'p2', name: 'Bára', units: 2 },
@@ -42,27 +98,38 @@ describe('Vyrovnání mezi víc hráči', () => {
   ]
 
   it('každý bod navíc inkasuje od každého soupeře zvlášť', () => {
-    const rows = settle(parties, 10)
+    const result = settleRound(soloRound(), parties)
 
-    expect(rows.map((r) => r.amount)).toEqual([70, -20, -50])
+    expect(result.kind).toBe('balances')
+    if (result.kind !== 'balances') return
+    expect(result.rows.map((r) => r.amount)).toEqual([70, -20, -50])
   })
 
-  it('součet všech částek je nula', () => {
-    const rows = settle(parties, 10)
+  it('součet všech zůstatků je nula', () => {
+    const rows = balances(parties, 10)
 
     expect(rows.reduce((sum, r) => sum + r.amount, 0)).toBe(0)
   })
 
-  it('nulová hodnota bodu znamená nulové vyrovnání', () => {
-    expect(settle(parties, 0).every((r) => r.amount === 0)).toBe(true)
+  it('dva hráči se vyrovnají prostým rozdílem bodů', () => {
+    const rows = balances(
+      [
+        { id: 'p1', name: 'Adam', units: 6 },
+        { id: 'p2', name: 'Bára', units: 2 },
+      ],
+      10,
+    )
+
+    expect(rows.map((r) => r.amount)).toEqual([40, -40])
   })
 })
 
 describe('Formátování částek', () => {
   it('píše koruny i eura', () => {
-    // Nezlomitelná mezera z Intl se pro porovnání normalizuje.
-    expect(formatMoney(60, 'CZK').replace(/ /g, ' ')).toBe('60 Kč')
-    expect(formatMoney(12.5, 'EUR').replace(/ /g, ' ')).toBe('12,50 €')
+    // Intl odděluje částku od měny nezlomitelnou mezerou (U+00A0, u části
+    // locale U+202F); pro porovnání ji srovnáme na obyčejnou.
+    expect(formatMoney(60, 'CZK').replace(/[\u00a0\u202f]/g, ' ')).toBe('60 Kč')
+    expect(formatMoney(12.5, 'EUR').replace(/[\u00a0\u202f]/g, ' ')).toBe('12,50 €')
   })
 
   it('u záporné částky nechá znaménko', () => {

@@ -1,7 +1,7 @@
 import type { Round } from '../types'
 import { formatHoleList, formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
-import { formatMoney, settle, settlementSummary } from '../money'
+import { formatMoney, settleRound } from '../money'
 import { APP_VERSION } from '../version'
 import Scorecard from './Scorecard'
 
@@ -32,15 +32,12 @@ export default function ResultsScreen({
   const showPositions = sections.some((s) => s.rows.length > 1)
 
   // Peníze se počítají z hlavní tabulky hry - body, skiny i vyhrané jamky
-  // fungují stejně. Bez sázky nebo bez soupeře se sekce nezobrazuje.
+  // fungují stejně. Bez sázky nebo bez soupeře vyjde 'none' a sekce se skryje.
   const mainRows = sections[0]?.rows ?? []
-  const settlement =
-    round.settings.pointValue > 0 && mainRows.length > 1
-      ? settle(
-          mainRows.map((row) => ({ id: row.id, name: row.name, units: row.value })),
-          round.settings.pointValue,
-        )
-      : []
+  const settlement = settleRound(
+    round,
+    mainRows.map((row) => ({ id: row.id, name: row.name, units: row.value })),
+  )
 
   function newRound() {
     if (finished || confirm('Rozehrané kolo se smaže. Opravdu chceš začít nové?')) {
@@ -110,27 +107,53 @@ export default function ResultsScreen({
           </p>
         )}
 
-        {settlement.length > 0 && (
+        {settlement.kind !== 'none' && (
           <section className="section">
             <h2 className="section-title">Vyrovnání</h2>
-            <ul className="settlement">
-              {settlement.map((row) => (
-                <li key={row.id} className="settlement-row">
-                  <span className="settlement-name">{row.name}</span>
-                  <span
-                    className={`settlement-amount${
-                      row.amount > 0 ? ' wins' : row.amount < 0 ? ' owes' : ''
-                    }`}
-                  >
-                    {formatMoney(row.amount, round.settings.currency)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+
+            {settlement.kind === 'transfers' ? (
+              <ul className="settlement">
+                {settlement.transfers.map((transfer) => (
+                  <li key={transfer.fromId} className="settlement-row">
+                    <span className="settlement-name">
+                      {transfer.fromName}
+                      <span className="settlement-arrow">→</span>
+                      {transfer.toName}
+                    </span>
+                    <span className="settlement-amount owes">
+                      {formatMoney(transfer.amount, round.settings.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="settlement">
+                {settlement.rows.map((row) => (
+                  <li key={row.id} className="settlement-row">
+                    <span className="settlement-name">{row.name}</span>
+                    <span
+                      className={`settlement-amount${
+                        row.amount > 0 ? ' wins' : row.amount < 0 ? ' owes' : ''
+                      }`}
+                    >
+                      {formatMoney(row.amount, round.settings.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <p className="hint">
-              {settlementSummary(settlement, round.settings.currency)} Bod je{' '}
-              {formatMoney(round.settings.pointValue, round.settings.currency)}
-              {round.settings.doubleClosingHoles && ', 9. a 18. jamka za dvojnásobek'}.
+              {settlement.summary}
+              {settlement.kind === 'balances' && (
+                <>
+                  {' '}
+                  Bod je {formatMoney(round.settings.pointValue, round.settings.currency)}
+                  .
+                </>
+              )}
+              {round.settings.doubleClosingHoles &&
+                ' 9. a 18. jamka byla za dvojnásobek.'}
             </p>
           </section>
         )}
