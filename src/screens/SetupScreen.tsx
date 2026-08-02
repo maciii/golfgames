@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { DEFAULT_GAME_ID, GAMES, getGame } from '../games'
 import type { RosterEntry } from '../storage'
-import { loadRoster, removeFromRoster } from '../storage'
+import { loadRoster, loadSettings, removeFromRoster, saveSettings } from '../storage'
+import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
+import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
+
+const CURRENCIES: Currency[] = ['CZK', 'EUR']
+const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
 
 const MAX_PLAYERS = 4
 const HOLE_OPTIONS = [9, 18]
@@ -27,12 +32,7 @@ const PAIRINGS: number[][][] = [
 ]
 
 interface Props {
-  onStart: (
-    gameId: string,
-    playerNames: string[],
-    holeCount: number,
-    teamIndices?: number[][],
-  ) => void
+  onStart: (options: CreateRoundOptions) => void
   onOpenArchive: () => void
   archiveCount: number
 }
@@ -48,6 +48,11 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
   const [pairing, setPairing] = useState(0)
   const [roster, setRoster] = useState<RosterEntry[]>(() => loadRoster())
   const [rosterEditing, setRosterEditing] = useState(false)
+  // Předvolby se pamatují z minulého kola, ať se sázka nezadává pořád dokola.
+  const [settings, setSettings] = useState<RoundSettings>(() => loadSettings())
+  const [pointValueText, setPointValueText] = useState(
+    () => `${loadSettings().pointValue}`,
+  )
 
   const game = getGame(gameId)
   const usesTeams = game.usesTeams(playerCount)
@@ -61,6 +66,32 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
     if (!next.playerCounts.includes(playerCount)) {
       setPlayerCount(next.playerCounts[0] ?? 2)
     }
+  }
+
+  /**
+   * Přepnutí měny nastaví obvyklou sázku dané měny, ale jen dokud si ji
+   * uživatel sám nepřepsal - jinak by mu překlik smazal zadanou hodnotu.
+   */
+  function selectCurrency(currency: Currency) {
+    const untouched = settings.pointValue === DEFAULT_POINT_VALUE[settings.currency]
+    if (!untouched) {
+      // Vlastní hodnota zůstává i s tím, jak si ji uživatel napsal ("2,5").
+      setSettings({ ...settings, currency })
+      return
+    }
+    const pointValue = DEFAULT_POINT_VALUE[currency]
+    setSettings({ ...settings, currency, pointValue })
+    setPointValueText(`${pointValue}`)
+  }
+
+  function updatePointValue(text: string) {
+    // Desetinná čárka i tečka, ať jde zadat 0,5 € podle zvyku.
+    setPointValueText(text)
+    const parsed = Number.parseFloat(text.replace(',', '.'))
+    setSettings({
+      ...settings,
+      pointValue: Number.isFinite(parsed) && parsed >= 0 ? parsed : 0,
+    })
   }
 
   function updateName(index: number, value: string) {
@@ -95,7 +126,19 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
         ? PAIRINGS[pairing]
         : [[0, 1]]
       : undefined
-    onStart(gameId, names.slice(0, playerCount), holeCount, teamIndices)
+    // Volba, kterou hra nepodporuje, se do kola nesmí propsat.
+    const effective: RoundSettings = {
+      ...settings,
+      doubleClosingHoles: game.supportsDoubleHoles && settings.doubleClosingHoles,
+    }
+    saveSettings(effective)
+    onStart({
+      gameId,
+      playerNames: names.slice(0, playerCount),
+      holeCount,
+      teamIndices,
+      settings: effective,
+    })
   }
 
   return (
@@ -222,6 +265,64 @@ export default function SetupScreen({ onStart, onOpenArchive, archiveCount }: Pr
             </div>
           </section>
         )}
+
+        <section className="section">
+          <h2 className="section-title">Sázka</h2>
+          <div className="segmented">
+            {CURRENCIES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`segment${code === settings.currency ? ' selected' : ''}`}
+                onClick={() => selectCurrency(code)}
+                aria-pressed={code === settings.currency}
+              >
+                {CURRENCY_LABEL[code]}
+              </button>
+            ))}
+          </div>
+
+          <label className="field">
+            <span className="field-label">Hodnota bodu</span>
+            <span className="field-input">
+              <input
+                className="name-input value-input"
+                type="text"
+                inputMode="decimal"
+                value={pointValueText}
+                onChange={(e) => updatePointValue(e.target.value)}
+                aria-label="Hodnota jednoho bodu"
+              />
+              <span className="field-suffix">{CURRENCY_LABEL[settings.currency]}</span>
+            </span>
+          </label>
+
+          {game.supportsDoubleHoles ? (
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={settings.doubleClosingHoles}
+                onChange={(e) =>
+                  setSettings({ ...settings, doubleClosingHoles: e.target.checked })
+                }
+              />
+              <span>
+                9. a 18. jamka za dvojnásobek
+                {holeCount === 9 && <em> (u devíti jamek jen poslední)</em>}
+              </span>
+            </label>
+          ) : (
+            <p className="hint">
+              Match play se počítá na jamky, takže dvojnásobná jamka by rozbila stav
+              zápasu – volba je proto vypnutá.
+            </p>
+          )}
+
+          <p className="hint">
+            Na konci kola se rozdíl bodů přepočítá na peníze; prohrávající strana platí
+            vítězné.
+          </p>
+        </section>
 
         <section className="section">
           <h2 className="section-title">Počet jamek</h2>

@@ -44,7 +44,8 @@ aplikace. Věcné změny patří do [`CHANGELOG.md`](CHANGELOG.md).
 ```
 src/
   types.ts            datový model kola (hráči, dvojice, skóre) + výpočty
-  storage.ts          localStorage: rozehrané kolo, archiv, seznam hráčů
+  storage.ts          localStorage: rozehrané kolo, archiv, hráči, předvolby
+  money.ts            přepočet bodů na peníze a formátování částek
   version.ts          verze vpečená při buildu
   games/              pravidla jednotlivých her
     types.ts          rozhraní GameDefinition + řazení pořadí
@@ -57,7 +58,8 @@ src/
   screens/
     SetupScreen.tsx   volba hry, hráčů, dvojic a počtu jamek
     PlayScreen.tsx    zápis skóre po jamkách
-    ResultsScreen.tsx pořadí + scorecard (i pro archivní kola)
+    ResultsScreen.tsx pořadí, vyrovnání a scorecard (i pro archivní kola)
+    Scorecard.tsx     tabulka se značkami skóre a sloupci hry
     ArchiveScreen.tsx seznam odehraných kol
 scripts/
   bump-version.mjs    zvedání verze

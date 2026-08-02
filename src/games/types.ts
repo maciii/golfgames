@@ -70,6 +70,11 @@ export interface GameDefinition {
   playerCounts: number[]
   /** Hraje se při daném počtu hráčů ve dvojicích? */
   usesTeams(playerCount: number): boolean
+  /**
+   * Dává u téhle hry smysl volba "9. a 18. jamka za dvojnásobek"? Match play
+   * se počítá na jamky, kde by dvojnásobná jamka rozbila stav zápasu.
+   */
+  supportsDoubleHoles: boolean
   computeStandings(round: Round): StandingsSection[]
   holeSummary?(round: Round, hole: number): HoleSummary[]
   /** Nepovinné sloupce navíc ve scorekartě (body dvojic, skiny apod.). */

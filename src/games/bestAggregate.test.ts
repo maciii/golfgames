@@ -121,6 +121,61 @@ describe('Best Aggregate - celkové pořadí', () => {
   })
 })
 
+describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
+  /** Devítijamkové kolo, kde se hraje jen poslední jamka: A 3/4, B 5/5. */
+  function closingHoleRound(doubleClosingHoles: boolean) {
+    const empty = [null, null, null, null, null, null, null, null]
+    return makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: Array<number>(9).fill(4),
+      scores: [
+        [...empty, 3],
+        [...empty, 4],
+        [...empty, 5],
+        [...empty, 5],
+      ],
+      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles },
+    })
+  }
+
+  it('bez volby počítá poslední jamku normálně', () => {
+    // lepší míč 1 + součet 1 + birdie 1
+    expect(holePoints(closingHoleRound(false), 8)[0]?.total).toBe(3)
+  })
+
+  it('se zapnutou volbou zdvojnásobí celý zisk z jamky včetně bonusu', () => {
+    const [teamA] = holePoints(closingHoleRound(true), 8)
+
+    expect(teamA).toEqual({ best: 2, aggregate: 2, bonus: 2, total: 6 })
+  })
+
+  it('ostatní jamky volba neovlivní', () => {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4, 4],
+      scores: [
+        [3, 3],
+        [4, 4],
+        [5, 5],
+        [5, 5],
+      ],
+      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles: true },
+    })
+
+    expect(holePoints(round, 0)[0]?.total).toBe(3)
+  })
+})
+
 describe('Best Aggregate - sloupce ve scorekartě', () => {
   it('přidá sloupec bodů za každou dvojici, hned za jejího druhého hráče', () => {
     const round = sampleRound()

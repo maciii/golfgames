@@ -11,6 +11,39 @@ Společné pro všechny hry:
   dává smysl i uprostřed kola.
 - Kolo lze hrát na 9 nebo 18 jamek.
 
+## Sázka a peněžní vyrovnání
+
+Před kolem se nastavuje měna, hodnota jednoho bodu a případné zdvojnásobení
+závěrečných jamek. Předvolby se pamatují do dalšího kola, ale **každé kolo
+si nese vlastní kopii** – změna sázky proto nepřepíše archiv.
+
+| Volba                         | Výchozí     | Poznámka                                  |
+| ----------------------------- | ----------- | ----------------------------------------- |
+| Měna                          | Kč          | přepínatelná na €                         |
+| Hodnota bodu                  | 10 Kč / 1 € | libovolné číslo, i desetinné (0,5 €)      |
+| 9. a 18. jamka za dvojnásobek | vypnuto     | u devítijamkového kola jen poslední jamka |
+
+Dvojnásobná jamka násobí **celý zisk z jamky**, tedy u Best Aggregate včetně
+bonusů za birdie a eagle, u Skins hodnotu skinu v sázce. Match play volbu
+nenabízí – počítá se na jamky a dvojnásobná jamka by rozbila stav zápasu
+i notaci `3&2`.
+
+### Jak se počítají peníze
+
+Každý bod navíc zaplatí soupeř. Při dvou stranách (dvě dvojice, dva hráči
+v match play) je to prostě **rozdíl bodů × hodnota bodu** – prohrávající
+strana platí vítězné.
+
+U tří a čtyř hráčů ve Skins platí stejný princip vůči každému soupeři
+zvlášť: kdo bere skin, inkasuje ho od všech ostatních. Pro stranu `i` tedy
+
+```
+částka = hodnota bodu × (body_i × (počet stran − 1) − součet bodů ostatních)
+```
+
+Součet všech částek je vždy nula. Výpočet je v
+[`src/money.ts`](../src/money.ts) a pokrytý testy.
+
 ## Značky ve scorekartě
 
 Skóre se ve scorekartě značí golfovou konvencí – tvar nese informaci i bez

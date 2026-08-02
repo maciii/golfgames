@@ -66,6 +66,31 @@ describe('Skins - rozdělení jamek', () => {
   })
 })
 
+describe('Skins - dvojnásobná devátá a osmnáctá', () => {
+  /** Devítijamkové kolo; první jamka dělená, poslední bere Adam. */
+  function closingHoleRound(doubleClosingHoles: boolean) {
+    const middle = [null, null, null, null, null, null, null]
+    return makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: Array<number>(9).fill(4),
+      scores: [
+        [4, ...middle, 3],
+        [4, ...middle, 5],
+      ],
+      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles },
+    })
+  }
+
+  it('poslední jamka je bez volby za jeden skin (plus přenesený)', () => {
+    expect(skinResults(closingHoleRound(false))[8]?.skins).toBe(2)
+  })
+
+  it('se zapnutou volbou je poslední jamka za dva skiny (plus přenesený)', () => {
+    expect(skinResults(closingHoleRound(true))[8]?.skins).toBe(3)
+  })
+})
+
 describe('Skins - pořadí', () => {
   it('řadí podle počtu získaných skinů', () => {
     const rows = skins.computeStandings(sampleRound())[0]?.rows ?? []

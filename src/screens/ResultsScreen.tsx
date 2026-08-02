@@ -1,6 +1,7 @@
 import type { Round } from '../types'
 import { formatRoundDate } from '../types'
 import { getGame } from '../games'
+import { formatMoney, settle, settlementSummary } from '../money'
 import { APP_VERSION } from '../version'
 import Scorecard from './Scorecard'
 
@@ -28,6 +29,17 @@ export default function ResultsScreen({
   const finished = Boolean(round.finishedAt)
   // Při jediném řádku není co poměřovat a pořadí by jen mátlo.
   const showPositions = sections.some((s) => s.rows.length > 1)
+
+  // Peníze se počítají z hlavní tabulky hry - body, skiny i vyhrané jamky
+  // fungují stejně. Bez sázky nebo bez soupeře se sekce nezobrazuje.
+  const mainRows = sections[0]?.rows ?? []
+  const settlement =
+    round.settings.pointValue > 0 && mainRows.length > 1
+      ? settle(
+          mainRows.map((row) => ({ id: row.id, name: row.name, units: row.value })),
+          round.settings.pointValue,
+        )
+      : []
 
   function newRound() {
     if (finished || confirm('Rozehrané kolo se smaže. Opravdu chceš začít nové?')) {
@@ -78,6 +90,31 @@ export default function ResultsScreen({
 
         {!finished && !readOnly && (
           <p className="hint">Počítají se jen jamky, které už mají zápis.</p>
+        )}
+
+        {settlement.length > 0 && (
+          <section className="section">
+            <h2 className="section-title">Vyrovnání</h2>
+            <ul className="settlement">
+              {settlement.map((row) => (
+                <li key={row.id} className="settlement-row">
+                  <span className="settlement-name">{row.name}</span>
+                  <span
+                    className={`settlement-amount${
+                      row.amount > 0 ? ' wins' : row.amount < 0 ? ' owes' : ''
+                    }`}
+                  >
+                    {formatMoney(row.amount, round.settings.currency)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="hint">
+              {settlementSummary(settlement, round.settings.currency)} Bod je{' '}
+              {formatMoney(round.settings.pointValue, round.settings.currency)}
+              {round.settings.doubleClosingHoles && ', 9. a 18. jamka za dvojnásobek'}.
+            </p>
+          </section>
         )}
 
         <Scorecard round={round} />

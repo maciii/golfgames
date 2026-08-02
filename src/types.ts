@@ -18,6 +18,32 @@ export interface Team {
   playerIds: PlayerId[]
 }
 
+export type Currency = 'CZK' | 'EUR'
+
+/** Nastavení bodování a sázky, společné všem hrám. */
+export interface RoundSettings {
+  currency: Currency
+  /** Kolik peněz je jeden bod (skin, vyhraná jamka). */
+  pointValue: number
+  /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
+  doubleClosingHoles: boolean
+}
+
+/** Obvyklá sázka podle měny: desetikoruna, nebo euro za bod. */
+export const DEFAULT_POINT_VALUE: Record<Currency, number> = {
+  CZK: 10,
+  EUR: 1,
+}
+
+export const DEFAULT_SETTINGS: RoundSettings = {
+  currency: 'CZK',
+  pointValue: DEFAULT_POINT_VALUE.CZK,
+  doubleClosingHoles: false,
+}
+
+/** Jamky, které se při zapnuté volbě počítají dvojnásobně (1-based). */
+export const DOUBLE_HOLES = [9, 18]
+
 export interface Round {
   id: string
   gameId: string
@@ -35,6 +61,8 @@ export interface Round {
   scores: Record<PlayerId, (number | null)[]>
   /** Jamka zobrazená naposledy, 0-based. */
   currentHole: number
+  /** Bodování a sázka; kolo si je nese, ať archiv sedí i po změně předvoleb. */
+  settings: RoundSettings
 }
 
 export const DEFAULT_PAR = 4
@@ -42,13 +70,22 @@ export const DEFAULT_PAR = 4
 /** Nejvyšší zapsatelný počet ran na jamce - pojistka proti překliku. */
 export const MAX_STROKES = 20
 
-export function createRound(
-  gameId: string,
-  playerNames: string[],
-  holeCount: number,
+export interface CreateRoundOptions {
+  gameId: string
+  playerNames: string[]
+  holeCount: number
   /** Rozdělení do týmů po indexech hráčů, např. [[0, 1], [2, 3]]. */
-  teamIndices?: number[][],
-): Round {
+  teamIndices?: number[][]
+  settings?: RoundSettings
+}
+
+export function createRound({
+  gameId,
+  playerNames,
+  holeCount,
+  teamIndices,
+  settings = DEFAULT_SETTINGS,
+}: CreateRoundOptions): Round {
   const players: Player[] = playerNames.map((name, i) => ({
     id: `p${i + 1}`,
     name: name.trim() || `Hráč ${i + 1}`,
@@ -76,7 +113,16 @@ export function createRound(
     pars: Array<number>(holeCount).fill(DEFAULT_PAR),
     scores,
     currentHole: 0,
+    settings: { ...settings },
   }
+}
+
+/**
+ * Kolikrát se jamka počítá. Devátá a osmnáctá mohou být za dvojnásobek -
+ * u devítijamkového kola tak dvojnásobí poslední jamku.
+ */
+export function holeMultiplier(round: Round, hole: number): number {
+  return round.settings.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
 }
 
 /** Tým se pojmenovává podle hráčů, ať se drží v souladu se zadanými jmény. */

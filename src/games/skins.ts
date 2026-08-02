@@ -1,5 +1,11 @@
 import type { PlayerId, Round } from '../types'
-import { isHoleComplete, playerName, scoreAt, strokeTotal } from '../types'
+import {
+  holeMultiplier,
+  isHoleComplete,
+  playerName,
+  scoreAt,
+  strokeTotal,
+} from '../types'
 import type {
   GameDefinition,
   HoleSummary,
@@ -46,6 +52,10 @@ export function skinResults(round: Round): SkinResult[] {
       continue
     }
 
+    // Devátá a osmnáctá jamka mohou být za dvojnásobek - do hry pak jde
+    // rovnou dvojnásobný skin, přenesený i vyhraný.
+    const stake = holeMultiplier(round, hole)
+
     const scores = round.players.map((p) => ({
       id: p.id,
       score: scoreAt(round, p.id, hole) ?? Number.POSITIVE_INFINITY,
@@ -54,12 +64,12 @@ export function skinResults(round: Round): SkinResult[] {
     const leaders = scores.filter((s) => s.score === lowest)
 
     if (leaders.length === 1 && leaders[0]) {
-      const skins = carry + 1
+      const skins = carry + stake
       carry = 0
       results.push({ hole, winnerId: leaders[0].id, skins, carry })
     } else {
       // Dělená jamka: skin se přenáší do další.
-      carry += 1
+      carry += stake
       results.push({ hole, winnerId: null, skins: 0, carry })
     }
   }
@@ -83,6 +93,7 @@ export const skins: GameDefinition = {
     'nepřiděluje a přičte se k další jamce. Vyhrává hráč s nejvíc skiny.',
   playerCounts: [2, 3, 4],
   usesTeams: () => false,
+  supportsDoubleHoles: true,
 
   computeStandings(round: Round): StandingsSection[] {
     const results = skinResults(round)
@@ -145,7 +156,7 @@ export const skins: GameDefinition = {
       {
         id: '_game',
         entries: [
-          { label: 'V sázce', value: `${carry + 1}` },
+          { label: 'V sázce', value: `${carry + holeMultiplier(round, hole)}` },
           { label: 'Bere', value },
         ],
       },

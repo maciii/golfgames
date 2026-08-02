@@ -7,6 +7,23 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.4.0] – 2026-08-02
+
+### Přidáno
+
+- **Sázka u každého kola** – měna (Kč / €) a hodnota jednoho bodu. Výchozí je
+  10 Kč nebo 1 €, přepsat jde na libovolné číslo včetně desetinného.
+  Předvolby se pamatují do dalšího kola.
+- **Volba „9. a 18. jamka za dvojnásobek“** – násobí celý zisk z jamky včetně
+  bonusů za birdie a eagle, u Skins hodnotu skinu v sázce. U devítijamkového
+  kola se týká poslední jamky. Match play ji nenabízí, protože by rozbila
+  stav zápasu.
+- **Peněžní vyrovnání ve výsledcích** – prohrávající strana platí vítězné
+  rozdíl bodů přepočtený na peníze. U tří a čtyř hráčů ve Skins se každý bod
+  navíc inkasuje od každého soupeře zvlášť, takže součet částek je nula.
+- Nový modul [`src/money.ts`](src/money.ts) s výpočtem vyrovnání a
+  formátováním částek, pokrytý testy.
+
 ## [0.3.1] – 2026-08-01
 
 ### Změněno

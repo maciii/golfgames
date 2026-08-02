@@ -1,5 +1,5 @@
 import type { Round, Team } from '../types'
-import { diffToPar, scoreAt, teamName, teamPlayers } from '../types'
+import { diffToPar, holeMultiplier, scoreAt, teamName, teamPlayers } from '../types'
 import type {
   GameDefinition,
   HoleSummary,
@@ -73,10 +73,14 @@ export function holePoints(round: Round, hole: number): TeamHolePoints[] {
     teamAggregate(round, teamB, hole),
   )
 
+  // Devátá a osmnáctá jamka mohou být za dvojnásobek - násobí se celý zisk
+  // z jamky včetně bonusů, ne jen souboj o lepší míč.
+  const multiplier = holeMultiplier(round, hole)
+
   return [teamA, teamB].map((team, index) => {
-    const best = bestWinner === index ? POINTS.best : 0
-    const aggregate = aggWinner === index ? POINTS.aggregate : 0
-    const bonus = bonusPoints(round, team, hole)
+    const best = (bestWinner === index ? POINTS.best : 0) * multiplier
+    const aggregate = (aggWinner === index ? POINTS.aggregate : 0) * multiplier
+    const bonus = bonusPoints(round, team, hole) * multiplier
     return { best, aggregate, bonus, total: best + aggregate + bonus }
   })
 }
@@ -124,6 +128,7 @@ export const bestAggregate: GameDefinition = {
     's nejvyšším počtem bodů.',
   playerCounts: [4],
   usesTeams: () => true,
+  supportsDoubleHoles: true,
 
   computeStandings(round: Round): StandingsSection[] {
     const totals = totalPoints(round)

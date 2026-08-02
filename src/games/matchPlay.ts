@@ -123,6 +123,7 @@ export const matchPlay: GameDefinition = {
     'zbývajících jamek.',
   playerCounts: [2, 4],
   usesTeams: (playerCount) => playerCount === 4,
+  supportsDoubleHoles: false,
 
   computeStandings(round: Round): StandingsSection[] {
     const sides = matchSides(round)

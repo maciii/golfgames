@@ -1,4 +1,5 @@
-import type { Round } from './types'
+import type { Round, RoundSettings } from './types'
+import { DEFAULT_SETTINGS } from './types'
 
 /**
  * Perzistence v localStorage.
@@ -13,6 +14,7 @@ import type { Round } from './types'
 const CURRENT_KEY = 'golfgames.currentRound.v1'
 const ARCHIVE_KEY = 'golfgames.archive.v1'
 const ROSTER_KEY = 'golfgames.roster.v1'
+const SETTINGS_KEY = 'golfgames.settings.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -57,7 +59,11 @@ function isValidRound(round: unknown): round is Round {
 
 /** Doplní pole, která ve starších uložených kolech chybí. */
 function normalize(round: Round): Round {
-  return { ...round, teams: Array.isArray(round.teams) ? round.teams : [] }
+  return {
+    ...round,
+    teams: Array.isArray(round.teams) ? round.teams : [],
+    settings: { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) },
+  }
 }
 
 // --- rozehrané kolo -------------------------------------------------------
@@ -94,6 +100,20 @@ export function deleteArchivedRound(roundId: string): void {
     ARCHIVE_KEY,
     loadArchive().filter((r) => r.id !== roundId),
   )
+}
+
+// --- předvolby bodování ---------------------------------------------------
+
+/**
+ * Naposledy použité nastavení sázky. Slouží jen jako předvyplnění dalšího
+ * kola - samotné kolo si nese vlastní kopii, aby archiv seděl i po změně.
+ */
+export function loadSettings(): RoundSettings {
+  return { ...DEFAULT_SETTINGS, ...(read<RoundSettings>(SETTINGS_KEY) ?? {}) }
+}
+
+export function saveSettings(settings: RoundSettings): void {
+  write(SETTINGS_KEY, settings)
 }
 
 // --- seznam hráčů ---------------------------------------------------------

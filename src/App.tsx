@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { PlayerId, Round } from './types'
+import type { CreateRoundOptions, PlayerId, Round } from './types'
 import { createRound } from './types'
 import {
   addToRoster,
@@ -33,20 +33,12 @@ export default function App() {
     saveCurrentRound(round)
   }, [round])
 
-  const startRound = useCallback(
-    (
-      gameId: string,
-      playerNames: string[],
-      holeCount: number,
-      teamIndices?: number[][],
-    ) => {
-      // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
-      addToRoster(playerNames)
-      setRound(createRound(gameId, playerNames, holeCount, teamIndices))
-      setView('play')
-    },
-    [],
-  )
+  const startRound = useCallback((options: CreateRoundOptions) => {
+    // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
+    addToRoster(options.playerNames)
+    setRound(createRound(options))
+    setView('play')
+  }, [])
 
   const setScore = useCallback(
     (playerId: PlayerId, hole: number, value: number | null) => {

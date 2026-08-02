@@ -28,6 +28,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
 - **Scorecard** se značkami podle golfové konvence – birdie v kroužku, bogey
   ve čtverečku – a u týmových her se sloupcem bodů dvojice za každou jamku
+- **Sázka a peněžní vyrovnání** – hodnota bodu v Kč nebo €, volitelně
+  dvojnásobná 9. a 18. jamka; na konci je vidět, kdo komu kolik platí
 - **Archiv odehraných kol** – dohraná kola se ukládají a jde se k nim vracet
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím
