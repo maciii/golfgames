@@ -7,6 +7,49 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.8.0] – 2026-08-02
+
+### Přidáno
+
+- **Extra body u jamky** – double, longest, nearest, bunker, double bunker,
+  water, barkie a arnie. Vybírají se tlačítkem u jména hráče a nabízejí se
+  jen ty, které mají v nastavení hry nenulovou hodnotu. Longest se nabízí
+  pouze na pětiparových jamkách, Nearest na tříparových.
+- **Extra bod získává celá dvojice**, i když ho uhrál jen jeden z partnerů.
+- **Obrazovka „Nastavení bodování hry"** – hodnoty extra bodů, násobiče za
+  výsledek a další volby, ukládané **zvlášť pro každou hru**.
+- **Konfigurovatelné násobiče za výsledek** – hodnota extra bodu platí za par
+  a lepší výsledek ji násobí; výchozí je birdie ×2, eagle ×3, albatros ×10
+  a condor ×1000. Bogey a horší extra bod nepřizná.
+- **Potvrzování Longest a Nearest** (ve výchozím stavu zapnuté) – kdo bonus
+  zapsal, musí jamku dohrát na par nebo líp, jinak bod propadá soupeřově
+  dvojici. Značka `L` / `N` u jména je zeleně, když bod zůstává vlastní
+  dvojici, červeně, když propadá soupeřům, a tlumeně, dokud hráč nezapsal.
+- **Double Best** – volitelný bod navíc (výchozí 1) pro dvojici, jejíž oba
+  míče byly lepší než oba míče soupeře.
+- **Značka `×2`** u hráče, který na jamce zapsal double.
+- **Kolo si nese vlastní kopii nastavení bodování.** Změna předvoleb tak
+  nepřepočítá už odehraná kola a ve výsledcích archivního kola je vidět
+  sekce „Bodování kola" s konfigurací, se kterou se hrálo.
+- **Vlastní doména `golf.kubecka.cz`** (`public/CNAME`); aplikace se servíruje
+  z kořene, base path jde přepnout přes `BASE_PATH`.
+- Rozsáhlá dokumentace: [`docs/architecture.md`](docs/architecture.md),
+  [`docs/decisions.md`](docs/decisions.md), [`docs/deployment.md`](docs/deployment.md),
+  [`AGENTS.md`](AGENTS.md) a pokyny pro GitHub Copilot.
+
+### Změněno
+
+- **Volba „9. a 18. jamka za dvojnásobek" se přesunula** ze zadání kola do
+  nastavení bodování hry a je nově **ve výchozím stavu zapnutá**.
+- **Double se skládá s dvojnásobnou jamkou i sám se sebou** – každý zápis
+  násobí zvlášť, takže dvojnásobná jamka s doublem je za čtyřnásobek.
+  Volba „Nenásobit extra body" nechá extra body v základní hodnotě.
+- **Součet dvojice počítá zbylého partnera.** Když jeden z dvojice jamku vzdá,
+  sčítají se rány těch, kdo dohráli; přednost má ale dvojice s víc dohranými
+  míči, aby si škrtnutím špatného míče nikdo nepolepšil.
+- Popisek „Lepší míč" se ve shrnutí jamky zkrátil na „Best".
+- Nearest má značku `N` (dřív `P`).
+
 ## [0.7.1] – 2026-08-02
 
 ### Změněno

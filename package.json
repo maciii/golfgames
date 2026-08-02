@@ -1,6 +1,6 @@
 {
   "name": "golfgames",
-  "version": "0.7.5",
+  "version": "0.8.0",
   "description": "Zápis golfového skóre po jamkách pro 2-4 hráče a vyhodnocení různých typů golfových her",
   "private": true,
   "type": "module",
@@ -19,9 +19,10 @@
     "bump:minor": "node scripts/bump-version.mjs minor",
     "bump:major": "node scripts/bump-version.mjs major"
   },
+  "homepage": "https://golf.kubecka.cz",
   "repository": {
     "type": "git",
-    "url": "http://local_proxy@127.0.0.1:41729/git/maciii/golfgames"
+    "url": "git+https://github.com/maciii/golfgames.git"
   },
   "license": "MIT",
   "dependencies": {

@@ -1,13 +1,13 @@
 # Golf Games
 
 Zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých typů
-golfových her.
+golfových her – včetně extra bodů a peněžního vyrovnání sázky.
 
 Aplikace je **PWA** – běží v prohlížeči, na iPhonu se přes Safari přidá na
 plochu a chová se jako běžná aplikace. Funguje offline, žádný účet, žádný
 server: veškerá data zůstávají v telefonu.
 
-**Živá verze:** https://maciii.github.io/golfgames/
+**Živá verze:** https://golf.kubecka.cz
 
 ## Hry
 
@@ -25,6 +25,11 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Zápis po jamkách** na jedno klepnutí – prostřední tlačítko vloží par,
   `+` bogey, `−` birdie, další klepnutí posouvají po ránách; par 3/4/5 se
   nastavuje u každé jamky přímo při hře
+- **Extra body** – double, longest, nearest, bunker, double bunker, water,
+  barkie, arnie. Hodnoty se nastavují zvlášť pro každou hru, lepší výsledek
+  je násobí (birdie ×2, eagle ×3…) a bonus vždy získává celá dvojice
+- **Longest a Nearest s potvrzením** – kdo je zapsal, musí jamku dohrát na par
+  nebo líp, jinak bod propadá soupeřům; barva značky u jména to hlásí průběžně
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
 - **Barevné značky výsledků** v šesti stupních od eagle po trojbogey, ve
   scorekartě i při zápisu; scorekarta má u týmových her sloupec bodů dvojice
@@ -36,7 +41,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   že ji hráč nedohrál, a jeho strana o ni přichází
 - **Kolo přerušené počasím** jde uložit i nedohrané; aplikace předtím vypíše,
   které jamky chybí
-- **Archiv odehraných kol** – dohraná kola se ukládají a jde se k nim vracet
+- **Archiv odehraných kol** – dohraná kola se ukládají i s nastavením, se
+  kterým se hrála, takže historické výsledky sedí i po změně předvoleb
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
@@ -63,30 +69,32 @@ online během pár minut bez App Store review.
 npm install
 npm run dev      # vývojový server
 npm run test     # testy pravidel her
+npm run check    # typy + testy + formát (co běží v CI)
 npm run build    # zvedne verzi, zkontroluje typy a postaví dist/
 ```
 
-Podrobnosti, strukturu projektu a konvence popisuje
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Historie změn je
-v [`CHANGELOG.md`](CHANGELOG.md).
+Vyžaduje Node 22 (viz `.nvmrc`).
+
+## Dokumentace
+
+| Dokument                                       | Obsah                                                   |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md) | jak je aplikace poskládaná, datový model, rozhraní hry  |
+| [`docs/games.md`](docs/games.md)               | pravidla her, extra body, peněžní vyrovnání             |
+| [`docs/decisions.md`](docs/decisions.md)       | proč je to takhle – rozhodnutí a jejich důvody          |
+| [`docs/deployment.md`](docs/deployment.md)     | nasazení, vlastní doména, časté problémy                |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura projektu, konvence                   |
+| [`AGENTS.md`](AGENTS.md)                       | pokyny pro AI asistenty a rychlý úvod pro nové vývojáře |
+| [`CHANGELOG.md`](CHANGELOG.md)                 | historie změn                                           |
 
 ## Nasazení
 
 Workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
 při každém pushi zkontroluje typy, pustí testy a postaví aplikaci; z větve
-`main` ji publikuje na GitHub Pages.
+`main` ji publikuje na GitHub Pages na doménu `golf.kubecka.cz`.
 
-> **Nastavení Pages:** v repozitáři musí být _Settings → Pages → Source:_
-> **GitHub Actions**. Při volbě _Deploy from a branch_ servíruje GitHub
-> vývojovou šablonu z kořene repozitáře a aplikace se zobrazí jako prázdná
-> stránka.
-
-Pro hosting z kořene domény (Cloudflare Pages, Netlify) se buildí
-s `BASE_PATH=/`:
-
-```bash
-BASE_PATH=/ npm run build
-```
+Podrobnosti včetně nastavení DNS a řešení prázdné stránky jsou
+v [`docs/deployment.md`](docs/deployment.md).
 
 ## Licence
 

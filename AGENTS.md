@@ -1,0 +1,109 @@
+# Pokyny pro AI asistenty
+
+Tenhle soubor je vstupní bod pro AI asistenty (Claude Code, GitHub Copilot,
+Cursor a spol.) a zároveň rychlé shrnutí pro člověka, který projekt vidí
+poprvé. Čti ho celý, než začneš měnit kód.
+
+## Co to je
+
+PWA pro zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých
+golfových her (Best Aggregate, Skins, Match play) včetně peněžního vyrovnání
+sázky. React 19 + TypeScript 7 + Vite 8, bez backendu, hostovaná zdarma na
+GitHub Pages.
+
+## Kde je co napsané
+
+Než začneš řešit netriviální změnu, přečti si příslušný dokument – většina
+otázek už má odpověď:
+
+| Dokument                                       | Co v něm najdeš                                           |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md) | vrstvy, datový model, invarianty, rozhraní hry, kde co je |
+| [`docs/games.md`](docs/games.md)               | pravidla her a bodování do detailu, extra body, peníze    |
+| [`docs/decisions.md`](docs/decisions.md)       | **proč** je to takhle a co by změnu ospravedlnilo         |
+| [`docs/deployment.md`](docs/deployment.md)     | GitHub Pages, vlastní doména, časté problémy              |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura, konvence, verzování                   |
+| [`CHANGELOG.md`](CHANGELOG.md)                 | historie věcných změn                                     |
+
+## Pracovní postup
+
+```bash
+npm install
+npm run dev      # vývojový server
+npm run check    # typy + testy + formát – tohle musí projít před commitem
+```
+
+1. Změna kódu.
+2. **Testy k pravidlům her a výpočtům jsou povinné.** UI se netestuje.
+3. `npm run check` musí projít (přesně tohle běží v CI).
+4. Věcnou změnu zapiš do `CHANGELOG.md` a zvedni verzi
+   (`npm run bump:minor` u nové funkce, `bump:major` u nekompatibilní změny
+   uložených dat; patch se zvedá sám při buildu).
+5. Když se mění pravidlo hry nebo chování, aktualizuj i `docs/games.md`;
+   když se mění důvod nějakého rozhodnutí, `docs/decisions.md`.
+
+## Nepřekročitelná pravidla
+
+Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
+
+1. **Nic placeného.** Žádné SaaS, žádné placené API, žádné závislosti
+   s předplatným. Celý projekt musí jít provozovat zdarma.
+2. **Pravidla her žijí jen v `src/games/`.** Obrazovky o konkrétní hře nic
+   nevědí – vykreslí, co dostanou z `computeStandings()`, `holeSummary()`
+   a `scorecardColumns()`.
+3. **`Round` je jediný zdroj pravdy** a musí zůstat serializovatelný do JSON.
+   Změna jeho tvaru znamená migraci v `storage.normalize()` a majoritní verzi.
+4. **Kolo si nese vlastní kopii nastavení.** Nikdy do `round.settings` nedávej
+   referenci na sdílený objekt – rozbilo by to přepočet archivních kol.
+5. **Prázdné skóre má dva významy** (nehraná vs. vzdaná jamka), viz níž.
+6. **Extra bod získává celá dvojice**, ne jen hráč, který ho uhrál. Platí to
+   i pro hry, které teprve vzniknou.
+7. **Uživatelské texty česky, kód a identifikátory anglicky.**
+8. **Komentáře vysvětlují proč, ne co.** Co dělá řádek, je vidět z kódu.
+9. **Nepřidávej závislosti bez důvodu.** Runtime závislosti jsou dneska jen
+   `react` a `react-dom` a je to záměr.
+
+## Nejčastější zdroje chyb
+
+- **Vzdaná vs. nehraná jamka.** `scores[player][hole] === null` znamená buď
+  „ještě jsme tam nedošli", nebo „hráč jamku vzdal". Rozhoduje
+  `isHoleStarted()`: když na jamce zapsal aspoň jeden hráč, jamka běží a komu
+  zápis chybí, ten ji vzdal. Každá nová hra to musí ošetřit. Ve výpočtech se
+  vzdaná hodnota reprezentuje jako `CONCEDED` (`Infinity`).
+- **`noUncheckedIndexedAccess` je zapnuté.** Indexování pole vrací
+  `T | undefined`, proto je v kódu tolik `?? fallback`. Neobcházej to
+  přetypováním; TypeScript 7 navíc odmítne type predicate, který je širší než
+  skutečný typ prvku (typický problém u `.filter()` – použij `flatMap`).
+- **Nové pole v `GameOptions`** musí přibýt do `DEFAULT_GAME_OPTIONS`
+  **a** do merge v `storage.normalize()` / `loadGameOptions()`, jinak stará
+  uložená kola spadnou na `undefined`.
+- **Pořadí hráčů v `team.playerIds` má význam** – peněžní vyrovnání dvojic
+  páruje protějšky podle indexu (první platí prvnímu).
+- **První sekce z `computeStandings()` je podkladem pro peníze.** Její
+  `row.value` se předává do `settleRound()` jako počet jednotek.
+- **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
+
+## Struktura ve zkratce
+
+```
+src/
+  types.ts     model kola + výpočty společné všem hrám (bonusy, značky, násobiče)
+  storage.ts   localStorage: rozehrané kolo, archiv, hráči, předvolby
+  money.ts     přepočet bodů na peníze
+  games/       pravidla her (GameDefinition), registr v index.ts
+  screens/     UI, česky psané texty
+docs/          architektura, pravidla, rozhodnutí, nasazení
+scripts/       zvedání verze, generátor PWA ikon
+```
+
+## Kontext, který z kódu není vidět
+
+- Aplikace se ovládá **jednou rukou na hřišti**, často v rukavici a na slunci.
+  Velká tlačítka, žádná klávesnice, plochá navigace bez routeru – všechno je
+  podřízené tomuhle.
+- **Offline provoz je požadavek, ne bonus.** Na hřišti nemusí být signál.
+- Data zůstávají v telefonu, žádný účet a žádná synchronizace. Kdyby jednou
+  bylo potřeba přenést kola jinam, správná odpověď je export/import JSON,
+  ne server.
+- Hraje se o peníze, takže **chyba v bodování je nejdražší chyba v projektu**.
+  Proto testy pokrývají matematiku a ne komponenty.

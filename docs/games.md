@@ -11,6 +11,17 @@ Společné pro všechny hry:
   dává smysl i uprostřed kola.
 - Kolo lze hrát na 9 nebo 18 jamek.
 
+## Obsah
+
+- [Vzdaná jamka vs. nehraná jamka](#vzdaná-jamka-vs-nehraná-jamka)
+- [Předčasně ukončené kolo](#předčasně-ukončené-kolo)
+- [Extra body](#extra-body)
+- [Nastavení bodování hry](#nastavení-bodování-hry)
+- [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
+- [Značky výsledku na jamce](#značky-výsledku-na-jamce)
+- [Best Aggregate](#best-aggregate) · [Skins](#skins) · [Match play](#match-play)
+- [Přidání další hry](#přidání-další-hry)
+
 ## Vzdaná jamka vs. nehraná jamka
 
 Chybějící zápis znamená dvě různé věci a aplikace je rozlišuje podle toho,
@@ -23,10 +34,11 @@ jestli na jamce zapsal **aspoň jeden** hráč:
 
 Vzdaná jamka se tedy počítá, a to v neprospěch toho, kdo ji nedohrál:
 
-- **Best Aggregate** – dvojice přichází o **součet** (nejde dopočítat, takže
-  ho bere soupeř). **Lepší míč** jí zůstává, dokud ho drží aspoň jeden
-  z partnerů; když vzdali oba, ztrácí i ten. Vzdaly-li součet obě dvojice,
-  nezíská ho nikdo.
+- **Best Aggregate** – do součtu dvojice se počítají rány těch, kdo dohráli,
+  ale přednost má dvojice s **víc dohranými míči**; při stejném počtu rozhoduje
+  nižší součet. Škrtnutím špatného míče si tak dvojice nepomůže. **Lepší míč**
+  jí zůstává, dokud ho drží aspoň jeden z partnerů; když vzdali oba, ztrácí
+  i ten.
 - **Skins** – kdo jamku vzdal, se o skin ucházet nemůže; skin bere nejnižší
   z těch, kdo dohráli.
 - **Match play** – kdo jamku vzdal, ji prohrává.
@@ -45,27 +57,119 @@ ukončit omylem.
 
 V archivu je u takového kola vidět rozsah, například „5 z 18 jamek“.
 
+## Extra body
+
+Vedle bodů za samotné skóre si hráč u jamky může zaškrtnout **extra body** –
+bonusy za způsob, jakým jamku zahrál. Vybírají se tlačítkem s hvězdičkou
+u jména hráče.
+
+| Bonus               | Značka | Výchozí | Kdy se nabízí | Za co                                           |
+| ------------------- | ------ | ------- | ------------- | ----------------------------------------------- |
+| **Double**          | `×2`   | zapnuto | vždy          | zdvojnásobí výsledek celé jamky pro obě dvojice |
+| **Longest**         | `L`    | 1 b.    | jen par 5     | nejdelší odpal; na jamce jen pro jednoho hráče  |
+| **Nearest**         | `N`    | 1 b.    | jen par 3     | nejbližší rána k jamce; jen pro jednoho hráče   |
+| **Bunker (sandie)** | –      | 1 b.    | vždy          | rána z bunkeru a přesto dobrý výsledek          |
+| **Double bunker**   | –      | 3 b.    | vždy          | dva bunkery na jedné jamce                      |
+| **Water**           | –      | 1 b.    | vždy          | míč ve vodě a přesto dobrý výsledek             |
+| **Barkie**          | –      | 1 b.    | vždy          | trefa do stromu a přesto dobrý výsledek         |
+| **Arnie**           | –      | 1 b.    | vždy          | dobrý výsledek, aniž by míč byl na fairwayi     |
+
+Hodnota `0` znamená vypnuto – takový bonus se při zápisu vůbec nenabídne.
+
+### Bonus získává celá dvojice
+
+Extra bod uhraný jedním hráčem se počítá **celé jeho dvojici**, ne jen jemu.
+Platí to i pro hry, které se přidají později.
+
+### Násobení podle výsledku
+
+Nastavená hodnota platí za **par**. Lepší výsledek ji násobí, horší než par
+extra bod vůbec nepřizná:
+
+| Výsledek na jamce | Násobič (výchozí) |
+| ----------------- | ----------------- |
+| Par               | ×1 (napevno)      |
+| Birdie            | ×2                |
+| Eagle             | ×3                |
+| Albatros          | ×10               |
+| Condor a lepší    | ×1000             |
+| Bogey a horší     | ×0 – nepočítá se  |
+
+Násobiče kromě paru jsou konfigurovatelné v nastavení bodování hry.
+
+Příklad: bunker za 1 bod zahraný na birdie dá dvojici 2 body; stejný bunker
+zahraný na bogey nedá nic.
+
+### Longest a Nearest
+
+Tyhle dva bonusy drží na jamce vždy jen **jeden hráč** – když ho zaškrtne
+někdo další, prvnímu se odebere.
+
+Ve výchozím stavu se **potvrzují**: hráč musí jamku dohrát na par nebo líp,
+jinak bod propadá **soupeřově dvojici**. Potvrzování jde pro každý z nich
+zvlášť vypnout, pak bod vždy zůstává té dvojici, která ho zapsala.
+
+Značka u jména napoví, jak to dopadne:
+
+| Barva značky | Význam                                |
+| ------------ | ------------------------------------- |
+| zelená       | bod zůstává vlastní dvojici           |
+| červená      | bod propadá soupeřům                  |
+| tlumená      | hráč jamku ještě nezapsal, není jasno |
+
+Na rozdíl od ostatních bonusů se jejich hodnota **nenásobí** podle výsledku –
+o přiznání rozhoduje právě potvrzovací pravidlo.
+
+### Double
+
+`Double` jako jediný nepřidává body, ale **násobí celou jamku** pro obě strany.
+Každý zápis násobí zvlášť, takže dva doubly na jedné jamce znamenají
+čtyřnásobek. S dvojnásobnou 9./18. jamkou se násobí dohromady.
+
+Volba **Nenásobit extra body** nechá extra body v základní hodnotě, i když se
+zbytek jamky násobí.
+
+## Nastavení bodování hry
+
+Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
+**zvlášť pro každou hru** – Best Aggregate a Skins si je nepřepisují navzájem.
+
+| Volba                         | Výchozí     | Popis                                            |
+| ----------------------------- | ----------- | ------------------------------------------------ |
+| Hodnoty extra bodů            | viz výš     | 0 = vypnuto                                      |
+| Násobiče za výsledek          | 2/3/10/1000 | birdie, eagle, albatros, condor                  |
+| Double                        | zapnuto     | extra bod, který násobí jamku                    |
+| 9. a 18. jamka za dvojnásobek | zapnuto     | jen u her, které to podporují                    |
+| Nenásobit extra body          | vypnuto     | dvojnásobná jamka ani double nenásobí extra body |
+| Potvrzovat Longest            | zapnuto     | při horším než par bod propadá soupeřům          |
+| Potvrzovat Nearest            | zapnuto     | při horším než par bod propadá soupeřům          |
+| Double Best                   | 1 b.        | jen Best Aggregate; bod za oba lepší míče        |
+
+**Kolo si nastavení nese s sebou.** Při založení se dělá jeho kopie, takže
+pozdější změna předvoleb nepřepočítá už odehraná kola v archivu. Ve výsledcích
+je proto u každého kola sekce „Bodování kola“ s tím, jak se počítalo.
+
 ## Sázka a peněžní vyrovnání
 
-Před kolem se nastavuje měna, hodnota jednoho bodu a případné zdvojnásobení
-závěrečných jamek. Předvolby se pamatují do dalšího kola, ale **každé kolo
-si nese vlastní kopii** – změna sázky proto nepřepíše archiv.
+Před kolem se nastavuje měna a hodnota jednoho bodu. Předvolby se pamatují do
+dalšího kola, ale **každé kolo si nese vlastní kopii**.
 
-| Volba                         | Výchozí     | Poznámka                                  |
-| ----------------------------- | ----------- | ----------------------------------------- |
-| Měna                          | Kč          | přepínatelná na €                         |
-| Hodnota bodu                  | 10 Kč / 1 € | libovolné číslo, i desetinné (0,5 €)      |
-| 9. a 18. jamka za dvojnásobek | vypnuto     | u devítijamkového kola jen poslední jamka |
+| Volba        | Výchozí     | Poznámka                             |
+| ------------ | ----------- | ------------------------------------ |
+| Měna         | Kč          | přepínatelná na €                    |
+| Hodnota bodu | 10 Kč / 1 € | libovolné číslo, i desetinné (0,5 €) |
 
-Dvojnásobná jamka násobí **celý zisk z jamky**, tedy u Best Aggregate včetně
-bonusů za birdie a eagle, u Skins hodnotu skinu v sázce. Match play volbu
-nenabízí – počítá se na jamky a dvojnásobná jamka by rozbila stav zápasu
-i notaci `3&2`.
+Volba **9. a 18. jamka za dvojnásobek** je v nastavení bodování hry (ve
+výchozím stavu zapnutá); u devítijamkového kola se týká poslední jamky.
+Násobí **celý zisk z jamky**, tedy u Best Aggregate včetně bonusů za birdie
+a eagle, u Skins hodnotu skinu v sázce. Match play volbu nenabízí – počítá se
+na jamky a dvojnásobná jamka by rozbila stav zápasu i notaci `3&2`.
 
 ### Jak se počítají peníze
 
-Výpočet je v [`src/money.ts`](../src/money.ts) a pokrytý testy. Liší se podle
-toho, jestli se hraje ve dvojicích.
+Výpočet je v [`src/money.ts`](../src/money.ts) a pokrytý testy. Vstupem je
+první výsledková tabulka hry, takže funguje stejně pro body, skiny i vyhrané
+jamky. Liší se podle toho, jestli se hraje ve dvojicích.
 
 #### Dvojice (Best Aggregate, four-ball match play)
 
@@ -104,10 +208,10 @@ scorekartě i při zápisu skóre, takže je výsledek poznat hned.
 | ----------------- | ------- | ---------------------------- |
 | Eagle a lepší     | žlutá   | kroužek s dvojitým obrysem   |
 | Birdie            | červená | kroužek                      |
-| Par               | modrá   | bez štítku, jen barva čísla  |
+| Par               | modrá   | čtvereček                    |
 | Bogey             | zelená  | čtvereček                    |
 | Dvojbogey         | šedá    | čtvereček s dvojitým obrysem |
-| Trojbogey a horší | černá   | čtvereček s dvojitým obrysem |
+| Trojbogey a horší | černá   | čtvereček s trojitým obrysem |
 
 Tvar nese informaci i bez barvy (podpar do kroužku, nadpar do čtverečku),
 takže scorekarta zůstane čitelná i pro barvoslepé.
@@ -134,17 +238,33 @@ Aggregate takhle ukazuje body dvojice na každé jamce, Skins rozdané skiny.
 
 Bodovaná hra dvou dvojic. Na každé jamce se dvojici připisují body:
 
-| Za co                                        | Body |
-| -------------------------------------------- | ---- |
-| BEST – nižší lepší míč než soupeřova dvojice | 1    |
-| Součet – nižší součet ran obou partnerů      | 1    |
-| Birdie kteréhokoli z partnerů                | 1    |
-| Eagle kteréhokoli z partnerů                 | 3    |
+| Za co                                              | Body          |
+| -------------------------------------------------- | ------------- |
+| BEST – nižší lepší míč než soupeřova dvojice       | 1             |
+| Součet – nižší součet ran obou partnerů            | 1             |
+| Birdie kteréhokoli z partnerů                      | 1             |
+| Eagle kteréhokoli z partnerů                       | 3             |
+| **Double Best** – oba míče lepší než oba soupeřovy | 1 (volitelné) |
+| **Extra body** – bunker, water, longest…           | dle nastavení |
 
 Vyhrává dvojice s nejvyšším součtem bodů.
 
 **Lepší míč** dvojice je nejnižší zapsaná rána některého z partnerů.
 **Součet** je součet ran obou partnerů.
+
+### Double Best
+
+Volitelný bod navíc (výchozí 1, `0` = vypnuto) pro dvojici, jejíž **oba míče
+byly lepší než oba míče soupeře** – tedy horší z jejích výsledků je lepší než
+lepší ze soupeřových. Vzdaný míč se počítá jako nejhorší možný, takže dvojice
+s nedohraným míčem Double Best nezíská.
+
+### Násobení jamky
+
+Body za BEST, součet, Double Best a bonusy za birdie/eagle násobí
+[dvojnásobná jamka i double](#double). Extra body se násobí také, pokud není
+zapnutá volba „Nenásobit extra body“; Longest a Nearest se navíc nikdy nenásobí
+podle výsledku.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 
@@ -156,11 +276,10 @@ v jednom souboru:
 - **Bonus za partnera zvlášť** – dvě birdie v jedné dvojici na jedné jamce
   znamenají 2 body.
 - **Eagle a lepší** – albatros se boduje stejně jako eagle, tedy 3 body.
+  (Týká se bodu za skóre; u extra bodů má albatros vlastní násobič.)
 - **Bonus nezávisí na soupeři** – birdie a eagle se dvojici započítají bez
   ohledu na to, jak dopadla druhá dvojice.
 - **Nedohraná jamka** – viz [Vzdaná jamka vs. nehraná jamka](#vzdaná-jamka-vs-nehraná-jamka).
-  Pro lepší míč stačí zápis jednoho partnera; součet dvojice bez zápisu
-  obou partnerů propadá soupeři.
 
 ---
 
@@ -180,6 +299,10 @@ Vyhrává hráč s nejvyšším počtem skinů.
 - **Nedohraná jamka** – jamka se vyhodnocuje, jakmile na ní někdo zapsal;
   kdo zápis nemá, tu jamku vzdal. Dokud nezapsal nikdo, bank se nemění.
 - **Konec kola** – skiny přenesené z poslední jamky propadají.
+- **Dvojnásobná jamka** – do hry jde rovnou dvojnásobný skin, přenesený
+  i vyhraný.
+- **Extra body** se ve Skins zatím nevyhodnocují (model je připravený,
+  vyhodnocuje je jen Best Aggregate).
 
 ---
 
@@ -213,6 +336,8 @@ zbývajících jamek.
   a prohrává; jamka, kam se nedošlo, stav nemění.
 - **Dohrávání po rozhodnutí** – aplikace zápas nezastavuje. Zbylé jamky jde
   dohrát a zapsat, stav zápasu se ale už nezmění.
+- **Dvojnásobné jamky** hra nenabízí (`supportsDoubleHoles: false`) – rozbily
+  by stav zápasu i notaci `3&2`.
 
 ---
 
@@ -226,10 +351,16 @@ zbývajících jamek.
 4. Popsat pravidla v tomto dokumentu.
 
 Zbytek aplikace – zápis skóre, ukládání, archiv i výsledková tabulka – je
-společný a nic dalšího se upravovat nemusí.
+společný a nic dalšího se upravovat nemusí. Podrobněji to rozebírá
+[`architecture.md`](architecture.md#rozhraní-hry).
 
 Rozhraní hry vrací:
 
-- `computeStandings(round)` – jednu nebo víc výsledkových tabulek
+- `computeStandings(round)` – jednu nebo víc výsledkových tabulek; **první
+  z nich je zároveň podkladem pro peněžní vyrovnání**
 - `holeSummary(round, hole)` – nepovinné shrnutí u právě zapisované jamky;
   klíč `_game` znamená informaci k celé jamce, jinak se páruje na id dvojice
+- `scorecardColumns(round)` – nepovinné sloupce navíc ve scorekartě
+
+Nezapomeňte, že **extra bod získává celá dvojice** – u nové týmové hry to musí
+platit taky.
