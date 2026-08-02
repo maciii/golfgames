@@ -261,6 +261,32 @@ export function scorecardPlayers(round: Round): Player[] {
   return [...ordered, ...missing]
 }
 
+/**
+ * Kategorie výsledku na jamce. Používá se pro barvu i tvar značky, aby
+ * scorekarta a zápis skóre vypadaly stejně.
+ */
+export type ScoreCategory = 'eagle' | 'birdie' | 'par' | 'bogey' | 'double' | 'triple'
+
+export function scoreCategory(score: number, par: number): ScoreCategory {
+  const diff = score - par
+  if (diff <= -2) return 'eagle'
+  if (diff === -1) return 'birdie'
+  if (diff === 0) return 'par'
+  if (diff === 1) return 'bogey'
+  if (diff === 2) return 'double'
+  return 'triple'
+}
+
+/** Popisky kategorií do legendy. */
+export const SCORE_CATEGORY_LABEL: Record<ScoreCategory, string> = {
+  eagle: 'Eagle a lepší',
+  birdie: 'Birdie',
+  par: 'Par',
+  bogey: 'Bogey',
+  double: 'Dvojbogey',
+  triple: 'Trojbogey a horší',
+}
+
 /** Formátuje rozdíl vůči paru: -2 -> "-2", 0 -> "E", 3 -> "+3". */
 export function formatToPar(toPar: number): string {
   if (toPar === 0) return 'E'

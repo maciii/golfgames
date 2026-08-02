@@ -95,22 +95,31 @@ Každý bod navíc inkasuje hráč od každého soupeře zvlášť. Pro hráče 
 Součet všech částek je vždy nula. Při dvou hráčích se výraz zjednoduší na
 rozdíl bodů × hodnota bodu.
 
-## Značky ve scorekartě
+## Značky výsledku na jamce
 
-Skóre se ve scorekartě značí golfovou konvencí – tvar nese informaci i bez
-barvy, takže je čitelná i pro barvoslepé a na tisku:
+Výsledek každé jamky nese barvu i tvar. Stejné značky se používají ve
+scorekartě i při zápisu skóre, takže je výsledek poznat hned.
 
-| Skóre             | Značka                       | Barva     |
-| ----------------- | ---------------------------- | --------- |
-| Eagle a lepší     | kroužek s dvojitým obrysem   | červená   |
-| Birdie            | kroužek                      | červená   |
-| Par               | bez značky                   | neutrální |
-| Bogey             | čtvereček                    | modrá     |
-| Dvojbogey a horší | čtvereček s dvojitým obrysem | modrá     |
+| Výsledek          | Barva   | Tvar                         |
+| ----------------- | ------- | ---------------------------- |
+| Eagle a lepší     | žlutá   | kroužek s dvojitým obrysem   |
+| Birdie            | červená | kroužek                      |
+| Par               | modrá   | bez štítku, jen barva čísla  |
+| Bogey             | zelená  | čtvereček                    |
+| Dvojbogey         | šedá    | čtvereček s dvojitým obrysem |
+| Trojbogey a horší | černá   | čtvereček s dvojitým obrysem |
 
-Barevné rozdělení (podpar červeně, nadpar modře) odpovídá turnajovým
-scorekartám. Par se záměrně nijak nezvýrazňuje – tvar má upozorňovat na to,
-co se od paru liší.
+Tvar nese informaci i bez barvy (podpar do kroužku, nadpar do čtverečku),
+takže scorekarta zůstane čitelná i pro barvoslepé.
+
+Dvě odchylky od předlohy, obojí kvůli tmavému motivu aplikace:
+
+- **Par nemá barevný štítek**, jen modré číslo – je to nejčastější výsledek
+  a plný štítek na každé druhé jamce by scorekartu zahltil.
+- **Černá má světlý obrys**, jinak by na tmavém pozadí splynula.
+
+Barvy jsou v `src/styles.css` jako proměnné `--score-*`, klasifikace
+v `scoreCategory()` v [`src/types.ts`](../src/types.ts).
 
 Hra může do scorekarty přidat vlastní sloupce (`scorecardColumns`) – Best
 Aggregate takhle ukazuje body dvojice na každé jamce, Skins rozdané skiny.

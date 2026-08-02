@@ -9,11 +9,22 @@
   --accent-dark: #16a34a;
   --under: #7dd3fc;
   --over: #fca5a5;
-  /* Značky ve scorekartě: podpar červeně, nadpar modře - jako na turnajových
-     scorekartách. Odstíny jsou zesvětlené, aby držely kontrast na tmavém
-     podkladu. */
-  --score-under: #e63946;
-  --score-over: #2f6fd0;
+
+  /* Barvy výsledků na jamce. Značka je barevný štítek, číslo v ní má tmavý
+     nebo bílý inkoust podle světlosti podkladu. */
+  --score-eagle: #f2c14e;
+  --score-eagle-ink: #14210f;
+  --score-birdie: #e8402a;
+  --score-birdie-ink: #fff;
+  --score-par: #3b9ce8;
+  --score-bogey: #5bb85b;
+  --score-bogey-ink: #14210f;
+  --score-double: #8a8a8a;
+  --score-double-ink: #fff;
+  /* Černá by na tmavém podkladu zanikla, proto dostane světlý obrys. */
+  --score-triple: #1c1c1c;
+  --score-triple-ink: #fff;
+  --score-triple-edge: #6a6a6a;
   --tap: 48px;
 }
 
@@ -423,29 +434,15 @@ button {
 }
 
 .score-value {
-  min-width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
   height: var(--tap);
-  font-size: 24px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
   /* Přidržení maže zápis, takže nesmí spustit výběr textu ani iOS nabídku. */
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-}
-
-.score-value.empty {
-  color: var(--text-dim);
-  font-weight: 500;
-}
-
-.score-value.under {
-  color: var(--under);
-}
-
-.score-value.over {
-  color: var(--over);
 }
 
 /* --- výsledky ----------------------------------------------------------- */
@@ -859,39 +856,68 @@ button {
   font-weight: 600;
 }
 
-.mark.birdie,
-.mark.eagle {
-  background: var(--score-under);
-  color: #fff;
+/* Podpar do kroužku, nadpar do čtverečku - golfová konvence. */
+.mark.eagle,
+.mark.birdie {
   border-radius: 50%;
 }
 
 .mark.bogey,
-.mark.double {
-  background: var(--score-over);
-  color: #fff;
-  border-radius: 2px;
+.mark.double,
+.mark.triple {
+  border-radius: 3px;
 }
 
-/* Vnější prstenec: mezera barvou podkladu, pak druhý obrys. */
 .mark.eagle {
+  background: var(--score-eagle);
+  color: var(--score-eagle-ink);
+  /* Dvojitý obrys: mezera barvou podkladu, pak druhý prstenec. */
   box-shadow:
     0 0 0 2px var(--bg-elevated),
-    0 0 0 3.5px var(--score-under);
+    0 0 0 3.5px var(--score-eagle);
+}
+
+.mark.birdie {
+  background: var(--score-birdie);
+  color: var(--score-birdie-ink);
+}
+
+/* Par se nezvýrazňuje štítkem, jen barvou čísla - je nejčastější. */
+.mark.par {
+  color: var(--score-par);
+}
+
+.mark.bogey {
+  background: var(--score-bogey);
+  color: var(--score-bogey-ink);
 }
 
 .mark.double {
+  background: var(--score-double);
+  color: var(--score-double-ink);
   box-shadow:
     0 0 0 2px var(--bg-elevated),
-    0 0 0 3.5px var(--score-over);
+    0 0 0 3.5px var(--score-double);
 }
 
-.mark.par {
-  color: var(--text);
+.mark.triple {
+  background: var(--score-triple);
+  color: var(--score-triple-ink);
+  box-shadow:
+    0 0 0 1px var(--score-triple-edge),
+    0 0 0 2.5px var(--bg-elevated),
+    0 0 0 4px var(--score-triple-edge);
 }
 
 .mark.empty {
   color: var(--line);
+}
+
+/* Větší varianta pro zápis skóre, kde je číslo hlavní ovládací prvek. */
+.mark.large {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
 }
 
 /* Dvojité rámečky potřebují kolem sebe místo, ať se neořežou. */
@@ -904,10 +930,14 @@ button {
 .legend {
   list-style: none;
   margin: 0;
-  padding: 0;
+  /* Stejný podklad jako scorekarta, aby dvojité obrysy značek měly správnou
+     barvu mezery. */
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 12px 16px;
   font-size: 13px;
   color: var(--text-dim);
 }

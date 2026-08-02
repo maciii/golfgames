@@ -10,6 +10,7 @@ import {
   parForPlayedHoles,
   roundCompleteness,
   scoreAt,
+  scoreCategory,
   strokeTotal,
   teamName,
   teamPlayers,
@@ -130,7 +131,6 @@ export default function PlayScreen({
     const score = scoreAt(round, player.id, hole)
     const played = holesPlayed(round, player.id)
     const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
-    const diff = score === null ? null : score - par
 
     return (
       <li key={player.id} className="player-row">
@@ -153,9 +153,7 @@ export default function PlayScreen({
           </button>
           <button
             type="button"
-            className={`score-value${diff === null ? ' empty' : ''}${
-              diff !== null && diff < 0 ? ' under' : ''
-            }${diff !== null && diff > 0 ? ' over' : ''}`}
+            className="score-value"
             onClick={() => handleScoreTap(player.id)}
             onPointerDown={() => startLongPress(player.id)}
             onPointerUp={cancelLongPress}
@@ -164,7 +162,13 @@ export default function PlayScreen({
             onContextMenu={(e) => e.preventDefault()}
             aria-label={`${player.name}: zapsat par, přidržením smazat zápis`}
           >
-            {score ?? '–'}
+            {/* Stejná značka jako ve scorekartě, ať je barva výsledku
+                poznat už při zápisu. */}
+            <span
+              className={`mark large ${score === null ? 'empty' : scoreCategory(score, par)}`}
+            >
+              {score ?? '–'}
+            </span>
           </button>
           <button
             type="button"

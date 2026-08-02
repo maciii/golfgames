@@ -7,6 +7,18 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.7.0] – 2026-08-02
+
+### Změněno
+
+- **Nová barevná škála výsledků na jamce**, nově v šesti stupních: eagle
+  žlutě, birdie červeně, par modře, bogey zeleně, dvojbogey šedě a trojbogey
+  a horší černě. Dřív se rozlišovalo jen pět stupňů ve dvou barvách.
+- Stejné značky se používají i **při zápisu skóre**, ne jen ve scorekartě –
+  barva výsledku je tak vidět hned při zadávání.
+- Par nedostal barevný štítek, jen modré číslo; černá má světlý obrys, aby
+  na tmavém pozadí nezanikla.
+
 ## [0.6.0] – 2026-08-02
 
 ### Opraveno

@@ -1,5 +1,13 @@
-import type { Player, Round } from '../types'
-import { parAt, scoreAt, scorecardPlayers, strokeTotal, teamName } from '../types'
+import type { Player, Round, ScoreCategory } from '../types'
+import {
+  SCORE_CATEGORY_LABEL,
+  parAt,
+  scoreAt,
+  scoreCategory,
+  scorecardPlayers,
+  strokeTotal,
+  teamName,
+} from '../types'
 import type { ScorecardColumn } from '../games'
 import { getGame } from '../games'
 
@@ -11,20 +19,20 @@ import { getGame } from '../games'
  * s dvojitým orámováním. Par se nijak nezvýrazňuje.
  */
 
-/** Zařazení rány vůči paru do jedné z kategorií se značkou. */
-function markClass(score: number, par: number): string {
-  const diff = score - par
-  if (diff <= -2) return 'eagle'
-  if (diff === -1) return 'birdie'
-  if (diff === 0) return 'par'
-  if (diff === 1) return 'bogey'
-  return 'double'
-}
-
 function ScoreCell({ score, par }: { score: number | null; par: number }) {
   if (score === null) return <span className="mark empty">–</span>
-  return <span className={`mark ${markClass(score, par)}`}>{score}</span>
+  return <span className={`mark ${scoreCategory(score, par)}`}>{score}</span>
 }
+
+/** Ukázková rána pro každou kategorii v legendě (par 4). */
+const LEGEND_EXAMPLES: [ScoreCategory, number][] = [
+  ['eagle', 2],
+  ['birdie', 3],
+  ['par', 4],
+  ['bogey', 5],
+  ['double', 6],
+  ['triple', 7],
+]
 
 /** Sloupec scorekarty: buď hráč, nebo vlastní sloupec hry (body, skiny). */
 type Column =
@@ -146,18 +154,12 @@ export default function Scorecard({ round }: { round: Round }) {
       </div>
 
       <ul className="legend">
-        <li>
-          <span className="mark eagle">2</span> eagle a lepší
-        </li>
-        <li>
-          <span className="mark birdie">3</span> birdie
-        </li>
-        <li>
-          <span className="mark bogey">5</span> bogey
-        </li>
-        <li>
-          <span className="mark double">6</span> dvojbogey a horší
-        </li>
+        {LEGEND_EXAMPLES.map(([category, example]) => (
+          <li key={category}>
+            <span className={`mark ${category}`}>{example}</span>
+            {SCORE_CATEGORY_LABEL[category]}
+          </li>
+        ))}
       </ul>
     </section>
   )
