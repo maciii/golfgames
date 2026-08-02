@@ -40,9 +40,15 @@ export interface BonusDefinition {
   id: BonusId
   name: string
   description: string
-  /** points = přičte body, multiplier = zdvojnásobí jamku. */
+  /** points = přičte body, multiplier = násobí jamku. */
   kind: 'points' | 'multiplier'
   defaultValue: number
+  /** Nabízí se jen na jamkách s tímhle parem; bez hodnoty na všech. */
+  onlyPar?: number
+  /** Na jamce ho může mít jen jeden hráč. */
+  exclusive?: boolean
+  /** Písmeno, kterým je bonus vidět u zápisu. */
+  mark?: string
 }
 
 export const BONUSES: BonusDefinition[] = [
@@ -56,16 +62,22 @@ export const BONUSES: BonusDefinition[] = [
   {
     id: 'longest',
     name: 'Longest',
-    description: 'Nejdelší odpal na jamce.',
+    description: 'Nejdelší odpal; jen na pětiparových jamkách, pro jednoho hráče.',
     kind: 'points',
     defaultValue: 1,
+    onlyPar: 5,
+    exclusive: true,
+    mark: 'L',
   },
   {
     id: 'nearest',
     name: 'Nearest',
-    description: 'Nejbližší rána k jamce.',
+    description: 'Nejbližší rána k jamce; jen na tříparových, pro jednoho hráče.',
     kind: 'points',
     defaultValue: 1,
+    onlyPar: 3,
+    exclusive: true,
+    mark: 'P',
   },
   {
     id: 'bunker',
@@ -127,6 +139,10 @@ export interface GameOptions {
   doubleBest: number
   /** Dvojnásobná jamka ani "double" nenásobí extra body. */
   noDoubleBonuses: boolean
+  /** Longest platí jen při paru a lepším, jinak bod bere soupeř. */
+  confirmLongest: boolean
+  /** Nearest platí jen při paru a lepším, jinak bod bere soupeř. */
+  confirmNearest: boolean
 }
 
 export const DEFAULT_GAME_OPTIONS: GameOptions = {
@@ -134,8 +150,10 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
     BonusId,
     number
   >,
-  doubleBest: 0,
+  doubleBest: 1,
   noDoubleBonuses: false,
+  confirmLongest: false,
+  confirmNearest: false,
 }
 
 export type Currency = 'CZK' | 'EUR'
@@ -264,12 +282,49 @@ export function holeMultiplier(round: Round, hole: number): number {
   return closing * doubleCallMultiplier(round, hole)
 }
 
-/** Zvolil někdo na jamce extra bod "double"? Platí pro obě dvojice. */
+/**
+ * Kolikrát se jamka násobí kvůli zvolenému "double". Každý zápis doublu
+ * násobí zvlášť, takže tři doubly na jamce znamenají osminásobek.
+ */
 export function doubleCallMultiplier(round: Round, hole: number): number {
   if ((round.settings.options.bonusValues.double ?? 0) <= 0) return 1
-  return round.players.some((p) => bonusesAt(round, p.id, hole).includes('double'))
-    ? 2
-    : 1
+  const calls = round.players.filter((p) =>
+    bonusesAt(round, p.id, hole).includes('double'),
+  ).length
+  return 2 ** calls
+}
+
+/** Bonusy, které jde na dané jamce zvolit; ty vázané na par jdou první. */
+export function availableBonuses(round: Round, hole: number): BonusDefinition[] {
+  const par = parAt(round, hole)
+  return BONUSES.filter(
+    (bonus) =>
+      (round.settings.options.bonusValues[bonus.id] ?? 0) > 0 &&
+      (bonus.onlyPar === undefined || bonus.onlyPar === par),
+  ).sort((a, b) => (a.onlyPar ? -1 : 0) - (b.onlyPar ? -1 : 0))
+}
+
+/**
+ * Kolik bodů má hráč na jamce zapsáno v extra bodech - do odznaku u zápisu.
+ * Longest a Nearest se počítají v základní hodnotě, protože o jejich přiznání
+ * rozhoduje až potvrzovací pravidlo.
+ */
+export function playerBonusPoints(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+): number {
+  const values = round.settings.options.bonusValues
+  const diff = diffToPar(round, playerId, hole)
+
+  let total = 0
+  for (const bonusId of bonusesAt(round, playerId, hole)) {
+    const bonus = getBonus(bonusId)
+    if (!bonus || bonus.kind === 'multiplier') continue
+    const value = values[bonusId] ?? 0
+    total += bonus.exclusive ? value : value * (diff === null ? 0 : bonusMultiplier(diff))
+  }
+  return total
 }
 
 /** Extra body, které má hráč zapsané na jamce. */
@@ -277,20 +332,41 @@ export function bonusesAt(round: Round, playerId: PlayerId, hole: number): Bonus
   return round.bonuses?.[playerId]?.[hole] ?? []
 }
 
-/** Přepne extra bod u hráče na jamce. */
+/**
+ * Přepne extra bod u hráče na jamce.
+ *
+ * Bonusy označené jako exkluzivní (Longest, Nearest) může mít na jamce jen
+ * jeden hráč, takže se ostatním zároveň odeberou.
+ */
 export function toggleBonus(
   round: Round,
   playerId: PlayerId,
   hole: number,
   bonusId: BonusId,
 ): Round {
-  const perPlayer = round.bonuses[playerId] ?? []
-  const holes = Array.from({ length: round.holeCount }, (_, i) => perPlayer[i] ?? [])
-  const current = holes[hole] ?? []
-  holes[hole] = current.includes(bonusId)
-    ? current.filter((b) => b !== bonusId)
-    : [...current, bonusId]
-  return { ...round, bonuses: { ...round.bonuses, [playerId]: holes } }
+  const holesOf = (id: PlayerId) => {
+    const perPlayer = round.bonuses[id] ?? []
+    return Array.from({ length: round.holeCount }, (_, i) => perPlayer[i] ?? [])
+  }
+
+  const own = holesOf(playerId)
+  const current = own[hole] ?? []
+  const adding = !current.includes(bonusId)
+  own[hole] = adding ? [...current, bonusId] : current.filter((b) => b !== bonusId)
+
+  const bonuses: Record<PlayerId, BonusId[][]> = { ...round.bonuses, [playerId]: own }
+
+  if (adding && getBonus(bonusId)?.exclusive) {
+    for (const player of round.players) {
+      if (player.id === playerId) continue
+      const holes = holesOf(player.id)
+      if (!(holes[hole] ?? []).includes(bonusId)) continue
+      holes[hole] = (holes[hole] ?? []).filter((b) => b !== bonusId)
+      bonuses[player.id] = holes
+    }
+  }
+
+  return { ...round, bonuses }
 }
 
 /** Tým se pojmenovává podle hráčů, ať se drží v souladu se zadanými jmény. */

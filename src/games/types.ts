@@ -38,7 +38,10 @@ export interface StandingsSection {
 export interface HoleSummary {
   /** Id týmu nebo hráče, ke kterému shrnutí patří. */
   id: string
-  entries: { label: string; value: string }[]
+  /** Vede tahle strana na jamce? Zvýrazní se při zápisu. */
+  winner?: boolean
+  /** highlight zvýrazní hodnotu, která na jamce vyhrála. */
+  entries: { label: string; value: string; highlight?: boolean }[]
 }
 
 /**

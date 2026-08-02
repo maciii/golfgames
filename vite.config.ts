@@ -4,9 +4,9 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// GitHub Pages servíruje aplikaci z /<repo>/, jiné hostingy (Cloudflare,
-// Netlify) z kořene. Přepíná se přes BASE_PATH při buildu.
-const base = process.env.BASE_PATH ?? '/golfgames/'
+// Aplikace běží na vlastní doméně (public/CNAME), takže se servíruje
+// z kořene. Bez vlastní domény by GitHub Pages potřebovaly '/golfgames/'.
+const base = process.env.BASE_PATH ?? '/'
 
 // Verze se čte z package.json a vpéká do bundlu, aby ji šlo zobrazit v UI.
 // Zvedá ji scripts/bump-version.mjs při každém lokálním buildu.

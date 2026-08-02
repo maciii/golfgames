@@ -1,10 +1,10 @@
-import type { BonusId, GameOptions } from '../types'
-import { BONUSES } from '../types'
+import type { BonusId, Round } from '../types'
+import { availableBonuses } from '../types'
 
 interface Props {
+  round: Round
   playerName: string
   hole: number
-  options: GameOptions
   /** Extra body, které má hráč na jamce zapsané. */
   selected: BonusId[]
   onToggle: (bonusId: BonusId) => void
@@ -18,14 +18,16 @@ interface Props {
  * se vůbec neukazují, aby se seznam na hřišti nemusel prohledávat.
  */
 export default function BonusSheet({
+  round,
   playerName,
   hole,
-  options,
   selected,
   onToggle,
   onClose,
 }: Props) {
-  const available = BONUSES.filter((bonus) => (options.bonusValues[bonus.id] ?? 0) > 0)
+  // Longest a Nearest se nabízejí jen na svém paru a jdou první.
+  const available = availableBonuses(round, hole)
+  const options = round.settings.options
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -40,8 +42,9 @@ export default function BonusSheet({
 
         {available.length === 0 ? (
           <p className="hint">
-            Pro tuhle hru nejsou zapnuté žádné extra body. Zapneš je v nastavení hry před
-            začátkem kola.
+            Pro tuhle jamku nejsou žádné extra body k dispozici. Zapneš je v nastavení hry
+            před začátkem kola; Longest je jen na pětiparových jamkách a Nearest na
+            tříparových.
           </p>
         ) : (
           <ul className="bonus-list">
@@ -58,7 +61,10 @@ export default function BonusSheet({
                   >
                     <span className="bonus-check">{active ? '✓' : ''}</span>
                     <span className="bonus-text">
-                      <span className="bonus-name">{bonus.name}</span>
+                      <span className="bonus-name">
+                        {bonus.mark && <span className="bonus-mark">{bonus.mark}</span>}
+                        {bonus.name}
+                      </span>
                       <span className="bonus-desc">{bonus.description}</span>
                     </span>
                     <span className="bonus-value">

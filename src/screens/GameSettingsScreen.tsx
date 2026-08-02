@@ -111,8 +111,32 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               onChange={(e) => update({ ...options, noDoubleBonuses: e.target.checked })}
             />
             <span>
-              Nedoublovat extra body
+              Nenásobit extra body
               <em> dvojnásobná jamka ani „double“ nenásobí extra body</em>
+            </span>
+          </label>
+
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={options.confirmLongest}
+              onChange={(e) => update({ ...options, confirmLongest: e.target.checked })}
+            />
+            <span>
+              Potvrzovat Longest
+              <em> při horším než par bod propadá soupeřům</em>
+            </span>
+          </label>
+
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={options.confirmNearest}
+              onChange={(e) => update({ ...options, confirmNearest: e.target.checked })}
+            />
+            <span>
+              Potvrzovat Nearest
+              <em> při horším než par bod propadá soupeřům</em>
             </span>
           </label>
         </section>

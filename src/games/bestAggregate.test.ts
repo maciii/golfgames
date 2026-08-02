@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { BonusId } from '../types'
-import { DEFAULT_GAME_OPTIONS } from '../types'
+import { DEFAULT_GAME_OPTIONS, availableBonuses, toggleBonus } from '../types'
 import { bestAggregate, holePoints, totalPoints } from './bestAggregate'
 import { makeRound } from './fixtures'
+
+/** Základní pravidla se testují bez Double Bestu, který je nově zapnutý. */
+const BASE_OPTIONS = { ...DEFAULT_GAME_OPTIONS, doubleBest: 0 }
 
 /**
  * Kolo pro testy: dvojice A (Adam + Alena) proti dvojici B (Bára + Bořek).
@@ -28,6 +31,7 @@ function sampleRound() {
       [3, 4, 3], // Bára
       [5, 4, 3], // Bořek
     ],
+    settings: { options: BASE_OPTIONS },
   })
 }
 
@@ -65,6 +69,7 @@ describe('Best Aggregate - body za jamku', () => {
       ],
       pars: [4],
       scores: [[3], [3], [5], [5]],
+      settings: { options: BASE_OPTIONS },
     })
 
     // Dvě birdie v jedné dvojici = 2 bonusové body.
@@ -104,6 +109,7 @@ describe('Best Aggregate - vzdané jamky', () => {
       ],
       pars: [4],
       scores,
+      settings: { options: BASE_OPTIONS },
     })
   }
 
@@ -188,7 +194,7 @@ describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
         [...empty, 5],
         [...empty, 5],
       ],
-      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles },
+      settings: { pointValue: 10, doubleClosingHoles, options: BASE_OPTIONS },
     })
   }
 
@@ -218,7 +224,7 @@ describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
         [5, 5],
         [5, 5],
       ],
-      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles: true },
+      settings: { pointValue: 10, doubleClosingHoles: true, options: BASE_OPTIONS },
     })
 
     expect(holePoints(round, 0)[0]?.total).toBe(3)
@@ -346,7 +352,7 @@ describe('Best Aggregate - extra body', () => {
   function withBonuses(
     adamBonuses: BonusId[],
     adamScore: number,
-    options = DEFAULT_GAME_OPTIONS,
+    options = BASE_OPTIONS,
     doubleClosingHoles = false,
   ) {
     const holes = doubleClosingHoles ? 9 : 1
@@ -393,8 +399,8 @@ describe('Best Aggregate - extra body', () => {
 
   it('respektuje hodnotu nastavenou pro daný bonus', () => {
     const options = {
-      ...DEFAULT_GAME_OPTIONS,
-      bonusValues: { ...DEFAULT_GAME_OPTIONS.bonusValues, water: 3 },
+      ...BASE_OPTIONS,
+      bonusValues: { ...BASE_OPTIONS.bonusValues, water: 3 },
     }
     const { round } = withBonuses(['water'], 4, options)
 
@@ -403,8 +409,8 @@ describe('Best Aggregate - extra body', () => {
 
   it('vypnutý bonus (0) body nepřidá', () => {
     const options = {
-      ...DEFAULT_GAME_OPTIONS,
-      bonusValues: { ...DEFAULT_GAME_OPTIONS.bonusValues, arnie: 0 },
+      ...BASE_OPTIONS,
+      bonusValues: { ...BASE_OPTIONS.bonusValues, arnie: 0 },
     }
     const { round } = withBonuses(['arnie'], 4, options)
 
@@ -421,7 +427,7 @@ describe('Best Aggregate - extra body', () => {
 })
 
 describe('Best Aggregate - double a násobiče', () => {
-  function withDouble(options = DEFAULT_GAME_OPTIONS, doubleClosingHoles = false) {
+  function withDouble(options = BASE_OPTIONS, doubleClosingHoles = false) {
     const holes = doubleClosingHoles ? 9 : 1
     const pad = Array<number | null>(holes - 1).fill(null)
     const at = (score: number) => [...pad, score]
@@ -453,17 +459,14 @@ describe('Best Aggregate - double a násobiče', () => {
   })
 
   it('s volbou "nedoublovat extra body" zůstanou extra body v základu', () => {
-    const { round, hole } = withDouble({
-      ...DEFAULT_GAME_OPTIONS,
-      noDoubleBonuses: true,
-    })
+    const { round, hole } = withDouble({ ...BASE_OPTIONS, noDoubleBonuses: true })
     const [teamA] = holePoints(round, hole)
 
     expect(teamA).toMatchObject({ best: 2, aggregate: 2, extra: 1, total: 5 })
   })
 
   it('double na dvojnásobné jamce dá čtyřnásobek', () => {
-    const { round, hole } = withDouble(DEFAULT_GAME_OPTIONS, true)
+    const { round, hole } = withDouble(BASE_OPTIONS, true)
     const [teamA] = holePoints(round, hole)
 
     expect(teamA).toMatchObject({ best: 4, aggregate: 4, extra: 4, total: 12 })
@@ -471,8 +474,8 @@ describe('Best Aggregate - double a násobiče', () => {
 
   it('vypnutý double nic nenásobí', () => {
     const options = {
-      ...DEFAULT_GAME_OPTIONS,
-      bonusValues: { ...DEFAULT_GAME_OPTIONS.bonusValues, double: 0 },
+      ...BASE_OPTIONS,
+      bonusValues: { ...BASE_OPTIONS.bonusValues, double: 0 },
     }
     const { round, hole } = withDouble(options)
     const [teamA] = holePoints(round, hole)
@@ -533,5 +536,137 @@ describe('Best Aggregate - nastavení se drží u kola', () => {
     expect(restored.bonuses.p1?.[0]).toEqual(['water'])
     // water 5 × 2 (birdie) + best 1 + součet 1 + birdie 1 + Double Best 2
     expect(holePoints(restored, 0)[0]?.total).toBe(15)
+  })
+})
+
+describe('Best Aggregate - Longest a Nearest', () => {
+  /**
+   * Pětiparová jamka: Longest má Adam (dvojice A). Soupeři hrají 6,
+   * takže o bod za Best a součet nejde.
+   */
+  function longestRound(adamScore: number, confirmLongest: boolean) {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [5],
+      scores: [[adamScore], [6], [6], [6]],
+      settings: { options: { ...BASE_OPTIONS, confirmLongest } },
+    })
+    round.bonuses.p1 = [['longest']]
+    return round
+  }
+
+  it('bez potvrzování dostane bod dvojice, která ho zapsala', () => {
+    const [teamA, teamB] = holePoints(longestRound(7, false), 0)
+
+    expect(teamA?.extra).toBe(1)
+    expect(teamB?.extra).toBe(0)
+  })
+
+  it('s potvrzováním platí při paru a lepším', () => {
+    const [teamA, teamB] = holePoints(longestRound(5, true), 0)
+
+    expect(teamA?.extra).toBe(1)
+    expect(teamB?.extra).toBe(0)
+  })
+
+  it('s potvrzováním propadá soupeřům při horším než par', () => {
+    const [teamA, teamB] = holePoints(longestRound(6, true), 0)
+
+    expect(teamA?.extra).toBe(0)
+    expect(teamB?.extra).toBe(1)
+  })
+
+  it('nezapsaná jamka se nepotvrzuje ani nepropadá', () => {
+    const round = longestRound(5, true)
+    round.scores.p1 = [null]
+    const [teamA, teamB] = holePoints(round, 0)
+
+    expect(teamA?.extra).toBe(0)
+    expect(teamB?.extra).toBe(0)
+  })
+
+  it('hodnota se nenásobí podle výsledku - birdie nedá dvojnásobek', () => {
+    // Adam zahraje 4 na par 5, tedy birdie.
+    expect(holePoints(longestRound(4, true), 0)[0]?.extra).toBe(1)
+  })
+
+  it('Longest se nabízí jen na pětiparové jamce', () => {
+    const round = longestRound(5, false)
+    expect(availableBonuses(round, 0).map((b) => b.id)).toContain('longest')
+
+    round.pars = [4]
+    expect(availableBonuses(round, 0).map((b) => b.id)).not.toContain('longest')
+  })
+
+  it('Nearest se nabízí jen na tříparové jamce', () => {
+    const round = longestRound(5, false)
+    expect(availableBonuses(round, 0).map((b) => b.id)).not.toContain('nearest')
+
+    round.pars = [3]
+    expect(availableBonuses(round, 0).map((b) => b.id)).toContain('nearest')
+  })
+
+  it('exkluzivní bonus se při zápisu odebere ostatním hráčům', () => {
+    const round = longestRound(5, false)
+    const moved = toggleBonus(round, 'p3', 0, 'longest')
+
+    expect(moved.bonuses.p1?.[0]).toEqual([])
+    expect(moved.bonuses.p3?.[0]).toEqual(['longest'])
+  })
+})
+
+describe('Best Aggregate - násobení doublů', () => {
+  /** Jamka, kde double zapíše `calls` hráčů; dvojice A bere Best i součet. */
+  function doubles(calls: number, doubleClosingHoles = false) {
+    const holes = doubleClosingHoles ? 9 : 1
+    const pad = Array<number | null>(holes - 1).fill(null)
+    const at = (score: number) => [...pad, score]
+
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: Array<number>(holes).fill(4),
+      scores: [at(4), at(5), at(5), at(5)],
+      settings: { doubleClosingHoles, options: BASE_OPTIONS },
+    })
+    const ids = ['p1', 'p2', 'p3', 'p4']
+    for (let i = 0; i < calls; i++) {
+      const id = ids[i]
+      if (id) {
+        round.bonuses[id] = Array.from({ length: holes }, (_, h) =>
+          h === holes - 1 ? (['double'] as BonusId[]) : [],
+        )
+      }
+    }
+    return { round, hole: holes - 1 }
+  }
+
+  it('jeden double zdvojnásobí', () => {
+    const { round, hole } = doubles(1)
+    expect(holePoints(round, hole)[0]?.total).toBe(4)
+  })
+
+  it('dva doubly znásobí čtyřikrát', () => {
+    const { round, hole } = doubles(2)
+    expect(holePoints(round, hole)[0]?.total).toBe(8)
+  })
+
+  it('tři doubly znásobí osmkrát', () => {
+    const { round, hole } = doubles(3)
+    expect(holePoints(round, hole)[0]?.total).toBe(16)
+  })
+
+  it('tři doubly na dvojnásobné jamce znásobí šestnáctkrát', () => {
+    const { round, hole } = doubles(3, true)
+    expect(holePoints(round, hole)[0]?.total).toBe(32)
   })
 })

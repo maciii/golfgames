@@ -4,6 +4,8 @@ import {
   MAX_STROKES,
   bonusesAt,
   formatHoleList,
+  getBonus,
+  playerBonusPoints,
   formatToPar,
   holesPlayed,
   isHoleComplete,
@@ -138,11 +140,21 @@ export default function PlayScreen({
     const played = holesPlayed(round, player.id)
     const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
     const bonuses = bonusesAt(round, player.id, hole)
+    const bonusPoints = playerBonusPoints(round, player.id, hole)
+    // Longest a Nearest jsou vidět písmenem přímo u hráče.
+    const marks = bonuses.map((id) => getBonus(id)?.mark).filter(Boolean)
 
     return (
       <li key={player.id} className="player-row">
         <div className="player-info">
-          <span className="player-name">{player.name}</span>
+          <span className="player-name">
+            {player.name}
+            {marks.map((mark) => (
+              <span key={mark} className="player-mark">
+                {mark}
+              </span>
+            ))}
+          </span>
           <span className="player-total">
             {played === 0
               ? 'zatím bez zápisu'
@@ -155,7 +167,7 @@ export default function PlayScreen({
           onClick={() => setBonusFor(player)}
           aria-label={`${player.name}: extra body`}
         >
-          {bonuses.length > 0 ? bonuses.length : '★'}
+          {bonuses.length > 0 ? (bonusPoints > 0 ? bonusPoints : '•') : '★'}
         </button>
         <div className="stepper">
           <button
@@ -257,13 +269,19 @@ export default function PlayScreen({
           round.teams.map((team) => {
             const summary = summaries.find((s) => s.id === team.id)
             return (
-              <section key={team.id} className="team-block">
+              <section
+                key={team.id}
+                className={`team-block${summary?.winner ? ' winning' : ''}`}
+              >
                 <div className="team-header">
                   <span className="team-name">{teamName(round, team)}</span>
                   {summary && (
                     <span className="team-summary">
                       {summary.entries.map((entry) => (
-                        <span key={entry.label} className="team-metric">
+                        <span
+                          key={entry.label}
+                          className={`team-metric${entry.highlight ? ' highlight' : ''}`}
+                        >
                           {entry.label} <strong>{entry.value}</strong>
                         </span>
                       ))}
@@ -316,9 +334,9 @@ export default function PlayScreen({
 
       {bonusFor && (
         <BonusSheet
+          round={round}
           playerName={bonusFor.name}
           hole={hole}
-          options={round.settings.options}
           selected={bonusesAt(round, bonusFor.id, hole)}
           onToggle={(bonusId) => onToggleBonus(bonusFor.id, hole, bonusId)}
           onClose={() => setBonusFor(null)}

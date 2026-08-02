@@ -1081,3 +1081,55 @@ button {
 .field-label {
   min-width: 0;
 }
+
+/* --- zvýraznění na jamce ------------------------------------------------- */
+
+/* Dvojice, která na jamce vede. */
+.team-block.winning .player-row {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+/* Hodnota, která na jamce vyhrála bod (Best, Součet). */
+.team-metric.highlight {
+  background: var(--score-birdie);
+  color: #fff;
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.team-metric.highlight strong {
+  color: #fff;
+}
+
+/* Longest / Nearest u jména hráče. */
+.player-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--score-eagle);
+  color: var(--score-eagle-ink);
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Značka bonusu v nabídce. */
+.bonus-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: var(--score-eagle);
+  color: var(--score-eagle-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
