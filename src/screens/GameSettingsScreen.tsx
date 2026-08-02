@@ -151,6 +151,22 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
             </label>
           ))}
 
+          {game.supportsDoubleHoles && (
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={options.doubleClosingHoles}
+                onChange={(e) =>
+                  update({ ...options, doubleClosingHoles: e.target.checked })
+                }
+              />
+              <span>
+                9. a 18. jamka za dvojnásobek
+                <em> u devítijamkového kola jen poslední jamka</em>
+              </span>
+            </label>
+          )}
+
           <label className="switch">
             <input
               type="checkbox"
@@ -186,11 +202,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               <em> při horším než par bod propadá soupeřům</em>
             </span>
           </label>
-        </section>
 
-        {game.id === 'best-aggregate' && (
-          <section className="section">
-            <h2 className="section-title">Double Best</h2>
+          {game.id === 'best-aggregate' && (
             <label className="field">
               <span className="field-label">
                 Double Best
@@ -210,8 +223,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 <span className="field-suffix">b.</span>
               </span>
             </label>
-          </section>
-        )}
+          )}
+        </section>
       </main>
 
       <footer className="app-footer">

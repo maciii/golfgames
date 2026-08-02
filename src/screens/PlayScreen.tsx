@@ -3,6 +3,7 @@ import type { BonusId, Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
   bonusesAt,
+  exclusiveBonusOutcome,
   formatHoleList,
   getBonus,
   playerBonusPoints,
@@ -141,8 +142,19 @@ export default function PlayScreen({
     const toPar = strokeTotal(round, player.id) - parForPlayedHoles(round, player.id)
     const bonuses = bonusesAt(round, player.id, hole)
     const bonusPoints = playerBonusPoints(round, player.id, hole)
-    // Longest a Nearest jsou vidět písmenem přímo u hráče.
-    const marks = bonuses.map((id) => getBonus(id)?.mark).filter(Boolean)
+    /**
+     * Značky u jména: L / N pro Longest a Nearest, ×2 pro double. U prvních
+     * dvou barva říká, komu bonus připadne - zeleně své dvojici, červeně
+     * soupeřům, neutrálně dokud hráč jamku nezapsal.
+     */
+    const marks = bonuses.flatMap((id) => {
+      const bonus = getBonus(id)
+      if (!bonus?.mark) return []
+      const tone = bonus.exclusive
+        ? exclusiveBonusOutcome(round, player.id, hole, id)
+        : 'multiplier'
+      return [{ key: id, text: bonus.mark, tone }]
+    })
 
     return (
       <li key={player.id} className="player-row">
@@ -150,8 +162,8 @@ export default function PlayScreen({
           <span className="player-name">
             {player.name}
             {marks.map((mark) => (
-              <span key={mark} className="player-mark">
-                {mark}
+              <span key={mark.key} className={`player-mark ${mark.tone}`}>
+                {mark.text}
               </span>
             ))}
           </span>

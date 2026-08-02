@@ -10,7 +10,11 @@ import { bestAggregate, holePoints, totalPoints } from './bestAggregate'
 import { makeRound } from './fixtures'
 
 /** Základní pravidla se testují bez Double Bestu, který je nově zapnutý. */
-const BASE_OPTIONS = { ...DEFAULT_GAME_OPTIONS, doubleBest: 0 }
+const BASE_OPTIONS = {
+  ...DEFAULT_GAME_OPTIONS,
+  doubleBest: 0,
+  doubleClosingHoles: false,
+}
 
 /**
  * Kolo pro testy: dvojice A (Adam + Alena) proti dvojici B (Bára + Bořek).
@@ -199,7 +203,7 @@ describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
         [...empty, 5],
         [...empty, 5],
       ],
-      settings: { pointValue: 10, doubleClosingHoles, options: BASE_OPTIONS },
+      settings: { pointValue: 10, options: { ...BASE_OPTIONS, doubleClosingHoles } },
     })
   }
 
@@ -229,7 +233,7 @@ describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
         [5, 5],
         [5, 5],
       ],
-      settings: { pointValue: 10, doubleClosingHoles: true, options: BASE_OPTIONS },
+      settings: { options: { ...BASE_OPTIONS, doubleClosingHoles: true } },
     })
 
     expect(holePoints(round, 0)[0]?.total).toBe(3)
@@ -373,7 +377,7 @@ describe('Best Aggregate - extra body', () => {
       ],
       pars: Array<number>(holes).fill(4),
       scores: [at(adamScore), at(5), at(5), at(5)],
-      settings: { doubleClosingHoles, options },
+      settings: { options: { ...options, doubleClosingHoles } },
     })
     base.bonuses.p1 = Array.from({ length: holes }, (_, i) =>
       i === holes - 1 ? adamBonuses : [],
@@ -447,7 +451,7 @@ describe('Best Aggregate - double a násobiče', () => {
       pars: Array<number>(holes).fill(4),
       // Adam 4 (par, s bunkerem), ostatní 5 -> A bere best i součet.
       scores: [at(4), at(5), at(5), at(5)],
-      settings: { doubleClosingHoles, options },
+      settings: { options: { ...options, doubleClosingHoles } },
     })
     round.bonuses.p1 = Array.from({ length: holes }, (_, i) =>
       i === holes - 1 ? (['double', 'bunker'] as BonusId[]) : [],
@@ -641,7 +645,7 @@ describe('Best Aggregate - násobení doublů', () => {
       ],
       pars: Array<number>(holes).fill(4),
       scores: [at(4), at(5), at(5), at(5)],
-      settings: { doubleClosingHoles, options: BASE_OPTIONS },
+      settings: { options: { ...BASE_OPTIONS, doubleClosingHoles } },
     })
     const ids = ['p1', 'p2', 'p3', 'p4']
     for (let i = 0; i < calls; i++) {

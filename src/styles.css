@@ -1101,7 +1101,7 @@ button {
   color: #fff;
 }
 
-/* Longest / Nearest u jména hráče. */
+/* Značky u jména hráče: L / N pro Longest a Nearest, ×2 pro double. */
 .player-mark {
   display: inline-flex;
   align-items: center;
@@ -1116,6 +1116,30 @@ button {
   font-size: 12px;
   font-weight: 700;
   vertical-align: middle;
+}
+
+/* Bonus zůstal své dvojici. */
+.player-mark.own {
+  background: var(--accent);
+  color: var(--score-eagle-ink);
+}
+
+/* Bonus propadl soupeřům. */
+.player-mark.opponent {
+  background: var(--score-birdie);
+  color: #fff;
+}
+
+/* Dokud hráč jamku nezapsal, není rozhodnuto. */
+.player-mark.pending {
+  background: var(--bg-input);
+  color: var(--text-dim);
+}
+
+/* Double - jiná barva než Longest a Nearest. */
+.player-mark.multiplier {
+  background: var(--score-par);
+  color: var(--score-par-ink);
 }
 
 /* Značka bonusu v nabídce. */

@@ -138,12 +138,15 @@ export default function SetupScreen({
         ? PAIRINGS[pairing]
         : [[0, 1]]
       : undefined
-    // Volba, kterou hra nepodporuje, se do kola nesmí propsat.
+    // Volby bodování se berou z nastavení zvolené hry; volbu, kterou hra
+    // nepodporuje, do kola nepropustíme.
+    const gameOptions = loadGameOptions(gameId)
     const effective: RoundSettings = {
       ...settings,
-      doubleClosingHoles: game.supportsDoubleHoles && settings.doubleClosingHoles,
-      // Volby bodování se berou z nastavení zvolené hry.
-      options: loadGameOptions(gameId),
+      options: {
+        ...gameOptions,
+        doubleClosingHoles: game.supportsDoubleHoles && gameOptions.doubleClosingHoles,
+      },
     }
     saveSettings(effective)
     onStart({
@@ -317,27 +320,6 @@ export default function SetupScreen({
               <span className="field-suffix">{CURRENCY_LABEL[settings.currency]}</span>
             </span>
           </label>
-
-          {game.supportsDoubleHoles ? (
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={settings.doubleClosingHoles}
-                onChange={(e) =>
-                  setSettings({ ...settings, doubleClosingHoles: e.target.checked })
-                }
-              />
-              <span>
-                9. a 18. jamka za dvojnásobek
-                {holeCount === 9 && <em> (u devíti jamek jen poslední)</em>}
-              </span>
-            </label>
-          ) : (
-            <p className="hint">
-              Match play se počítá na jamky, takže dvojnásobná jamka by rozbila stav
-              zápasu – volba je proto vypnutá.
-            </p>
-          )}
 
           <p className="hint">
             Na konci kola se rozdíl bodů přepočítá na peníze; prohrávající strana platí

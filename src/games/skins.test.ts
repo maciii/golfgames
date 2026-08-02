@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { carryInto, skinResults, skins } from './skins'
+import { DEFAULT_GAME_OPTIONS } from '../types'
 import { makeRound } from './fixtures'
 
 /**
@@ -91,7 +92,10 @@ describe('Skins - dvojnásobná devátá a osmnáctá', () => {
         [4, ...middle, 3],
         [4, ...middle, 5],
       ],
-      settings: { currency: 'CZK', pointValue: 10, doubleClosingHoles },
+      settings: {
+        pointValue: 10,
+        options: { ...DEFAULT_GAME_OPTIONS, doubleClosingHoles },
+      },
     })
   }
 

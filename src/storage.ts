@@ -73,6 +73,10 @@ function normalize(round: Round): Round {
       ...settings,
       options: {
         ...DEFAULT_GAME_OPTIONS,
+        // Volba se dřív ukládala v settings, ne v options.
+        ...('doubleClosingHoles' in settings
+          ? { doubleClosingHoles: Boolean(settings.doubleClosingHoles) }
+          : {}),
         ...(settings.options ?? {}),
         resultMultipliers: {
           ...DEFAULT_RESULT_MULTIPLIERS,

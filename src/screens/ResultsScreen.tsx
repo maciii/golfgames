@@ -44,7 +44,7 @@ export default function ResultsScreen({
    * vidět, podle čeho se body počítaly, i když se předvolby mezitím změnily.
    */
   const configuration = [
-    round.settings.doubleClosingHoles ? '9. a 18. jamka dvojnásobně' : null,
+    round.settings.options.doubleClosingHoles ? '9. a 18. jamka dvojnásobně' : null,
     round.settings.options.doubleBest > 0
       ? `Double Best ${round.settings.options.doubleBest} b.`
       : null,
@@ -170,7 +170,7 @@ export default function ResultsScreen({
                   .
                 </>
               )}
-              {round.settings.doubleClosingHoles &&
+              {round.settings.options.doubleClosingHoles &&
                 ' 9. a 18. jamka byla za dvojnásobek.'}
             </p>
           </section>

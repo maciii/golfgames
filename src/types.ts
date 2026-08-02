@@ -58,6 +58,7 @@ export const BONUSES: BonusDefinition[] = [
     description: 'Zdvojnásobí výsledek celé jamky pro obě dvojice.',
     kind: 'multiplier',
     defaultValue: 1,
+    mark: '×2',
   },
   {
     id: 'longest',
@@ -77,7 +78,7 @@ export const BONUSES: BonusDefinition[] = [
     defaultValue: 1,
     onlyPar: 3,
     exclusive: true,
-    mark: 'P',
+    mark: 'N',
   },
   {
     id: 'bunker',
@@ -168,6 +169,8 @@ export interface GameOptions {
   confirmNearest: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */
   resultMultipliers: Record<ResultTier, number>
+  /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
+  doubleClosingHoles: boolean
 }
 
 export const DEFAULT_GAME_OPTIONS: GameOptions = {
@@ -180,6 +183,7 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   confirmLongest: true,
   confirmNearest: true,
   resultMultipliers: DEFAULT_RESULT_MULTIPLIERS,
+  doubleClosingHoles: true,
 }
 
 export type Currency = 'CZK' | 'EUR'
@@ -189,9 +193,7 @@ export interface RoundSettings {
   currency: Currency
   /** Kolik peněz je jeden bod (skin, vyhraná jamka). */
   pointValue: number
-  /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
-  doubleClosingHoles: boolean
-  /** Volby bodování konkrétní hry (extra body, Double Best). */
+  /** Volby bodování konkrétní hry (extra body, Double Best, dvojnásobky). */
   options: GameOptions
 }
 
@@ -204,7 +206,6 @@ export const DEFAULT_POINT_VALUE: Record<Currency, number> = {
 export const DEFAULT_SETTINGS: RoundSettings = {
   currency: 'CZK',
   pointValue: DEFAULT_POINT_VALUE.CZK,
-  doubleClosingHoles: false,
   options: DEFAULT_GAME_OPTIONS,
 }
 
@@ -305,7 +306,7 @@ export function createRound({
  */
 export function holeMultiplier(round: Round, hole: number): number {
   const closing =
-    round.settings.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
+    round.settings.options.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
   return closing * doubleCallMultiplier(round, hole)
 }
 
@@ -319,6 +320,30 @@ export function doubleCallMultiplier(round: Round, hole: number): number {
     bonusesAt(round, p.id, hole).includes('double'),
   ).length
   return 2 ** calls
+}
+
+/**
+ * Komu na jamce připadne bonus, který drží jediný hráč (Longest, Nearest).
+ *
+ * Bez potvrzování zůstává vždy jeho straně. S potvrzováním rozhoduje výsledek:
+ * par a lepší bonus potvrdí, horší ho posílá soupeři. Dokud hráč jamku
+ * nezapsal, není rozhodnuto.
+ */
+export function exclusiveBonusOutcome(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+  bonusId: BonusId,
+): 'own' | 'opponent' | 'pending' {
+  const confirm =
+    bonusId === 'longest'
+      ? round.settings.options.confirmLongest
+      : round.settings.options.confirmNearest
+  if (!confirm) return 'own'
+
+  const diff = diffToPar(round, playerId, hole)
+  if (diff === null) return 'pending'
+  return diff <= 0 ? 'own' : 'opponent'
 }
 
 /** Bonusy, které jde na dané jamce zvolit; ty vázané na par jdou první. */
