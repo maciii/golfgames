@@ -241,7 +241,15 @@ export function createRound({
     scores,
     bonuses,
     currentHole: 0,
-    settings: { ...settings },
+    // Hluboká kopie: kolo si nese vlastní nastavení, takže pozdější změna
+    // předvoleb hry nepřepíše, jak se počítalo odehrané kolo v archivu.
+    settings: {
+      ...settings,
+      options: {
+        ...settings.options,
+        bonusValues: { ...settings.options.bonusValues },
+      },
+    },
   }
 }
 

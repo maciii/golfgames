@@ -1,5 +1,5 @@
 import type { Round } from '../types'
-import { formatHoleList, formatRoundDate, roundCompleteness } from '../types'
+import { BONUSES, formatHoleList, formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { formatMoney, settleRound } from '../money'
 import { APP_VERSION } from '../version'
@@ -38,6 +38,24 @@ export default function ResultsScreen({
     round,
     mainRows.map((row) => ({ id: row.id, name: row.name, units: row.value })),
   )
+
+  /**
+   * Konfigurace, se kterou se kolo hrálo. U archivního kola je díky tomu
+   * vidět, podle čeho se body počítaly, i když se předvolby mezitím změnily.
+   */
+  const configuration = [
+    round.settings.doubleClosingHoles ? '9. a 18. jamka dvojnásobně' : null,
+    round.settings.options.doubleBest > 0
+      ? `Double Best ${round.settings.options.doubleBest} b.`
+      : null,
+    ...BONUSES.filter((b) => (round.settings.options.bonusValues[b.id] ?? 0) > 0).map(
+      (b) =>
+        b.kind === 'multiplier'
+          ? b.name
+          : `${b.name} ${round.settings.options.bonusValues[b.id]} b.`,
+    ),
+    round.settings.options.noDoubleBonuses ? 'extra body se nedoublují' : null,
+  ].filter(Boolean)
 
   function newRound() {
     if (finished || confirm('Rozehrané kolo se smaže. Opravdu chceš začít nové?')) {
@@ -159,6 +177,13 @@ export default function ResultsScreen({
         )}
 
         <Scorecard round={round} />
+
+        {configuration.length > 0 && (
+          <section className="section">
+            <h2 className="section-title">Bodování kola</h2>
+            <p className="hint">{configuration.join(' · ')}</p>
+          </section>
+        )}
 
         {!readOnly && onOpenArchive && (
           <button type="button" className="link-button" onClick={onOpenArchive}>

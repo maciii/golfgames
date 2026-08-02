@@ -480,3 +480,58 @@ describe('Best Aggregate - double a násobiče', () => {
     expect(teamA).toMatchObject({ best: 1, aggregate: 1, extra: 1, total: 3 })
   })
 })
+
+describe('Best Aggregate - nastavení se drží u kola', () => {
+  /** Kolo s vlastní konfigurací a zapsaným extra bodem. */
+  function configuredRound() {
+    const options = {
+      ...DEFAULT_GAME_OPTIONS,
+      bonusValues: { ...DEFAULT_GAME_OPTIONS.bonusValues, water: 5 },
+      doubleBest: 2,
+    }
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[3], [4], [5], [6]],
+      settings: { options },
+    })
+    round.bonuses.p1 = [['water']]
+    return { round, options }
+  }
+
+  it('pozdější změna předvoleb hry kolo nepřepíše', () => {
+    const { round, options } = configuredRound()
+    const before = holePoints(round, 0)[0]?.total
+
+    // Simuluje úpravu nastavení hry po startu kola.
+    options.bonusValues.water = 99
+    options.doubleBest = 0
+
+    expect(holePoints(round, 0)[0]?.total).toBe(before)
+  })
+
+  it('kolo obnovené z archivu se počítá stejně', () => {
+    const { round } = configuredRound()
+    // Archiv ukládá kolo jako JSON, takže tudy musí projít beze změny.
+    const restored = JSON.parse(JSON.stringify(round)) as typeof round
+
+    expect(holePoints(restored, 0)).toEqual(holePoints(round, 0))
+    expect(totalPoints(restored)).toEqual(totalPoints(round))
+  })
+
+  it('archivované kolo si nese hodnoty bonusů i zapsané extra body', () => {
+    const { round } = configuredRound()
+    const restored = JSON.parse(JSON.stringify(round)) as typeof round
+
+    expect(restored.settings.options.bonusValues.water).toBe(5)
+    expect(restored.settings.options.doubleBest).toBe(2)
+    expect(restored.bonuses.p1?.[0]).toEqual(['water'])
+    // water 5 × 2 (birdie) + best 1 + součet 1 + birdie 1 + Double Best 2
+    expect(holePoints(restored, 0)[0]?.total).toBe(15)
+  })
+})
