@@ -1,8 +1,8 @@
 import type { PlayerId, Round } from '../types'
-import { scoreAt, teamName } from '../types'
+import { isHoleStarted, scoreAt, teamName } from '../types'
 import type { GameDefinition, HoleSummary, StandingsSection } from './types'
 import { rankRows } from './types'
-import { teamBestBall } from './shared'
+import { CONCEDED, formatSideScore, teamBestBall } from './shared'
 
 /**
  * Match play - zápas dvou stran na jamky.
@@ -44,9 +44,13 @@ function matchSides(round: Round): Side[] {
  * Vrací null, dokud strana jamku nezapsala.
  */
 function sideScore(round: Round, side: Side, hole: number): number | null {
+  if (!isHoleStarted(round, hole)) return null
+
   if (side.playerIds.length === 1) {
     const id = side.playerIds[0]
-    return id ? scoreAt(round, id, hole) : null
+    const score = id ? scoreAt(round, id, hole) : null
+    // Chybějící zápis na rozehrané jamce = jamku vzdal, soupeř ji bere.
+    return score ?? CONCEDED
   }
   return teamBestBall(round, { id: side.id, playerIds: side.playerIds }, hole)
 }
@@ -183,7 +187,7 @@ export const matchPlay: GameDefinition = {
       return {
         id: side.id,
         entries: [
-          { label: 'Lepší míč', value: own === null ? '–' : `${own}` },
+          { label: 'Lepší míč', value: formatSideScore(own) },
           { label: 'Jamka', value: outcome },
         ],
       }

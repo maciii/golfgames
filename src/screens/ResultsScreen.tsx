@@ -1,5 +1,5 @@
 import type { Round } from '../types'
-import { formatRoundDate } from '../types'
+import { formatHoleList, formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { formatMoney, settle, settlementSummary } from '../money'
 import { APP_VERSION } from '../version'
@@ -27,6 +27,7 @@ export default function ResultsScreen({
   const game = getGame(round.gameId)
   const sections = game.computeStandings(round)
   const finished = Boolean(round.finishedAt)
+  const completeness = roundCompleteness(round)
   // Při jediném řádku není co poměřovat a pořadí by jen mátlo.
   const showPositions = sections.some((s) => s.rows.length > 1)
 
@@ -90,6 +91,23 @@ export default function ResultsScreen({
 
         {!finished && !readOnly && (
           <p className="hint">Počítají se jen jamky, které už mají zápis.</p>
+        )}
+
+        {finished && !completeness.complete && (
+          <p className="hint">
+            {completeness.conceded.length > 0 && (
+              <>
+                Vzdané jamky: {formatHoleList(completeness.conceded)} – dvojice na nich
+                přišla o součet.{' '}
+              </>
+            )}
+            {completeness.unplayed.length > 0 && (
+              <>
+                Kolo skončilo dřív, jamky {formatHoleList(completeness.unplayed)} se
+                nehrály.
+              </>
+            )}
+          </p>
         )}
 
         {settlement.length > 0 && (

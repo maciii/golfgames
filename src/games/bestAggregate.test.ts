@@ -74,7 +74,7 @@ describe('Best Aggregate - body za jamku', () => {
     })
   })
 
-  it('nedá bod, dokud jedna z dvojic jamku nezapsala', () => {
+  it('na jamce, kam se ještě nedošlo, nezískává nikdo nic', () => {
     const round = makeRound({
       gameId: 'best-aggregate',
       players: ['Adam', 'Alena', 'Bára', 'Bořek'],
@@ -83,12 +83,50 @@ describe('Best Aggregate - body za jamku', () => {
         [2, 3],
       ],
       pars: [4],
-      scores: [[3], [4], [null], [null]],
+      scores: [[null], [null], [null], [null]],
     })
 
-    const [teamA] = holePoints(round, 0)
-    // Birdie se započítá hned, souboj o jamku až s druhou dvojicí.
-    expect(teamA).toEqual({ best: 0, aggregate: 0, bonus: 1, total: 1 })
+    expect(holePoints(round, 0).map((p) => p.total)).toEqual([0, 0])
+  })
+})
+
+describe('Best Aggregate - vzdané jamky', () => {
+  /** Rozehraná jamka bez zápisu = hráč ji vzdal, ne že se na ni nedošlo. */
+  function concessionRound(scores: (number | null)[][]) {
+    return makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores,
+    })
+  }
+
+  it('nedohraný partner připraví dvojici o součet, lepší míč jí zůstává', () => {
+    // A: Adam 4, Alena vzdala -> lepší míč 4, součet nejde dopočítat
+    // B: 5/5 -> lepší míč 5, součet 10
+    const [teamA, teamB] = holePoints(concessionRound([[4], [null], [5], [5]]), 0)
+
+    expect(teamA).toEqual({ best: 1, aggregate: 0, bonus: 0, total: 1 })
+    expect(teamB).toEqual({ best: 0, aggregate: 1, bonus: 0, total: 1 })
+  })
+
+  it('když jamku vzdala celá dvojice, bere soupeř lepší míč i součet', () => {
+    const [teamA, teamB] = holePoints(concessionRound([[3], [4], [null], [null]]), 0)
+
+    // Dvojice A k tomu má birdie Adama.
+    expect(teamA).toEqual({ best: 1, aggregate: 1, bonus: 1, total: 3 })
+    expect(teamB).toEqual({ best: 0, aggregate: 0, bonus: 0, total: 0 })
+  })
+
+  it('když součet nedohrály obě dvojice, nezíská ho nikdo', () => {
+    const [teamA, teamB] = holePoints(concessionRound([[4], [null], [5], [null]]), 0)
+
+    expect(teamA).toEqual({ best: 1, aggregate: 0, bonus: 0, total: 1 })
+    expect(teamB).toEqual({ best: 0, aggregate: 0, bonus: 0, total: 0 })
   })
 })
 
@@ -203,7 +241,7 @@ describe('Best Aggregate - sloupce ve scorekartě', () => {
     expect(teamB?.total(round)).toBe('3')
   })
 
-  it('nechá buňku prázdnou, dokud dvojice jamku nezapsala', () => {
+  it('nechá buňku prázdnou jen u jamky, kam se nedošlo', () => {
     const round = makeRound({
       gameId: 'best-aggregate',
       players: ['Adam', 'Alena', 'Bára', 'Bořek'],
@@ -211,12 +249,18 @@ describe('Best Aggregate - sloupce ve scorekartě', () => {
         [0, 1],
         [2, 3],
       ],
-      pars: [4],
-      scores: [[null], [null], [4], [4]],
+      pars: [4, 4],
+      // jamka 1 rozehraná (A ji vzdala), jamka 2 nehraná
+      scores: [
+        [null, null],
+        [null, null],
+        [4, null],
+        [4, null],
+      ],
     })
-    const [teamA, teamB] = bestAggregate.scorecardColumns?.(round) ?? []
+    const [teamA] = bestAggregate.scorecardColumns?.(round) ?? []
 
-    expect(teamA?.cell(round, 0)).toBe('')
-    expect(teamB?.cell(round, 0)).toBe('0')
+    expect(teamA?.cell(round, 0)).toBe('0')
+    expect(teamA?.cell(round, 1)).toBe('')
   })
 })

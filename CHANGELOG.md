@@ -7,6 +7,28 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.5.0] – 2026-08-02
+
+### Změněno
+
+- **Chybějící zápis na rozehrané jamce se počítá jako vzdaná jamka.** Dřív se
+  taková jamka přeskakovala. Nově dvojice v Best Aggregate přichází o součet
+  (bere ho soupeř), ve Skins se vzdaný hráč o skin ucházet nemůže a v Match
+  play jamku prohrává. Lepší míč dvojici zůstává, dokud ho drží aspoň jeden
+  z partnerů.
+- Jamka, na kterou se ještě nedošlo (nezapsal na ní nikdo), se nadále
+  nezapočítává nikomu – aplikace obojí rozlišuje podle toho, jestli na jamce
+  zapsal aspoň jeden hráč.
+
+### Přidáno
+
+- **Uložení předčasně ukončeného kola** – odkaz „Ukončit kolo“ u zápisu skóre
+  funguje na kterékoli jamce, takže kolo přerušené počasím se dá uložit.
+- Upozornění před uložením nekompletního kola vypíše chybějící jamky a
+  rozliší vzdané od nehraných; uložení je potřeba potvrdit.
+- Archiv u předčasně ukončeného kola ukazuje rozsah, například „5 z 18 jamek“.
+- Vzdaný výsledek je při zápisu označený slovem „vzdáno“.
+
 ## [0.4.0] – 2026-08-02
 
 ### Přidáno

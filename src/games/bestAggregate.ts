@@ -1,5 +1,5 @@
 import type { Round, Team } from '../types'
-import { diffToPar, holeMultiplier, scoreAt, teamName, teamPlayers } from '../types'
+import { diffToPar, holeMultiplier, isHoleStarted, teamName, teamPlayers } from '../types'
 import type {
   GameDefinition,
   HoleSummary,
@@ -7,7 +7,13 @@ import type {
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
-import { lowerWins, teamAggregate, teamBestBall, teamStrokeTotal } from './shared'
+import {
+  formatSideScore,
+  lowerWins,
+  teamAggregate,
+  teamBestBall,
+  teamStrokeTotal,
+} from './shared'
 
 /**
  * Best Aggregate - bodovaná hra dvou dvojic (vždy 4 hráči).
@@ -20,6 +26,10 @@ import { lowerWins, teamAggregate, teamBestBall, teamStrokeTotal } from './share
  *   3 body za eagle    - za každý eagle kteréhokoli z partnerů
  *
  * Vyhrává dvojice s nejvyšším součtem bodů.
+ *
+ * Chybějící zápis na rozehrané jamce znamená vzdanou jamku: dvojice tím
+ * ztrácí součet (soupeř ho bere), lepší míč jí zůstává, dokud ho drží aspoň
+ * jeden z partnerů.
  *
  * Rozhodnutí tam, kde pravidla mlčí (viz docs/games.md):
  *   - Při shodě lepšího míče ani součtu nezískává bod nikdo (jamka je dělená).
@@ -167,9 +177,8 @@ export const bestAggregate: GameDefinition = {
       label: 'Body',
       afterPlayerId: team.playerIds[team.playerIds.length - 1],
       cell: (r, hole) => {
-        // Prázdná buňka, dokud dvojice jamku vůbec nezapsala.
-        const played = team.playerIds.some((id) => scoreAt(r, id, hole) !== null)
-        if (!played) return ''
+        // Prázdná buňka, dokud se na jamce vůbec nehrálo; vzdaná jamka má 0.
+        if (!isHoleStarted(r, hole)) return ''
         return `${holePoints(r, hole)[index]?.total ?? 0}`
       },
       total: (r) => `${totalPoints(r)[index]?.total ?? 0}`,
@@ -178,18 +187,13 @@ export const bestAggregate: GameDefinition = {
 
   holeSummary(round: Round, hole: number): HoleSummary[] {
     const points = holePoints(round, hole)
-    return round.teams.map((team, index) => {
-      const best = teamBestBall(round, team, hole)
-      const aggregate = teamAggregate(round, team, hole)
-      const earned = points[index]?.total ?? 0
-      return {
-        id: team.id,
-        entries: [
-          { label: 'Lepší míč', value: best === null ? '–' : `${best}` },
-          { label: 'Součet', value: aggregate === null ? '–' : `${aggregate}` },
-          { label: 'Body', value: `${earned}` },
-        ],
-      }
-    })
+    return round.teams.map((team, index) => ({
+      id: team.id,
+      entries: [
+        { label: 'Lepší míč', value: formatSideScore(teamBestBall(round, team, hole)) },
+        { label: 'Součet', value: formatSideScore(teamAggregate(round, team, hole)) },
+        { label: 'Body', value: `${points[index]?.total ?? 0}` },
+      ],
+    }))
   },
 }

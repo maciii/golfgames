@@ -2,12 +2,13 @@ import { useRef } from 'react'
 import type { Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
+  formatHoleList,
   formatToPar,
   holesPlayed,
   isHoleComplete,
-  isRoundComplete,
   parAt,
   parForPlayedHoles,
+  roundCompleteness,
   scoreAt,
   strokeTotal,
   teamName,
@@ -54,7 +55,8 @@ export default function PlayScreen({
   const par = parAt(round, hole)
   const isLastHole = hole === round.holeCount - 1
   const holeDone = isHoleComplete(round, hole)
-  const roundDone = isRoundComplete(round)
+  // Ukončit jde jen kolo, ve kterém se aspoň něco zapsalo.
+  const anyScore = round.players.some((p) => holesPlayed(round, p.id) > 0)
   const summaries = game.holeSummary?.(round, hole) ?? []
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
@@ -87,6 +89,32 @@ export default function PlayScreen({
       clearTimeout(longPress.current.timer)
       longPress.current.timer = null
     }
+  }
+
+  /**
+   * Ukončení kola. Kolo se dá uložit i nedohrané (třeba když hru ukončí
+   * počasí), ale ne omylem - chybějící zápisy se nejdřív vypíšou a rozliší
+   * se přitom vzdané jamky od těch, na které se vůbec nedošlo.
+   */
+  function finish() {
+    const { conceded, unplayed, complete } = roundCompleteness(round)
+    if (complete) {
+      onFinish()
+      return
+    }
+
+    const lines = ['Kolo není kompletní.', '']
+    if (conceded.length > 0) {
+      lines.push(
+        `Chybí zápis na jamkách ${formatHoleList(conceded)} – budou se počítat jako vzdané.`,
+      )
+    }
+    if (unplayed.length > 0) {
+      lines.push(`Nehrané jamky ${formatHoleList(unplayed)} se do výsledku nezapočítají.`)
+    }
+    lines.push('', 'Uložit kolo i tak?')
+
+    if (confirm(lines.join('\n'))) onFinish()
   }
 
   function handleScoreTap(playerId: PlayerId) {
@@ -238,20 +266,23 @@ export default function PlayScreen({
           bogey. Přidržením čísla zápis smažeš.
         </p>
 
-        <button type="button" className="link-button" onClick={onShowResults}>
-          Průběžné výsledky
-        </button>
+        <div className="link-row">
+          <button type="button" className="link-button" onClick={onShowResults}>
+            Průběžné výsledky
+          </button>
+          {/* Kolo může skončit kdykoli - třeba když přijde bouřka. */}
+          {!isLastHole && anyScore && (
+            <button type="button" className="link-button" onClick={finish}>
+              Ukončit kolo
+            </button>
+          )}
+        </div>
       </main>
 
       <footer className="app-footer">
         {isLastHole ? (
-          <button
-            type="button"
-            className="primary-button"
-            onClick={onFinish}
-            disabled={!roundDone}
-          >
-            {roundDone ? 'Ukončit a uložit kolo' : 'Doplň zbývající jamky'}
+          <button type="button" className="primary-button" onClick={finish}>
+            Ukončit a uložit kolo
           </button>
         ) : (
           <button

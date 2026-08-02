@@ -74,6 +74,39 @@ describe('Match play - souboj jednotlivců', () => {
   })
 })
 
+describe('Match play - vzdané jamky', () => {
+  it('kdo jamku vzdal, ji prohrává', () => {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      // Na druhé jamce Bára nedohrála.
+      scores: [
+        [4, 5],
+        [5, null],
+      ],
+    })
+
+    expect(matchState(round).won).toEqual([2, 0])
+  })
+
+  it('jamka, kam se nedošlo, stav nemění', () => {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, null],
+        [5, null],
+      ],
+    })
+    const state = matchState(round)
+
+    expect(state.won).toEqual([1, 0])
+    expect(state.remaining).toBe(1)
+  })
+})
+
 describe('Match play - four-ball dvojic', () => {
   /**
    * Za dvojici hraje lepší míč:

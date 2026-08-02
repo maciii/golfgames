@@ -11,6 +11,40 @@ Společné pro všechny hry:
   dává smysl i uprostřed kola.
 - Kolo lze hrát na 9 nebo 18 jamek.
 
+## Vzdaná jamka vs. nehraná jamka
+
+Chybějící zápis znamená dvě různé věci a aplikace je rozlišuje podle toho,
+jestli na jamce zapsal **aspoň jeden** hráč:
+
+| Stav jamky                 | Význam                 | Dopad na body              |
+| -------------------------- | ---------------------- | -------------------------- |
+| Nikdo nezapsal             | ještě se na ni nedošlo | nezapočítá se nikomu       |
+| Někdo zapsal, někomu chybí | ten hráč jamku vzdal   | vzdaný hráč jamku prohrává |
+
+Vzdaná jamka se tedy počítá, a to v neprospěch toho, kdo ji nedohrál:
+
+- **Best Aggregate** – dvojice přichází o **součet** (nejde dopočítat, takže
+  ho bere soupeř). **Lepší míč** jí zůstává, dokud ho drží aspoň jeden
+  z partnerů; když vzdali oba, ztrácí i ten. Vzdaly-li součet obě dvojice,
+  nezíská ho nikdo.
+- **Skins** – kdo jamku vzdal, se o skin ucházet nemůže; skin bere nejnižší
+  z těch, kdo dohráli.
+- **Match play** – kdo jamku vzdal, ji prohrává.
+
+Při zápisu je vzdaný výsledek označený slovem „vzdáno“.
+
+## Předčasně ukončené kolo
+
+Kolo jde uložit i nedohrané – třeba když hru ukončí počasí. Slouží k tomu
+odkaz **Ukončit kolo** u zápisu skóre, dostupný na kterékoli jamce.
+
+Před uložením aplikace vypíše, co chybí, a rozliší přitom obojí: jamky se
+scházejícím zápisem (počítají se jako vzdané) a jamky, na které se vůbec
+nedošlo (nezapočítají se). Uložení je pak potřeba potvrdit, aby kolo nešlo
+ukončit omylem.
+
+V archivu je u takového kola vidět rozsah, například „5 z 18 jamek“.
+
 ## Sázka a peněžní vyrovnání
 
 Před kolem se nastavuje měna, hodnota jednoho bodu a případné zdvojnásobení
@@ -95,12 +129,11 @@ v jednom souboru:
 - **Bonus za partnera zvlášť** – dvě birdie v jedné dvojici na jedné jamce
   znamenají 2 body.
 - **Eagle a lepší** – albatros se boduje stejně jako eagle, tedy 3 body.
-- **Bonus bez soupeře** – birdie a eagle se dvojici započítají hned, i když
-  soupeřova dvojice jamku ještě nezapsala. Body za BEST a součet se přidělí
-  až ve chvíli, kdy má zápis i druhá dvojice.
-- **Nedohraný lepší míč** – pro lepší míč stačí zápis jednoho partnera.
-  Součet se počítá až se zápisem obou, jinak by dvojice s jedním nedohraným
-  míčem vycházela nesprávně lépe.
+- **Bonus nezávisí na soupeři** – birdie a eagle se dvojici započítají bez
+  ohledu na to, jak dopadla druhá dvojice.
+- **Nedohraná jamka** – viz [Vzdaná jamka vs. nehraná jamka](#vzdaná-jamka-vs-nehraná-jamka).
+  Pro lepší míč stačí zápis jednoho partnera; součet dvojice bez zápisu
+  obou partnerů propadá soupeři.
 
 ---
 
@@ -117,8 +150,8 @@ Vyhrává hráč s nejvyšším počtem skinů.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 
-- **Nedohraná jamka** – jamka se vyhodnocuje až ve chvíli, kdy mají zápis
-  všichni hráči. Do té doby se bank nemění.
+- **Nedohraná jamka** – jamka se vyhodnocuje, jakmile na ní někdo zapsal;
+  kdo zápis nemá, tu jamku vzdal. Dokud nezapsal nikdo, bank se nemění.
 - **Konec kola** – skiny přenesené z poslední jamky propadají.
 
 ---
@@ -149,8 +182,8 @@ zbývajících jamek.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 
-- **Nedohraná jamka** – do stavu vstoupí až ve chvíli, kdy mají zápis obě
-  strany.
+- **Nedohraná jamka** – strana bez zápisu na rozehrané jamce ji vzdala
+  a prohrává; jamka, kam se nedošlo, stav nemění.
 - **Dohrávání po rozhodnutí** – aplikace zápas nezastavuje. Zbylé jamky jde
   dohrát a zapsat, stav zápasu se ale už nezmění.
 

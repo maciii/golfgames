@@ -160,6 +160,13 @@ button {
   min-height: var(--tap);
 }
 
+.link-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
 /* --- výběr hry ---------------------------------------------------------- */
 
 .game-list {

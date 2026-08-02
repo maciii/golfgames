@@ -30,6 +30,10 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   ve čtverečku – a u týmových her se sloupcem bodů dvojice za každou jamku
 - **Sázka a peněžní vyrovnání** – hodnota bodu v Kč nebo €, volitelně
   dvojnásobná 9. a 18. jamka; na konci je vidět, kdo komu kolik platí
+- **Vzdané jamky se počítají** – chybějící zápis na rozehrané jamce znamená,
+  že ji hráč nedohrál, a jeho strana o ni přichází
+- **Kolo přerušené počasím** jde uložit i nedohrané; aplikace předtím vypíše,
+  které jamky chybí
 - **Archiv odehraných kol** – dohraná kola se ukládají a jde se k nim vracet
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím

@@ -1,11 +1,6 @@
 import type { PlayerId, Round } from '../types'
-import {
-  holeMultiplier,
-  isHoleComplete,
-  playerName,
-  scoreAt,
-  strokeTotal,
-} from '../types'
+import { holeMultiplier, isHoleStarted, playerName, scoreAt, strokeTotal } from '../types'
+import { CONCEDED } from './shared'
 import type {
   GameDefinition,
   HoleSummary,
@@ -22,7 +17,8 @@ import { rankRows } from './types'
  * do další jamky - další rozhodnutá jamka tak vynese víc skinů najednou.
  *
  * Rozhodnutí tam, kde pravidla mlčí (viz docs/games.md):
- *   - Jamka se vyhodnocuje až ve chvíli, kdy mají zápis všichni hráči.
+ *   - Jamka se vyhodnocuje, jakmile na ní někdo zapsal; komu zápis chybí,
+ *     ten jamku vzdal a o skin se ucházet nemůže.
  *   - Skiny přenesené z poslední jamky propadají.
  */
 
@@ -46,8 +42,8 @@ export function skinResults(round: Round): SkinResult[] {
   let carry = 0
 
   for (let hole = 0; hole < round.holeCount; hole++) {
-    if (!isHoleComplete(round, hole)) {
-      // Nedohraná jamka se nevyhodnocuje a bank se nemění.
+    if (!isHoleStarted(round, hole)) {
+      // Na jamku se ještě nedošlo - nevyhodnocuje se a bank se nemění.
       results.push({ hole, winnerId: null, skins: 0, carry })
       continue
     }
@@ -56,9 +52,10 @@ export function skinResults(round: Round): SkinResult[] {
     // rovnou dvojnásobný skin, přenesený i vyhraný.
     const stake = holeMultiplier(round, hole)
 
+    // Kdo jamku vzdal, o skin se ucházet nemůže.
     const scores = round.players.map((p) => ({
       id: p.id,
-      score: scoreAt(round, p.id, hole) ?? Number.POSITIVE_INFINITY,
+      score: scoreAt(round, p.id, hole) ?? CONCEDED,
     }))
     const lowest = Math.min(...scores.map((s) => s.score))
     const leaders = scores.filter((s) => s.score === lowest)

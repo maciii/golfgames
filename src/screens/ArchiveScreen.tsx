@@ -1,5 +1,5 @@
 import type { Round } from '../types'
-import { formatRoundDate } from '../types'
+import { formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { APP_VERSION } from '../version'
 
@@ -19,6 +19,13 @@ function winnerLine(round: Round): string {
   if (winners.length > 1) return `remíza: ${winners.map((w) => w.name).join(', ')}`
   const winner = winners[0]
   return winner ? `${winner.name} · ${winner.valueLabel}` : 'bez výsledku'
+}
+
+/** Rozsah kola; u předčasně ukončených kol je vidět, kam se došlo. */
+function playedHolesLabel(round: Round): string {
+  const played = roundCompleteness(round).unplayed.length
+  const done = round.holeCount - played
+  return played === 0 ? `${round.holeCount} jamek` : `${done} z ${round.holeCount} jamek`
 }
 
 /** Archiv odehraných kol - seznam s možností otevřít detail nebo smazat. */
@@ -61,8 +68,8 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
                   </span>
                   <span className="archive-winner">{winnerLine(round)}</span>
                   <span className="archive-players">
-                    {round.players.map((p) => p.name).join(', ')} · {round.holeCount}{' '}
-                    jamek
+                    {round.players.map((p) => p.name).join(', ')} ·{' '}
+                    {playedHolesLabel(round)}
                   </span>
                 </button>
                 <button

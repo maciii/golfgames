@@ -41,20 +41,33 @@ describe('Skins - rozdělení jamek', () => {
     expect(results[2]?.carry).toBe(1)
   })
 
-  it('nedohranou jamku nevyhodnocuje ani nemění bank', () => {
+  it('kdo jamku vzdal, o skin se ucházet nemůže', () => {
     const round = makeRound({
       gameId: 'skins',
       players: ['Adam', 'Bára'],
       pars: [4, 4],
+      // Na druhé jamce Bára nedohrála, Adam ji tím pádem bere.
       scores: [
         [3, 4],
         [5, null],
       ],
     })
-    const results = skinResults(round)
 
-    expect(results[0]?.winnerId).not.toBe(null)
-    expect(results[1]).toEqual({ hole: 1, winnerId: null, skins: 0, carry: 0 })
+    expect(skinResults(round)[1]).toEqual({ hole: 1, winnerId: 'p1', skins: 1, carry: 0 })
+  })
+
+  it('na jamku, kam se nedošlo, se nic nerozděluje ani nepřenáší', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [3, null],
+        [5, null],
+      ],
+    })
+
+    expect(skinResults(round)[1]).toEqual({ hole: 1, winnerId: null, skins: 0, carry: 0 })
   })
 
   it('hlásí, kolik skinů se do jamky přenáší', () => {

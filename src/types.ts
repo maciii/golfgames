@@ -168,8 +168,71 @@ export function parForPlayedHoles(round: Round, playerId: PlayerId): number {
   )
 }
 
+/**
+ * Hrálo se už na téhle jamce?
+ *
+ * Rozlišuje dvě různé věci, které v datech vypadají stejně (chybějící zápis):
+ * jamka, na kterou se ještě nedošlo, a jamka, kterou hráč vzdal. Jakmile na
+ * jamce zapsal aspoň jeden hráč, je jamka rozehraná - a komu tam zápis chybí,
+ * ten ji vzdal.
+ */
+export function isHoleStarted(round: Round, hole: number): boolean {
+  return round.players.some((p) => scoreAt(round, p.id, hole) !== null)
+}
+
 export function isHoleComplete(round: Round, hole: number): boolean {
   return round.players.every((p) => scoreAt(round, p.id, hole) !== null)
+}
+
+export interface RoundCompleteness {
+  /** Jamky (1-based), kde se hrálo, ale někomu chybí zápis - vzdané. */
+  conceded: number[]
+  /** Jamky (1-based), na které se vůbec nedošlo. */
+  unplayed: number[]
+  complete: boolean
+}
+
+/** Přehled chybějících zápisů pro upozornění při ukončení kola. */
+export function roundCompleteness(round: Round): RoundCompleteness {
+  const conceded: number[] = []
+  const unplayed: number[] = []
+
+  for (let hole = 0; hole < round.holeCount; hole++) {
+    if (!isHoleStarted(round, hole)) unplayed.push(hole + 1)
+    else if (!isHoleComplete(round, hole)) conceded.push(hole + 1)
+  }
+
+  return {
+    conceded,
+    unplayed,
+    complete: conceded.length === 0 && unplayed.length === 0,
+  }
+}
+
+/** Seznam jamek se souvislými úseky zkrácenými na rozsah: "1, 3, 6–18". */
+export function formatHoleList(holes: number[]): string {
+  const parts: string[] = []
+  let start: number | null = null
+  let previous: number | null = null
+
+  const flush = () => {
+    if (start === null || previous === null) return
+    if (previous - start >= 2) parts.push(`${start}–${previous}`)
+    else for (let h = start; h <= previous; h++) parts.push(`${h}`)
+  }
+
+  for (const hole of holes) {
+    if (previous !== null && hole === previous + 1) {
+      previous = hole
+      continue
+    }
+    flush()
+    start = hole
+    previous = hole
+  }
+  flush()
+
+  return parts.join(', ')
 }
 
 export function isRoundComplete(round: Round): boolean {
