@@ -18,6 +18,112 @@ export interface Team {
   playerIds: PlayerId[]
 }
 
+/**
+ * Extra body - speciální herní bonusy, které si hráč u jamky sám zaškrtne.
+ *
+ * "double" je výjimka: nepřidává body, ale zdvojnásobuje celý výsledek jamky.
+ *
+ * Bonus vždycky připadá celé dvojici, ne jen tomu, kdo ho uhrál. (Platí i pro
+ * hry, které se přidají později.)
+ */
+export type BonusId =
+  'double' | 'longest' | 'bunker' | 'doubleBunker' | 'water' | 'barkie' | 'arnie'
+
+export interface BonusDefinition {
+  id: BonusId
+  name: string
+  description: string
+  /** points = přičte body, multiplier = zdvojnásobí jamku. */
+  kind: 'points' | 'multiplier'
+  defaultValue: number
+}
+
+export const BONUSES: BonusDefinition[] = [
+  {
+    id: 'double',
+    name: 'Double',
+    description: 'Zdvojnásobí výsledek celé jamky pro obě dvojice.',
+    kind: 'multiplier',
+    defaultValue: 1,
+  },
+  {
+    id: 'longest',
+    name: 'Longest',
+    description: 'Nejdelší odpal na jamce.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'bunker',
+    name: 'Bunker (sandie)',
+    description: 'Rána z bunkeru a přesto dobrý výsledek.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'doubleBunker',
+    name: 'Double bunker',
+    description: 'Dva bunkery na jedné jamce.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'water',
+    name: 'Water',
+    description: 'Míč ve vodě a přesto dobrý výsledek.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'barkie',
+    name: 'Barkie',
+    description: 'Trefa do stromu a přesto dobrý výsledek.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+  {
+    id: 'arnie',
+    name: 'Arnie',
+    description: 'Dobrý výsledek, aniž by míč byl na fairwayi.',
+    kind: 'points',
+    defaultValue: 1,
+  },
+]
+
+export function getBonus(id: BonusId): BonusDefinition | undefined {
+  return BONUSES.find((b) => b.id === id)
+}
+
+/**
+ * Kolikrát se extra bod počítá podle výsledku hráče na jamce.
+ * Bogey a horší extra bod neuhraje.
+ */
+export function bonusMultiplier(diff: number): number {
+  if (diff <= -2) return 3
+  if (diff === -1) return 2
+  if (diff === 0) return 1
+  return 0
+}
+
+/** Volby bodování konkrétní hry. */
+export interface GameOptions {
+  /** Hodnota jednotlivých extra bodů; 0 znamená vypnuto. */
+  bonusValues: Record<BonusId, number>
+  /** Bod navíc, když oba partneři zahráli líp než oba soupeři; 0 = vypnuto. */
+  doubleBest: number
+  /** Dvojnásobná jamka ani "double" nenásobí extra body. */
+  noDoubleBonuses: boolean
+}
+
+export const DEFAULT_GAME_OPTIONS: GameOptions = {
+  bonusValues: Object.fromEntries(BONUSES.map((b) => [b.id, b.defaultValue])) as Record<
+    BonusId,
+    number
+  >,
+  doubleBest: 0,
+  noDoubleBonuses: false,
+}
+
 export type Currency = 'CZK' | 'EUR'
 
 /** Nastavení bodování a sázky, společné všem hrám. */
