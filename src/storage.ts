@@ -49,8 +49,13 @@ function remove(key: string): void {
   }
 }
 
-/** Hrubá kontrola tvaru: poškozená data radši zahodíme, než spadnout. */
-function isValidRound(round: unknown): round is Round {
+/**
+ * Hrubá kontrola tvaru: poškozená data radši zahodíme, než spadnout.
+ *
+ * Exportované kvůli záloze - importovaný soubor prochází stejnou kontrolou
+ * jako data z localStorage, ať se cizí JSON nedostane dál.
+ */
+export function isValidRound(round: unknown): round is Round {
   if (!round || typeof round !== 'object') return false
   const r = round as Partial<Round>
   return (
@@ -62,8 +67,13 @@ function isValidRound(round: unknown): round is Round {
   )
 }
 
-/** Doplní pole, která ve starších uložených kolech chybí. */
-function normalize(round: Round): Round {
+/**
+ * Doplní pole, která ve starších uložených kolech chybí.
+ *
+ * Exportované kvůli záloze; je to čistá funkce, takže se dá použít i na kolo,
+ * které nepřišlo z localStorage.
+ */
+export function normalizeRound(round: Round): Round {
   const settings = { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) }
   return {
     ...round,
@@ -91,7 +101,7 @@ function normalize(round: Round): Round {
 
 export function loadCurrentRound(): Round | null {
   const round = read<Round>(CURRENT_KEY)
-  return isValidRound(round) ? normalize(round) : null
+  return isValidRound(round) ? normalizeRound(round) : null
 }
 
 export function saveCurrentRound(round: Round | null): void {
@@ -104,7 +114,7 @@ export function saveCurrentRound(round: Round | null): void {
 export function loadArchive(): Round[] {
   const archive = read<Round[]>(ARCHIVE_KEY)
   if (!Array.isArray(archive)) return []
-  return archive.filter(isValidRound).map(normalize)
+  return archive.filter(isValidRound).map(normalizeRound)
 }
 
 /**
@@ -121,6 +131,14 @@ export function deleteArchivedRound(roundId: string): void {
     ARCHIVE_KEY,
     loadArchive().filter((r) => r.id !== roundId),
   )
+}
+
+/**
+ * Přepíše celý archiv najednou - používá obnova ze zálohy, která má výsledný
+ * seznam už poskládaný a nemá smysl ho ukládat kolo po kole.
+ */
+export function saveArchive(rounds: Round[]): void {
+  write(ARCHIVE_KEY, rounds.slice(0, ARCHIVE_LIMIT))
 }
 
 // --- předvolby bodování ---------------------------------------------------
@@ -161,6 +179,15 @@ export function loadGameOptions(gameId: string): GameOptions {
 export function saveGameOptions(gameId: string, options: GameOptions): void {
   const all = read<Record<string, GameOptions>>(GAME_OPTIONS_KEY) ?? {}
   write(GAME_OPTIONS_KEY, { ...all, [gameId]: options })
+}
+
+/** Volby všech her najednou - pro zálohu, která je ukládá jako celek. */
+export function loadAllGameOptions(): Record<string, GameOptions> {
+  return read<Record<string, GameOptions>>(GAME_OPTIONS_KEY) ?? {}
+}
+
+export function saveAllGameOptions(all: Record<string, GameOptions>): void {
+  write(GAME_OPTIONS_KEY, all)
 }
 
 // --- seznam hráčů ---------------------------------------------------------
@@ -204,4 +231,9 @@ export function removeFromRoster(entryId: string): RosterEntry[] {
   const roster = loadRoster().filter((e) => e.id !== entryId)
   write(ROSTER_KEY, roster)
   return roster
+}
+
+/** Přepíše celý seznam hráčů - pro obnovu ze zálohy. */
+export function saveRoster(roster: RosterEntry[]): void {
+  write(ROSTER_KEY, roster)
 }

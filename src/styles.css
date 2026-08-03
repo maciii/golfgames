@@ -180,6 +180,26 @@ button {
   gap: 8px 24px;
 }
 
+/* Výběr souboru se spouští z vlastního tlačítka, nativní pole je schované. */
+.file-input {
+  display: none;
+}
+
+/* Výsledek zálohování nebo obnovy. */
+.notice {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.notice.error {
+  background: color-mix(in srgb, var(--score-birdie) 18%, var(--bg-elevated));
+  color: var(--score-birdie);
+}
+
 /* --- výběr hry ---------------------------------------------------------- */
 
 .game-list {

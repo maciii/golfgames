@@ -38,8 +38,32 @@ znamená překážku před prvním zápisem skóre. Kolo golfu má jedno zaříz
 které zapisuje – sdílení mezi telefony není potřeba.
 
 **Důsledek.** Data se nepřenesou mezi telefony a smazání dat prohlížeče je
-smaže. Kdyby to jednou vadilo, nejlevnější cesta je export/import JSON, ne
-server.
+smaže.
+
+**Jak se to vyvinulo.** Přesně tohle začalo vadit. První odpovědí je záloha do
+souboru (bod 20); dalším krokem je nepovinná synchronizace přes účet Google,
+kde ale `localStorage` zůstane zdrojem pravdy a bez přihlášení se nic nemění.
+
+---
+
+## 2b. Záloha do souboru dřív než cloud
+
+**Rozhodnutí.** Než přijde synchronizace, umí aplikace stáhnout všechna data
+jako jeden JSON a načíst ho zpátky.
+
+**Proč zrovna tohle jako první.** Je to pár hodin práce, okamžitě řeší
+nejhorší scénář (ztráta telefonu) a nezávisí na žádné cizí službě. Zároveň to
+zůstává únikovým východem, kdyby se cloudové řešení někdy ukázalo jako slepá
+ulička.
+
+**Sloučit vs. nahradit.** Výchozí je slučování, protože obnova nikdy nesmí nic
+smazat. Při shodě id vyhrává novější kolo (podle data ukončení) a rozehraná hra
+zůstává ta místní – jinak by obnova mohla zahodit rozehrané kolo. Režim
+„nahradit vše" existuje pro nové zařízení, kde je předchozí stav prázdný
+a slučování by nedávalo smysl.
+
+**Odmítnutí místo tichého poškození.** Cizí soubor, poškozený JSON i záloha
+z novější verze skončí hláškou. Napůl přečtená záloha je horší než žádná.
 
 ---
 

@@ -43,18 +43,30 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   které jamky chybí
 - **Archiv odehraných kol** – dohraná kola se ukládají i s nastavením, se
   kterým se hrála, takže historické výsledky sedí i po změně předvoleb
+- **Záloha dat do souboru** – celý obsah aplikace se stáhne jako jeden JSON
+  a jde ho načíst zpátky; obnova umí zálohu buď sloučit se současnými daty,
+  nebo jimi vše nahradit
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
   není potřeba
 - **Rozehrané kolo přežije** zavření aplikace i restart telefonu
 
-## Instalace na iPhone
+## Instalace do telefonu
+
+**iPhone**
 
 1. Otevřít adresu aplikace v **Safari** (jiné prohlížeče na iOS instalaci na
    plochu nenabízejí).
 2. Tlačítko _Sdílet_ → **Přidat na plochu**.
 3. Spouštět z ikony – aplikace běží na celou obrazovku bez adresního řádku.
+
+**Android**
+
+1. Otevřít adresu v **Chrome**.
+2. Přijmout nabídku _Nainstalovat aplikaci_, nebo v nabídce ⋮ zvolit
+   **Přidat na plochu**.
+3. Aplikace se nainstaluje jako WebAPK s vlastní ikonou v seznamu aplikací.
 
 ## Proč PWA
 

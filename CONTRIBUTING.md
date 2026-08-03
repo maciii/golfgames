@@ -51,6 +51,7 @@ src/
   types.ts            datový model kola (hráči, dvojice, skóre, bonusy) + výpočty
   storage.ts          localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts            přepočet bodů na peníze a formátování částek
+  backup.ts           export a import dat do souboru JSON
   version.ts          verze vpečená při buildu
   styles.css          jediný stylopis, barvy jako CSS proměnné
   games/              pravidla jednotlivých her
@@ -69,6 +70,7 @@ src/
     ResultsScreen.tsx     pořadí, vyrovnání a scorecard (i pro archivní kola)
     Scorecard.tsx         tabulka se značkami skóre a sloupci hry
     ArchiveScreen.tsx     seznam odehraných kol
+    BackupScreen.tsx      záloha dat do souboru a obnova z něj
 scripts/
   bump-version.mjs    zvedání verze
   gen-icons.mjs       generátor PWA ikon (bez závislostí)
@@ -120,6 +122,7 @@ peníze nejvyšší a chyba v bodování je nejdražší.
 - `src/money.test.ts` – peněžní vyrovnání
 - `src/types.test.ts` – model kola: vzdané vs. nehrané jamky, výpis jamek,
   přidělení Longestu a Nearestu
+- `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 
 Pomocník `makeRound` z `src/games/fixtures.ts` postaví kolo s předvyplněnými
 pary a skóre. Testy základních pravidel používají `BASE_OPTIONS` s vypnutými

@@ -44,6 +44,7 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
                                  │
                  ┌───────────────▼────────────────────┐
    perzistence   │ storage.ts (localStorage)          │
+                 │ backup.ts  (export/import JSON)    │
                  └────────────────────────────────────┘
 ```
 
@@ -306,6 +307,7 @@ vidět hned.
 - `src/money.test.ts` – peněžní vyrovnání
 - `src/types.test.ts` – model kola: vzdané vs. nehrané jamky, výpis jamek,
   přidělení Longestu a Nearestu
+- `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 
 Fixtura `makeRound({ gameId, players, pars, scores, settings })`
 (`src/games/fixtures.ts`) postaví kolo bez zbytečné ceremonie. Testy základních
@@ -323,5 +325,6 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | přepočet bodů na peníze          | `src/money.ts`                          |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
 | co se ukládá do telefonu         | `src/storage.ts`                        |
+| tvar souboru se zálohou          | `src/backup.ts`                         |
 | ovládání zápisu skóre            | `src/screens/PlayScreen.tsx`            |
 | obsah nastavení bodování         | `src/screens/GameSettingsScreen.tsx`    |

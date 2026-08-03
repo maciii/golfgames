@@ -90,6 +90,7 @@ src/
   types.ts     model kola + výpočty společné všem hrám (bonusy, značky, násobiče)
   storage.ts   localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts     přepočet bodů na peníze
+  backup.ts    export a import dat do souboru JSON
   games/       pravidla her (GameDefinition), registr v index.ts
   screens/     UI, česky psané texty
 docs/          architektura, pravidla, rozhodnutí, nasazení

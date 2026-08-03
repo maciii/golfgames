@@ -7,6 +7,31 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.9.0] – 2026-08-03
+
+### Přidáno
+
+- **Záloha dat do souboru a obnova z něj** – nová obrazovka „Záloha dat“
+  dostupná z úvodní stránky. Stáhne jeden soubor JSON se vším (rozehrané kolo,
+  archiv, seznam hráčů, nastavení bodování všech her) a umí ho načíst zpátky.
+  První krok k tomu, aby data nebyla uvězněná v jednom telefonu.
+- Obnova má dva režimy: **Sloučit** (výchozí) přidá kola ze zálohy k současným
+  a nic nesmaže – při shodě id vyhrává novější kolo a rozehraná hra zůstává ta
+  současná; **Nahradit vše** nastaví přesně stav ze zálohy, což se hodí na novém
+  zařízení.
+- Cizí nebo poškozený soubor se odmítne s vysvětlením místo tichého poškození
+  dat. Záloha z novější verze aplikace se odmítne také.
+- Kola ze starších verzí se při obnově automaticky doplní na aktuální tvar –
+  procházejí stejnou normalizací jako data z úložiště.
+
+### Vývojářské
+
+- Nový modul [`src/backup.ts`](src/backup.ts) rozdělený na čisté funkce
+  (slučování, kontrola souboru) a tenké obálky nad `localStorage`, plus 14 testů
+  v `src/backup.test.ts`.
+- `storage.ts` nově vystavuje `isValidRound()`, `normalizeRound()` a hromadné
+  zápisy `saveArchive()`, `saveRoster()`, `saveAllGameOptions()`.
+
 ## [0.8.1] – 2026-08-03
 
 ### Opraveno

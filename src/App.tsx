@@ -14,8 +14,9 @@ import PlayScreen from './screens/PlayScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import ArchiveScreen from './screens/ArchiveScreen'
 import GameSettingsScreen from './screens/GameSettingsScreen'
+import BackupScreen from './screens/BackupScreen'
 
-type View = 'setup' | 'play' | 'results' | 'archive' | 'gameSettings'
+type View = 'setup' | 'play' | 'results' | 'archive' | 'gameSettings' | 'backup'
 
 /**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
@@ -109,6 +110,16 @@ export default function App() {
     setView('archive')
   }, [])
 
+  /**
+   * Po obnově ze zálohy je v úložišti jiný stav, než jaký drží komponenta.
+   * Načteme ho znovu, jinak by ho efekt ukládající rozehrané kolo přepsal zpět.
+   */
+  const reloadFromStorage = useCallback(() => {
+    setRound(loadCurrentRound())
+    setArchive(loadArchive())
+    setOpenArchiveId(null)
+  }, [])
+
   const leaveArchive = useCallback(() => {
     setOpenArchiveId(null)
     setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')
@@ -122,6 +133,15 @@ export default function App() {
           setSettingsGameId(null)
           setView(round ? 'play' : 'setup')
         }}
+      />
+    )
+  }
+
+  if (view === 'backup') {
+    return (
+      <BackupScreen
+        onImported={reloadFromStorage}
+        onBack={() => setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')}
       />
     )
   }
@@ -152,6 +172,7 @@ export default function App() {
           setSettingsGameId(gameId)
           setView('gameSettings')
         }}
+        onOpenBackup={() => setView('backup')}
         archiveCount={archive.length}
       />
     )

@@ -41,6 +41,7 @@ interface Props {
   onStart: (options: CreateRoundOptions) => void
   onOpenArchive: () => void
   onOpenGameSettings: (gameId: string) => void
+  onOpenBackup: () => void
   archiveCount: number
 }
 
@@ -49,6 +50,7 @@ export default function SetupScreen({
   onStart,
   onOpenArchive,
   onOpenGameSettings,
+  onOpenBackup,
   archiveCount,
 }: Props) {
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
@@ -345,9 +347,14 @@ export default function SetupScreen({
           <p className="hint">Par každé jamky nastavíš přímo při hře.</p>
         </section>
 
-        <button type="button" className="link-button" onClick={onOpenArchive}>
-          Archiv odehraných kol{archiveCount > 0 ? ` (${archiveCount})` : ''}
-        </button>
+        <div className="link-row">
+          <button type="button" className="link-button" onClick={onOpenArchive}>
+            Archiv odehraných kol{archiveCount > 0 ? ` (${archiveCount})` : ''}
+          </button>
+          <button type="button" className="link-button" onClick={onOpenBackup}>
+            Záloha dat
+          </button>
+        </div>
       </main>
 
       <footer className="app-footer">
