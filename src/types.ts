@@ -426,6 +426,31 @@ export function toggleBonus(
   return { ...round, bonuses }
 }
 
+/**
+ * Nastaví par jamky a zahodí extra body, které na novém paru nedávají smysl.
+ *
+ * Longest se hraje jen na pětiparových jamkách a Nearest na tříparových.
+ * Když se par opraví dodatečně (typicky až po zápisu), musí zapsaný bonus
+ * zmizet - jinak by se počítal na jamce, kde vůbec nejde zvolit.
+ */
+export function setHolePar(round: Round, hole: number, par: number): Round {
+  const pars = [...round.pars]
+  pars[hole] = par
+
+  const bonuses: Record<PlayerId, BonusId[][]> = {}
+  for (const player of round.players) {
+    const perPlayer = round.bonuses[player.id] ?? []
+    const holes = Array.from({ length: round.holeCount }, (_, i) => perPlayer[i] ?? [])
+    holes[hole] = (holes[hole] ?? []).filter((id) => {
+      const onlyPar = getBonus(id)?.onlyPar
+      return onlyPar === undefined || onlyPar === par
+    })
+    bonuses[player.id] = holes
+  }
+
+  return { ...round, pars, bonuses }
+}
+
 /** Tým se pojmenovává podle hráčů, ať se drží v souladu se zadanými jmény. */
 export function teamName(round: Round, team: Team): string {
   return team.playerIds

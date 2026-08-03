@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { BonusId, CreateRoundOptions, PlayerId, Round } from './types'
-import { createRound, toggleBonus } from './types'
+import { createRound, setHolePar, toggleBonus } from './types'
 import {
   addToRoster,
   archiveRound,
@@ -60,12 +60,8 @@ export default function App() {
   }, [])
 
   const setPar = useCallback((hole: number, par: number) => {
-    setRound((prev) => {
-      if (!prev) return prev
-      const pars = [...prev.pars]
-      pars[hole] = par
-      return { ...prev, pars }
-    })
+    // setHolePar zároveň zahodí Longest/Nearest, když na novém paru nepatří.
+    setRound((prev) => (prev ? setHolePar(prev, hole, par) : prev))
   }, [])
 
   const goToHole = useCallback((hole: number) => {

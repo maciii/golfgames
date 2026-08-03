@@ -105,6 +105,11 @@ zahraný na bogey nedá nic.
 Tyhle dva bonusy drží na jamce vždy jen **jeden hráč** – když ho zaškrtne
 někdo další, prvnímu se odebere.
 
+Jsou navázané na par jamky (Longest par 5, Nearest par 3). Když se par
+jamky dodatečně opraví, zapsaný bonus se **smaže** – jinak by se počítal na
+jamce, kde ho vůbec nejde zvolit. Zpětná oprava paru ho neobnoví, na správné
+jamce se zaškrtne znovu.
+
 Ve výchozím stavu se **potvrzují**: hráč musí jamku dohrát na par nebo líp,
 jinak bod propadá **soupeřově dvojici**. Potvrzování jde pro každý z nich
 zvlášť vypnout, pak bod vždy zůstává té dvojici, která ho zapsala.

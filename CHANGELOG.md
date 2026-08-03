@@ -7,6 +7,15 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.8.1] – 2026-08-03
+
+### Opraveno
+
+- **Změna paru jamky smaže Longest a Nearest, které na nový par nepatří.**
+  Dřív zapsaný Longest zůstal na jamce i po opravě paru z 5 na jinou hodnotu
+  (a stejně tak Nearest na trojce), takže se bonus počítal na jamce, kde ho
+  vůbec nejde zvolit. Bonusy nezávislé na paru zůstávají beze změny.
+
 ## [0.8.0] – 2026-08-02
 
 ### Přidáno

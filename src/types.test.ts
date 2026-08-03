@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_GAME_OPTIONS,
+  bonusesAt,
   exclusiveBonusOutcome,
   formatHoleList,
   isHoleStarted,
+  parAt,
   roundCompleteness,
+  setHolePar,
+  toggleBonus,
 } from './types'
 import { makeRound } from './games/fixtures'
 
@@ -144,5 +148,83 @@ describe('Přidělení Longest a Nearest', () => {
 
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('opponent')
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('own')
+  })
+})
+
+/**
+ * Par jde opravit i dodatečně, klidně až po zápisu extra bodů. Longest patří
+ * jen na pětiparovou jamku a Nearest na tříparovou, takže změna paru je musí
+ * zahodit - jinak by se počítaly tam, kde je vůbec nejde zvolit.
+ *
+ * Kolo: tři jamky (par 5, 3, 4), čtyři hráči ve dvou dvojicích.
+ */
+describe('Změna paru jamky', () => {
+  function roundWithBonuses() {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
+      pars: [5, 3, 4],
+      scores: [
+        [5, 3, 4],
+        [5, 3, 4],
+        [5, 3, 4],
+        [5, 3, 4],
+      ],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+    })
+    // Adam má Longest na pětiparové a Nearest na tříparové jamce, k tomu
+    // bunker, který na paru nezávisí.
+    const withLongest = toggleBonus(round, 'p1', 0, 'longest')
+    const withBunker = toggleBonus(withLongest, 'p1', 0, 'bunker')
+    return toggleBonus(withBunker, 'p1', 1, 'nearest')
+  }
+
+  it('z pětiparové jamky zmizí Longest', () => {
+    const next = setHolePar(roundWithBonuses(), 0, 4)
+
+    expect(bonusesAt(next, 'p1', 0)).not.toContain('longest')
+  })
+
+  it('z tříparové jamky zmizí Nearest', () => {
+    const next = setHolePar(roundWithBonuses(), 1, 4)
+
+    expect(bonusesAt(next, 'p1', 1)).not.toContain('nearest')
+  })
+
+  it('bonusy nezávislé na paru zůstávají', () => {
+    const next = setHolePar(roundWithBonuses(), 0, 4)
+
+    expect(bonusesAt(next, 'p1', 0)).toEqual(['bunker'])
+  })
+
+  it('ostatní jamky změna paru neovlivní', () => {
+    const next = setHolePar(roundWithBonuses(), 0, 4)
+
+    expect(bonusesAt(next, 'p1', 1)).toContain('nearest')
+  })
+
+  it('při návratu na původní par se bonus sám neobnoví', () => {
+    const next = setHolePar(setHolePar(roundWithBonuses(), 0, 4), 0, 5)
+
+    expect(bonusesAt(next, 'p1', 0)).toEqual(['bunker'])
+  })
+
+  it('nový par se zapíše', () => {
+    const next = setHolePar(roundWithBonuses(), 0, 3)
+
+    expect(parAt(next, 0)).toBe(3)
+  })
+
+  it('bonus vázaný na nový par zůstane', () => {
+    // Pětiparová jamka se opraví na tříparovou; Nearest by na ní obstál,
+    // Longest ne.
+    const round = toggleBonus(roundWithBonuses(), 'p2', 0, 'longest')
+    const next = setHolePar(round, 0, 3)
+
+    expect(bonusesAt(next, 'p2', 0)).toEqual([])
+    expect(bonusesAt(next, 'p1', 0)).toEqual(['bunker'])
   })
 })
