@@ -74,9 +74,19 @@ Rules → vložit obsah souboru a publikovat.
    kvóty operace selžou, faktura nepřijde nikdy).
 2. Authentication → Sign-in method → **Google**.
 3. Authentication → Settings → Authorized domains → `golf.kubecka.cz`.
-4. Konfigurace do GitHub Secrets jako `VITE_FIREBASE_API_KEY`,
+4. Konfigurace do GitHub jako `VITE_FIREBASE_API_KEY`,
    `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`
    a `VITE_FIREBASE_APP_ID`; workflow je předá buildu (viz `.env.example`).
+
+   **Kam přesně:** Settings → Secrets and variables → **Actions** → záložka
+   _Secrets_ nebo _Variables_. Workflow čte obě, takže je jedno která.
+   Musí to být **na úrovni repozitáře**, ne uvnitř konkrétního _Environment_ -
+   environmentové hodnoty vidí jen job, který ten environment deklaruje, a to
+   build job nedělá.
+
+   Jestli hodnoty dorazily, se pozná z logu nasazení: krok **Kontrola
+   konfigurace Firebase** vypíše u každé položky „vyplněno" nebo „CHYBÍ"
+   (hodnoty se netisknou, jen délka).
 
 Údaje nejsou tajné – u Firebase jsou veřejné z principu a zabezpečení stojí na
 pravidlech, ne na utajení klíče. V repozitáři nejsou proto, aby šlo projekt
