@@ -45,6 +45,7 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
                  ┌───────────────▼────────────────────┐
    perzistence   │ storage.ts (localStorage)          │
                  │ backup.ts  (export/import JSON)    │
+                 │ sync/      (nepovinně Firestore)   │
                  └────────────────────────────────────┘
 ```
 
@@ -209,6 +210,25 @@ Pravidla:
 - Suffix `.v1` je připravený na nekompatibilní změnu tvaru dat; při ní se
   zvedne na `.v2` a přidá se převod (a `npm run bump:major`).
 
+## Synchronizace (nepovinná)
+
+Složka `src/sync/` přidává zálohu do Firestore přes účet Google. Je stavěná
+tak, aby **nepřihlášeného uživatele nestála nic** - Firebase SDK se načítá
+dynamickým importem až při přihlášení a je vynechané z předcachování service
+workerem.
+
+| Soubor               | Role                                                   |
+| -------------------- | ------------------------------------------------------ |
+| `firebase.ts`        | líné načtení SDK, konfigurace z `import.meta.env`      |
+| `auth.ts`            | přihlášení Googlem (okno, při blokaci přesměrování)    |
+| `merge.ts`           | **čisté funkce** slučování - jádro, které jde testovat |
+| `sync.ts`            | pull/push, fronta neodeslaných změn                    |
+| `AccountContext.tsx` | stav účtu pro celou aplikaci                           |
+
+`localStorage` zůstává zdrojem pravdy; cloud je zrcadlo. Konflikty řeší
+`updatedAt` (vyhrává novější), nic se nikdy nezahazuje. Podrobnosti včetně
+nastavení projektu jsou v [`sync.md`](sync.md).
+
 ## Stav a navigace
 
 `App.tsx` drží tři věci: rozehrané kolo, archiv a jméno viditelné obrazovky
@@ -308,6 +328,7 @@ vidět hned.
 - `src/types.test.ts` – model kola: vzdané vs. nehrané jamky, výpis jamek,
   přidělení Longestu a Nearestu
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
+- `src/sync/merge.test.ts` – slučování při synchronizaci (bez Firebase)
 
 Fixtura `makeRound({ gameId, players, pars, scores, settings })`
 (`src/games/fixtures.ts`) postaví kolo bez zbytečné ceremonie. Testy základních
@@ -326,5 +347,8 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
 | co se ukládá do telefonu         | `src/storage.ts`                        |
 | tvar souboru se zálohou          | `src/backup.ts`                         |
+| slučování při synchronizaci      | `src/sync/merge.ts`                     |
+| co a kdy se posílá do cloudu     | `src/sync/sync.ts`                      |
+| přihlášení Googlem               | `src/sync/auth.ts`                      |
 | ovládání zápisu skóre            | `src/screens/PlayScreen.tsx`            |
 | obsah nastavení bodování         | `src/screens/GameSettingsScreen.tsx`    |

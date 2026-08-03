@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Pravidla zabezpečení Firestore pro Golf Games.
+//
+// Celý model stojí na jediném pravidle: ke svým datům se dostane výhradně
+// přihlášený vlastník. Nikdo nemůže číst ani zapisovat cizí kola a neexistuje
+// dotaz, kterým by šlo projít databázi napříč uživateli.
+//
+// Nasazení: Firebase Console -> Firestore Database -> Rules -> vložit a
+// publikovat. Nebo `firebase deploy --only firestore:rules`, pokud používáš
+// Firebase CLI.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Uživatelský dokument a všechno pod ním (kola, předvolby).
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Vše ostatní je zakázané. Bez tohohle pravidla by se na nové kolekce
+    // vztahoval výchozí zákaz, ale explicitní zápis je čitelnější.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

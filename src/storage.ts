@@ -77,6 +77,9 @@ export function normalizeRound(round: Round): Round {
   const settings = { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) }
   return {
     ...round,
+    // Kola z verzí před synchronizací čas změny nemají; datum ukončení
+    // (u nedohraných založení) je nejlepší dostupný odhad.
+    updatedAt: round.updatedAt ?? round.finishedAt ?? round.createdAt,
     teams: Array.isArray(round.teams) ? round.teams : [],
     bonuses: round.bonuses ?? {},
     settings: {

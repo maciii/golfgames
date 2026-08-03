@@ -25,7 +25,7 @@ function round(id: string, finishedAt: string): Round {
     pars: [4],
     scores: [[4], [5]],
   })
-  return { ...base, id, createdAt: finishedAt, finishedAt }
+  return { ...base, id, createdAt: finishedAt, updatedAt: finishedAt, finishedAt }
 }
 
 function fileWith(data: Partial<BackupData>, overrides: Partial<BackupFile> = {}) {

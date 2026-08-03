@@ -11,6 +11,7 @@ import {
 import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
+import { useAccount } from '../sync/AccountContext'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
 const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
@@ -42,6 +43,7 @@ interface Props {
   onOpenArchive: () => void
   onOpenGameSettings: (gameId: string) => void
   onOpenBackup: () => void
+  onOpenAccount: () => void
   archiveCount: number
 }
 
@@ -51,8 +53,10 @@ export default function SetupScreen({
   onOpenArchive,
   onOpenGameSettings,
   onOpenBackup,
+  onOpenAccount,
   archiveCount,
 }: Props) {
+  const { status, account } = useAccount()
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
     getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
@@ -354,6 +358,12 @@ export default function SetupScreen({
           <button type="button" className="link-button" onClick={onOpenBackup}>
             Záloha dat
           </button>
+          {/* Bez konfigurace cloudu nemá smysl účet vůbec nabízet. */}
+          {status !== 'disabled' && (
+            <button type="button" className="link-button" onClick={onOpenAccount}>
+              {account ? 'Účet a synchronizace' : 'Přihlásit se'}
+            </button>
+          )}
         </div>
       </main>
 
@@ -361,7 +371,12 @@ export default function SetupScreen({
         <button type="button" className="primary-button" onClick={start}>
           Začít kolo
         </button>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">
+          verze {APP_VERSION}
+          {status === 'synced' && ' · zálohováno'}
+          {status === 'syncing' && ' · synchronizuji'}
+          {status === 'offline' && ' · bez připojení'}
+        </p>
       </footer>
     </div>
   )

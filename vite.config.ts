@@ -19,6 +19,17 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Firebase dostane vlastní pojmenovaný chunk, aby ho šlo vynechat
+        // z předcachování service workerem (viz workbox.globIgnores níž).
+        advancedChunks: {
+          groups: [{ name: 'firebase', test: /node_modules[\\/]@?firebase/ }],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -48,6 +59,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Firebase se nepředcachuje. Naprostá většina uživatelů hraje bez
+        // přihlášení a nemá důvod stahovat SDK, které nikdy nepoužije;
+        // přihlášenému se načte ze sítě v okamžiku, kdy ho potřebuje - a to
+        // stejně jde jen online.
+        globIgnores: ['**/firebase*.js'],
         // Celá aplikace je offline-first: bez signálu na hřišti musí jít
         // zapisovat skóre.
         navigateFallback: `${base}index.html`,

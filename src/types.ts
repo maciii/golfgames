@@ -219,6 +219,15 @@ export interface Round {
   createdAt: string
   /** ISO timestamp ukončení; dokud chybí, je kolo rozehrané. */
   finishedAt?: string
+  /**
+   * ISO timestamp poslední změny zápisu.
+   *
+   * Podle něj se při synchronizaci rozhoduje, která verze kola je novější.
+   * Zvedá ho jen skutečná změna dat (skóre, extra body, par, ukončení), ne
+   * pouhé listování jamkami - jinak by zařízení, kde se jen kouká, přebilo
+   * zápis z toho, kde se hraje.
+   */
+  updatedAt?: string
   players: Player[]
   /** Prázdné u her, které se hrají za jednotlivce. */
   teams: Team[]
@@ -275,10 +284,13 @@ export function createRound({
       .filter((id): id is PlayerId => id !== undefined),
   }))
 
+  const now = new Date().toISOString()
+
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     gameId,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
     players,
     teams,
     holeCount,
@@ -297,6 +309,28 @@ export function createRound({
       },
     },
   }
+}
+
+/**
+ * Označí kolo za právě změněné.
+ *
+ * Volá se u každé změny zápisu, aby synchronizace poznala novější verzi.
+ * Listování jamkami sem záměrně nepatří (viz komentář u `Round.updatedAt`).
+ */
+export function touchRound(round: Round): Round {
+  return { ...round, updatedAt: new Date().toISOString() }
+}
+
+/**
+ * Čas poslední změny kola v milisekundách.
+ *
+ * Kola z verzí před zavedením `updatedAt` spadnou na datum ukončení, případně
+ * založení - to je nejlepší odhad, jaký o nich máme.
+ */
+export function roundTimestamp(round: Round): number {
+  const stamp = round.updatedAt ?? round.finishedAt ?? round.createdAt
+  const time = Date.parse(stamp ?? '')
+  return Number.isNaN(time) ? 0 : time
 }
 
 /**

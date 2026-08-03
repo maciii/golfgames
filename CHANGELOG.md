@@ -7,6 +7,38 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.10.0] – 2026-08-03
+
+### Přidáno
+
+- **Nepovinná záloha do cloudu přes účet Google.** Po přihlášení se kola,
+  seznam hráčů i nastavení bodování průběžně zálohují do Firestore a jsou
+  dostupná z dalších zařízení. Na novém telefonu stačí se přihlásit.
+- **Bez přihlášení se nemění vůbec nic.** Aplikace v takovém případě nenaváže
+  spojení a Firebase SDK se ani nestáhne – je načítané dynamicky až při
+  přihlášení a vynechané z předcachování service workerem. Předcachovaná
+  velikost aplikace zůstala na ~324 kB.
+- **Obrazovka „Účet"** se stavem synchronizace, ručním spuštěním, odhlášením
+  a smazáním účtu i všech dat v cloudu.
+- **Zásady zpracování údajů** dostupné z obrazovky účtu.
+- Pravidla zabezpečení [`firestore.rules`](firestore.rules): ke svým datům se
+  dostane výhradně přihlášený vlastník.
+
+### Změněno
+
+- Kolo si nese `updatedAt`, podle kterého se při synchronizaci pozná novější
+  verze. Zvedá ho jen skutečná změna zápisu, ne listování jamkami – jinak by
+  zařízení, na kterém se jen kouká, přebilo to, na kterém se hraje.
+- Kola z dřívějších verzí `updatedAt` doplní z data ukončení, takže se archiv
+  chová správně i po aktualizaci.
+
+### Vývojářské
+
+- Nová složka `src/sync/` rozdělená tak, aby slučovací logika (`merge.ts`)
+  neměla s Firebase nic společného a dala se testovat bez sítě (13 testů).
+- Konfigurace Firebase se plní při buildu z GitHub Secrets, viz `.env.example`;
+  bez ní se aplikace postaví i spustí jako čistě místní.
+
 ## [0.9.0] – 2026-08-03
 
 ### Přidáno

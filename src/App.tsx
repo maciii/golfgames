@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { BonusId, CreateRoundOptions, PlayerId, Round } from './types'
-import { createRound, setHolePar, toggleBonus } from './types'
+import { createRound, setHolePar, toggleBonus, touchRound } from './types'
 import {
   addToRoster,
   archiveRound,
@@ -15,8 +15,19 @@ import ResultsScreen from './screens/ResultsScreen'
 import ArchiveScreen from './screens/ArchiveScreen'
 import GameSettingsScreen from './screens/GameSettingsScreen'
 import BackupScreen from './screens/BackupScreen'
+import AccountScreen from './screens/AccountScreen'
+import PrivacyScreen from './screens/PrivacyScreen'
+import { AccountProvider, useAccount } from './sync/AccountContext'
 
-type View = 'setup' | 'play' | 'results' | 'archive' | 'gameSettings' | 'backup'
+type View =
+  | 'setup'
+  | 'play'
+  | 'results'
+  | 'archive'
+  | 'gameSettings'
+  | 'backup'
+  | 'account'
+  | 'privacy'
 
 /**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
@@ -24,7 +35,8 @@ type View = 'setup' | 'play' | 'results' | 'archive' | 'gameSettings' | 'backup'
  * Navigace je záměrně plochá - aplikace se ovládá jednou rukou na hřišti,
  * takže se nikam nezanořuje a router by byl zbytečná váha.
  */
-export default function App() {
+function AppShell() {
+  const { noteRoundChange, dataVersion } = useAccount()
   // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
   const [view, setView] = useState<View>('play')
@@ -35,7 +47,10 @@ export default function App() {
 
   useEffect(() => {
     saveCurrentRound(round)
-  }, [round])
+    // Synchronizace si změnu jen poznamená; odešle ji s odkladem, aby jedno
+    // kolo nestálo osmnáct zápisů do cloudu.
+    if (round) noteRoundChange(round)
+  }, [round, noteRoundChange])
 
   const startRound = useCallback((options: CreateRoundOptions) => {
     // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
@@ -50,19 +65,21 @@ export default function App() {
         if (!prev) return prev
         const holes = [...(prev.scores[playerId] ?? [])]
         holes[hole] = value
-        return { ...prev, scores: { ...prev.scores, [playerId]: holes } }
+        return touchRound({ ...prev, scores: { ...prev.scores, [playerId]: holes } })
       })
     },
     [],
   )
 
   const setBonus = useCallback((playerId: PlayerId, hole: number, bonusId: BonusId) => {
-    setRound((prev) => (prev ? toggleBonus(prev, playerId, hole, bonusId) : prev))
+    setRound((prev) =>
+      prev ? touchRound(toggleBonus(prev, playerId, hole, bonusId)) : prev,
+    )
   }, [])
 
   const setPar = useCallback((hole: number, par: number) => {
     // setHolePar zároveň zahodí Longest/Nearest, když na novém paru nepatří.
-    setRound((prev) => (prev ? setHolePar(prev, hole, par) : prev))
+    setRound((prev) => (prev ? touchRound(setHolePar(prev, hole, par)) : prev))
   }, [])
 
   const goToHole = useCallback((hole: number) => {
@@ -75,7 +92,7 @@ export default function App() {
   const finishRound = useCallback(() => {
     setRound((prev) => {
       if (!prev) return prev
-      const finished = { ...prev, finishedAt: new Date().toISOString() }
+      const finished = touchRound({ ...prev, finishedAt: new Date().toISOString() })
       // Stejné id přepíše dřívější záznam, takže dodatečná oprava skóre
       // archiv nezdvojí.
       archiveRound(finished)
@@ -86,7 +103,7 @@ export default function App() {
   }, [])
 
   const resumeRound = useCallback(() => {
-    setRound((prev) => (prev ? { ...prev, finishedAt: undefined } : prev))
+    setRound((prev) => (prev ? touchRound({ ...prev, finishedAt: undefined }) : prev))
     setView('play')
   }, [])
 
@@ -120,10 +137,22 @@ export default function App() {
     setOpenArchiveId(null)
   }, [])
 
+  /** Kam se vrátit z podobrazovky: do rozehrané hry, výsledků, nebo na úvod. */
+  const mainView = useCallback(
+    (): View => (round ? (round.finishedAt ? 'results' : 'play') : 'setup'),
+    [round],
+  )
+
   const leaveArchive = useCallback(() => {
     setOpenArchiveId(null)
-    setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')
-  }, [round])
+    setView(mainView())
+  }, [mainView])
+
+  // Když synchronizace přinesla data z cloudu, načteme je do obrazovky.
+  // Zůstáváme přitom tam, kde uživatel je - jen se pod ním obnoví obsah.
+  useEffect(() => {
+    if (dataVersion > 0) reloadFromStorage()
+  }, [dataVersion, reloadFromStorage])
 
   if (view === 'gameSettings' && settingsGameId) {
     return (
@@ -139,9 +168,19 @@ export default function App() {
 
   if (view === 'backup') {
     return (
-      <BackupScreen
-        onImported={reloadFromStorage}
-        onBack={() => setView(round ? (round.finishedAt ? 'results' : 'play') : 'setup')}
+      <BackupScreen onImported={reloadFromStorage} onBack={() => setView(mainView())} />
+    )
+  }
+
+  if (view === 'privacy') {
+    return <PrivacyScreen onBack={() => setView('account')} />
+  }
+
+  if (view === 'account') {
+    return (
+      <AccountScreen
+        onOpenPrivacy={() => setView('privacy')}
+        onBack={() => setView(mainView())}
       />
     )
   }
@@ -173,6 +212,7 @@ export default function App() {
           setView('gameSettings')
         }}
         onOpenBackup={() => setView('backup')}
+        onOpenAccount={() => setView('account')}
         archiveCount={archive.length}
       />
     )
@@ -199,5 +239,19 @@ export default function App() {
       onFinish={finishRound}
       onShowResults={() => setView('results')}
     />
+  )
+}
+
+/**
+ * Kořen aplikace obalený stavem účtu.
+ *
+ * Provider sám o sobě nic nestahuje - Firebase se načte teprve tehdy, když se
+ * uživatel přihlásí (nebo už přihlášený je).
+ */
+export default function App() {
+  return (
+    <AccountProvider>
+      <AppShell />
+    </AccountProvider>
   )
 }

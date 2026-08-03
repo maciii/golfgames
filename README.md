@@ -3,9 +3,9 @@
 Zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých typů
 golfových her – včetně extra bodů a peněžního vyrovnání sázky.
 
-Aplikace je **PWA** – běží v prohlížeči, na iPhonu se přes Safari přidá na
-plochu a chová se jako běžná aplikace. Funguje offline, žádný účet, žádný
-server: veškerá data zůstávají v telefonu.
+Aplikace je **PWA** – běží v prohlížeči, na iPhonu i Androidu se přidá na
+plochu a chová se jako běžná aplikace. Funguje offline a bez účtu; data
+zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 
 **Živá verze:** https://golf.kubecka.cz
 
@@ -46,6 +46,9 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Záloha dat do souboru** – celý obsah aplikace se stáhne jako jeden JSON
   a jde ho načíst zpátky; obnova umí zálohu buď sloučit se současnými daty,
   nebo jimi vše nahradit
+- **Nepovinná záloha do cloudu** – po přihlášení účtem Google se kola průběžně
+  zálohují a jsou dostupná z dalších zařízení. Bez přihlášení se nemění vůbec
+  nic: aplikace nenaváže spojení a všechno zůstává v telefonu
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
   vyberou klepnutím
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
@@ -95,6 +98,7 @@ Vyžaduje Node 22 (viz `.nvmrc`).
 | [`docs/games.md`](docs/games.md)               | pravidla her, extra body, peněžní vyrovnání             |
 | [`docs/decisions.md`](docs/decisions.md)       | proč je to takhle – rozhodnutí a jejich důvody          |
 | [`docs/deployment.md`](docs/deployment.md)     | nasazení, vlastní doména, časté problémy                |
+| [`docs/sync.md`](docs/sync.md)                 | účet, synchronizace a nastavení Firebase                |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura projektu, konvence                   |
 | [`AGENTS.md`](AGENTS.md)                       | pokyny pro AI asistenty a rychlý úvod pro nové vývojáře |
 | [`CHANGELOG.md`](CHANGELOG.md)                 | historie změn                                           |

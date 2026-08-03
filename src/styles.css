@@ -200,6 +200,41 @@ button {
   color: var(--score-birdie);
 }
 
+/* Nevratná akce (smazání účtu) se musí lišit od běžných tlačítek. */
+.danger-button {
+  width: 100%;
+  min-height: var(--tap);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 17px;
+  background: color-mix(in srgb, var(--score-birdie) 22%, var(--bg-elevated));
+  color: var(--score-birdie);
+}
+
+.account-name {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 650;
+}
+
+/* Delší souvislý text (zásady zpracování údajů). */
+.prose .section-title {
+  margin-bottom: 4px;
+}
+
+.bullet-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.bullet-list li {
+  list-style: disc;
+  margin-bottom: 4px;
+}
+
 /* --- výběr hry ---------------------------------------------------------- */
 
 .game-list {

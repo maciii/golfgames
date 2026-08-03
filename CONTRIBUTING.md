@@ -52,6 +52,11 @@ src/
   storage.ts          localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts            přepočet bodů na peníze a formátování částek
   backup.ts           export a import dat do souboru JSON
+  sync/               nepovinná záloha do Firestore přes účet Google
+    firebase.ts       líné načtení SDK
+    auth.ts           přihlášení Googlem
+    merge.ts          čisté funkce slučování
+    sync.ts           pull/push a fronta neodeslaných změn
   version.ts          verze vpečená při buildu
   styles.css          jediný stylopis, barvy jako CSS proměnné
   games/              pravidla jednotlivých her
@@ -71,11 +76,14 @@ src/
     Scorecard.tsx         tabulka se značkami skóre a sloupci hry
     ArchiveScreen.tsx     seznam odehraných kol
     BackupScreen.tsx      záloha dat do souboru a obnova z něj
+    AccountScreen.tsx     přihlášení, stav synchronizace, smazání účtu
+    PrivacyScreen.tsx     zásady zpracování údajů
 scripts/
   bump-version.mjs    zvedání verze
   gen-icons.mjs       generátor PWA ikon (bez závislostí)
 docs/
   architecture.md     jak je aplikace poskládaná, datový model, invarianty
+  sync.md             účet, synchronizace a nastavení Firebase
   games.md            pravidla her a jejich vyhodnocení
   decisions.md        rozhodnutí a jejich důvody
   deployment.md       nasazení, vlastní doména, časté problémy
@@ -123,6 +131,7 @@ peníze nejvyšší a chyba v bodování je nejdražší.
 - `src/types.test.ts` – model kola: vzdané vs. nehrané jamky, výpis jamek,
   přidělení Longestu a Nearestu
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
+- `src/sync/merge.test.ts` – slučování při synchronizaci
 
 Pomocník `makeRound` z `src/games/fixtures.ts` postaví kolo s předvyplněnými
 pary a skóre. Testy základních pravidel používají `BASE_OPTIONS` s vypnutými

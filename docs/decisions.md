@@ -40,9 +40,10 @@ které zapisuje – sdílení mezi telefony není potřeba.
 **Důsledek.** Data se nepřenesou mezi telefony a smazání dat prohlížeče je
 smaže.
 
-**Jak se to vyvinulo.** Přesně tohle začalo vadit. První odpovědí je záloha do
-souboru (bod 20); dalším krokem je nepovinná synchronizace přes účet Google,
-kde ale `localStorage` zůstane zdrojem pravdy a bez přihlášení se nic nemění.
+**Jak se to vyvinulo.** Přesně tohle začalo vadit. Odpovědí je záloha do
+souboru (bod 2b) a nepovinná synchronizace přes účet Google (bod 2c). Původní
+rozhodnutí ale platí dál pro nepřihlášeného uživatele - ten má pořád všechno
+jen v telefonu a nic neodchází ven.
 
 ---
 
@@ -64,6 +65,50 @@ a slučování by nedávalo smysl.
 
 **Odmítnutí místo tichého poškození.** Cizí soubor, poškozený JSON i záloha
 z novější verze skončí hláškou. Napůl přečtená záloha je horší než žádná.
+
+---
+
+## 2c. Synchronizace: Firebase, ale localStorage zůstává zdrojem pravdy
+
+**Rozhodnutí.** Nepovinná záloha do Firestore přes přihlášení účtem Google,
+na bezplatném plánu Spark.
+
+**Proč Firebase.** Přihlášení Googlem používá jen scope `openid email profile`,
+což je nesensitivní údaj a nevyžaduje ověřovací proces aplikace u Google -
+na rozdíl od varianty s Google Drive, kde by scope `drive.appdata` znamenal
+ověření a bez něj limit ~100 uživatelů. Spark plán je bez platební karty: při
+vyčerpání kvóty operace selžou, faktura nepřijde nikdy. To přesně odpovídá
+podmínce, že projekt nesmí nic stát.
+
+**Zvažované alternativy.** Supabase odpadlo kvůli uspávání projektu po 7 dnech
+nečinnosti - u aplikace používané párkrát měsíčně by sync nefungoval zrovna
+tehdy, kdy je potřeba. Cloudflare Workers + D1 mají skvělé limity, ale
+přihlášení Googlem by se muselo naprogramovat včetně ověřování tokenů, což je
+víc kódu a víc odpovědnosti za bezpečnost.
+
+**Zdrojem pravdy zůstává `localStorage`.** Cloud je zrcadlo, ne primární
+úložiště. Zápis skóre proto zůstává okamžitý a offline, výpadek cloudu nemůže
+rozbít probíhající kolo a celý dosavadní kód her se nemusel měnit.
+
+**SDK se načítá až při přihlášení.** Dynamickým importem a s vynecháním
+z předcachování service workerem. Nepřihlášený uživatel tak nestáhne ani bajt
+navíc - to je podmínka toho, že se pro něj nic nemění.
+
+---
+
+## 2d. Konflikty: vyhrává poslední zápis
+
+**Rozhodnutí.** Kola se párují podle `id`, rozhoduje `updatedAt`. Nic se nikdy
+nezahazuje - výsledek je vždy sjednocení obou stran.
+
+**Proč ne něco chytřejšího.** Slučování po jamkách by řešilo případ, kdy dva
+lidé zapisují stejné kolo na dvou telefonech. To se ale nestává - kolo zapisuje
+jeden člověk na jednom zařízení. Za tu vzácnost nestojí složitost, kterou by
+bylo potřeba udržovat u každé nové hry.
+
+**`updatedAt` zvedá jen skutečná změna dat.** Listování jamkami ne. Kdyby ano,
+zařízení, na kterém se jen kouká do výsledků, by přebilo zápis z toho, kde se
+zrovna hraje - a to je přímá cesta ke ztrátě skóre.
 
 ---
 

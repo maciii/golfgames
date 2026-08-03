@@ -1,6 +1,6 @@
 {
   "name": "golfgames",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Zápis golfového skóre po jamkách pro 2-4 hráče a vyhodnocení různých typů golfových her",
   "private": true,
   "type": "module",
@@ -26,6 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "firebase": "^12.17.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

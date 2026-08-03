@@ -1,5 +1,5 @@
 import type { GameOptions, Round, RoundSettings } from './types'
-import { DEFAULT_SETTINGS } from './types'
+import { DEFAULT_SETTINGS, roundTimestamp } from './types'
 import type { RosterEntry } from './storage'
 import {
   ARCHIVE_LIMIT,
@@ -81,20 +81,12 @@ export interface ImportSummary {
 
 // --- čisté funkce ---------------------------------------------------------
 
-/** Nejnovější časový údaj kola; podle něj se při shodě id vybírá vítěz. */
-function roundTime(round: Round): number {
-  const stamp = round.finishedAt ?? round.createdAt
-  const time = Date.parse(stamp ?? '')
-  return Number.isNaN(time) ? 0 : time
-}
-
 /**
  * Sloučí dva archivy podle id kola.
  *
  * Nic se nezahazuje - výsledek je sjednocení obou stran. Když se stejné kolo
- * sejde v obou, vyhrává novější podle data ukončení (u nedohraného podle data
- * založení); při shodě zůstává místní verze, protože ta je ta, se kterou
- * uživatel právě pracuje.
+ * sejde v obou, vyhrává novější podle času poslední změny; při shodě zůstává
+ * místní verze, protože ta je ta, se kterou uživatel právě pracuje.
  */
 export function mergeArchives(local: Round[], incoming: Round[]): Round[] {
   const byId = new Map<string, Round>()
@@ -103,11 +95,12 @@ export function mergeArchives(local: Round[], incoming: Round[]): Round[] {
 
   for (const round of incoming) {
     const existing = byId.get(round.id)
-    if (!existing || roundTime(round) > roundTime(existing)) byId.set(round.id, round)
+    if (!existing || roundTimestamp(round) > roundTimestamp(existing))
+      byId.set(round.id, round)
   }
 
   return [...byId.values()]
-    .sort((a, b) => roundTime(b) - roundTime(a))
+    .sort((a, b) => roundTimestamp(b) - roundTimestamp(a))
     .slice(0, ARCHIVE_LIMIT)
 }
 

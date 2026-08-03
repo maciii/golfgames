@@ -22,6 +22,7 @@ otázek už má odpověď:
 | [`docs/games.md`](docs/games.md)               | pravidla her a bodování do detailu, extra body, peníze    |
 | [`docs/decisions.md`](docs/decisions.md)       | **proč** je to takhle a co by změnu ospravedlnilo         |
 | [`docs/deployment.md`](docs/deployment.md)     | GitHub Pages, vlastní doména, časté problémy              |
+| [`docs/sync.md`](docs/sync.md)                 | účet, synchronizace, nastavení Firebase                   |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura, konvence, verzování                   |
 | [`CHANGELOG.md`](CHANGELOG.md)                 | historie věcných změn                                     |
 
@@ -47,7 +48,9 @@ npm run check    # typy + testy + formát – tohle musí projít před commitem
 Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 
 1. **Nic placeného.** Žádné SaaS, žádné placené API, žádné závislosti
-   s předplatným. Celý projekt musí jít provozovat zdarma.
+   s předplatným. Celý projekt musí jít provozovat zdarma. Firebase běží
+   **výhradně na bezplatném plánu Spark** - Blaze se nikdy nezapíná, protože
+   při vyčerpání kvóty mají operace selhat, ne začít stát peníze.
 2. **Pravidla her žijí jen v `src/games/`.** Obrazovky o konkrétní hře nic
    nevědí – vykreslí, co dostanou z `computeStandings()`, `holeSummary()`
    a `scorecardColumns()`.
@@ -82,6 +85,11 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
   `row.value` se předává do `settleRound()` jako počet jednotek.
 - **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
+- **Firebase se nesmí dostat do hlavního bundlu.** Načítá se dynamickým
+  importem až při přihlášení a je vynechané z předcachování service workerem.
+  Statický `import` z `firebase/*` mimo `src/sync/` tohle rozbije.
+- **`updatedAt` na kole zvedá jen skutečná změna dat** (`touchRound()`).
+  Listování jamkami ne - jinak by prohlížející zařízení přebilo to hrající.
 
 ## Struktura ve zkratce
 
@@ -91,6 +99,7 @@ src/
   storage.ts   localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts     přepočet bodů na peníze
   backup.ts    export a import dat do souboru JSON
+  sync/        nepovinná záloha do Firestore (líné načtení SDK)
   games/       pravidla her (GameDefinition), registr v index.ts
   screens/     UI, česky psané texty
 docs/          architektura, pravidla, rozhodnutí, nasazení
