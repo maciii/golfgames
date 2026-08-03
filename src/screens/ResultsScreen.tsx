@@ -7,6 +7,8 @@ import Scorecard from './Scorecard'
 
 interface Props {
   round: Round
+  /** Odkaz na účet; u archivního kola se nenabízí. */
+  onOpenAccount?: () => void
   /** Archivní kolo se jen prohlíží - nejde v něm pokračovat ani ho mazat. */
   readOnly?: boolean
   onResume?: () => void
@@ -18,6 +20,7 @@ interface Props {
 /** Výsledky kola: tabulky podle pravidel hry plus kompletní scorecard. */
 export default function ResultsScreen({
   round,
+  onOpenAccount,
   readOnly = false,
   onResume,
   onNewRound,
@@ -185,10 +188,21 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {!readOnly && onOpenArchive && (
-          <button type="button" className="link-button" onClick={onOpenArchive}>
-            Archiv odehraných kol
-          </button>
+        {/* Rozcestník je i tady, protože s rozehraným kolem se uživatel na
+            úvodní obrazovku nedostane. */}
+        {!readOnly && (
+          <div className="link-row">
+            {onOpenArchive && (
+              <button type="button" className="link-button" onClick={onOpenArchive}>
+                Archiv odehraných kol
+              </button>
+            )}
+            {onOpenAccount && (
+              <button type="button" className="link-button" onClick={onOpenAccount}>
+                Účet a záloha
+              </button>
+            )}
+          </div>
         )}
       </main>
 

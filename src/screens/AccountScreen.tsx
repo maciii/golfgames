@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAccount } from '../sync/AccountContext'
+import { missingConfigKeys } from '../sync/firebase'
 import type { SignInError, SyncStatus } from '../sync/AccountContext'
 import { APP_VERSION } from '../version'
 
@@ -75,10 +76,28 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
 
       <main className="content">
         {status === 'disabled' ? (
-          <p className="hint">
-            Tahle verze aplikace běží bez připojení k cloudu. Data si zálohuj přes
-            obrazovku „Záloha dat“.
-          </p>
+          <section className="section">
+            <p className="notice error">
+              Tahle verze aplikace nemá nastavené připojení k cloudu, takže se nejde
+              přihlásit. Data si zatím zálohuj přes obrazovku „Záloha dat“.
+            </p>
+            <h2 className="section-title">Co chybí</h2>
+            <p className="hint">
+              Buildu se nedostaly tyhle údaje – doplň je v repozitáři jako GitHub Secrets
+              (Settings → Secrets and variables → Actions) a spusť nasazení znovu:
+            </p>
+            <ul className="bullet-list">
+              {missingConfigKeys().map((key) => (
+                <li key={key}>
+                  <code>{key}</code>
+                </li>
+              ))}
+            </ul>
+            <p className="hint">
+              Postup je popsaný v <code>docs/sync.md</code>. Verze aplikace je{' '}
+              {APP_VERSION} – zkontroluj, že je to ta nasazená.
+            </p>
+          </section>
         ) : account ? (
           <>
             <section className="section">

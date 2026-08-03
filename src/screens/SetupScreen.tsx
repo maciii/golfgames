@@ -358,12 +358,11 @@ export default function SetupScreen({
           <button type="button" className="link-button" onClick={onOpenBackup}>
             Záloha dat
           </button>
-          {/* Bez konfigurace cloudu nemá smysl účet vůbec nabízet. */}
-          {status !== 'disabled' && (
-            <button type="button" className="link-button" onClick={onOpenAccount}>
-              {account ? 'Účet a synchronizace' : 'Přihlásit se'}
-            </button>
-          )}
+          {/* Odkaz je vidět vždycky. I když cloud není nastavený, uživatel se
+              aspoň dozví proč - mlčky schovaná funkce se nedá diagnostikovat. */}
+          <button type="button" className="link-button" onClick={onOpenAccount}>
+            {account ? 'Účet a synchronizace' : 'Přihlásit se a zálohovat'}
+          </button>
         </div>
       </main>
 

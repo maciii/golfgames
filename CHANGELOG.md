@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.10.1] – 2026-08-03
+
+### Opraveno
+
+- **Odkaz na přihlášení nešel najít.** Byl jen na úvodní obrazovce, která se
+  ukáže pouze bez rozehraného kola – s rozehranou hrou se k němu nedalo dostat
+  vůbec. Nově je „Účet a záloha“ i u zápisu skóre a ve výsledcích.
+- **Když chybí konfigurace cloudu, odkaz se skrýval bez vysvětlení.** Nově je
+  vidět vždy a obrazovka účtu vypíše, které údaje buildu chyběly – jinak se
+  nedalo poznat, proč přihlášení není k dispozici.
+
 ## [0.10.0] – 2026-08-03
 
 ### Přidáno

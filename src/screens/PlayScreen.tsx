@@ -35,6 +35,7 @@ interface Props {
   onGoToHole: (hole: number) => void
   onFinish: () => void
   onShowResults: () => void
+  onOpenAccount: () => void
 }
 
 /**
@@ -51,6 +52,7 @@ export default function PlayScreen({
   onGoToHole,
   onFinish,
   onShowResults,
+  onOpenAccount,
 }: Props) {
   // Na dotyku běží vždy jen jedno přidržení, takže stačí jeden ref pro celou
   // obrazovku.
@@ -325,6 +327,9 @@ export default function PlayScreen({
               Ukončit kolo
             </button>
           )}
+          <button type="button" className="link-button" onClick={onOpenAccount}>
+            Účet a záloha
+          </button>
         </div>
       </main>
 

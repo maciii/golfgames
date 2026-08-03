@@ -225,6 +225,7 @@ function AppShell() {
         onResume={resumeRound}
         onNewRound={discardRound}
         onOpenArchive={openArchive}
+        onOpenAccount={() => setView('account')}
       />
     )
   }
@@ -238,6 +239,7 @@ function AppShell() {
       onGoToHole={goToHole}
       onFinish={finishRound}
       onShowResults={() => setView('results')}
+      onOpenAccount={() => setView('account')}
     />
   )
 }

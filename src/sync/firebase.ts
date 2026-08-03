@@ -30,7 +30,23 @@ const config = {
  * místní - díky tomu jde repozitář postavit i bez přístupu k Firebase.
  */
 export function isSyncConfigured(): boolean {
-  return Boolean(config.apiKey && config.authDomain && config.projectId && config.appId)
+  return missingConfigKeys().length === 0
+}
+
+/**
+ * Které údaje konfigurace chybí.
+ *
+ * Slouží k diagnostice: bez tohohle výpisu je "synchronizace nedostupná"
+ * hláška, se kterou se nedá nic dělat.
+ */
+export function missingConfigKeys(): string[] {
+  const required: [string, string | undefined][] = [
+    ['VITE_FIREBASE_API_KEY', config.apiKey],
+    ['VITE_FIREBASE_AUTH_DOMAIN', config.authDomain],
+    ['VITE_FIREBASE_PROJECT_ID', config.projectId],
+    ['VITE_FIREBASE_APP_ID', config.appId],
+  ]
+  return required.filter(([, value]) => !value).map(([name]) => name)
 }
 
 export interface FirebaseBundle {
