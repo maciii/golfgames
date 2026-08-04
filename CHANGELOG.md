@@ -7,6 +7,25 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.11.0] – 2026-08-04
+
+### Opraveno
+
+- **Na iPhonu a iPadu nešlo přihlášení vůbec** – prohlížeč blokoval
+  vyskakovací okno. Okno se otevíralo až po dynamickém načtení Firebase SDK
+  a po síťovém ověření původu stránky, které SDK dělá samo; do té doby
+  „uživatelské gesto" z klepnutí vypršelo. Nově se obojí připraví dopředu při
+  otevření obrazovky účtu (tlačítko je do té doby vypnuté s popiskem
+  „Připravuji přihlášení…") a okno se otevírá synchronně v obsluze klepnutí.
+- **Chyba synchronizace se zahazovala** a hlásila jen „nepovedlo se".
+  Nově obrazovka účtu vypíše konkrétní příčinu – nevytvořená databáze,
+  nenasazená pravidla, vypršené přihlášení – včetně toho, kde to spravit.
+
+### Změněno
+
+- Otevření obrazovky účtu nově přednačte Firebase SDK. Kdo na účet nesáhne,
+  nadále nestáhne nic; ověřeno v prohlížeči.
+
 ## [0.10.3] – 2026-08-04
 
 ### Přidáno

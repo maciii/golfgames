@@ -12,6 +12,8 @@ import type { Account, SignInError } from './auth'
 import {
   deleteAccount,
   describeSignInError,
+  isAuthReady,
+  preloadAuth,
   signInWithGoogle,
   signOutAccount,
   watchAccount,
@@ -20,6 +22,7 @@ import { isSyncConfigured } from './firebase'
 import {
   cancelScheduledPush,
   deleteCloudData,
+  describeSyncError,
   flushQueue,
   scheduleRoundPush,
   syncAll,
@@ -56,6 +59,15 @@ interface AccountValue {
   lastSyncAt: Date | null
   /** Důvod, proč přihlášení neproběhlo; `cancelled` se nehlásí. */
   signInError: SignInError | null
+  /** Proč selhala synchronizace, srozumitelně. */
+  syncError: string | null
+  /**
+   * Je SDK načtené a jde otevřít přihlašovací okno? Dokud ne, tlačítko musí
+   * zůstat vypnuté - popup otevřený po čekání na síť prohlížeč zablokuje.
+   */
+  authReady: boolean
+  /** Načte SDK dopředu; volá obrazovka účtu při otevření. */
+  prepareSignIn: () => void
   signIn: () => Promise<void>
   signOut: () => Promise<void>
   /** Synchronizuje hned; vrací false, když není kdo. */
@@ -95,6 +107,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   )
   const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null)
   const [signInError, setSignInError] = useState<SignInError | null>(null)
+  const [syncError, setSyncError] = useState<string | null>(null)
+  const [authReady, setAuthReady] = useState(() => isAuthReady())
   const [dataVersion, setDataVersion] = useState(0)
   // V callbackech potřebujeme aktuální uid bez toho, aby se přegenerovaly.
   const uid = useRef<string | null>(null)
@@ -104,13 +118,27 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     try {
       const result = await syncAll(userId)
       setLastSyncAt(new Date())
+      setSyncError(null)
       setStatus('synced')
       // Obrazovky si po tomhle znovu načtou data z úložiště.
       if (result.rounds > 0) setDataVersion((n) => n + 1)
-    } catch {
+    } catch (error) {
       // Bez signálu to není chyba - data zůstala v zařízení a pošlou se pak.
-      setStatus(navigator.onLine ? 'error' : 'offline')
+      if (navigator.onLine) {
+        setSyncError(describeSyncError(error))
+        setStatus('error')
+      } else {
+        setStatus('offline')
+      }
     }
+  }, [])
+
+  /** Načte SDK dopředu, aby šlo přihlašovací okno otevřít při klepnutí. */
+  const prepareSignIn = useCallback(() => {
+    if (!isSyncConfigured() || isAuthReady()) return
+    void preloadAuth()
+      .then(() => setAuthReady(true))
+      .catch(() => setStatus('error'))
   }, [])
 
   /**
@@ -164,6 +192,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setStatus('syncing')
     try {
       const next = await signInWithGoogle()
+      setAuthReady(true)
       rememberSignedIn(true)
       if (!next) return // přesměrování; účet dorazí po návratu na stránku
 
@@ -231,6 +260,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         account,
         lastSyncAt,
         signInError,
+        syncError,
+        authReady,
+        prepareSignIn,
         signIn,
         signOut,
         syncNow,

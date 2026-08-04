@@ -127,14 +127,37 @@ odstranila až **vlastní auth doména**, která vyžaduje servírovat cestu
 `/__/auth/handler` z `golf.kubecka.cz`. To umí Firebase Hosting, ne GitHub
 Pages – znamenalo by to přestěhovat hosting.
 
-## Přihlášení na iOS a Androidu
+## Přihlášení a blokování vyskakovacích oken
 
-Výchozí je **vyskakovací okno** – funguje na Androidu i v prohlížeči na
-počítači. Když ho prohlížeč zablokuje (typicky iOS v režimu „přidáno na
-plochu"), aplikace přepne na **přesměrování**.
+Tohle je nejkřehčí místo celé synchronizace a stojí za to mu rozumět.
 
-Přesměrování prochází doménou `*.firebaseapp.com`, takže ho může trápit
-blokování cookies třetích stran. Proto je jen záložní cestou a ne výchozí.
+**Pravidlo prohlížečů:** vyskakovací okno smí otevřít jen kód běžící přímo
+v obsluze klepnutí. Jakékoli čekání na síť mezitím gesto „spotřebuje" a okno
+se zablokuje. Safari je v tomhle nejpřísnější.
+
+Do cesty se přitom pletou **dvě** čekání:
+
+1. **Naše** – dynamický import Firebase SDK. Řeší `preloadAuth()`, které SDK
+   načte už při otevření obrazovky účtu. Tlačítko je do té doby vypnuté
+   s popiskem „Připravuji přihlášení…".
+2. **Firebase** – SDK si před otevřením okna samo ověřuje původ stránky proti
+   autorizovaným doménám, což je další síťový požadavek. Proto `preloadAuth()`
+   volá i `getRedirectResult()`, které tuhle přípravu udělá dopředu.
+
+Teprve pak `signInWithGoogle()` otevírá okno **synchronně**, bez jediného
+`await` před sebou. Funkce proto záměrně není `async`.
+
+Když okno přesto zablokuje nastavení prohlížeče, zkusí se **přesměrování**.
+To ale prochází doménou `*.firebaseapp.com`, takže ho v Safari trápí blokování
+úložiště třetích stran – je to poslední záchrana, ne spolehlivá cesta.
+
+### Definitivní řešení, pokud iOS zlobí dál
+
+Přestěhovat hosting na **Firebase Hosting** (na plánu Spark zdarma)
+a nastavit `authDomain` na `golf.kubecka.cz`. Tím je přihlášení celé
+first-party: odpadá ověřování původu i blokování úložiště, funguje popup
+i přesměrování a z přihlašovací obrazovky Google zmizí `firebaseapp.com`.
+Cenou je přesun nasazení z GitHub Pages.
 
 ## Velikost stahovaných dat
 

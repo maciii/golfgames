@@ -1,16 +1,52 @@
+import type { Auth } from 'firebase/auth'
 import { loadFirebase } from './firebase'
 
 /**
  * Přihlášení účtem Google.
  *
- * Aplikace běží na iPhonu i Androidu a každý z nich se chová jinak:
+ * **Zásadní omezení prohlížečů:** vyskakovací okno smí otevřít jen kód, který
+ * běží přímo v obsluze klepnutí. Jakékoli čekání na síť mezitím (třeba
+ * dynamický import SDK) uživatelské gesto "spotřebuje" a Safari okno zablokuje.
+ * Proto se SDK **předem načte** (preloadAuth) a `signInWithGoogle()` pak popup
+ * otevírá synchronně, bez jediného `await` před ním.
  *
- * - **Vyskakovací okno** je výchozí cesta. Funguje na Androidu i v desktopu
- *   a nemusí procházet přes doménu Firebase, takže ho netrápí blokování
- *   cookies třetích stran.
- * - **Přesměrování** je záloha pro případ, že okno prohlížeč zablokuje -
- *   typicky iOS v režimu "přidáno na plochu".
+ * Přesměrování zůstává jako záloha pro případ, že okno zablokuje nastavení
+ * prohlížeče. Není výchozí cestou: prochází doménou `*.firebaseapp.com`,
+ * takže ho v Safari trápí blokování úložiště třetích stran.
  */
+
+type AuthModule = typeof import('firebase/auth')
+
+/** Připravené SDK. Dokud je null, popup se otevřít nedá. */
+let ready: { auth: Auth; module: AuthModule } | null = null
+let loading: Promise<{ auth: Auth; module: AuthModule }> | null = null
+
+/**
+ * Načte SDK dopředu, aby šel popup otevřít synchronně při klepnutí.
+ * Volá se při otevření obrazovky účtu.
+ */
+export function preloadAuth(): Promise<{ auth: Auth; module: AuthModule }> {
+  loading ??= (async () => {
+    const { auth } = await loadFirebase()
+    const module = await import('firebase/auth')
+
+    // Firebase si před otevřením okna samo ověřuje původ stránky proti
+    // autorizovaným doménám, a to je síťový požadavek. Kdyby na něj došlo až
+    // při klepnutí, spotřeboval by uživatelské gesto a prohlížeč by okno
+    // zablokoval. `getRedirectResult` tuhle přípravu udělá dopředu a zároveň
+    // vyzvedne případný návrat z přesměrování.
+    await module.getRedirectResult(auth).catch(() => null)
+
+    ready = { auth, module }
+    return ready
+  })()
+  return loading
+}
+
+/** Je SDK připravené? Podle toho se povoluje tlačítko přihlášení. */
+export function isAuthReady(): boolean {
+  return ready !== null
+}
 
 export interface Account {
   uid: string
@@ -19,7 +55,7 @@ export interface Account {
 }
 
 /** Chyby, na které umíme uživateli odpovědět srozumitelně. */
-export type SignInError = 'cancelled' | 'network' | 'unavailable' | 'unknown'
+export type SignInError = 'cancelled' | 'network' | 'unavailable' | 'notReady' | 'unknown'
 
 /** Kódy, které znamenají "uživatel to sám zavřel" - není co hlásit jako chybu. */
 const CANCELLED = [
@@ -43,6 +79,7 @@ function codeOf(error: unknown): string {
 
 export function describeSignInError(error: unknown): SignInError {
   const code = codeOf(error)
+  if (code === 'app/not-ready') return 'notReady'
   if (CANCELLED.includes(code)) return 'cancelled'
   if (code === 'auth/network-request-failed') return 'network'
   if (code.startsWith('auth/')) return 'unavailable'
@@ -64,22 +101,37 @@ function toAccount(user: {
 /**
  * Spustí přihlášení. Při úspěchu vrací účet; při přesměrování se stránka
  * načte znovu a účet dorazí až přes `watchAccount()`.
+ *
+ * Funkce **není async** a popup otevírá hned prvním příkazem - jinak by se
+ * ztratilo uživatelské gesto a prohlížeč by okno zablokoval. Když SDK ještě
+ * není načtené, vrací chybu `notReady` místo toho, aby na něj čekala.
  */
-export async function signInWithGoogle(): Promise<Account | null> {
-  const { auth } = await loadFirebase()
-  const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } =
-    await import('firebase/auth')
-  const provider = new GoogleAuthProvider()
-
-  try {
-    const credential = await signInWithPopup(auth, provider)
-    return toAccount(credential.user)
-  } catch (error) {
-    if (!POPUP_BLOCKED.includes(codeOf(error))) throw error
-    // Okno neprošlo - zkusíme přesměrování; návrat obslouží watchAccount().
-    await signInWithRedirect(auth, provider)
-    return null
+export function signInWithGoogle(): Promise<Account | null> {
+  if (!ready) {
+    // Načteme na příště, ale tenhle pokus zahodíme - čekáním bychom o gesto
+    // přišli a popup by neprošel.
+    void preloadAuth()
+    return Promise.reject(
+      Object.assign(new Error('SDK není načtené'), {
+        code: 'app/not-ready',
+      }),
+    )
   }
+
+  const { auth, module } = ready
+  const provider = new module.GoogleAuthProvider()
+
+  // Žádné `await` před tímhle řádkem. Tady se otevírá okno.
+  return module.signInWithPopup(auth, provider).then(
+    (credential) => toAccount(credential.user),
+    async (error: unknown) => {
+      if (!POPUP_BLOCKED.includes(codeOf(error))) throw error
+      // Okno zablokovalo nastavení prohlížeče - zkusíme přesměrování;
+      // návrat obslouží watchAccount().
+      await module.signInWithRedirect(auth, provider)
+      return null
+    },
+  )
 }
 
 export async function signOutAccount(): Promise<void> {

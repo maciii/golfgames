@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAccount } from '../sync/AccountContext'
 import { missingConfigKeys } from '../sync/firebase'
 import type { SignInError, SyncStatus } from '../sync/AccountContext'
@@ -22,6 +22,7 @@ const SIGN_IN_ERROR: Record<SignInError, string> = {
   cancelled: '',
   network: 'Přihlášení se nepovedlo kvůli připojení. Zkus to prosím znovu.',
   unavailable: 'Přihlášení se nepovedlo. Zkus to prosím znovu.',
+  notReady: 'Přihlášení se ještě připravuje, zkus to prosím za okamžik.',
   unknown: 'Něco se pokazilo. Zkus to prosím znovu.',
 }
 
@@ -38,12 +39,20 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
     account,
     lastSyncAt,
     signInError,
+    syncError,
+    authReady,
+    prepareSignIn,
     signIn,
     signOut,
     syncNow,
     deleteEverything,
   } = useAccount()
   const [busy, setBusy] = useState(false)
+
+  // SDK se načítá hned při otevření obrazovky, aby šlo přihlašovací okno
+  // otevřít přímo v obsluze klepnutí. Kdyby se načítalo až po klepnutí,
+  // prohlížeč by okno zablokoval jako nevyžádané.
+  useEffect(prepareSignIn, [prepareSignIn])
 
   async function run(action: () => Promise<unknown>) {
     setBusy(true)
@@ -104,12 +113,15 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
               <h2 className="section-title">Přihlášen</h2>
               <p className="account-name">{account.name}</p>
               {account.email && <p className="hint">{account.email}</p>}
-              <p className="notice">
+              <p className={`notice${status === 'error' ? ' error' : ''}`}>
                 {STATUS_TEXT[status]}
                 {lastSyncAt && status === 'synced' && (
                   <> Naposledy {lastSyncAt.toLocaleTimeString('cs-CZ')}.</>
                 )}
               </p>
+              {status === 'error' && syncError && (
+                <p className="notice error">{syncError}</p>
+              )}
               <button
                 type="button"
                 className="secondary-button"
@@ -164,10 +176,14 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
               <button
                 type="button"
                 className="primary-button"
-                disabled={busy || status === 'syncing'}
+                disabled={busy || status === 'syncing' || !authReady}
                 onClick={() => void run(signIn)}
               >
-                {status === 'syncing' ? 'Přihlašuji…' : 'Přihlásit se účtem Google'}
+                {status === 'syncing'
+                  ? 'Přihlašuji…'
+                  : authReady
+                    ? 'Přihlásit se účtem Google'
+                    : 'Připravuji přihlášení…'}
               </button>
               {signInError && (
                 <p className="notice error">{SIGN_IN_ERROR[signInError]}</p>

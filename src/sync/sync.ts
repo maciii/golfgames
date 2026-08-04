@@ -276,6 +276,36 @@ export async function deleteCloudData(uid: string): Promise<void> {
   writeQueue([])
 }
 
+/**
+ * Přeloží chybu ze synchronizace na větu, se kterou se dá něco dělat.
+ *
+ * Nejčastější příčiny nejsou v aplikaci, ale v nastavení projektu, takže
+ * obecné "nepovedlo se" je k ničemu - uživatel pak nemá kde začít.
+ */
+export function describeSyncError(error: unknown): string {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code: unknown }).code)
+      : ''
+
+  if (code.includes('permission-denied') || code.includes('PERMISSION_DENIED')) {
+    return 'Databáze odmítla přístup. Nejspíš nejsou nasazená pravidla – Firebase Console → Firestore Database → Rules.'
+  }
+  if (code.includes('not-found') || code.includes('NOT_FOUND')) {
+    return 'Databáze Firestore neexistuje. Vytvoř ji: Firebase Console → Build → Firestore Database → Create database.'
+  }
+  if (code.includes('unavailable')) {
+    return 'Databáze není dostupná. Buď není vytvořená, nebo se k ní nedá připojit.'
+  }
+  if (code.includes('unauthenticated')) {
+    return 'Přihlášení vypršelo. Odhlas se a přihlas znovu.'
+  }
+  if (code.includes('failed-precondition')) {
+    return 'Firestore hlásí, že projekt není připravený – zkontroluj, že je databáze vytvořená.'
+  }
+  return code ? `Chyba ${code}.` : 'Neznámá chyba při synchronizaci.'
+}
+
 /** Čas poslední změny kola - pro popis stavu v UI. */
 export function lastChangeOf(rounds: Round[]): number {
   return rounds.reduce((newest, round) => Math.max(newest, roundTimestamp(round)), 0)
