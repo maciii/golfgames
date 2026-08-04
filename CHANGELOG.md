@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.10.3] – 2026-08-04
+
+### Přidáno
+
+- **Veřejná stránka se zásadami zpracování údajů** na `/soukromi.html`.
+  Google při nastavení přihlášení vyžaduje odkaz na veřejnou adresu, kterou
+  obrazovka v aplikaci nemá. Obrazovka na ni teď odkazuje.
+
+### Opraveno
+
+- Build hlásil zastaralou volbu `advancedChunks`; nahrazena za `codeSplitting`.
+  Firebase zůstává ve vlastním chunku mimo předcachování, velikost beze změny.
+
 ## [0.10.1] – 2026-08-03
 
 ### Opraveno

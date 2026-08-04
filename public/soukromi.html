@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zpracování údajů · Golf Games</title>
+    <meta
+      name="description"
+      content="Zásady zpracování osobních údajů aplikace Golf Games."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <!--
+      Veřejná verze zásad zpracování údajů.
+
+      Existuje kvůli tomu, že Google při nastavení přihlášení (OAuth consent
+      screen) vyžaduje odkaz na veřejnou adresu; obrazovka v aplikaci žádnou
+      nemá, protože aplikace nemá router.
+
+      Text drž v souladu se `src/screens/PrivacyScreen.tsx` - jsou to dvě
+      podoby téhož dokumentu.
+    -->
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+        max-width: 40rem;
+        background: #0f1c14;
+        color: #eef4ef;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 28px 0 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #9fb4a6;
+      }
+      p,
+      li {
+        color: #cfe0d4;
+      }
+      .lead {
+        color: #9fb4a6;
+        margin: 0 0 8px;
+      }
+      a {
+        color: #34c46a;
+      }
+      footer {
+        margin-top: 40px;
+        padding-top: 16px;
+        border-top: 1px solid #24382b;
+        color: #9fb4a6;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Zpracování údajů</h1>
+    <p class="lead">
+      Golf Games – zápis golfového skóre, <a href="/">golf.kubecka.cz</a>
+    </p>
+
+    <h2>Bez přihlášení</h2>
+    <p>
+      Aplikace bez přihlášení neodesílá nikam nic. Všechna data – odehraná kola, jména
+      spoluhráčů i nastavení – zůstávají v úložišti prohlížeče ve vašem zařízení.
+      Neexistuje žádný účet ani server, který by o nich věděl.
+    </p>
+
+    <h2>S přihlášením</h2>
+    <p>
+      Když se přihlásíte účtem Google, ukládají se tato data do služby Google Firebase
+      (Firestore), aby byla zálohovaná a dostupná z dalších zařízení:
+    </p>
+    <ul>
+      <li>odehraná a rozehraná kola včetně skóre, hráčů a nastavení bodování</li>
+      <li>seznam uložených spoluhráčů</li>
+      <li>předvolby sázky a bodování</li>
+      <li>e-mail a jméno z účtu Google, aby šlo data přiřadit</li>
+    </ul>
+    <p>
+      Jména spoluhráčů zadává uživatel. Doporučujeme uvádět je tak, jak je běžné mezi
+      hráči – celé jméno není potřeba.
+    </p>
+
+    <h2>Kdo k datům má přístup</h2>
+    <p>
+      Jen vlastník účtu. Pravidla databáze jsou nastavená tak, že ke svým datům se dostane
+      výhradně přihlášený vlastník. Data se nikomu nepředávají, nepoužívají se k reklamě
+      ani k profilování. Zpracovatelem úložiště je Google Ireland Limited jako
+      provozovatel Firebase.
+    </p>
+
+    <h2>Jak dlouho</h2>
+    <p>
+      Dokud data uživatel sám nesmaže. Účet i všechna data v cloudu smaže tlačítkem
+      „Smazat účet a data v cloudu“ na obrazovce Účet. Smazání je okamžité a nevratné.
+    </p>
+
+    <h2>Práva uživatele</h2>
+    <p>
+      Uživatel má právo na přístup k údajům, jejich opravu, výmaz a přenositelnost.
+      Přístup i přenositelnost pokrývá tlačítko „Stáhnout zálohu“ na obrazovce Záloha dat,
+      které vydá všechna data v otevřeném formátu JSON. Opravit je lze přímo v aplikaci,
+      smazat tlačítkem výše.
+    </p>
+
+    <h2>Kontakt</h2>
+    <p>
+      Správcem údajů je provozovatel aplikace. S čímkoli ohledně zpracování se ozvěte na
+      <a href="mailto:martin@kubecka.cz">martin@kubecka.cz</a>.
+    </p>
+
+    <footer>
+      <a href="/">Zpět do aplikace</a>
+    </footer>
+  </body>
+</html>

@@ -95,6 +95,26 @@ přesměrovat jinam bez zásahu do kódu.
 **Blaze se nikdy nezapíná.** Bezplatný plán je pojistka proti tomu, aby projekt
 mohl začít stát peníze.
 
+## Název aplikace na přihlašovací obrazovce Google
+
+Text „Přihlášení do aplikace …" nepochází z kódu, ale z **OAuth consent
+screen** v Google Cloud Console. Firebase tam při založení projektu dosadí
+doménu `<projekt>.firebaseapp.com`, což vypadá cize.
+
+Změna: Google Cloud Console → projekt Firebase → _APIs & Services_ →
+_OAuth consent screen_ (novější rozhraní: _Branding_) → **App name**.
+Vyplnit i _Application home page_ (`https://golf.kubecka.cz`) a _Privacy
+policy link_ (`https://golf.kubecka.cz/soukromi.html`).
+
+Změna názvu u nesensitivních scopů (a `openid email profile` mezi ně patří)
+nevyžaduje ověření aplikace. **Nahrání loga ale ověření spustí**, takže logo
+nechávej prázdné, dokud ověřením projít nechceš.
+
+Doménu `golfgames-…firebaseapp.com` v adresním řádku přihlašovacího okna by
+odstranila až **vlastní auth doména**, která vyžaduje servírovat cestu
+`/__/auth/handler` z `golf.kubecka.cz`. To umí Firebase Hosting, ne GitHub
+Pages – znamenalo by to přestěhovat hosting.
+
 ## Přihlášení na iOS a Androidu
 
 Výchozí je **vyskakovací okno** – funguje na Androidu i v prohlížeči na

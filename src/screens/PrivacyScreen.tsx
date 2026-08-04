@@ -8,6 +8,10 @@ const CONTACT = 'martin@kubecka.cz'
  *
  * Nutné od chvíle, kdy aplikace umí ukládat data k účtu. Text je záměrně
  * krátký a konkrétní - popisuje přesně to, co aplikace dělá, nic navíc.
+ *
+ * Stejný dokument je i jako statická stránka `public/soukromi.html`, protože
+ * Google při nastavení přihlášení vyžaduje veřejnou adresu. Když se mění text,
+ * mění se na obou místech.
  */
 export default function PrivacyScreen({ onBack }: { onBack: () => void }) {
   return (
