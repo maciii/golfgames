@@ -86,7 +86,7 @@ export const en: Record<MessageKey, Message> = {
   'bonus.footerPlayer':
     'An extra point counts for the player who entered it. The value applies to par, a better result multiplies it according to the game settings; a bogey or worse scores nothing.',
   'bonus.double.name': 'Double stake',
-  'bonus.double.description': 'Doubles the stake on this hole.',
+  'bonus.double.description': 'Allows doubling the stake on the hole.',
   'bonus.longest.name': 'Longest',
   'bonus.longest.description': 'Longest drive; par 5 holes only, for a single player.',
   'bonus.nearest.name': 'Nearest',
@@ -112,6 +112,8 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.noOptions': 'This game has no additional scoring options.',
   'gameSettings.extraPoints': 'Extra points',
   'gameSettings.bonusValue': 'Value of the {name} bonus',
+  'gameSettings.decreaseValue': 'Decrease value: {name}',
+  'gameSettings.increaseValue': 'Increase value: {name}',
   'gameSettings.pointsSuffix': 'pts',
   'gameSettings.multipliers': 'Result multipliers',
   'gameSettings.multipliersHint':
@@ -125,7 +127,8 @@ export const en: Record<MessageKey, Message> = {
     'neither a double hole nor “double stake” multiplies extra points',
   'gameSettings.confirmLongest': 'Confirm Longest',
   'gameSettings.confirmNearest': 'Confirm Nearest',
-  'gameSettings.confirmNote': 'worse than par and the point goes to the opponents',
+  'gameSettings.confirmNote':
+    'with a result worse than PAR, the point goes to the opponents',
   'gameSettings.confirmPlayerNote': 'worse than par and the bonus scores nothing',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':

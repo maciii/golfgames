@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { BonusId, GameOptions, ResultTier } from '../types'
 import { BONUSES, RESULT_TIERS } from '../types'
 import { getGame } from '../games'
@@ -10,6 +10,64 @@ import type { MessageKey } from '../i18n'
 interface Props {
   gameId: string
   onBack: () => void
+}
+
+interface NumberControlProps {
+  value: string
+  suffix: string
+  inputLabel: string
+  decreaseLabel: string
+  increaseLabel: string
+  onChange: (value: string) => void
+  onBlur: () => void
+  onStep: (amount: number) => void
+}
+
+function NumberControl({
+  value,
+  suffix,
+  inputLabel,
+  decreaseLabel,
+  increaseLabel,
+  onChange,
+  onBlur,
+  onStep,
+}: NumberControlProps) {
+  return (
+    <span className="value-control">
+      <button
+        type="button"
+        className="value-step"
+        onClick={() => onStep(-1)}
+        aria-label={decreaseLabel}
+        title={decreaseLabel}
+      >
+        −
+      </button>
+      <input
+        className="name-input value-input"
+        type="text"
+        inputMode="decimal"
+        enterKeyHint="done"
+        autoComplete="off"
+        spellCheck={false}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        aria-label={inputLabel}
+      />
+      <button
+        type="button"
+        className="value-step"
+        onClick={() => onStep(1)}
+        aria-label={increaseLabel}
+        title={increaseLabel}
+      >
+        +
+      </button>
+      <span className="field-suffix">{suffix}</span>
+    </span>
+  )
 }
 
 /**
@@ -58,12 +116,31 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
     else update({ ...options, bonusValues: { ...options.bonusValues, [key]: value } })
   }
 
+  function stepValue(key: BonusId | 'doubleBest', amount: number) {
+    const current = parse(texts[key] ?? '')
+    setValue(key, `${Math.max(0, current + amount)}`)
+  }
+
+  function normalizeValue(key: BonusId | 'doubleBest') {
+    setValue(key, `${parse(texts[key] ?? '')}`)
+  }
+
   function setTier(tier: ResultTier, text: string) {
     setTexts((prev) => ({ ...prev, [`tier-${tier}`]: text }))
     update({
       ...options,
       resultMultipliers: { ...options.resultMultipliers, [tier]: parse(text) },
     })
+  }
+
+  function stepTier(tier: ResultTier, amount: number) {
+    const key = `tier-${tier}`
+    const current = parse(texts[key] ?? '')
+    setTier(tier, `${Math.max(0, current + amount)}`)
+  }
+
+  function normalizeTier(tier: ResultTier) {
+    setTier(tier, `${parse(texts[`tier-${tier}`] ?? '')}`)
   }
 
   const pointBonuses = BONUSES.filter(
@@ -77,8 +154,7 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
     game.supportsDoubleHoles ||
     scoring.noDoubleBonuses ||
     scoring.confirmLongest ||
-    scoring.confirmNearest ||
-    scoring.doubleBest
+    scoring.confirmNearest
   const hasScoringOptions =
     pointBonuses.length > 0 || scoring.resultMultipliers || hasOtherOptions
   const confirmNote =
@@ -106,27 +182,56 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
           <section className="section">
             <h2 className="section-title">{t('gameSettings.extraPoints')}</h2>
             {pointBonuses.map((bonus) => (
-              <label key={bonus.id} className="field">
-                <span className="field-label">
-                  {t(dynamicKey('bonus', bonus.id, 'name'))}
-                  <span className="field-note">
-                    {t(dynamicKey('bonus', bonus.id, 'description'))}
+              <Fragment key={bonus.id}>
+                <label className="field">
+                  <span className="field-label">
+                    {t(dynamicKey('bonus', bonus.id, 'name'))}
+                    <span className="field-note">
+                      {t(dynamicKey('bonus', bonus.id, 'description'))}
+                    </span>
                   </span>
-                </span>
-                <span className="field-input">
-                  <input
-                    className="name-input value-input"
-                    type="text"
-                    inputMode="decimal"
+                  <NumberControl
                     value={texts[bonus.id] ?? '0'}
-                    onChange={(e) => setValue(bonus.id, e.target.value)}
-                    aria-label={t('gameSettings.bonusValue', {
+                    suffix={t('gameSettings.pointsSuffix')}
+                    inputLabel={t('gameSettings.bonusValue', {
                       name: t(dynamicKey('bonus', bonus.id, 'name')),
                     })}
+                    decreaseLabel={t('gameSettings.decreaseValue', {
+                      name: t(dynamicKey('bonus', bonus.id, 'name')),
+                    })}
+                    increaseLabel={t('gameSettings.increaseValue', {
+                      name: t(dynamicKey('bonus', bonus.id, 'name')),
+                    })}
+                    onChange={(text) => setValue(bonus.id, text)}
+                    onBlur={() => normalizeValue(bonus.id)}
+                    onStep={(amount) => stepValue(bonus.id, amount)}
                   />
-                  <span className="field-suffix">{t('gameSettings.pointsSuffix')}</span>
-                </span>
-              </label>
+                </label>
+                {bonus.id === 'nearest' && scoring.doubleBest && (
+                  <label className="field">
+                    <span className="field-label">
+                      {t('gameSettings.doubleBest')}
+                      <span className="field-note">
+                        {t('gameSettings.doubleBestNote')}
+                      </span>
+                    </span>
+                    <NumberControl
+                      value={texts.doubleBest ?? '0'}
+                      suffix={t('gameSettings.pointsSuffix')}
+                      inputLabel={t('gameSettings.doubleBestValue')}
+                      decreaseLabel={t('gameSettings.decreaseValue', {
+                        name: t('gameSettings.doubleBest'),
+                      })}
+                      increaseLabel={t('gameSettings.increaseValue', {
+                        name: t('gameSettings.doubleBest'),
+                      })}
+                      onChange={(text) => setValue('doubleBest', text)}
+                      onBlur={() => normalizeValue('doubleBest')}
+                      onStep={(amount) => stepValue('doubleBest', amount)}
+                    />
+                  </label>
+                )}
+              </Fragment>
             ))}
           </section>
         )}
@@ -143,19 +248,22 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                     {t(dynamicKey('tier', tier.id, 'note'))}
                   </span>
                 </span>
-                <span className="field-input">
-                  <input
-                    className="name-input value-input"
-                    type="text"
-                    inputMode="decimal"
-                    value={texts[`tier-${tier.id}`] ?? '1'}
-                    onChange={(e) => setTier(tier.id, e.target.value)}
-                    aria-label={t('gameSettings.multiplierFor', {
-                      name: t(dynamicKey('tier', tier.id, 'name')),
-                    })}
-                  />
-                  <span className="field-suffix">×</span>
-                </span>
+                <NumberControl
+                  value={texts[`tier-${tier.id}`] ?? '1'}
+                  suffix="×"
+                  inputLabel={t('gameSettings.multiplierFor', {
+                    name: t(dynamicKey('tier', tier.id, 'name')),
+                  })}
+                  decreaseLabel={t('gameSettings.decreaseValue', {
+                    name: t(dynamicKey('tier', tier.id, 'name')),
+                  })}
+                  increaseLabel={t('gameSettings.increaseValue', {
+                    name: t(dynamicKey('tier', tier.id, 'name')),
+                  })}
+                  onChange={(text) => setTier(tier.id, text)}
+                  onBlur={() => normalizeTier(tier.id)}
+                  onStep={(amount) => stepTier(tier.id, amount)}
+                />
               </label>
             ))}
           </section>
@@ -246,26 +354,6 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 <span>
                   {t('gameSettings.confirmNearest')}
                   <em> {confirmNote}</em>
-                </span>
-              </label>
-            )}
-
-            {scoring.doubleBest && (
-              <label className="field">
-                <span className="field-label">
-                  {t('gameSettings.doubleBest')}
-                  <span className="field-note">{t('gameSettings.doubleBestNote')}</span>
-                </span>
-                <span className="field-input">
-                  <input
-                    className="name-input value-input"
-                    type="text"
-                    inputMode="decimal"
-                    value={texts.doubleBest ?? '0'}
-                    onChange={(e) => setValue('doubleBest', e.target.value)}
-                    aria-label={t('gameSettings.doubleBestValue')}
-                  />
-                  <span className="field-suffix">{t('gameSettings.pointsSuffix')}</span>
                 </span>
               </label>
             )}

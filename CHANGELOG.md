@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.13.1] – 2026-08-04
+
+### Změněno
+
+- Nastavení bodování používá na mobilu dotykové ovladače `− / hodnota / +`;
+  ruční desetinné zadání zůstává možné a po opuštění se normalizuje.
+- Double Best je v nastavení bodování zařazený mezi Nearest a Bunker, tedy
+  společně s hodnotami extra bodů.
+- Popis potvrzování Longest a Nearest přesněji říká, že při výsledku horším
+  než PAR bod propadá soupeřům.
+
 ## [0.13.0] – 2026-08-04
 
 ### Přidáno
@@ -24,6 +35,10 @@ jen verze s věcnou změnou.
 
 ### Změněno
 
+- Nastavení bodování používá na mobilu dotykové ovladače `− / hodnota / +`;
+  ruční desetinné zadání zůstává možné a po opuštění se normalizuje.
+- Double Best je v nastavení bodování zařazený mezi Nearest a Bunker, tedy
+  společně s hodnotami extra bodů.
 - České popisky výsledků používají názvy `Doble` a `Triple` místo výrazů
   Dvojbogey a Trojbogey.
 - Skins scorecard jemně podbarvuje celé buňky všech jamek, jejichž skiny byly

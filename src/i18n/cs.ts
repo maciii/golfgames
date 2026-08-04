@@ -92,7 +92,7 @@ export const cs = {
   'bonus.footerPlayer':
     'Extra bod se počítá hráči, který ho zapsal. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení hry; při bogey a horším se nepočítá.',
   'bonus.double.name': 'Dvojnásobná sázka',
-  'bonus.double.description': 'Zdvojnásobí sázku na této jamce.',
+  'bonus.double.description': 'Umožňuje zdvojnásobit sázku na jamce.',
   'bonus.longest.name': 'Longest',
   'bonus.longest.description':
     'Nejdelší odpal; jen na pětiparových jamkách, pro jednoho hráče.',
@@ -121,6 +121,8 @@ export const cs = {
   'gameSettings.noOptions': 'Tahle hra nemá další volby bodování.',
   'gameSettings.extraPoints': 'Extra body',
   'gameSettings.bonusValue': 'Hodnota bonusu {name}',
+  'gameSettings.decreaseValue': 'Snížit hodnotu: {name}',
+  'gameSettings.increaseValue': 'Zvýšit hodnotu: {name}',
   'gameSettings.pointsSuffix': 'b.',
   'gameSettings.multipliers': 'Násobiče za výsledek',
   'gameSettings.multipliersHint':
@@ -134,7 +136,7 @@ export const cs = {
     'dvojnásobná jamka ani „dvojnásobná sázka“ nenásobí extra body',
   'gameSettings.confirmLongest': 'Potvrzovat Longest',
   'gameSettings.confirmNearest': 'Potvrzovat Nearest',
-  'gameSettings.confirmNote': 'při horším než par bod propadá soupeřům',
+  'gameSettings.confirmNote': 'při horším výsledku než PAR bod propadá soupeřům',
   'gameSettings.confirmPlayerNote': 'při horším než par se bonus nepočítá',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':

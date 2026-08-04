@@ -774,10 +774,13 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
 .field-label {
+  flex: 1 1 180px;
+  min-width: 0;
   font-size: 15px;
 }
 
@@ -792,10 +795,67 @@ button {
   text-align: right;
 }
 
+.value-control {
+  display: grid;
+  grid-template-columns: 48px 76px 48px auto;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.value-control .value-input {
+  width: 76px;
+  min-height: 48px;
+  padding: 0 8px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.value-step {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.value-step:active {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+.value-step:focus-visible,
+.value-control .value-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .field-suffix {
   font-size: 15px;
   color: var(--text-dim);
   min-width: 20px;
+}
+
+@media (max-width: 480px) {
+  .field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .field-label {
+    flex-basis: auto;
+  }
+
+  .value-control {
+    align-self: flex-end;
+  }
 }
 
 .switch {
