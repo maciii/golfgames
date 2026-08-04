@@ -97,6 +97,11 @@ export const cs = {
   'play.plus': '{name}: přidat ránu, z prázdné buňky bogey',
   'play.hint':
     'Klepnutím doprostřed zapíšeš par ({par}), tlačítkem − birdie a tlačítkem + bogey. Přidržením čísla zápis smažeš.',
+  'play.strokesReceived': {
+    one: 'Na téhle jamce dostává {count} ránu',
+    few: 'Na téhle jamce dostává {count} rány',
+    other: 'Na téhle jamce dostává {count} ran',
+  },
   'play.standings': 'Průběžné výsledky',
   'play.finish': 'Ukončit kolo',
   'play.account': 'Účet a záloha',
@@ -426,6 +431,9 @@ export const cs = {
   'stableford.headerNetNote': 'Netto body podle stroke indexu jamky.',
 
   // Zadání hřiště
+  'scorecard.strokeIndex': 'Stroke index jamky',
+  'scorecard.strokeIndexShort': 'SI',
+
   'course.newTitle': 'Nové hřiště',
   'course.editTitle': 'Úprava hřiště',
   'course.name': 'Název',

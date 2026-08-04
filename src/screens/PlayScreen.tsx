@@ -20,6 +20,7 @@ import {
   teamPlayers,
 } from '../types'
 import { getGame } from '../games'
+import { strokesReceived } from '../handicap'
 import BonusSheet from './BonusSheet'
 import { useT } from '../i18n'
 
@@ -170,6 +171,18 @@ export default function PlayScreen({
                 {mark.text}
               </span>
             ))}
+            {/* Rány, které hráč na téhle jamce dostává. Bez toho není poznat,
+                proč má za stejný počet ran jiný výsledek než soupeř. */}
+            {strokesReceived(round, player.id, hole) > 0 && (
+              <span
+                className="player-mark strokes"
+                title={t('play.strokesReceived', {
+                  count: strokesReceived(round, player.id, hole),
+                })}
+              >
+                {'•'.repeat(Math.min(3, strokesReceived(round, player.id, hole)))}
+              </span>
+            )}
           </span>
           <span className="player-total">
             {played === 0

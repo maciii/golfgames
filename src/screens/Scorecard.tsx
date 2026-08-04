@@ -9,6 +9,7 @@ import {
 } from '../types'
 import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
 import { getGame } from '../games'
+import { isNetRound, roundStrokeIndex } from '../handicap'
 import { dynamicKey, useT } from '../i18n'
 
 /**
@@ -116,6 +117,13 @@ export default function Scorecard({ round }: { round: Round }) {
   )
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
 
+  // Stroke index se ukazuje jen u netto kola - u hrubého je to sloupec navíc
+  // s číslem, které na nic nemá vliv, a mřížka je na telefonu úzká.
+  const showStrokeIndex = isNetRound(round)
+  const strokeIndex = roundStrokeIndex(round)
+  /** Kolik sloupců stojí před hráči: jamka, par a případně SI. */
+  const leadingColumns = showStrokeIndex ? 3 : 2
+
   // Nadřazený řádek se jmény dvojic; každá zabírá své hráče i sloupec bodů.
   const teamGroups = round.teams.map((team) => ({
     name: teamName(round, team),
@@ -138,7 +146,7 @@ export default function Scorecard({ round }: { round: Round }) {
           <thead>
             {teamGroups.length > 0 && (
               <tr className="group-row">
-                <th scope="col" colSpan={2} />
+                <th scope="col" colSpan={leadingColumns} />
                 {teamGroups.map((group) => (
                   <th key={group.name} scope="colgroup" colSpan={group.span}>
                     {group.name}
@@ -151,6 +159,11 @@ export default function Scorecard({ round }: { round: Round }) {
               {/* Sloupec jamek má zkratku, na plné slovo v mřížce není místo. */}
               <th scope="col">{t('scorecard.holeShort')}</th>
               <th scope="col">{t('scorecard.par')}</th>
+              {showStrokeIndex && (
+                <th scope="col" title={t('scorecard.strokeIndex')}>
+                  {t('scorecard.strokeIndexShort')}
+                </th>
+              )}
               {columns.map((column) =>
                 column.kind === 'player' ? (
                   <th
@@ -180,6 +193,9 @@ export default function Scorecard({ round }: { round: Round }) {
               <tr key={hole}>
                 <th scope="row">{hole + 1}</th>
                 <td className="par-cell">{parAt(round, hole)}</td>
+                {showStrokeIndex && (
+                  <td className="par-cell si-cell">{strokeIndex[hole] ?? hole + 1}</td>
+                )}
                 {columns.map((column) => {
                   if (column.kind === 'player') {
                     const decoration = game.scorecardPlayerCell?.(
@@ -223,6 +239,7 @@ export default function Scorecard({ round }: { round: Round }) {
             <tr>
               <th scope="row">Σ</th>
               <td className="par-cell">{parTotal}</td>
+              {showStrokeIndex && <td className="par-cell si-cell" />}
               {columns.map((column) => {
                 if (column.kind === 'player') {
                   return (
@@ -247,7 +264,11 @@ export default function Scorecard({ round }: { round: Round }) {
             </tr>
             {playerTotals.size > 0 && (
               <tr className="scorecard-game-total-row">
-                <th scope="row" colSpan={2} className="scorecard-total-label">
+                <th
+                  scope="row"
+                  colSpan={leadingColumns}
+                  className="scorecard-total-label"
+                >
                   {t('scorecard.gameTotal')}
                 </th>
                 {columns.map((column) => {

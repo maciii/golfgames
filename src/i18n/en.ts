@@ -87,6 +87,10 @@ export const en: Record<MessageKey, Message> = {
   'play.plus': '{name}: one stroke more, bogey from an empty cell',
   'play.hint':
     'Tap the middle to enter par ({par}), − for a birdie and + for a bogey. Press and hold the number to clear it.',
+  'play.strokesReceived': {
+    one: 'Receives {count} stroke on this hole',
+    other: 'Receives {count} strokes on this hole',
+  },
   'play.standings': 'Current standings',
   'play.finish': 'Finish round',
   'play.account': 'Account and backup',
@@ -407,6 +411,9 @@ export const en: Record<MessageKey, Message> = {
   'stableford.headerNetNote': 'Net points based on the stroke index of the hole.',
 
   // Course editor
+  'scorecard.strokeIndex': 'Stroke index of the hole',
+  'scorecard.strokeIndexShort': 'SI',
+
   'course.newTitle': 'New course',
   'course.editTitle': 'Edit course',
   'course.name': 'Name',
