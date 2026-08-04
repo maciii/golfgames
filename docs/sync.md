@@ -20,8 +20,20 @@ users/{uid}/rounds/{roundId}   celé kolo jako JSON
 users/{uid}/prefs/app          hráči, sázka a volby bodování
 ```
 
-Jedno kolo = jeden dokument. `Round` je serializovatelný do JSON, takže se
-ukládá tak, jak je, bez mapování na tabulky.
+Jedno kolo = jeden dokument, bez mapování na tabulky.
+
+**Jedna výjimka: Firestore neumí pole uvnitř pole.** `Round.bonuses` je
+`bonuses[hráč][jamka] = seznam bonusů`, tedy pole polí, a přímý zápis skončí
+chybou `invalid-argument`. V dokumentu se proto jamky ukládají jako mapa:
+
+```
+v aplikaci   bonuses.p1 = [[], ['longest'], []]
+v dokumentu  bonuses.p1 = { "1": ['longest'] }
+```
+
+Převod tam i zpět je v [`src/sync/document.ts`](../src/sync/document.ts) jako
+čisté funkce s testy. Přibude-li do modelu další pole polí, musí projít stejnou
+cestou.
 
 Rozehrané kolo není nic zvláštního – je to obyčejné kolo bez `finishedAt`.
 Na novém zařízení se pozná právě podle toho (`pickCurrentRound()`).

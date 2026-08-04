@@ -15,6 +15,7 @@ import {
   saveSettings,
 } from '../storage'
 import { mergeRosters } from '../backup'
+import { fromDocument, toDocument } from './document'
 import { finishedRounds, mergeRounds, pickCurrentRound } from './merge'
 import { loadFirebase } from './firebase'
 
@@ -60,15 +61,6 @@ function writeQueue(ids: string[]): void {
   }
 }
 
-/**
- * Firestore neumí uložit `undefined`. Kolo je navržené jako serializovatelné
- * do JSON, takže průchod JSONem je zároveň nejjednodušší způsob, jak se
- * nedefinovaných hodnot zbavit.
- */
-function toDocument(round: Round): Record<string, unknown> {
-  return JSON.parse(JSON.stringify(round)) as Record<string, unknown>
-}
-
 /** Všechna místní kola: rozehrané i archiv, bez duplicit. */
 function localRounds(): Round[] {
   const current = loadCurrentRound()
@@ -85,7 +77,7 @@ async function fetchRounds(uid: string): Promise<Round[]> {
 
   const snapshot = await getDocs(collection(db, 'users', uid, 'rounds'))
   return snapshot.docs
-    .map((entry) => entry.data() as unknown)
+    .map((entry) => fromDocument(entry.data()))
     .filter(isValidRound)
     .map(normalizeRound)
 }

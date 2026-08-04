@@ -85,6 +85,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
   `row.value` se předává do `settleRound()` jako počet jednotek.
 - **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
+- **Firestore neumí pole uvnitř pole.** `Round.bonuses` je
+  `bonuses[hráč][jamka]`, tedy pole polí, a přímý zápis skončí chybou
+  `invalid-argument`. Převod do mapové podoby a zpět je v `src/sync/document.ts`.
+  Když do modelu přibude další pole polí, musí projít stejnou cestou.
 - **Firebase se nesmí dostat do hlavního bundlu.** Načítá se dynamickým
   importem až při přihlášení a je vynechané z předcachování service workerem.
   Statický `import` z `firebase/*` mimo `src/sync/` tohle rozbije.

@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.11.1] – 2026-08-04
+
+### Opraveno
+
+- **Synchronizace končila chybou `invalid-argument`.** Firestore neumí uložit
+  pole uvnitř pole a `Round.bonuses` (extra body podle hráče a jamky) přesně
+  takové je. V dokumentu se jamky nově ukládají jako mapa klíčovaná číslem
+  jamky; převod tam i zpět je v `src/sync/document.ts` a hlídá ho deset testů
+  včetně kontroly, že v dokumentu žádné pole v poli nezůstane.
+
 ## [0.11.0] – 2026-08-04
 
 ### Opraveno
