@@ -434,6 +434,8 @@ export const en: Record<MessageKey, Message> = {
   'course.teeNamePlaceholder': 'e.g. yellow',
   'course.courseRating': 'CR',
   'course.slopeRating': 'SR',
+  'course.courseRatingFor': 'Course Rating of the {tee} tee',
+  'course.slopeRatingFor': 'Slope Rating of the {tee} tee',
   'course.addTee': 'Add tee',
   'course.removeTee': 'Remove tee',
   'course.delete': 'Delete course',

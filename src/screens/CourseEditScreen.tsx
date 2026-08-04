@@ -19,6 +19,12 @@ import { useT } from '../i18n'
 const PAR_OPTIONS = [3, 4, 5]
 const HOLE_OPTIONS = [9, 18]
 
+/** Rozepsaná norma odpaliště tak, jak ji uživatel právě píše. */
+interface RatingText {
+  cr: string
+  sr: string
+}
+
 interface Props {
   /** Upravované hřiště; bez něj se zakládá nové. */
   course?: Course
@@ -31,6 +37,26 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
   const t = useT()
   const [draft, setDraft] = useState<Course>(() => course ?? createCourse('', 18))
   const [nameError, setNameError] = useState(false)
+
+  /**
+   * Normy odpališť se drží zvlášť jako text.
+   *
+   * Kdyby se pole řídilo přímo číslem z modelu, nešlo by zadat desetinnou
+   * hodnotu: po napsání "71." vrátí parsování 71, pole se překreslí bez tečky
+   * a další číslice se nemá kam připsat. Model dostává rozparsovanou hodnotu,
+   * uživatel vidí přesně to, co napsal.
+   */
+  const [ratingText, setRatingText] = useState<Record<string, RatingText>>(() =>
+    Object.fromEntries(
+      (course?.tees ?? []).map((tee) => [
+        tee.id,
+        {
+          cr: tee.courseRating === undefined ? '' : `${tee.courseRating}`,
+          sr: tee.slopeRating === undefined ? '' : `${tee.slopeRating}`,
+        },
+      ]),
+    ),
+  )
 
   function setHoleCount(holeCount: number) {
     setDraft((prev) => ({
@@ -94,10 +120,37 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
     setDraft((prev) => ({ ...prev, tees: prev.tees.filter((_, i) => i !== index) }))
   }
 
-  /** Číslo z pole; prázdné pole znamená "neznámé", ne nulu. */
+  /**
+   * Číslo z pole; prázdné nebo rozepsané pole znamená "neznámé", ne nulu.
+   * Desetinná čárka i tečka, ať jde 71,2 napsat podle zvyku.
+   */
   function parseNumber(text: string): number | undefined {
     const value = Number.parseFloat(text.replace(',', '.'))
     return Number.isFinite(value) ? value : undefined
+  }
+
+  /** Text normy tak, jak ho uživatel napsal. */
+  function ratingOf(tee: CourseTee, field: keyof RatingText): string {
+    const stored = ratingText[tee.id]?.[field]
+    if (stored !== undefined) return stored
+    const value = field === 'cr' ? tee.courseRating : tee.slopeRating
+    return value === undefined ? '' : `${value}`
+  }
+
+  function updateRating(index: number, field: keyof RatingText, text: string) {
+    const tee = draft.tees[index]
+    if (!tee) return
+
+    setRatingText((prev) => ({
+      ...prev,
+      [tee.id]: { cr: ratingOf(tee, 'cr'), sr: ratingOf(tee, 'sr'), [field]: text },
+    }))
+    updateTee(
+      index,
+      field === 'cr'
+        ? { courseRating: parseNumber(text) }
+        : { slopeRating: parseNumber(text) },
+    )
   }
 
   function save() {
@@ -247,10 +300,10 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
                       className="name-input value-input"
                       type="text"
                       inputMode="decimal"
-                      value={tee.courseRating ?? ''}
-                      onChange={(e) =>
-                        updateTee(index, { courseRating: parseNumber(e.target.value) })
-                      }
+                      autoComplete="off"
+                      value={ratingOf(tee, 'cr')}
+                      onChange={(e) => updateRating(index, 'cr', e.target.value)}
+                      aria-label={t('course.courseRatingFor', { tee: tee.name })}
                     />
                   </span>
                 </label>
@@ -261,10 +314,10 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
                       className="name-input value-input"
                       type="text"
                       inputMode="numeric"
-                      value={tee.slopeRating ?? ''}
-                      onChange={(e) =>
-                        updateTee(index, { slopeRating: parseNumber(e.target.value) })
-                      }
+                      autoComplete="off"
+                      value={ratingOf(tee, 'sr')}
+                      onChange={(e) => updateRating(index, 'sr', e.target.value)}
+                      aria-label={t('course.slopeRatingFor', { tee: tee.name })}
                     />
                   </span>
                 </label>

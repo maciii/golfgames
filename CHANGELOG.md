@@ -7,6 +7,21 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.14.1] – 2026-08-04
+
+### Opraveno
+
+- **Course Rating nešel zadat jako desetinné číslo.** Pole se řídilo přímo
+  číslem z modelu, takže se rozepsaná hodnota „71." hned převedla na 71
+  a tečka zmizela dřív, než šlo dopsat desetinnou část. Normy odpališť se
+  teď drží jako text a do modelu jde rozparsovaná hodnota; funguje desetinná
+  tečka i čárka.
+
+### Přidáno
+
+- [`docs/import-hrist.md`](docs/import-hrist.md) – návod a vzor pro hromadné
+  nahrání vlastní databáze hřišť souborem ve formátu zálohy.
+
 ## [0.14.0] – 2026-08-04
 
 ### Přidáno

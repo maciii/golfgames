@@ -454,6 +454,8 @@ export const cs = {
   'course.teeNamePlaceholder': 'Např. žlutá',
   'course.courseRating': 'CR',
   'course.slopeRating': 'SR',
+  'course.courseRatingFor': 'Course Rating odpaliště {tee}',
+  'course.slopeRatingFor': 'Slope Rating odpaliště {tee}',
   'course.addTee': 'Přidat odpaliště',
   'course.removeTee': 'Odebrat odpaliště',
   'course.delete': 'Smazat hřiště',
