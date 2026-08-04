@@ -8,8 +8,10 @@ poprvé. Čti ho celý, než začneš měnit kód.
 
 PWA pro zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých
 golfových her (Best Aggregate, Skins, Match play) včetně peněžního vyrovnání
-sázky. React 19 + TypeScript 7 + Vite 8, bez backendu, hostovaná zdarma na
-GitHub Pages.
+sázky. React 19 + TypeScript 7 + Vite 8, hostovaná zdarma na GitHub Pages.
+Vlastní backend nemá – data drží `localStorage` a jedinou serverovou částí je
+**nepovinná** záloha do Firestore po přihlášení účtem Google. Uživatelské
+rozhraní je česky a anglicky.
 
 ## Kde je co napsané
 
@@ -66,8 +68,9 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
    jako `Record<MessageKey, Message>`, takže chybějící překlad neprojde
    překladem. Kód a identifikátory zůstávají anglicky.
 8. **Komentáře vysvětlují proč, ne co.** Co dělá řádek, je vidět z kódu.
-9. **Nepřidávej závislosti bez důvodu.** Runtime závislosti jsou dneska jen
-   `react` a `react-dom` a je to záměr.
+9. **Nepřidávej závislosti bez důvodu.** Runtime závislosti jsou dneska
+   `react`, `react-dom` a `firebase` a je to záměr. Firebase je navíc jediná,
+   která se nedostane do hlavního bundlu (viz níž).
 
 ## Nejčastější zdroje chyb
 
@@ -115,9 +118,10 @@ src/
   sync/        nepovinná záloha do Firestore (líné načtení SDK)
   i18n/        překlady: cs.ts je zdroj pravdy pro klíče, en.ts musí sedět
   games/       pravidla her (GameDefinition), registr v index.ts
-  screens/     UI, česky psané texty
-docs/          architektura, pravidla, rozhodnutí, nasazení
+  screens/     UI; žádné texty natvrdo, všechno přes useT()
+docs/          architektura, pravidla, rozhodnutí, nasazení, synchronizace
 scripts/       zvedání verze, generátor PWA ikon
+firestore.rules  pravidla zabezpečení databáze (nasazují se z konzole Firebase)
 ```
 
 ## Kontext, který z kódu není vidět
@@ -126,8 +130,11 @@ scripts/       zvedání verze, generátor PWA ikon
   Velká tlačítka, žádná klávesnice, plochá navigace bez routeru – všechno je
   podřízené tomuhle.
 - **Offline provoz je požadavek, ne bonus.** Na hřišti nemusí být signál.
-- Data zůstávají v telefonu, žádný účet a žádná synchronizace. Kdyby jednou
-  bylo potřeba přenést kola jinam, správná odpověď je export/import JSON,
-  ne server.
+- **Nepřihlášený uživatel je výchozí případ, ne okrajový.** Přihlášení nikdy
+  nesmí být podmínkou čehokoli a nikam se netlačí. Když chybí konfigurace
+  Firebase, aplikace o účtu ani nemluví a je plně funkční – takhle se dá
+  postavit i z forku bez jediného tajemství.
+- Data drží `localStorage` a cloud je jen zrcadlo. Když se výpadek cloudu
+  projeví na rozehraném kole, je to chyba v návrhu, ne v síti.
 - Hraje se o peníze, takže **chyba v bodování je nejdražší chyba v projektu**.
   Proto testy pokrývají matematiku a ne komponenty.

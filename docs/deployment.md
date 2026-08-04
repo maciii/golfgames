@@ -32,6 +32,40 @@ výsledek.
    deploy skončí hláškou `Branch "main" is not allowed to deploy to
 github-pages due to environment protection rules`.
 
+## Konfigurace Firebase při buildu
+
+Synchronizace potřebuje čtyři proměnné prostředí. Build je bere ze **Secrets
+i z Variables** (`${{ secrets.X || vars.X }}`), protože webová konfigurace
+Firebase je veřejná z principu – zabezpečení stojí na `firestore.rules`, ne na
+utajení klíče. Je proto jedno, kam si je uložíš.
+
+| Proměnná                    |
+| --------------------------- |
+| `VITE_FIREBASE_API_KEY`     |
+| `VITE_FIREBASE_AUTH_DOMAIN` |
+| `VITE_FIREBASE_PROJECT_ID`  |
+| `VITE_FIREBASE_APP_ID`      |
+
+**Musí být na úrovni repozitáře** – Settings → Secrets and variables →
+Actions, záložka _Secrets_ nebo _Variables_. Uložené v konkrétním
+**Environment** je build job neuvidí, protože žádné prostředí nepoužívá.
+Tohle je nejčastější chyba a projeví se tiše: aplikace se postaví a funguje,
+jen v ní chybí přihlášení.
+
+Poznat to jde bez hádání. Krok **Kontrola konfigurace Firebase** vypíše u každé
+proměnné `vyplněno, N znaků`, nebo `CHYBÍ` (hodnoty se do logu nikdy netisknou,
+jen délka). Totéž hlásí i obrazovka Účet přímo v aplikaci, když konfigurace
+chybí.
+
+Bez proměnných je build plně funkční, jen bez sekce s účtem – fork se tak dá
+postavit bez jediného tajemství.
+
+Lokálně se hodnoty berou z `.env.local` (vzor je v
+[`.env.example`](../.env.example), `.env.local` je v `.gitignore`).
+
+Zbytek nastavení Firebase – projekt, poskytovatel Google, autorizované domény,
+databáze a pravidla – popisuje [`sync.md`](sync.md).
+
 ## DNS
 
 U poskytovatele domény `kubecka.cz`:
@@ -90,10 +124,12 @@ takže to není krok pro půlku kola.
 | 404 na assety, aplikace bez stylů               | `base` neodpovídá adrese, na které to běží                    |
 | Deploy skončí na `environment protection rules` | větev `main` není povolená pro prostředí `github-pages`       |
 | Doména hlásí certifikát pro `github.io`         | Enforce HTTPS ještě nedoběhlo, případně chybí `public/CNAME`  |
+| V aplikaci chybí přihlášení                     | proměnné `VITE_FIREBASE_*` nedorazily do buildu (viz výš)     |
 
 Hláška „Aplikaci se nepodařilo načíst" je záměrná pojistka v
 [`index.html`](../index.html): kdyby se hlavní skript nenačetl, uživatel uvidí
-vysvětlení místo prázdné obrazovky.
+vysvětlení místo prázdné obrazovky. Je dvojjazyčná natvrdo – běží dřív, než se
+načte aplikace, takže v ní zvolený jazyk ještě není k dispozici.
 
 ## Lokální ověření produkčního buildu
 

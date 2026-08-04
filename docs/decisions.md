@@ -357,7 +357,7 @@ Postup nastavení DNS a Pages je v [`deployment.md`](deployment.md).
 
 ---
 
-## 21. Vlastní i18n místo knihovny
+## 20. Vlastní i18n místo knihovny
 
 **Rozhodnutí.** Češtinu a angličtinu drží `src/i18n/` - vlastních ~250 řádků
 místo `i18next` nebo podobné knihovny.
@@ -392,10 +392,14 @@ Věci, o kterých padlo rozhodnutí je odložit:
   u hráče, HCP jamky (SI) a přepočet ve všech hrách.
 - **Rozdělení Longest/Nearest u her jednotlivců.** Potvrzovací pravidlo mluví
   o „soupeřově dvojici", takže dnes dává smysl jen u týmových her.
-- **Export a import dat.** Zatím nepotřebné, ale je to nejlevnější náhrada
-  synchronizace, kdyby jednou byla potřeba.
 - **Extra body v ostatních hrách.** Model je připravený, vyhodnocuje je zatím
   jen Best Aggregate.
+- **Sdílená kola mezi hráči.** Synchronizace dnes zálohuje data jednoho účtu.
+  Aby viděli kolo všichni zúčastnění, potřebovalo by se řešit pozvání,
+  oprávnění a souběžný zápis – to je řádově větší úloha než dnešní zrcadlo.
+- **Vlastní hosting Firebase.** Přesun z GitHub Pages na Firebase Hosting by
+  z přihlašovací obrazovky Google odstranil doménu `firebaseapp.com`. Pořád
+  zdarma, ale je to zásah do celého nasazovacího řetězce.
 - **Další jazyky.** Přidání je jen nový katalog vedle `cs.ts` a `en.ts`; kód
   se měnit nemusí. Zatím na ně není poptávka.
 - **Další měny.** Sázka umí Kč a €. S angličtinou by dávaly smysl i libry

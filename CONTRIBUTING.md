@@ -58,10 +58,12 @@ src/
     index.tsx         kontext, useT(), detekce jazyka
     plural.ts         množná čísla přes Intl.PluralRules
   sync/               nepovinná záloha do Firestore přes účet Google
-    firebase.ts       líné načtení SDK
-    auth.ts           přihlášení Googlem
+    firebase.ts       líné načtení SDK, kontrola konfigurace
+    auth.ts           přihlášení Googlem (předehřátí kvůli blokování popupů)
     merge.ts          čisté funkce slučování
+    document.ts       převod Round na dokument Firestore a zpět
     sync.ts           pull/push a fronta neodeslaných změn
+    AccountContext.tsx  stav účtu a synchronizace pro celou aplikaci
   version.ts          verze vpečená při buildu
   styles.css          jediný stylopis, barvy jako CSS proměnné
   games/              pravidla jednotlivých her
@@ -83,6 +85,8 @@ src/
     BackupScreen.tsx      záloha dat do souboru a obnova z něj
     AccountScreen.tsx     přihlášení, stav synchronizace, smazání účtu
     PrivacyScreen.tsx     zásady zpracování údajů
+firestore.rules       pravidla zabezpečení databáze (nasazují se z konzole)
+.env.example          vzor konfigurace Firebase pro lokální vývoj
 scripts/
   bump-version.mjs    zvedání verze
   gen-icons.mjs       generátor PWA ikon (bez závislostí)
@@ -112,8 +116,10 @@ nový soubor v `src/games/`, zápis do registru, testy, odstavec v dokumentaci.
 - Pravidla her žijí výhradně v `src/games/`. Obrazovky o konkrétní hře nic
   nevědí, jen vykreslí, co dostanou z `computeStandings()`.
 - `Round` musí zůstat serializovatelný do JSON – ukládá se tak, jak je.
-- Nové runtime závislosti jen s dobrým důvodem; zatím jsou to `react`
-  a `react-dom`.
+- Nové runtime závislosti jen s dobrým důvodem; zatím jsou to `react`,
+  `react-dom` a `firebase`. Firebase se smí importovat **jen dynamicky
+  a jen ze `src/sync/`** – statický import ji vtáhne do hlavního bundlu, který
+  stahuje i nepřihlášený uživatel.
 
 ## Proč tu není ESLint
 
@@ -140,7 +146,12 @@ peníze nejvyšší a chyba v bodování je nejdražší.
   přidělení Longestu a Nearestu
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 - `src/sync/merge.test.ts` – slučování při synchronizaci
+- `src/sync/document.test.ts` – tvar dokumentu pro Firestore (žádné pole
+  uvnitř pole)
 - `src/i18n/i18n.test.ts` – úplnost katalogů a chování překladu
+
+Testy, které ověřují konkrétní znění textu, si musí nastavit jazyk
+(`setActiveLocale('cs')` v `beforeAll`) – Node jinak hlásí angličtinu.
 
 Pomocník `makeRound` z `src/games/fixtures.ts` postaví kolo s předvyplněnými
 pary a skóre. Testy základních pravidel používají `BASE_OPTIONS` s vypnutými

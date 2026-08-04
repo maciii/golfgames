@@ -92,6 +92,10 @@ npm run build    # zvedne verzi, zkontroluje typy a postaví dist/
 
 Vyžaduje Node 22 (viz `.nvmrc`).
 
+Aplikace se rozjede i bez jakéhokoli nastavení – jen bez sekce s účtem.
+Pro vývoj synchronizace zkopíruj `.env.example` do `.env.local` a doplň údaje
+z konzole Firebase (postup v [`docs/sync.md`](docs/sync.md)).
+
 ## Dokumentace
 
 | Dokument                                       | Obsah                                                   |

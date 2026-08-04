@@ -19,10 +19,11 @@ vyrovnání sázky.
 
 Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
 
-- **Běží na iPhonu v Safari**, přidaná na plochu. Ovládá se jednou rukou,
-  často v rukavici a na slunci.
-- **Bez serveru, bez účtu, bez placených služeb.** Data jsou v `localStorage`
-  telefonu, hosting je GitHub Pages.
+- **Běží na telefonu přidaná na plochu** – na iPhonu v Safari, na Androidu
+  v Chrome jako WebAPK. Ovládá se jednou rukou, často v rukavici a na slunci.
+- **Bez placených služeb.** Hosting je GitHub Pages, data jsou v `localStorage`
+  telefonu. Účet a záloha do cloudu jsou **nepovinné** – bez přihlášení
+  aplikace nenaváže žádné spojení a chová se jako úplně offline aplikace.
 - **Offline first.** Na hřišti nemusí být signál; service worker předcachuje
   celou aplikaci.
 
@@ -30,7 +31,7 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
 
 ```
                  ┌────────────────────────────────────┐
-   React         │ screens/  (UI, česky psané texty)  │
+   React         │ screens/  (UI, texty přes useT())  │
                  └───────────────┬────────────────────┘
                                  │ čte Round, volá callbacky
                  ┌───────────────▼────────────────────┐
@@ -80,8 +81,13 @@ interface Round {
   bonuses: Record<PlayerId, BonusId[][]> // extra body na jamce
   currentHole: number // 0-based
   settings: RoundSettings // sázka + volby bodování, vlastní kopie
+  updatedAt?: string // ISO; poslední skutečná změna dat, řídí synchronizaci
 }
 ```
+
+`updatedAt` zvedá výhradně `touchRound()` při změně dat (skóre, par, bonus,
+nastavení), ne při listování jamkami. Stará kola z verzí před synchronizací ho
+nemají a `normalizeRound()` jim ho doplní jako `finishedAt ?? createdAt`.
 
 ### Invarianty, které je potřeba držet
 
@@ -287,6 +293,9 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 | `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                 |
 | `Scorecard.tsx`          | tabulka se značkami skóre a vlastními sloupci hry               |
 | `ArchiveScreen.tsx`      | seznam odehraných kol                                           |
+| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                        |
+| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat              |
+| `PrivacyScreen.tsx`      | zásady zpracování údajů                                         |
 
 ### Ovládání zápisu skóre
 
@@ -377,6 +386,7 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | slučování při synchronizaci      | `src/sync/merge.ts`                     |
 | co a kdy se posílá do cloudu     | `src/sync/sync.ts`                      |
 | přihlášení Googlem               | `src/sync/auth.ts`                      |
+| tvar dokumentu ve Firestore      | `src/sync/document.ts`                  |
 | texty aplikace                   | `src/i18n/cs.ts`, `src/i18n/en.ts`      |
 | ovládání zápisu skóre            | `src/screens/PlayScreen.tsx`            |
 | obsah nastavení bodování         | `src/screens/GameSettingsScreen.tsx`    |

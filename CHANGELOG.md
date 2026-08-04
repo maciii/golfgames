@@ -7,6 +7,20 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.12.1] – 2026-08-04
+
+### Změněno
+
+- **Dokumentace dorovnaná na aktuální stav.** Pokyny pro GitHub Copilot byly
+  pořád ve verzi před synchronizací a před jazyky (tvrdily „bez backendu",
+  „texty česky" a jen dvě runtime závislosti). Nově popisují i18n, pravidla
+  pro Firebase a plán Spark.
+- `docs/deployment.md` popisuje konfiguraci Firebase při buildu včetně toho,
+  proč proměnné uložené v Environment build job nevidí.
+- Doplněno `updatedAt` do modelu kola v `docs/architecture.md`, chybějící
+  soubory `sync/` a testy v `CONTRIBUTING.md`, otevřené otázky v
+  `docs/decisions.md`.
+
 ## [0.12.0] – 2026-08-04
 
 ### Přidáno
