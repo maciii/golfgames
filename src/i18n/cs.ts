@@ -29,6 +29,7 @@ export const cs = {
   'setup.subtitle': 'Nové kolo',
   'setup.game': 'Hra',
   'setup.gameSettings': 'Nastavení bodování hry',
+  'setup.gameSettingsFor': 'Nastavení bodování hry {name}',
   'setup.players': 'Hráči',
   'setup.fixedPlayers': 'Tahle hra se hraje vždy ve {count} hráčích.',
   'setup.savedPlayers': 'Uložení hráči',
@@ -88,8 +89,10 @@ export const cs = {
     'Pro tuhle jamku nejsou žádné extra body k dispozici. Zapneš je v nastavení hry před začátkem kola; Longest je jen na pětiparových jamkách a Nearest na tříparových.',
   'bonus.footer':
     'Extra bod se počítá celé dvojici. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení hry; při bogey a horším se nepočítá.',
-  'bonus.double.name': 'Double',
-  'bonus.double.description': 'Zdvojnásobí výsledek celé jamky pro obě dvojice.',
+  'bonus.footerPlayer':
+    'Extra bod se počítá hráči, který ho zapsal. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení hry; při bogey a horším se nepočítá.',
+  'bonus.double.name': 'Dvojnásobná sázka',
+  'bonus.double.description': 'Zdvojnásobí sázku na této jamce.',
   'bonus.longest.name': 'Longest',
   'bonus.longest.description':
     'Nejdelší odpal; jen na pětiparových jamkách, pro jednoho hráče.',
@@ -110,7 +113,12 @@ export const cs = {
   // --- nastavení bodování hry --------------------------------------------
   'gameSettings.title': 'Bodování',
   'gameSettings.intro':
+    'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne.',
+  'gameSettings.introTeam':
     'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším se extra bod nepočítá. Bonus vždy získává celá dvojice.',
+  'gameSettings.introPlayer':
+    'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším se extra bod nepočítá. Bonus získává hráč, který ho zapsal.',
+  'gameSettings.noOptions': 'Tahle hra nemá další volby bodování.',
   'gameSettings.extraPoints': 'Extra body',
   'gameSettings.bonusValue': 'Hodnota bonusu {name}',
   'gameSettings.pointsSuffix': 'b.',
@@ -123,10 +131,11 @@ export const cs = {
   'gameSettings.doubleClosingNote': 'u devítijamkového kola jen poslední jamka',
   'gameSettings.noDoubleBonuses': 'Nenásobit extra body',
   'gameSettings.noDoubleBonusesNote':
-    'dvojnásobná jamka ani „double“ nenásobí extra body',
+    'dvojnásobná jamka ani „dvojnásobná sázka“ nenásobí extra body',
   'gameSettings.confirmLongest': 'Potvrzovat Longest',
   'gameSettings.confirmNearest': 'Potvrzovat Nearest',
   'gameSettings.confirmNote': 'při horším než par bod propadá soupeřům',
+  'gameSettings.confirmPlayerNote': 'při horším než par se bonus nepočítá',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'Bod navíc, když oba partneři zahráli líp než oba soupeři.',
@@ -140,6 +149,9 @@ export const cs = {
   'results.conceded': 'Vzdané jamky: {holes} – dvojice na nich přišla o součet.',
   'results.unplayed': 'Kolo skončilo dřív, jamky {holes} se nehrály.',
   'results.settlement': 'Vyrovnání',
+  'results.totalWinnings': 'Celková výhra',
+  'results.optimizedPayments': 'Optimalizované platby',
+  'results.detailedPayments': 'Konkrétní jednotlivé platby',
   'results.pointWorth': 'Bod je {money}.',
   'results.doubleClosingNote': '9. a 18. jamka byla za dvojnásobek.',
   'results.configuration': 'Bodování kola',
@@ -157,6 +169,7 @@ export const cs = {
   'scorecard.holeShort': 'J',
   'scorecard.par': 'Par',
   'scorecard.total': 'Celkem',
+  'scorecard.gameTotal': 'B',
 
   // --- archiv -------------------------------------------------------------
   'archive.title': 'Archiv',
@@ -302,8 +315,8 @@ export const cs = {
   'score.birdie': 'Birdie',
   'score.par': 'Par',
   'score.bogey': 'Bogey',
-  'score.double': 'Dvojbogey',
-  'score.triple': 'Trojbogey a horší',
+  'score.double': 'Doble',
+  'score.triple': 'Triple',
 
   // --- násobiče za výsledek ----------------------------------------------
   'tier.birdie.name': 'Birdie',
@@ -331,6 +344,7 @@ export const cs = {
 
   // Best Aggregate
   'best.points': 'Body',
+  'best.headerNote': 'Průběžné skóre',
   'best.pointsDescription':
     'Za jamku: 1 bod za lepší míč, 1 za nižší součet, 1 za birdie, 3 za eagle.',
   'best.best': 'Best',
@@ -349,7 +363,20 @@ export const cs = {
   'skins.description': 'Shoda na jamce skin nepřidělí a přenese ho do další.',
   'skins.noHole': 'zatím žádná jamka',
   'skins.wonHoles': '{count} vyhraných jamek: {holes}',
-  'skins.column': 'Skin',
+  'skins.scoreDetail': 'Skiny {skins} · Extra {extra} b.',
+  'skins.scorecardSkin': {
+    one: '{name}: 1 skin',
+    few: '{name}: {count} skiny',
+    other: '{name}: {count} skinů',
+  },
+  'skins.scorecardSkinCarried': '{name}: skin z této jamky byl přenesen a později získán',
+  'skins.scorecardExtra': {
+    one: '{name}: +1 extra bod',
+    few: '{name}: +{count} extra body',
+    other: '{name}: +{count} extra bodů',
+  },
+  'skins.scorecardTotal': '{name}: {skins} skinů +{extra} extra bodů = {total} celkem',
+  'skins.headerNote': 'Skiny + extra body',
   'skins.atStake': 'V sázce',
   'skins.takes': 'Bere',
 
@@ -358,6 +385,8 @@ export const cs = {
   'match.notStarted': 'Zápas ještě nezačal',
   'match.allSquareRemaining': 'Nerozhodně, zbývá {count} jamek',
   'match.wins': '{name} vyhrává {lead}&{remaining}',
+  'match.winsFinal': '{name} vyhrává {lead} UP',
+  'match.allSquareFinished': 'Nerozhodně po poslední jamce',
   'match.dormie': '{name} vede {lead} UP (dormie), zbývá {remaining} jamek',
   'match.leads': '{name} vede {lead} UP, zbývá {remaining} jamek',
   'match.allSquare': 'AS',
@@ -370,10 +399,13 @@ export const cs = {
   'match.loses': 'ztrácí',
   'match.bestBall': 'Lepší míč',
   'match.hole': 'Jamka',
+  'match.outOfPlay': 'Mimo hru – zápas už je rozhodnutý',
 
   // --- peněžní vyrovnání --------------------------------------------------
   'money.nobodyOwes': 'Nikdo nikomu nic nedluží.',
   'money.eachOpponent': 'Každý bod navíc platí každý ze soupeřů zvlášť.',
+  'money.optimizedSettlement':
+    'Platby jsou sloučené do nejmenšího možného počtu převodů.',
   'money.draw': 'Nerozhodně, nikdo nikomu nic nedluží.',
   'money.transfers':
     'Rozdíl {units} b. × {value} = {amount}, které platí každý hráč zvlášť.',

@@ -14,7 +14,7 @@ zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 | Hra                | Hráči              | Princip                                         |
 | ------------------ | ------------------ | ----------------------------------------------- |
 | **Best Aggregate** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
-| **Skins**          | 2–4 jednotlivci    | Každá jamka je skin, shoda ho přenáší do další  |
+| **Skins**          | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
 | **Match play**     | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
 
 Přesné vyhodnocení včetně okrajových situací popisuje
@@ -25,18 +25,22 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Zápis po jamkách** na jedno klepnutí – prostřední tlačítko vloží par,
   `+` bogey, `−` birdie, další klepnutí posouvají po ránách; par 3/4/5 se
   nastavuje u každé jamky přímo při hře
-- **Extra body** – double, longest, nearest, bunker, double bunker, water,
-  barkie, arnie. Hodnoty se nastavují zvlášť pro každou hru, lepší výsledek
-  je násobí (birdie ×2, eagle ×3…) a bonus vždy získává celá dvojice
+- **Extra body** – dvojnásobná sázka, longest, nearest, bunker, double bunker,
+  water, barkie, arnie. Volby se nastavují zvlášť pro každou hru; týmové hry
+  připisují bonus celé dvojici, Skins hráči, který ho uhrál
 - **Longest a Nearest s potvrzením** – kdo je zapsal, musí jamku dohrát na par
   nebo líp, jinak bod propadá soupeřům; barva značky u jména to hlásí průběžně
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
-- **Barevné značky výsledků** v šesti stupních od eagle po trojbogey, ve
+- **Průběžné skóre v hlavičce** – každá hra ukazuje svůj stav u aktuální jamky;
+  Match play navíc hlásí náskok, dormie, zbývající jamky a jamky mimo hru po
+  rozhodnutí zápasu
+- **Barevné značky výsledků** v šesti stupních od eagle po Triple, ve
   scorekartě i při zápisu; scorekarta má u týmových her sloupec bodů dvojice
-  za každou jamku
+  za každou jamku a Skins označuje vítězný skin žlutým rámečkem celé buňky
+  přímo u hráčova výsledku
 - **Sázka a peněžní vyrovnání** – hodnota bodu v Kč nebo €, volitelně
-  dvojnásobná 9. a 18. jamka; na konci je vidět, kdo komu kolik platí –
-  u dvojic po hráčích, každý svému protějšku
+  dvojnásobná 9. a 18. jamka; na konci je vidět **Celková výhra**, konkrétní
+  platby mezi hráči a volitelně jejich optimalizovaná varianta s méně převody
 - **Vzdané jamky se počítají** – chybějící zápis na rozehrané jamce znamená,
   že ji hráč nedohrál, a jeho strana o ni přichází
 - **Kolo přerušené počasím** jde uložit i nedohrané; aplikace předtím vypíše,
@@ -53,8 +57,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   vyberou klepnutím
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
   není potřeba
-- **Česky i anglicky** – jazyk se vybere podle prohlížeče a dá se přepnout
-  v nastavení; datum, částky i řazení jmen se řídí zvoleným jazykem
+- **Česky i anglicky** – jazyk se vybere podle prohlížeče a přepíná se
+  vlajkami v pravém horním rohu; datum, částky i řazení jmen se řídí volbou
 - **Rozehrané kolo přežije** zavření aplikace i restart telefonu
 
 ## Instalace do telefonu

@@ -12,6 +12,7 @@ import {
 } from '../types'
 import type {
   GameDefinition,
+  HeaderSummary,
   HoleSummary,
   ScorecardColumn,
   StandingsSection,
@@ -266,6 +267,24 @@ export const bestAggregate: GameDefinition = {
   id: 'best-aggregate',
   playerCounts: [4],
   usesTeams: () => true,
+  scoringOptions: {
+    bonusIds: [
+      'double',
+      'longest',
+      'nearest',
+      'bunker',
+      'doubleBunker',
+      'water',
+      'barkie',
+      'arnie',
+    ],
+    resultMultipliers: true,
+    doubleBest: true,
+    noDoubleBonuses: true,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusScope: 'team',
+  },
   supportsDoubleHoles: true,
 
   computeStandings(round: Round): StandingsSection[] {
@@ -303,6 +322,17 @@ export const bestAggregate: GameDefinition = {
         rows: rankRows(rows, 'highest'),
       },
     ]
+  },
+
+  headerSummary(round: Round): HeaderSummary {
+    const totals = totalPoints(round)
+    return {
+      entries: round.teams.map((team, index) => ({
+        label: teamName(round, team),
+        value: t('common.points', { count: totals[index]?.total ?? 0 }),
+      })),
+      note: t('best.headerNote'),
+    }
   },
 
   /**

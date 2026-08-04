@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { carryInto, skinResults, skins } from './skins'
+import { carryInto, skinExtraPoints, skinResults, skins } from './skins'
 import { DEFAULT_GAME_OPTIONS } from '../types'
 import { makeRound } from './fixtures'
 
@@ -134,18 +134,98 @@ describe('Skins - pořadí', () => {
     expect(section?.description).toContain('1')
   })
 
-  it('má ve scorekartě sloupec s rozdanými skiny', () => {
+  it('označí vítěze skinu přímo u jeho výsledku', () => {
     const round = sampleRound()
-    const [column] = skins.scorecardColumns?.(round) ?? []
+    const cell = skins.scorecardPlayerCell?.(round, 'p1', 1)
+    const carriedCell = skins.scorecardPlayerCell?.(round, 'p1', 0)
 
-    expect(column?.label).toBe('Skin')
-    expect(column?.cell(round, 0)).toBe('') // dělená jamka
-    expect(column?.cell(round, 1)).toBe('2') // včetně přeneseného skinu
-    expect(column?.total(round)).toBe('2')
+    expect(skins.scorecardColumns).toBeUndefined()
+    expect(cell?.skin?.ariaLabel).toBe('Adam: 2 skiny')
+    expect(carriedCell?.skin?.ariaLabel).toContain('přenesen')
+  })
+
+  it('označí všechny jamky, ze kterých vznikly tři skiny najednou', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril'],
+      pars: [4, 4, 4],
+      scores: [
+        [4, 4, 3],
+        [4, 4, 4],
+        [4, 4, 5],
+      ],
+    })
+
+    expect(skinResults(round).map((result) => result.skins)).toEqual([0, 0, 3])
+    expect(skins.scorecardPlayerCell?.(round, 'p1', 0)?.skin).toBeDefined()
+    expect(skins.scorecardPlayerCell?.(round, 'p1', 1)?.skin).toBeDefined()
+    expect(skins.scorecardPlayerCell?.(round, 'p1', 2)?.skin).toBeDefined()
+    expect(skins.scorecardPlayerCell?.(round, 'p2', 0)?.skin).toBeUndefined()
   })
 
   it('jde hrát ve dvou až čtyřech a bez dvojic', () => {
     expect(skins.playerCounts).toEqual([2, 3, 4])
     expect(skins.usesTeams(4)).toBe(false)
+  })
+
+  it('deklaruje hráčské bonusy a nepoužívá Double Best', () => {
+    expect(skins.scoringOptions.bonusScope).toBe('player')
+    expect(skins.scoringOptions.doubleBest).toBe(false)
+    expect(skins.scoringOptions.bonusIds).toContain('bunker')
+  })
+})
+
+describe('Skins - extra body', () => {
+  it('přičte extra body ke skóre hráče a zobrazí je ve scorekartě', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril'],
+      pars: [4],
+      scores: [[3], [4], [5]],
+    })
+    round.bonuses.p1 = [['bunker']]
+
+    expect(skinExtraPoints(round, 'p1', 0)).toBe(2)
+
+    const rows = skins.computeStandings(round)[0]?.rows ?? []
+    expect(rows[0]).toMatchObject({ value: 3, valueLabel: '3' })
+    expect(rows[0]?.detail).toContain('Skiny 1 · Extra 2 b.')
+
+    const cell = skins.scorecardPlayerCell?.(round, 'p1', 0)
+
+    expect(skins.scorecardColumns).toBeUndefined()
+    expect(cell?.suffix?.text).toBe('+2')
+    expect(cell?.suffix?.ariaLabel).toBe('Adam: +2 extra body')
+    expect(skins.scorecardPlayerTotal?.(round, 'p1')).toEqual({
+      text: '1 + 2 = 3',
+      ariaLabel: 'Adam: 1 skinů +2 extra bodů = 3 celkem',
+    })
+    expect(skins.scorecardPlayerTotal?.(round, 'p2')).toEqual({
+      text: '0',
+      ariaLabel: 'Bára: 0 skinů +0 extra bodů = 0 celkem',
+    })
+  })
+
+  it('nepřidá značku do scorekarty jamky, na kterou se ještě nedošlo', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
+      pars: [4],
+      scores: [[null], [null], [null], [null]],
+    })
+
+    expect(skins.scorecardPlayerCell?.(round, 'p1', 0)).toEqual({})
+  })
+
+  it('extra bod za bogey nepřidá', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4],
+      scores: [[5], [4]],
+    })
+    round.bonuses.p1 = [['bunker']]
+
+    expect(skinExtraPoints(round, 'p1', 0)).toBe(0)
   })
 })

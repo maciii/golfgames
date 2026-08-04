@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Round } from '../types'
 import { BONUSES, formatHoleList, formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
@@ -19,6 +20,8 @@ interface Props {
   onBack?: () => void
 }
 
+type PaymentMode = 'individual' | 'optimized'
+
 /** Výsledky kola: tabulky podle pravidel hry plus kompletní scorecard. */
 export default function ResultsScreen({
   round,
@@ -30,7 +33,9 @@ export default function ResultsScreen({
   onBack,
 }: Props) {
   const t = useT()
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('individual')
   const game = getGame(round.gameId)
+  const scoring = game.scoringOptions
   const sections = game.computeStandings(round)
   const finished = Boolean(round.finishedAt)
   const completeness = roundCompleteness(round)
@@ -40,6 +45,8 @@ export default function ResultsScreen({
   // Peníze se počítají z hlavní tabulky hry - body, skiny i vyhrané jamky
   // fungují stejně. Bez sázky nebo bez soupeře vyjde 'none' a sekce se skryje.
   const mainRows = sections[0]?.rows ?? []
+  // U jednotlivců se přepínač týká jen způsobu zobrazení stejných zůstatků;
+  // výchozí přímé platby zachovávají původní pravidlo každý proti každému.
   const settlement = settleRound(
     round,
     mainRows.map((row) => ({ id: row.id, name: row.name, units: row.value })),
@@ -50,19 +57,25 @@ export default function ResultsScreen({
    * vidět, podle čeho se body počítaly, i když se předvolby mezitím změnily.
    */
   const configuration = [
-    round.settings.options.doubleClosingHoles ? t('results.configDoubleClosing') : null,
-    round.settings.options.doubleBest > 0
+    game.supportsDoubleHoles && round.settings.options.doubleClosingHoles
+      ? t('results.configDoubleClosing')
+      : null,
+    scoring.doubleBest && round.settings.options.doubleBest > 0
       ? t('results.configDoubleBest', { count: round.settings.options.doubleBest })
       : null,
-    ...BONUSES.filter((b) => (round.settings.options.bonusValues[b.id] ?? 0) > 0).map(
-      (b) => {
-        const name = t(dynamicKey('bonus', b.id, 'name'))
-        if (b.kind === 'multiplier') return name
-        const value = round.settings.options.bonusValues[b.id] ?? 0
-        return `${name} ${t('common.points', { count: value })}`
-      },
-    ),
-    round.settings.options.noDoubleBonuses ? t('results.configNoDoubleBonuses') : null,
+    ...BONUSES.filter(
+      (b) =>
+        scoring.bonusIds.includes(b.id) &&
+        (round.settings.options.bonusValues[b.id] ?? 0) > 0,
+    ).map((b) => {
+      const name = t(dynamicKey('bonus', b.id, 'name'))
+      if (b.kind === 'multiplier') return name
+      const value = round.settings.options.bonusValues[b.id] ?? 0
+      return `${name} ${t('common.points', { count: value })}`
+    }),
+    scoring.noDoubleBonuses && round.settings.options.noDoubleBonuses
+      ? t('results.configNoDoubleBonuses')
+      : null,
   ].filter(Boolean)
 
   function newRound() {
@@ -134,12 +147,19 @@ export default function ResultsScreen({
 
         {settlement.kind !== 'none' && (
           <section className="section">
-            <h2 className="section-title">{t('results.settlement')}</h2>
+            <h2 className="section-title">
+              {settlement.kind === 'balances'
+                ? t('results.totalWinnings')
+                : t('results.settlement')}
+            </h2>
 
             {settlement.kind === 'transfers' ? (
               <ul className="settlement">
                 {settlement.transfers.map((transfer) => (
-                  <li key={transfer.fromId} className="settlement-row">
+                  <li
+                    key={`${transfer.fromId}-${transfer.toId}`}
+                    className="settlement-row"
+                  >
                     <span className="settlement-name">
                       {transfer.fromName}
                       <span className="settlement-arrow">→</span>
@@ -152,24 +172,79 @@ export default function ResultsScreen({
                 ))}
               </ul>
             ) : (
-              <ul className="settlement">
-                {settlement.rows.map((row) => (
-                  <li key={row.id} className="settlement-row">
-                    <span className="settlement-name">{row.name}</span>
-                    <span
-                      className={`settlement-amount${
-                        row.amount > 0 ? ' wins' : row.amount < 0 ? ' owes' : ''
-                      }`}
-                    >
-                      {formatMoney(row.amount, round.settings.currency)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="settlement">
+                  {settlement.rows.map((row) => (
+                    <li key={row.id} className="settlement-row">
+                      <span className="settlement-name">{row.name}</span>
+                      <span
+                        className={`settlement-amount${
+                          row.amount > 0 ? ' wins' : row.amount < 0 ? ' owes' : ''
+                        }`}
+                      >
+                        {formatMoney(row.amount, round.settings.currency)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {settlement.transfers.length > 0 && (
+                  <>
+                    <div className="segmented settlement-toggle">
+                      <button
+                        type="button"
+                        className={`segment${
+                          paymentMode === 'individual' ? ' selected' : ''
+                        }`}
+                        onClick={() => setPaymentMode('individual')}
+                        aria-pressed={paymentMode === 'individual'}
+                      >
+                        {t('results.detailedPayments')}
+                      </button>
+                      <button
+                        type="button"
+                        className={`segment${
+                          paymentMode === 'optimized' ? ' selected' : ''
+                        }`}
+                        onClick={() => setPaymentMode('optimized')}
+                        aria-pressed={paymentMode === 'optimized'}
+                      >
+                        {t('results.optimizedPayments')}
+                      </button>
+                    </div>
+                    <h3 className="settlement-subtitle">
+                      {paymentMode === 'individual'
+                        ? t('results.detailedPayments')
+                        : t('results.optimizedPayments')}
+                    </h3>
+                    <ul className="settlement">
+                      {(paymentMode === 'individual'
+                        ? settlement.transfers
+                        : settlement.optimizedTransfers
+                      ).map((transfer) => (
+                        <li
+                          key={`${transfer.fromId}-${transfer.toId}`}
+                          className="settlement-row"
+                        >
+                          <span className="settlement-name">
+                            {transfer.fromName}
+                            <span className="settlement-arrow">→</span>
+                            {transfer.toName}
+                          </span>
+                          <span className="settlement-amount owes">
+                            {formatMoney(transfer.amount, round.settings.currency)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
             )}
 
             <p className="hint">
-              {settlement.summary}
+              {settlement.kind === 'balances' && paymentMode === 'optimized'
+                ? t('money.optimizedSettlement')
+                : settlement.summary}
               {settlement.kind === 'balances' && (
                 <>
                   {' '}
@@ -181,7 +256,8 @@ export default function ResultsScreen({
                   })}
                 </>
               )}
-              {round.settings.options.doubleClosingHoles &&
+              {game.supportsDoubleHoles &&
+                round.settings.options.doubleClosingHoles &&
                 ` ${t('results.doubleClosingNote')}`}
             </p>
           </section>

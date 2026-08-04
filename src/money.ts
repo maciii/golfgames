@@ -13,8 +13,9 @@ import { localeTag, t } from './i18n'
  * rozdílu 7 bodů a desetikoruně za bod tedy platí první hráč 70 Kč prvnímu
  * soupeři a druhý hráč 70 Kč druhému soupeři; dvojice dohromady dostane 140 Kč.
  *
- * **Jednotlivci** (Skins, match play dvou hráčů) - každý bod navíc inkasuje
- * hráč od každého soupeře zvlášť. Součet všech částek je nula.
+ * **Jednotlivci** (Skins, match play dvou hráčů) - čisté zůstatky vznikají
+ * z vyrovnání vůči každému soupeři zvlášť. UI nabízí přímé platby i jejich
+ * sloučení do nejmenšího možného počtu převodů; součet zůstatků je nula.
  */
 
 /** Strana vyrovnání - dvojice, nebo jednotlivec. */
@@ -43,7 +44,15 @@ export interface Transfer {
 
 export type Settlement =
   | { kind: 'none' }
-  | { kind: 'balances'; rows: Balance[]; summary: string }
+  | {
+      kind: 'balances'
+      rows: Balance[]
+      /** Přímé vyrovnání každého rozdílu mezi dvojicí hráčů. */
+      transfers: Transfer[]
+      /** Stejné zůstatky vyrovnané nejmenším možným počtem plateb. */
+      optimizedTransfers: Transfer[]
+      summary: string
+    }
   | {
       kind: 'transfers'
       transfers: Transfer[]
@@ -71,6 +80,107 @@ export function balances(parties: SettlementParty[], pointValue: number): Balanc
   }))
 }
 
+/** Vypíše každý dluh mezi dvojicí jednotlivců zvlášť. */
+export function pairwiseTransfers(
+  parties: SettlementParty[],
+  pointValue: number,
+): Transfer[] {
+  const transfers: Transfer[] = []
+
+  for (let firstIndex = 0; firstIndex < parties.length; firstIndex++) {
+    const first = parties[firstIndex]
+    if (!first) continue
+
+    for (let secondIndex = firstIndex + 1; secondIndex < parties.length; secondIndex++) {
+      const second = parties[secondIndex]
+      if (!second || first.units === second.units) continue
+
+      const winner = first.units > second.units ? first : second
+      const loser = winner === first ? second : first
+      transfers.push({
+        fromId: loser.id,
+        fromName: loser.name,
+        toId: winner.id,
+        toName: winner.name,
+        amount: Math.abs(first.units - second.units) * pointValue,
+      })
+    }
+  }
+
+  return transfers
+}
+
+/**
+ * Najde vyrovnání s nejmenším počtem převodů.
+ *
+ * Hráčů jsou nejvýše čtyři, takže lze projít všechny možné protějšky bez
+ * složitého optimalizačního modelu. Každý krok vynuluje alespoň jeden
+ * zůstatek, a hledání si pamatuje nejkratší nalezené řešení.
+ */
+export function optimizedTransfers(
+  parties: SettlementParty[],
+  pointValue: number,
+): Transfer[] {
+  const epsilon = 1e-9
+  const remaining = balances(parties, pointValue).map((balance) => ({
+    balance: Math.abs(balance.amount) < epsilon ? 0 : balance.amount,
+    party: balance,
+  }))
+  let best: Transfer[] | null = null
+
+  function search(state: typeof remaining, transfers: Transfer[]): void {
+    if (best && transfers.length >= best.length) return
+
+    const firstIndex = state.findIndex((entry) => Math.abs(entry.balance) >= epsilon)
+    if (firstIndex < 0) {
+      best = transfers
+      return
+    }
+
+    const first = state[firstIndex]
+    if (!first) return
+
+    for (let secondIndex = firstIndex + 1; secondIndex < state.length; secondIndex++) {
+      const second = state[secondIndex]
+      if (!second || first.balance * second.balance >= 0) continue
+
+      const amount = Math.min(Math.abs(first.balance), Math.abs(second.balance))
+      const next = state.map((entry) => ({ ...entry }))
+      const firstNext = next[firstIndex]
+      const secondNext = next[secondIndex]
+      if (!firstNext || !secondNext) continue
+
+      let transfer: Transfer
+      if (first.balance < 0) {
+        firstNext.balance += amount
+        secondNext.balance -= amount
+        transfer = {
+          fromId: first.party.id,
+          fromName: first.party.name,
+          toId: second.party.id,
+          toName: second.party.name,
+          amount,
+        }
+      } else {
+        firstNext.balance -= amount
+        secondNext.balance += amount
+        transfer = {
+          fromId: second.party.id,
+          fromName: second.party.name,
+          toId: first.party.id,
+          toName: first.party.name,
+          amount,
+        }
+      }
+
+      search(next, [...transfers, transfer])
+    }
+  }
+
+  search(remaining, [])
+  return best ?? []
+}
+
 /**
  * Sestaví vyrovnání pro celé kolo.
  *
@@ -91,11 +201,15 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
     teams[0]?.playerIds.length === teams[1]?.playerIds.length
 
   if (!isPairGame) {
+    // Přímé převody zůstávají výchozí kvůli průhlednosti; optimalizované jsou
+    // alternativní rozpis pro skupiny, které chtějí méně skutečných plateb.
     const rows = balances(parties, pointValue)
+    const transfers = pairwiseTransfers(parties, pointValue)
+    const optimized = optimizedTransfers(parties, pointValue)
     const summary = rows.every((r) => r.amount === 0)
       ? t('money.nobodyOwes')
       : t('money.eachOpponent')
-    return { kind: 'balances', rows, summary }
+    return { kind: 'balances', rows, transfers, optimizedTransfers: optimized, summary }
   }
 
   const [first, second] = parties as [SettlementParty, SettlementParty]

@@ -54,9 +54,10 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
 Závislosti jdou vždy jen dolů. Konkrétně:
 
 - **Obrazovka nikdy nepočítá pravidla hry.** Vykreslí, co jí vrátí
-  `computeStandings()`, `holeSummary()` a `scorecardColumns()`. Jediná výjimka
-  je `PlayScreen`, která zná obecné pojmy z `types.ts` (par, extra body,
-  kategorie výsledku), ne ale pravidla konkrétní hry.
+  `computeStandings()`, `holeSummary()`, `headerSummary()` a scorecardové
+  dekorace hry. Jediná výjimka je `PlayScreen`, která zná obecné pojmy z
+  `types.ts` (par, extra body, kategorie výsledku), ne ale pravidla konkrétní
+  hry.
 - **Hra nikdy nesahá do `localStorage`** ani nezná React.
 - **`types.ts` nezná hry.** Obsahuje jen model kola a výpočty, které platí pro
   všechny hry.
@@ -120,15 +121,19 @@ sentinel nikdy neukládá, existuje jen ve výpočtech.
 Hra je jeden objekt implementující `GameDefinition`
 ([`src/games/types.ts`](../src/games/types.ts)):
 
-| Člen                             | Povinné | K čemu                                      |
-| -------------------------------- | ------- | ------------------------------------------- |
-| `id`, `name`, `tagline`, `rules` | ano     | identita a texty ve výběru hry              |
-| `playerCounts`                   | ano     | povolené počty hráčů                        |
-| `usesTeams(count)`               | ano     | hraje se při daném počtu ve dvojicích?      |
-| `supportsDoubleHoles`            | ano     | dává smysl volba „9. a 18. za dvojnásobek"? |
-| `computeStandings(round)`        | ano     | výsledkové tabulky (jedna nebo víc)         |
-| `holeSummary(round, hole)`       | ne      | shrnutí u právě zapisované jamky            |
-| `scorecardColumns(round)`        | ne      | vlastní sloupce ve scorekartě               |
+| Člen                         | Povinné | K čemu                                       |
+| ---------------------------- | ------- | -------------------------------------------- |
+| `id`                         | ano     | identita hry; texty jsou v `src/i18n/`       |
+| `playerCounts`               | ano     | povolené počty hráčů                         |
+| `usesTeams(count)`           | ano     | hraje se při daném počtu ve dvojicích?       |
+| `supportsDoubleHoles`        | ano     | dává smysl volba „9. a 18. za dvojnásobek"?  |
+| `scoringOptions`             | ano     | které bonusy a volby mají v této hře význam  |
+| `computeStandings(round)`    | ano     | výsledkové tabulky (jedna nebo víc)          |
+| `holeSummary(round, hole)`   | ne      | shrnutí u právě zapisované jamky             |
+| `headerSummary(round, hole)` | ne      | průběžné skóre a stav aktuální jamky         |
+| `scorecardPlayerCell(...)`   | ne      | dekorace výsledku hráče (např. skin a bonus) |
+| `scorecardPlayerTotal(...)`  | ne      | souhrn hry za celkovými ránami hráče         |
+| `scorecardColumns(round)`    | ne      | vlastní sloupce ve scorekartě                |
 
 Registr je [`src/games/index.ts`](../src/games/index.ts). `getGame()` při
 neznámém `id` vrací výchozí hru, aby archiv s odstraněnou hrou nespadl.
@@ -151,20 +156,22 @@ konec, aby nikdo nevedl jen proto, že ještě nic nezapsal.
 5. Záznam v [`../CHANGELOG.md`](../CHANGELOG.md) a `npm run bump:minor`.
 
 Nic dalšího se nemění – zápis skóre, ukládání, archiv, scorekarta i peněžní
-vyrovnání jsou společné.
+vyrovnání jsou společné. `scoringOptions` ale musí přesně deklarovat, které
+volby hra používá a jestli extra body připadnou celé dvojici, nebo jednotlivci.
 
-**Pozor na jedno pravidlo napříč hrami:** extra bod (bonus) uhraný jedním
-hráčem se počítá **celé dvojici**, ne jen jemu. U týmových her to musí platit
-i v nových hrách.
+**Pozor na příjemce bonusu:** týmové hry připisují extra bod celé dvojici,
+individuální hry hráči, který ho uhrál. Rozsah je součástí
+`GameDefinition.scoringOptions`, ne předpoklad obrazovky.
 
 ## Extra body (bonusy)
 
-Model je v `types.ts`, vyhodnocení v konkrétní hře (zatím jen Best Aggregate).
+Model je v `types.ts`, vyhodnocení v konkrétní hře. Best Aggregate používá
+týmové bonusy, Skins hráčské bonusy a Match play extra body nepoužívá.
 
 - `BONUSES` je seznam definic (`BonusDefinition`): `double`, `longest`,
   `nearest`, `bunker`, `doubleBunker`, `water`, `barkie`, `arnie`.
-- `kind: 'points'` přidává body, `kind: 'multiplier'` (jen `double`) násobí
-  celou jamku.
+- `kind: 'points'` přidává body, `kind: 'multiplier'` (dvojnásobná sázka)
+  násobí celou jamku.
 - `onlyPar` omezuje nabídku na jamky daného paru (Longest na par 5, Nearest
   na par 3).
 - `exclusive` znamená, že bonus na jamce drží jediný hráč – `toggleBonus()`
@@ -186,7 +193,7 @@ v [`games.md`](games.md#extra-body).
 Dvě nezávislé věci se násobí mezi sebou (`holeMultiplier()`):
 
 1. **Dvojnásobná 9. a 18. jamka** – volba `doubleClosingHoles` v nastavení hry.
-2. **Zvolený „double"** – extra bod `double`, každý zápis násobí zvlášť
+2. **Zvolená dvojnásobná sázka** – volba `double`, každý zápis násobí zvlášť
    (`doubleCallMultiplier()` = `2 ** početZápisů`).
 
 Dvojnásobná jamka s jedním doublem je tedy za čtyřnásobek. Volba
@@ -328,9 +335,15 @@ zůstává vlastní dvojici), `opponent` (červeně – propadá soupeřům), `p
 
 - `kind: 'transfers'` – dvě stejně velké dvojice. Rozdíl bodů × hodnota bodu
   platí **každý hráč prohrávající dvojice zvlášť** svému protějšku.
-- `kind: 'balances'` – jednotlivci. Každý bod navíc se inkasuje od každého
-  soupeře zvlášť; součet všech částek je nula.
+- `kind: 'balances'` – jednotlivci. Obsahuje čisté zůstatky (`rows`), přímé
+  převody mezi každou dvojicí (`transfers`) i optimalizované převody
+  (`optimizedTransfers`), které zachovají stejné zůstatky s minimem plateb.
 - `kind: 'none'` – bez sázky nebo bez soupeře; sekce se v UI skryje.
+
+Ve výsledcích se u jednotlivců zobrazí nadpis **Celková výhra** a přepínač
+mezi **Konkrétními jednotlivými platbami** a **Optimalizovanými platbami**.
+Výchozí detailní varianta zachovává původní význam „každý soupeř zvlášť",
+optimalizovaná varianta pouze slučuje převody.
 
 Podrobný výpočet i příklad je v [`games.md`](games.md#jak-se-počítají-peníze).
 

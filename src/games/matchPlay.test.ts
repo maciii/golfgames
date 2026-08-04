@@ -79,6 +79,31 @@ describe('Match play - souboj jednotlivců', () => {
 
     expect(matchState(dormie).label).toContain('dormie')
   })
+
+  it('po rozhodnutí zápasu už další jamky do výsledku nepočítá', () => {
+    const afterDecision = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4, 4, 4],
+      scores: [
+        [4, 4, 4, 10],
+        [5, 5, 5, 1],
+      ],
+    })
+
+    const state = matchState(afterDecision)
+
+    expect(state.won).toEqual([3, 0])
+    expect(state.remaining).toBe(1)
+    expect(state.label).toBe('Adam vyhrává 3&1')
+
+    const header = matchPlay.headerSummary?.(afterDecision, 3)
+    expect(header?.tone).toBe('outOfPlay')
+    expect(header?.note).toContain('Mimo hru')
+    expect(matchPlay.holeSummary?.(afterDecision, 3)[0]?.entries[0]?.value).toContain(
+      'Mimo hru',
+    )
+  })
 })
 
 describe('Match play - vzdané jamky', () => {
@@ -153,5 +178,10 @@ describe('Match play - four-ball dvojic', () => {
     expect(matchPlay.playerCounts).toEqual([2, 4])
     expect(matchPlay.usesTeams(2)).toBe(false)
     expect(matchPlay.usesTeams(4)).toBe(true)
+  })
+
+  it('deklaruje, že nepoužívá extra bodovací volby', () => {
+    expect(matchPlay.scoringOptions.bonusIds).toEqual([])
+    expect(matchPlay.scoringOptions.resultMultipliers).toBe(false)
   })
 })

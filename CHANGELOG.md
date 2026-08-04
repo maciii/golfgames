@@ -7,6 +7,41 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.13.0] – 2026-08-04
+
+### Přidáno
+
+- Jazyk se přepíná vlajkami v pravém horním rohu úvodní obrazovky.
+- Každá hra má vlastní ozubené tlačítko nastavení; zobrazuje jen volby,
+  které její pravidla skutečně používají.
+- Skins nyní vyhodnocuje extra body pro jednotlivé hráče a zobrazuje je ve
+  výsledcích i přímo za výsledkem hráče ve scorekartě.
+- Individuální vyrovnání zobrazuje vedle čistých zůstatků i konkrétní platby
+  mezi každou dvojicí hráčů a přepínač pro optimalizované platby s minimálním
+  počtem převodů.
+- Hlavička zápisu ukazuje průběžné skóre hry. Match play zobrazuje náskok,
+  dormie, zbývající jamky a jamky mimo hru po matematickém rozhodnutí.
+
+### Změněno
+
+- České popisky výsledků používají názvy `Doble` a `Triple` místo výrazů
+  Dvojbogey a Trojbogey.
+- Skins scorecard jemně podbarvuje celé buňky všech jamek, jejichž skiny byly
+  přidělené hráči, včetně předchozích jamek z přenášeného banku. Extra body
+  zapisuje jako `+N` hned za výsledkem a ve spodním řádku pod součtem ran
+  přidává `B`/`P`; nulové extra body se nezobrazují.
+- Podbarvení přidělených skinů je výraznější, aby bylo v scorekartě snadno
+  rozpoznatelné i na mobilu.
+- Přidán i jemný vnitřní rámeček kolem podbarvených buněk s přiděleným skinem.
+- Hráčské sloupce ve scorekartě mají střídavé decentní podbarvení pro snazší
+  sledování výsledků napříč řádky.
+- Průběžné skóre se v zápisu zobrazuje vedle čísla aktuální jamky místo v
+  samostatném řádku pod navigací, takže hlavička zabírá méně místa.
+- Bonus `double` se v rozhraní jmenuje **Dvojnásobná sázka / Double stake**;
+  popis nově vysvětluje, že násobí sázku na jamce.
+- Match play po rozhodující jamce další zapsané jamky do výsledku ani
+  vyrovnání nezapočítává.
+
 ## [0.12.1] – 2026-08-04
 
 ### Změněno

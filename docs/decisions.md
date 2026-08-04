@@ -189,13 +189,16 @@ dvojice dostane dohromady 140 Kč.
 
 ---
 
-## 8. Extra bod získává celá dvojice
+## 8. Příjemce extra bodu určuje hra
 
 **Rozhodnutí.** Bonus (bunker, water, barkie, arnie, longest, nearest…)
-uhraný jedním hráčem se počítá **celé jeho dvojici**, ne jen jemu.
+uhraný jedním hráčem připadne příjemci, kterého deklaruje konkrétní hra.
+V týmových hrách se počítá celé jeho dvojici, ve Skins hráči, který ho uhrál.
 
-**Platnost.** Explicitně i pro hry, které se přidají později. Je to pravidlo
-hry, ne detail implementace Best Aggregate.
+**Proč.** Skins není týmová hra a její extra body by při připsání dvojici
+neměly žádného správného příjemce. Rozsah je proto součástí
+`GameDefinition.scoringOptions`, ne detail obrazovky nebo implementace jedné
+hry.
 
 ---
 
@@ -210,21 +213,23 @@ jinak a hodnota se dá měnit bez zásahu do kódu.
 
 **Výjimka.** Longest a Nearest se nenásobí – o jejich přiznání rozhoduje
 potvrzovací pravidlo (bod 10), takže by násobení bylo dvojí bonus za totéž.
+Pravidlo násobení platí pro týmového i hráčského příjemce.
 
 ---
 
 ## 10. Potvrzování Longest a Nearest
 
 **Rozhodnutí.** Ve výchozím stavu zapnuté: hráč, který Longest nebo Nearest
-zapsal, musí jamku dohrát na **par nebo líp**. Horší výsledek posílá bod
-soupeřově dvojici.
+zapsal, musí jamku dohrát na **par nebo líp**. V týmové hře horší výsledek
+posílá bod soupeřově dvojici; ve Skins se bonus při horším výsledku
+nezapočítá.
 
 **Proč.** Tak se to hraje – nejdelší odpal nebo nejbližší rána, po které
 následuje zkažená jamka, se nepočítá jako zásluha.
 
-**V UI.** Značka `L` / `N` u jména je zeleně, když bod zůstává vlastní dvojici,
-červeně, když propadá soupeřům, a tlumeně, dokud hráč jamku nezapsal
-(`exclusiveBonusOutcome()`).
+**V UI.** Značka `L` / `N` u jména je zeleně, když bod zůstává vlastní straně,
+červeně, když v týmové hře propadá soupeřům, a tlumeně, dokud hráč jamku
+nezapsal (`exclusiveBonusOutcome()`).
 
 **Exkluzivita.** Longest a Nearest může mít na jamce jen jeden hráč;
 `toggleBonus()` ho ostatním automaticky odebere. Longest se nabízí jen na
@@ -232,11 +237,11 @@ pětiparových jamkách, Nearest na tříparových.
 
 ---
 
-## 11. Double násobí, nepřidává
+## 11. Dvojnásobná sázka násobí, nepřidává
 
-**Rozhodnutí.** Extra bod `double` je jediný typu `multiplier` – nepřidává
-body, ale zdvojnásobí výsledek celé jamky pro obě dvojice. Každý zápis násobí
-zvlášť, takže tři doubly na jamce znamenají osminásobek.
+**Rozhodnutí.** Volba `double` (v UI „Dvojnásobná sázka") je jediná typu
+`multiplier` – nepřidává body, ale zdvojnásobí sázku celé jamky. Každý zápis
+násobí zvlášť, takže tři volby na jamce znamenají osminásobek.
 
 **Skládání s dvojnásobnou jamkou.** Dvojnásobná 9./18. jamka a zvolený double
 se násobí mezi sebou – dohromady čtyřnásobek. Volba „Nenásobit extra body"
@@ -289,8 +294,8 @@ kola se tím předchází.
 ## 15. Značky výsledku v šesti kategoriích
 
 **Rozhodnutí.** Eagle a lepší žlutě (kroužek s dvojitým obrysem), birdie
-červeně (kroužek), par modře (čtvereček), bogey zeleně (čtvereček), dvojbogey
-šedě (dvojitý obrys), trojbogey a horší černě (trojitý obrys). Barvy vychází
+červeně (kroužek), par modře (čtvereček), bogey zeleně (čtvereček), Doble
+šedě (dvojitý obrys), Triple černě (trojitý obrys). Barvy vychází
 z předlohy zobrazování skóre na turnajových webech.
 
 **Tvar nese informaci i bez barvy** – podpar do kroužku, nadpar do čtverečku –
@@ -384,16 +389,51 @@ hráčů se dějí mimo komponenty, takže by jinak zůstaly v jednom jazyce nat
 
 ---
 
+## 21. Match play po matematickém rozhodnutí
+
+**Rozhodnutí.** Zápas se rozhodne na první jamce, po které je náskok větší
+než počet zbývajících jamek. Stav se pak nemění, i když aplikace dovolí
+zapsat další jamky. Ty se označí jako „mimo hru" a neovlivní výsledek ani
+vyrovnání.
+
+**Proč.** To odpovídá Rule 3.2a Pravidel golfu: zápas je vyhraný, jakmile
+jedna strana vede o více jamek, než kolik jich zbývá. Uživatel může pozdější
+skóre zachovat pro úplnou scorekartu, ale nesmí zpětně změnit oficiální
+výsledek zápasu.
+
+**V UI.** Hlavička zápisu ukazuje průběžné `UP`/`DOWN`, zbývající jamky,
+`dormie`, konečný výsledek nebo stav „mimo hru". Herní kontrakt to poskytuje
+přes `headerSummary(round, hole)`.
+
+---
+
+## 22. Dvě varianty vyrovnání jednotlivců
+
+**Rozhodnutí.** U jednotlivců se jako výchozí zobrazuje **Celková výhra**
+a pod ní **Konkrétní jednotlivé platby**. Přepínač nabídne také
+**Optimalizované platby**, které hledají stejné zůstatky s nejmenším počtem
+převodů.
+
+**Proč.** Přímý rozpis zachovává intuitivní pravidlo, že každý bod se
+vyrovnává vůči každému soupeři. Některé skupiny ale chtějí po skončení kola
+provést co nejméně plateb. Proto jsou obě interpretace viditelné a uživatel
+nemusí volit mezi průhledností a praktičností.
+
+**Důsledek.** `Settlement.kind === 'balances'` obsahuje `rows` s čistými
+zůstatky, `transfers` s přímými platbami a `optimizedTransfers` s minimálním
+počtem plateb. Optimalizace nemění žádný zůstatek, pouze slučuje převody.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
 
 - **Handicapy.** Zapisuje se jen hrubé skóre. Netto výsledky by znamenaly HCP
   u hráče, HCP jamky (SI) a přepočet ve všech hrách.
-- **Rozdělení Longest/Nearest u her jednotlivců.** Potvrzovací pravidlo mluví
-  o „soupeřově dvojici", takže dnes dává smysl jen u týmových her.
-- **Extra body v ostatních hrách.** Model je připravený, vyhodnocuje je zatím
-  jen Best Aggregate.
+- **Extra body v dalších hrách.** Best Aggregate a Skins je vyhodnocují,
+  Match play je záměrně nepoužívá. Nová hra musí rozsah deklarovat přes
+  `GameDefinition.scoringOptions`.
 - **Sdílená kola mezi hráči.** Synchronizace dnes zálohuje data jednoho účtu.
   Aby viděli kolo všichni zúčastnění, potřebovalo by se řešit pozvání,
   oprávnění a souběžný zápis – to je řádově větší úloha než dnešní zrcadlo.

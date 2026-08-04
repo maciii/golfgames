@@ -23,8 +23,12 @@ export function getGame(gameId: string): GameDefinition {
 
 export type {
   GameDefinition,
+  GameScoringOptions,
+  HeaderSummary,
   HoleSummary,
   ScorecardColumn,
+  ScorecardPlayerCell,
+  ScorecardPlayerTotal,
   StandingRow,
   StandingsSection,
 } from './types'

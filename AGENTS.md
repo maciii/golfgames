@@ -54,15 +54,16 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
    **výhradně na bezplatném plánu Spark** - Blaze se nikdy nezapíná, protože
    při vyčerpání kvóty mají operace selhat, ne začít stát peníze.
 2. **Pravidla her žijí jen v `src/games/`.** Obrazovky o konkrétní hře nic
-   nevědí – vykreslí, co dostanou z `computeStandings()`, `holeSummary()`
-   a `scorecardColumns()`.
+   nevědí – vykreslí, co dostanou z `computeStandings()`, `holeSummary()`,
+   `headerSummary()` a scorecardových hooků.
 3. **`Round` je jediný zdroj pravdy** a musí zůstat serializovatelný do JSON.
    Změna jeho tvaru znamená migraci v `storage.normalize()` a majoritní verzi.
 4. **Kolo si nese vlastní kopii nastavení.** Nikdy do `round.settings` nedávej
    referenci na sdílený objekt – rozbilo by to přepočet archivních kol.
 5. **Prázdné skóre má dva významy** (nehraná vs. vzdaná jamka), viz níž.
-6. **Extra bod získává celá dvojice**, ne jen hráč, který ho uhrál. Platí to
-   i pro hry, které teprve vzniknou.
+6. **Příjemce extra bodu určuje hra.** U týmových her ho získává celá dvojice,
+   u individuálních her hráč, který ho uhrál. Nová hra to musí deklarovat
+   v `GameDefinition.scoringOptions` a podle toho bonus vyhodnotit.
 7. **Uživatelské texty patří do `src/i18n/`.** Do komponent se nepíšou.
    Nový text znamená klíč v `cs.ts` a překlad v `en.ts` - `en.ts` je typovaný
    jako `Record<MessageKey, Message>`, takže chybějící překlad neprojde
@@ -89,7 +90,8 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **Pořadí hráčů v `team.playerIds` má význam** – peněžní vyrovnání dvojic
   páruje protějšky podle indexu (první platí prvnímu).
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
-  `row.value` se předává do `settleRound()` jako počet jednotek.
+  `row.value` se předává do `settleRound()` jako počet jednotek; u Skins je
+  to součet skinů a přiznaných extra bodů.
 - **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
 - **Firestore neumí pole uvnitř pole.** `Round.bonuses` je
   `bonuses[hráč][jamka]`, tedy pole polí, a přímý zápis skončí chybou

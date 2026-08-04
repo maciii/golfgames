@@ -1,6 +1,11 @@
 import type { PlayerId, Round } from '../types'
 import { isHoleStarted, scoreAt, teamName } from '../types'
-import type { GameDefinition, HoleSummary, StandingsSection } from './types'
+import type {
+  GameDefinition,
+  HeaderSummary,
+  HoleSummary,
+  StandingsSection,
+} from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
 import { CONCEDED, formatSideScore, teamBestBall } from './shared'
@@ -69,6 +74,8 @@ export interface MatchState {
   leaderIndex: 0 | 1 | null
   /** Je zápas matematicky rozhodnutý? */
   decided: boolean
+  /** 0-based jamka, na které se zápas stal matematicky rozhodnutým. */
+  decisionHole: number | null
   /** Slovní stav zápasu do hlavičky výsledků. */
   label: string
 }
@@ -80,6 +87,7 @@ export function matchState(round: Round): MatchState {
   const won: [number, number] = [0, 0]
   let halved = 0
   let settled = 0
+  let decisionHole: number | null = null
 
   if (sideA && sideB) {
     for (let hole = 0; hole < round.holeCount; hole++) {
@@ -90,6 +98,12 @@ export function matchState(round: Round): MatchState {
       if (a < b) won[0] += 1
       else if (b < a) won[1] += 1
       else halved += 1
+
+      const lead = Math.abs(won[0] - won[1])
+      if (lead > round.holeCount - settled) {
+        decisionHole = hole
+        break
+      }
     }
   }
 
@@ -97,19 +111,24 @@ export function matchState(round: Round): MatchState {
   const diff = won[0] - won[1]
   const lead = Math.abs(diff)
   const leaderIndex = diff === 0 ? null : diff > 0 ? 0 : 1
-  const decided = lead > remaining
+  const decided = decisionHole !== null
 
   let label: string
   if (leaderIndex === null) {
     label =
       settled === 0
         ? t('match.notStarted')
-        : t('match.allSquareRemaining', { count: remaining })
+        : remaining === 0
+          ? t('match.allSquareFinished')
+          : t('match.allSquareRemaining', { count: remaining })
   } else {
     const name = sides[leaderIndex]?.name ?? '?'
     if (decided) {
       // Golfová notace: náskok & počet jamek, které zbývaly.
-      label = t('match.wins', { name, lead, remaining })
+      label =
+        remaining === 0
+          ? t('match.winsFinal', { name, lead })
+          : t('match.wins', { name, lead, remaining })
     } else if (lead === remaining) {
       label = t('match.dormie', { name, lead, remaining })
     } else {
@@ -117,13 +136,29 @@ export function matchState(round: Round): MatchState {
     }
   }
 
-  return { won, halved, remaining, lead, leaderIndex, decided, label }
+  return { won, halved, remaining, lead, leaderIndex, decided, decisionHole, label }
+}
+
+function sideValueLabel(state: MatchState, index: number): string {
+  if (state.leaderIndex === null) return t('match.allSquare')
+  return state.leaderIndex === index
+    ? t('match.up', { count: state.lead })
+    : t('match.down', { count: state.lead })
 }
 
 export const matchPlay: GameDefinition = {
   id: 'match-play',
   playerCounts: [2, 4],
   usesTeams: (playerCount) => playerCount === 4,
+  scoringOptions: {
+    bonusIds: [],
+    resultMultipliers: false,
+    doubleBest: false,
+    noDoubleBonuses: false,
+    confirmLongest: false,
+    confirmNearest: false,
+    bonusScope: 'player',
+  },
   supportsDoubleHoles: false,
 
   computeStandings(round: Round): StandingsSection[] {
@@ -132,17 +167,12 @@ export const matchPlay: GameDefinition = {
 
     const rows = sides.map((side, index) => {
       const wonHoles = state.won[index === 0 ? 0 : 1]
-      let valueLabel: string
-      if (state.leaderIndex === null) valueLabel = t('match.allSquare')
-      else if (state.leaderIndex === index)
-        valueLabel = t('match.up', { count: state.lead })
-      else valueLabel = t('match.down', { count: state.lead })
 
       return {
         id: side.id,
         name: side.name,
         value: wonHoles,
-        valueLabel,
+        valueLabel: sideValueLabel(state, index),
         detail: t('match.detail', { won: wonHoles, halved: state.halved }),
         holesPlayed: wonHoles + state.halved,
       }
@@ -158,10 +188,42 @@ export const matchPlay: GameDefinition = {
     ]
   },
 
+  headerSummary(round: Round, hole: number): HeaderSummary {
+    const state = matchState(round)
+    const outOfPlay = state.decisionHole !== null && hole > state.decisionHole
+    const tone = outOfPlay
+      ? 'outOfPlay'
+      : state.decided
+        ? 'decided'
+        : state.leaderIndex !== null && state.lead === state.remaining
+          ? 'dormie'
+          : 'normal'
+
+    return {
+      entries: matchSides(round).map((side, index) => ({
+        label: side.name,
+        value: sideValueLabel(state, index),
+        highlight: state.leaderIndex === index,
+      })),
+      note: outOfPlay ? t('match.outOfPlay') : state.label,
+      tone,
+    }
+  },
+
   holeSummary(round: Round, hole: number): HoleSummary[] {
     const sides = matchSides(round)
     const [sideA, sideB] = sides
     if (!sideA || !sideB) return []
+
+    const state = matchState(round)
+    if (state.decisionHole !== null && hole > state.decisionHole) {
+      return [
+        {
+          id: '_game',
+          entries: [{ label: t('match.hole'), value: t('match.outOfPlay') }],
+        },
+      ]
+    }
 
     const a = sideScore(round, sideA, hole)
     const b = sideScore(round, sideB, hole)

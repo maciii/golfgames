@@ -1,10 +1,24 @@
-import type { PlayerId, Round } from '../types'
-import { holeMultiplier, isHoleStarted, playerName, scoreAt, strokeTotal } from '../types'
+import type { BonusId, PlayerId, Round } from '../types'
+import {
+  bonusMultiplier,
+  bonusesAt,
+  diffToPar,
+  exclusiveBonusOutcome,
+  getBonus,
+  holeMultiplier,
+  holesPlayed,
+  isHoleStarted,
+  playerName,
+  scoreAt,
+  strokeTotal,
+} from '../types'
 import { CONCEDED } from './shared'
 import type {
   GameDefinition,
+  HeaderSummary,
   HoleSummary,
-  ScorecardColumn,
+  ScorecardPlayerCell,
+  ScorecardPlayerTotal,
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
@@ -32,6 +46,86 @@ export interface SkinResult {
   skins: number
   /** Kolik skinů se po jamce přenáší dál. */
   carry: number
+}
+
+const POINT_BONUSES: BonusId[] = [
+  'longest',
+  'nearest',
+  'bunker',
+  'doubleBunker',
+  'water',
+  'barkie',
+  'arnie',
+]
+
+/** Body, které hráč získá na jedné jamce mimo samotný skin. */
+export function skinExtraPoints(round: Round, playerId: PlayerId, hole: number): number {
+  const diff = diffToPar(round, playerId, hole)
+  if (diff === null) return 0
+
+  const resultMultiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
+  if (resultMultiplier === 0) return 0
+
+  let total = 0
+  for (const bonusId of bonusesAt(round, playerId, hole)) {
+    if (!POINT_BONUSES.includes(bonusId)) continue
+    const bonus = getBonus(bonusId)
+    const value = round.settings.options.bonusValues[bonusId] ?? 0
+    if (!bonus || bonus.kind !== 'points' || value <= 0) continue
+
+    if (bonus.exclusive) {
+      // U jednotlivců propadne nepotvrzený Longest/Nearest, nemá komu
+      // připadnout jako soupeřova dvojice.
+      if (exclusiveBonusOutcome(round, playerId, hole, bonusId) !== 'own') continue
+      total += value
+    } else {
+      total += value * resultMultiplier
+    }
+  }
+
+  const multiplier = round.settings.options.noDoubleBonuses
+    ? 1
+    : holeMultiplier(round, hole)
+  return total * multiplier
+}
+
+function skinCount(
+  round: Round,
+  playerId: PlayerId,
+  results = skinResults(round),
+): number {
+  return results
+    .filter((result) => result.winnerId === playerId)
+    .reduce((sum, result) => sum + result.skins, 0)
+}
+
+function extraTotal(round: Round, playerId: PlayerId): number {
+  let total = 0
+  for (let hole = 0; hole < round.holeCount; hole++) {
+    total += skinExtraPoints(round, playerId, hole)
+  }
+  return total
+}
+
+/** Jamky, jejichž skiny byly později přidělené jednomu hráči. */
+function skinAwardHoles(round: Round): Record<PlayerId, Set<number>> {
+  const awarded: Record<PlayerId, Set<number>> = {}
+  for (const player of round.players) awarded[player.id] = new Set()
+
+  const carriedHoles: number[] = []
+  for (const [hole, result] of skinResults(round).entries()) {
+    if (result.winnerId !== null) {
+      const holes = awarded[result.winnerId]
+      if (!holes) continue
+      for (const carriedHole of carriedHoles) holes.add(carriedHole)
+      holes.add(hole)
+      carriedHoles.length = 0
+    } else if (isHoleStarted(round, hole)) {
+      carriedHoles.push(hole)
+    }
+  }
+
+  return awarded
 }
 
 /**
@@ -85,6 +179,24 @@ export const skins: GameDefinition = {
   id: 'skins',
   playerCounts: [2, 3, 4],
   usesTeams: () => false,
+  scoringOptions: {
+    bonusIds: [
+      'double',
+      'longest',
+      'nearest',
+      'bunker',
+      'doubleBunker',
+      'water',
+      'barkie',
+      'arnie',
+    ],
+    resultMultipliers: true,
+    doubleBest: false,
+    noDoubleBonuses: true,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusScope: 'player',
+  },
   supportsDoubleHoles: true,
 
   computeStandings(round: Round): StandingsSection[] {
@@ -92,21 +204,26 @@ export const skins: GameDefinition = {
 
     const rows = round.players.map((player) => {
       const won = results.filter((r) => r.winnerId === player.id)
-      const skinCount = won.reduce((sum, r) => sum + r.skins, 0)
+      const skinsWon = skinCount(round, player.id, results)
+      const extra = extraTotal(round, player.id)
       return {
         id: player.id,
         name: player.name,
-        value: skinCount,
-        valueLabel: `${skinCount}`,
-        detail:
-          won.length === 0
-            ? t('skins.noHole')
-            : t('skins.wonHoles', {
+        value: skinsWon + extra,
+        valueLabel: `${skinsWon + extra}`,
+        detail: [
+          t('skins.scoreDetail', { skins: skinsWon, extra }),
+          won.length > 0
+            ? t('skins.wonHoles', {
                 count: won.length,
                 holes: won.map((r) => r.hole + 1).join(', '),
-              }),
+              })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' · '),
         secondary: t('common.strokes', { count: strokeTotal(round, player.id) }),
-        holesPlayed: results.filter((r) => r.winnerId !== null).length,
+        holesPlayed: holesPlayed(round, player.id),
       }
     })
 
@@ -122,19 +239,69 @@ export const skins: GameDefinition = {
     ]
   },
 
-  /** Sloupec se skiny rozdanými na jamce; prázdný, když se jamka dělila. */
-  scorecardColumns(): ScorecardColumn[] {
-    return [
-      {
-        id: 'skins',
-        label: t('skins.column'),
-        cell: (round, hole) => {
-          const result = skinResults(round)[hole]
-          return result?.winnerId ? `${result.skins}` : ''
-        },
-        total: (round) => `${skinResults(round).reduce((sum, r) => sum + r.skins, 0)}`,
-      },
-    ]
+  /**
+   * Zvýrazní všechny zdrojové jamky přeneseného banku, ne jen tu, kde se
+   * nakonec rozhodl. Hráč tak vidí, odkud se jeho tři skiny sešly.
+   */
+  scorecardPlayerCell(
+    round: Round,
+    playerId: PlayerId,
+    hole: number,
+  ): ScorecardPlayerCell {
+    const result = skinResults(round)[hole]
+    const player = round.players.find((entry) => entry.id === playerId)
+    const extra = skinExtraPoints(round, playerId, hole)
+    const cell: ScorecardPlayerCell = {}
+    const awardedHoles = skinAwardHoles(round)
+
+    if (awardedHoles[playerId]?.has(hole) && player) {
+      cell.skin = {
+        ariaLabel:
+          result?.winnerId === playerId
+            ? t('skins.scorecardSkin', {
+                name: player.name,
+                count: result.skins,
+              })
+            : t('skins.scorecardSkinCarried', { name: player.name }),
+      }
+    }
+
+    if (extra > 0 && player) {
+      cell.suffix = {
+        text: `+${extra}`,
+        ariaLabel: t('skins.scorecardExtra', {
+          name: player.name,
+          count: extra,
+        }),
+      }
+    }
+
+    return cell
+  },
+
+  scorecardPlayerTotal(round: Round, playerId: PlayerId): ScorecardPlayerTotal {
+    const skinsWon = skinCount(round, playerId)
+    const extra = extraTotal(round, playerId)
+    return {
+      text: extra > 0 ? `${skinsWon} + ${extra} = ${skinsWon + extra}` : `${skinsWon}`,
+      ariaLabel: t('skins.scorecardTotal', {
+        name: playerName(round, playerId),
+        skins: skinsWon,
+        extra,
+        total: skinsWon + extra,
+      }),
+    }
+  },
+
+  headerSummary(round: Round): HeaderSummary {
+    const results = skinResults(round)
+    return {
+      entries: round.players.map((player) => ({
+        label: player.name,
+        value: `${skinCount(round, player.id, results) + extraTotal(round, player.id)}`,
+      })),
+      note: t('skins.headerNote'),
+    }
   },
 
   holeSummary(round: Round, hole: number): HoleSummary[] {

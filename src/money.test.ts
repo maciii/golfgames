@@ -113,6 +113,40 @@ describe('Vyrovnání jednotlivců', () => {
     expect(result.rows.map((r) => r.amount)).toEqual([70, -20, -50])
   })
 
+  it('vypíše konkrétní dluhy mezi každou dvojicí hráčů', () => {
+    const result = settleRound(soloRound(), [
+      { id: 'p1', name: 'Adam', units: 5 },
+      { id: 'p2', name: 'Bára', units: 3 },
+      { id: 'p3', name: 'Cyril', units: 0 },
+    ])
+
+    if (result.kind !== 'balances') throw new Error('čekány zůstatky')
+    expect(result.rows.map((row) => row.amount)).toEqual([70, 10, -80])
+    expect(result.transfers).toHaveLength(3)
+    expect(
+      result.transfers.map((transfer) => [
+        transfer.fromName,
+        transfer.toName,
+        transfer.amount,
+      ]),
+    ).toEqual([
+      ['Bára', 'Adam', 20],
+      ['Cyril', 'Adam', 50],
+      ['Cyril', 'Bára', 30],
+    ])
+    expect(result.optimizedTransfers).toHaveLength(2)
+    expect(
+      result.optimizedTransfers.map((transfer) => [
+        transfer.fromName,
+        transfer.toName,
+        transfer.amount,
+      ]),
+    ).toEqual([
+      ['Cyril', 'Adam', 70],
+      ['Cyril', 'Bára', 10],
+    ])
+  })
+
   it('součet všech zůstatků je nula', () => {
     const rows = balances(parties, 10)
 

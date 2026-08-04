@@ -190,6 +190,12 @@ describe('Best Aggregate - celkové pořadí', () => {
     expect(bestAggregate.playerCounts).toEqual([4])
     expect(bestAggregate.usesTeams(4)).toBe(true)
   })
+
+  it('deklaruje týmové bonusy a vlastní volby bodování', () => {
+    expect(bestAggregate.scoringOptions.bonusScope).toBe('team')
+    expect(bestAggregate.scoringOptions.doubleBest).toBe(true)
+    expect(bestAggregate.scoringOptions.bonusIds).toContain('double')
+  })
 })
 
 describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {

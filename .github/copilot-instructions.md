@@ -11,7 +11,8 @@ v [`docs/decisions.md`](../docs/decisions.md).
 ## Základní pravidla
 
 - Pravidla her patří **jen** do `src/games/` (rozhraní `GameDefinition`).
-  Komponenty v `src/screens/` o konkrétní hře nevědí nic.
+  Komponenty v `src/screens/` o konkrétní hře nevědí nic; vykreslují i
+  scorecardové dekorace a souhrny, které hra poskytne.
 - `Round` v `src/types.ts` je jediný zdroj pravdy a musí zůstat
   serializovatelný do JSON.
 - Kolo si při založení dělá **hlubokou kopii** nastavení, aby změna předvoleb
@@ -19,7 +20,8 @@ v [`docs/decisions.md`](../docs/decisions.md).
 - `scores[player][hole] === null` znamená buď nehranou, nebo **vzdanou** jamku
   – rozhoduje `isHoleStarted()`. Ve výpočtech se vzdaná hodnota reprezentuje
   jako `CONCEDED` (`Infinity`).
-- Extra bod (bonus) uhraný jedním hráčem se počítá **celé dvojici**.
+- Extra bod (bonus) se počítá podle konkrétní hry: týmovým hrám celé dvojici,
+  individuálním hrám hráči, který ho uhrál.
 - **Uživatelské texty patří do `src/i18n/`, ne do komponent.** Kód
   a identifikátory zůstávají anglicky.
 - Komentáře vysvětlují **proč**, ne co.

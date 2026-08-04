@@ -23,6 +23,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.subtitle': 'New round',
   'setup.game': 'Game',
   'setup.gameSettings': 'Scoring settings',
+  'setup.gameSettingsFor': 'Scoring settings for {name}',
   'setup.players': 'Players',
   'setup.fixedPlayers': 'This game is always played by {count} players.',
   'setup.savedPlayers': 'Saved players',
@@ -82,8 +83,10 @@ export const en: Record<MessageKey, Message> = {
     'No extra points are available for this hole. You turn them on in the game settings before the round; Longest is only on par 5 holes and Nearest on par 3.',
   'bonus.footer':
     'An extra point counts for the whole pair. The value applies to par, a better result multiplies it according to the game settings; a bogey or worse scores nothing.',
-  'bonus.double.name': 'Double',
-  'bonus.double.description': 'Doubles the result of the whole hole for both pairs.',
+  'bonus.footerPlayer':
+    'An extra point counts for the player who entered it. The value applies to par, a better result multiplies it according to the game settings; a bogey or worse scores nothing.',
+  'bonus.double.name': 'Double stake',
+  'bonus.double.description': 'Doubles the stake on this hole.',
   'bonus.longest.name': 'Longest',
   'bonus.longest.description': 'Longest drive; par 5 holes only, for a single player.',
   'bonus.nearest.name': 'Nearest',
@@ -101,8 +104,12 @@ export const en: Record<MessageKey, Message> = {
 
   // --- scoring settings ---------------------------------------------------
   'gameSettings.title': 'Scoring',
-  'gameSettings.intro':
+  'gameSettings.intro': 'Zero means off – such an extra point is not offered at all.',
+  'gameSettings.introTeam':
     'Zero means off – such an extra point is not offered at all. The value applies to par, a better result multiplies it according to the settings below; a bogey or worse scores nothing. A bonus always counts for the whole pair.',
+  'gameSettings.introPlayer':
+    'Zero means off – such an extra point is not offered at all. The value applies to par, a better result multiplies it according to the settings below; a bogey or worse scores nothing. A bonus counts for the player who entered it.',
+  'gameSettings.noOptions': 'This game has no additional scoring options.',
   'gameSettings.extraPoints': 'Extra points',
   'gameSettings.bonusValue': 'Value of the {name} bonus',
   'gameSettings.pointsSuffix': 'pts',
@@ -115,10 +122,11 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.doubleClosingNote': 'in a nine hole round only the last hole',
   'gameSettings.noDoubleBonuses': 'Do not double extra points',
   'gameSettings.noDoubleBonusesNote':
-    'neither a double hole nor “double” multiplies extra points',
+    'neither a double hole nor “double stake” multiplies extra points',
   'gameSettings.confirmLongest': 'Confirm Longest',
   'gameSettings.confirmNearest': 'Confirm Nearest',
   'gameSettings.confirmNote': 'worse than par and the point goes to the opponents',
+  'gameSettings.confirmPlayerNote': 'worse than par and the bonus scores nothing',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'An extra point when both partners played better than both opponents.',
@@ -132,6 +140,9 @@ export const en: Record<MessageKey, Message> = {
   'results.conceded': 'Conceded holes: {holes} – the pair lost the aggregate on them.',
   'results.unplayed': 'The round ended early, holes {holes} were not played.',
   'results.settlement': 'Settlement',
+  'results.totalWinnings': 'Total winnings',
+  'results.optimizedPayments': 'Optimized payments',
+  'results.detailedPayments': 'Individual payments',
   'results.pointWorth': 'A point is {money}.',
   'results.doubleClosingNote': 'Holes 9 and 18 counted double.',
   'results.configuration': 'Round scoring',
@@ -150,6 +161,7 @@ export const en: Record<MessageKey, Message> = {
   'scorecard.holeShort': 'H',
   'scorecard.par': 'Par',
   'scorecard.total': 'Total',
+  'scorecard.gameTotal': 'P',
 
   // --- archive ------------------------------------------------------------
   'archive.title': 'Archive',
@@ -318,6 +330,7 @@ export const en: Record<MessageKey, Message> = {
 
   // Best Aggregate
   'best.points': 'Points',
+  'best.headerNote': 'Current score',
   'best.pointsDescription':
     'Per hole: 1 point for the best ball, 1 for the lower aggregate, 1 for a birdie, 3 for an eagle.',
   'best.best': 'Best',
@@ -336,7 +349,18 @@ export const en: Record<MessageKey, Message> = {
   'skins.description': 'A tied hole awards no skin and carries it over to the next one.',
   'skins.noHole': 'no hole yet',
   'skins.wonHoles': '{count} holes won: {holes}',
-  'skins.column': 'Skin',
+  'skins.scoreDetail': 'Skins {skins} · Extra {extra} pts',
+  'skins.scorecardSkin': {
+    one: '{name}: 1 skin',
+    other: '{name}: {count} skins',
+  },
+  'skins.scorecardSkinCarried': '{name}: skin from this hole was carried and won later',
+  'skins.scorecardExtra': {
+    one: '{name}: +1 extra point',
+    other: '{name}: +{count} extra points',
+  },
+  'skins.scorecardTotal': '{name}: {skins} skins +{extra} extra points = {total} total',
+  'skins.headerNote': 'Skins + extra points',
   'skins.atStake': 'At stake',
   'skins.takes': 'Takes',
 
@@ -345,6 +369,8 @@ export const en: Record<MessageKey, Message> = {
   'match.notStarted': 'The match has not started yet',
   'match.allSquareRemaining': 'All square, {count} holes to play',
   'match.wins': '{name} wins {lead}&{remaining}',
+  'match.winsFinal': '{name} wins {lead} UP',
+  'match.allSquareFinished': 'All square after the final hole',
   'match.dormie': '{name} is {lead} UP (dormie), {remaining} holes to play',
   'match.leads': '{name} is {lead} UP, {remaining} holes to play',
   'match.allSquare': 'AS',
@@ -357,10 +383,13 @@ export const en: Record<MessageKey, Message> = {
   'match.loses': 'loses',
   'match.bestBall': 'Best ball',
   'match.hole': 'Hole',
+  'match.outOfPlay': 'Out of play - the match is already decided',
 
   // --- money settlement ---------------------------------------------------
   'money.nobodyOwes': 'Nobody owes anybody anything.',
   'money.eachOpponent': 'Every extra point is paid by each opponent separately.',
+  'money.optimizedSettlement':
+    'Payments are combined into the fewest possible transfers.',
   'money.draw': 'A draw, nobody owes anybody anything.',
   'money.transfers':
     'Difference of {units} pts × {value} = {amount}, paid by each player separately.',

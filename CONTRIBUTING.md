@@ -80,7 +80,7 @@ src/
     BonusSheet.tsx        výběr extra bodů pro hráče na jamce
     GameSettingsScreen.tsx nastavení bodování konkrétní hry
     ResultsScreen.tsx     pořadí, vyrovnání a scorecard (i pro archivní kola)
-    Scorecard.tsx         tabulka se značkami skóre a sloupci hry
+    Scorecard.tsx         tabulka se značkami, dekoracemi a souhrny hry
     ArchiveScreen.tsx     seznam odehraných kol
     BackupScreen.tsx      záloha dat do souboru a obnova z něj
     AccountScreen.tsx     přihlášení, stav synchronizace, smazání účtu

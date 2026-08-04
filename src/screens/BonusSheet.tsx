@@ -1,5 +1,6 @@
 import type { BonusId, Round } from '../types'
 import { availableBonuses } from '../types'
+import { getGame } from '../games'
 import { dynamicKey, useT } from '../i18n'
 
 interface Props {
@@ -28,7 +29,10 @@ export default function BonusSheet({
 }: Props) {
   const t = useT()
   // Longest a Nearest se nabízejí jen na svém paru a jdou první.
-  const available = availableBonuses(round, hole)
+  const game = getGame(round.gameId)
+  const available = availableBonuses(round, hole).filter((bonus) =>
+    game.scoringOptions.bonusIds.includes(bonus.id),
+  )
   const options = round.settings.options
 
   return (
@@ -77,7 +81,11 @@ export default function BonusSheet({
           </ul>
         )}
 
-        <p className="hint">{t('bonus.footer')}</p>
+        <p className="hint">
+          {game.scoringOptions.bonusScope === 'team'
+            ? t('bonus.footer')
+            : t('bonus.footerPlayer')}
+        </p>
 
         <button type="button" className="primary-button" onClick={onClose}>
           {t('common.done')}

@@ -12,7 +12,7 @@ import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
-import { LOCALES, LOCALE_LABEL, useLocale } from '../i18n'
+import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, useLocale } from '../i18n'
 import type { MessageKey } from '../i18n'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
@@ -171,8 +171,27 @@ export default function SetupScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{t('setup.title')}</h1>
-        <p className="subtitle">{t('setup.subtitle')}</p>
+        <div className="setup-header-row">
+          <div>
+            <h1>{t('setup.title')}</h1>
+            <p className="subtitle">{t('setup.subtitle')}</p>
+          </div>
+          <div className="language-switcher" aria-label={t('setup.language')}>
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`language-button${code === locale ? ' selected' : ''}`}
+                onClick={() => setLocale(code)}
+                aria-label={LOCALE_LABEL[code]}
+                aria-pressed={code === locale}
+                title={LOCALE_LABEL[code]}
+              >
+                {LOCALE_FLAG[code]}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="content">
@@ -180,28 +199,37 @@ export default function SetupScreen({
           <h2 className="section-title">{t('setup.game')}</h2>
           <div className="game-list">
             {GAMES.map((g) => (
-              <button
-                key={g.id}
-                type="button"
-                className={`game-card${g.id === gameId ? ' selected' : ''}`}
-                onClick={() => selectGame(g.id)}
-                aria-pressed={g.id === gameId}
-              >
-                <span className="game-name">{t(`games.${g.id}.name` as MessageKey)}</span>
-                <span className="game-tagline">
-                  {t(`games.${g.id}.tagline` as MessageKey)}
-                </span>
-              </button>
+              <div key={g.id} className="game-choice">
+                <button
+                  type="button"
+                  className={`game-card${g.id === gameId ? ' selected' : ''}`}
+                  onClick={() => selectGame(g.id)}
+                  aria-pressed={g.id === gameId}
+                >
+                  <span className="game-name">
+                    {t(`games.${g.id}.name` as MessageKey)}
+                  </span>
+                  <span className="game-tagline">
+                    {t(`games.${g.id}.tagline` as MessageKey)}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="game-settings-button"
+                  onClick={() => onOpenGameSettings(g.id)}
+                  aria-label={t('setup.gameSettingsFor', {
+                    name: t(`games.${g.id}.name` as MessageKey),
+                  })}
+                  title={t('setup.gameSettingsFor', {
+                    name: t(`games.${g.id}.name` as MessageKey),
+                  })}
+                >
+                  <span aria-hidden="true">⚙</span>
+                </button>
+              </div>
             ))}
           </div>
           <p className="hint">{t(`games.${game.id}.rules` as MessageKey)}</p>
-          <button
-            type="button"
-            className="link-button"
-            onClick={() => onOpenGameSettings(gameId)}
-          >
-            {t('setup.gameSettings')}
-          </button>
         </section>
 
         <section className="section">
@@ -352,23 +380,6 @@ export default function SetupScreen({
             ))}
           </div>
           <p className="hint">{t('setup.holeCountHint')}</p>
-        </section>
-
-        <section className="section">
-          <h2 className="section-title">{t('setup.language')}</h2>
-          <div className="segmented">
-            {LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                className={`segment${code === locale ? ' selected' : ''}`}
-                onClick={() => setLocale(code)}
-                aria-pressed={code === locale}
-              >
-                {LOCALE_LABEL[code]}
-              </button>
-            ))}
-          </div>
         </section>
 
         <div className="link-row">

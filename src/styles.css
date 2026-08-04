@@ -86,6 +86,37 @@ button {
   letter-spacing: -0.01em;
 }
 
+.setup-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.language-switcher {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+}
+
+.language-button {
+  width: 40px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 21px;
+  line-height: 1;
+  filter: grayscale(0.75);
+  opacity: 0.65;
+}
+
+.language-button.selected {
+  background: var(--bg-input);
+  filter: none;
+  opacity: 1;
+}
+
 .subtitle {
   margin: 2px 0 0;
   color: var(--text-dim);
@@ -243,6 +274,12 @@ button {
   gap: 8px;
 }
 
+.game-choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--tap);
+  gap: 8px;
+}
+
 .game-card {
   display: flex;
   flex-direction: column;
@@ -252,6 +289,24 @@ button {
   border-radius: 12px;
   background: var(--bg-elevated);
   border: 1.5px solid transparent;
+}
+
+.game-choice .game-card {
+  width: 100%;
+}
+
+.game-settings-button {
+  min-height: var(--tap);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 22px;
+}
+
+.game-settings-button:hover,
+.game-settings-button:focus-visible {
+  color: var(--accent);
+  background: var(--bg-input);
 }
 
 .game-card.selected {
@@ -348,9 +403,27 @@ button {
 
 .hole-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.hole-nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hole-center {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .nav-arrow {
@@ -381,6 +454,73 @@ button {
 .hole-of {
   font-size: 13px;
   color: var(--text-dim);
+}
+
+.game-header-summary {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+}
+
+.game-header-score {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+.game-header-entry {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.game-header-entry span {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-header-entry strong {
+  color: var(--text);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-header-entry.highlight strong,
+.game-header-summary.dormie .game-header-note {
+  color: var(--score-eagle);
+}
+
+.game-header-summary.decided .game-header-note {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.game-header-summary.outOfPlay {
+  border-left: 1px solid var(--over);
+  padding-left: 8px;
+}
+
+.game-header-summary.outOfPlay .game-header-note,
+.hole-header.out-of-play .hole-number {
+  color: var(--over);
+  font-weight: 650;
+}
+
+.game-header-note {
+  min-width: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .par-row {
@@ -700,6 +840,23 @@ button {
   background: var(--bg-elevated);
 }
 
+.settlement-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.settlement-toggle {
+  width: 100%;
+}
+
+.settlement-toggle .segment {
+  font-size: 13px;
+}
+
 .settlement-name {
   font-size: 16px;
   font-weight: 550;
@@ -874,6 +1031,17 @@ button {
   color: var(--text-dim);
 }
 
+/* Hráčské sloupce mají střídavě velmi jemný akcent, aby se rány daly rychle sledovat. */
+.scorecard .player-col-a,
+.scorecard .extra-col.player-col-a {
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-elevated));
+}
+
+.scorecard .player-col-b,
+.scorecard .extra-col.player-col-b {
+  background: color-mix(in srgb, var(--accent) 2%, var(--bg-elevated));
+}
+
 /* Nadřazený řádek se jmény dvojic nad jejich sloupci. */
 .scorecard .group-row th {
   font-size: 11px;
@@ -886,6 +1054,46 @@ button {
   border-left: 1px solid var(--line);
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Výsledek, skinový čtverec a suffix zůstávají v jedné kompaktní buňce. */
+.scorecard-player-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 24px;
+}
+
+.scorecard-extra-suffix {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorecard td.skin-awarded {
+  background: color-mix(in srgb, var(--score-eagle) 30%, var(--bg-elevated));
+  box-shadow: inset 0 0 0 1.5px
+    color-mix(in srgb, var(--score-eagle) 72%, var(--bg-elevated));
+}
+
+.scorecard-game-total-row {
+  border-top: 1px solid var(--line);
+}
+
+.scorecard-total-label {
+  text-align: right !important;
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.scorecard-game-total-value {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .scorecard thead th.extra-col {

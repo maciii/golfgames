@@ -1,4 +1,4 @@
-import type { Round } from '../types'
+import type { BonusId, Round } from '../types'
 
 /**
  * Společné rozhraní všech her.
@@ -45,12 +45,56 @@ export interface HoleSummary {
 }
 
 /**
+ * Volby bodování, které mají v konkrétní hře skutečný význam.
+ *
+ * `GameOptions` zůstává společný a serializovatelný kvůli archivům, ale UI i
+ * pravidla hry se řídí tímhle popisem, aby se nenabízely mrtvé volby.
+ */
+export interface GameScoringOptions {
+  /** Extra body, které hra umí vyhodnotit. */
+  bonusIds: BonusId[]
+  /** Hra používá násobiče podle výsledku hráče. */
+  resultMultipliers: boolean
+  /** Hra má volbu Double Best. */
+  doubleBest: boolean
+  /** Hra umožňuje ponechat extra body mimo násobení jamky. */
+  noDoubleBonuses: boolean
+  /** Hra potvrzuje Longest podle výsledku hráče. */
+  confirmLongest: boolean
+  /** Hra potvrzuje Nearest podle výsledku hráče. */
+  confirmNearest: boolean
+  /** Komu připadne běžný bonus: celé dvojici, nebo jednotlivci. */
+  bonusScope: 'team' | 'player'
+}
+
+/** Průběžné skóre, které hra zobrazí vedle hlavičky aktuální jamky. */
+export interface HeaderSummary {
+  entries: { label: string; value: string; highlight?: boolean }[]
+  note?: string
+  tone?: 'normal' | 'dormie' | 'decided' | 'outOfPlay'
+}
+
+/** Dekorace hráčova výsledku, kterou může hra přidat do scorekarty. */
+export interface ScorecardPlayerCell {
+  skin?: { ariaLabel: string }
+  suffix?: { text: string; ariaLabel: string }
+}
+
+/** Souhrn hry zobrazený za celkovým počtem ran hráče. */
+export interface ScorecardPlayerTotal {
+  text: string
+  ariaLabel: string
+}
+
+/**
  * Vlastní sloupec ve scorekartě - typicky body, které hra rozdala na jamce.
  * Scorekarta sama o pravidlech nic neví, jen sloupce vykreslí.
  */
 export interface ScorecardColumn {
   id: string
   label: string
+  /** Přístupný popis pro sloupce, jejichž viditelný label je jen symbol. */
+  ariaLabel?: string
   /**
    * Id hráče, za jehož sloupcem se tenhle zobrazí. Díky tomu stojí body
    * dvojice hned vedle ran obou partnerů. Bez hodnoty se řadí na konec.
@@ -72,6 +116,8 @@ export interface GameDefinition {
   playerCounts: number[]
   /** Hraje se při daném počtu hráčů ve dvojicích? */
   usesTeams(playerCount: number): boolean
+  /** Volby bodování relevantní pro tuhle hru. */
+  scoringOptions: GameScoringOptions
   /**
    * Dává u téhle hry smysl volba "9. a 18. jamka za dvojnásobek"? Match play
    * se počítá na jamky, kde by dvojnásobná jamka rozbila stav zápasu.
@@ -79,6 +125,9 @@ export interface GameDefinition {
   supportsDoubleHoles: boolean
   computeStandings(round: Round): StandingsSection[]
   holeSummary?(round: Round, hole: number): HoleSummary[]
+  headerSummary?(round: Round, hole: number): HeaderSummary
+  scorecardPlayerCell?(round: Round, playerId: string, hole: number): ScorecardPlayerCell
+  scorecardPlayerTotal?(round: Round, playerId: string): ScorecardPlayerTotal
   /** Nepovinné sloupce navíc ve scorekartě (body dvojic, skiny apod.). */
   scorecardColumns?(round: Round): ScorecardColumn[]
 }

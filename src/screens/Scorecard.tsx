@@ -7,7 +7,7 @@ import {
   strokeTotal,
   teamName,
 } from '../types'
-import type { ScorecardColumn } from '../games'
+import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
 import { getGame } from '../games'
 import { dynamicKey, useT } from '../i18n'
 
@@ -15,13 +15,36 @@ import { dynamicKey, useT } from '../i18n'
  * Scorekarta se značkami podle golfové konvence.
  *
  * Tvary i barvy vychází z toho, jak skóre zobrazují turnajové scorekarty:
- * podpar červeně v kroužku, nadpar modře ve čtverečku, eagle a dvojbogey
+ * podpar červeně v kroužku, nadpar modře ve čtverečku, eagle a Doble
  * s dvojitým orámováním. Par se nijak nezvýrazňuje.
  */
 
-function ScoreCell({ score, par }: { score: number | null; par: number }) {
-  if (score === null) return <span className="mark empty">–</span>
-  return <span className={`mark ${scoreCategory(score, par)}`}>{score}</span>
+function ScoreCell({
+  score,
+  par,
+  decoration,
+}: {
+  score: number | null
+  par: number
+  decoration?: ScorecardPlayerCell
+}) {
+  return (
+    <span className="scorecard-player-cell">
+      <span className={`mark ${score === null ? 'empty' : scoreCategory(score, par)}`}>
+        {score ?? '–'}
+      </span>
+      {decoration?.suffix && (
+        <span
+          className="scorecard-extra-suffix"
+          role="img"
+          aria-label={decoration.suffix.ariaLabel}
+          title={decoration.suffix.ariaLabel}
+        >
+          {decoration.suffix.text}
+        </span>
+      )}
+    </span>
+  )
 }
 
 /** Ukázková rána pro každou kategorii v legendě (par 4). */
@@ -36,7 +59,8 @@ const LEGEND_EXAMPLES: [ScoreCategory, number][] = [
 
 /** Sloupec scorekarty: buď hráč, nebo vlastní sloupec hry (body, skiny). */
 type Column =
-  { kind: 'player'; player: Player } | { kind: 'extra'; column: ScorecardColumn }
+  | { kind: 'player'; player: Player; playerIndex: number }
+  | { kind: 'extra'; column: ScorecardColumn }
 
 /**
  * Poskládá sloupce tak, aby vlastní sloupce hry stály za hráčem, ke kterému
@@ -44,8 +68,8 @@ type Column =
  */
 function buildColumns(round: Round, extras: ScorecardColumn[]): Column[] {
   const columns: Column[] = []
-  for (const player of scorecardPlayers(round)) {
-    columns.push({ kind: 'player', player })
+  for (const [playerIndex, player] of scorecardPlayers(round).entries()) {
+    columns.push({ kind: 'player', player, playerIndex })
     for (const column of extras) {
       if (column.afterPlayerId === player.id) columns.push({ kind: 'extra', column })
     }
@@ -56,11 +80,40 @@ function buildColumns(round: Round, extras: ScorecardColumn[]): Column[] {
   return columns
 }
 
+function playerColumnClass(playerIndex: number): string {
+  return `player-col ${playerColumnToneClass(playerIndex)}`
+}
+
+function playerColumnToneClass(playerIndex: number): string {
+  return playerIndex % 2 === 0 ? 'player-col-a' : 'player-col-b'
+}
+
+function extraColumnClass(
+  column: ScorecardColumn,
+  playerIndexes: Map<string, number>,
+): string {
+  const playerIndex = column.afterPlayerId
+    ? playerIndexes.get(column.afterPlayerId)
+    : undefined
+  return playerIndex === undefined
+    ? 'extra-col'
+    : `extra-col ${playerColumnToneClass(playerIndex)}`
+}
+
 export default function Scorecard({ round }: { round: Round }) {
   const t = useT()
   const game = getGame(round.gameId)
   const extras = game.scorecardColumns?.(round) ?? []
   const columns = buildColumns(round, extras)
+  const playerTotals = new Map<string, ScorecardPlayerTotal>()
+  if (game.scorecardPlayerTotal) {
+    for (const player of scorecardPlayers(round)) {
+      playerTotals.set(player.id, game.scorecardPlayerTotal(round, player.id))
+    }
+  }
+  const playerIndexes = new Map(
+    scorecardPlayers(round).map((player, playerIndex) => [player.id, playerIndex]),
+  )
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
 
   // Nadřazený řádek se jmény dvojic; každá zabírá své hráče i sloupec bodů.
@@ -100,12 +153,22 @@ export default function Scorecard({ round }: { round: Round }) {
               <th scope="col">{t('scorecard.par')}</th>
               {columns.map((column) =>
                 column.kind === 'player' ? (
-                  <th key={column.player.id} scope="col">
+                  <th
+                    key={column.player.id}
+                    scope="col"
+                    className={playerColumnClass(column.playerIndex)}
+                  >
                     {/* Dlouhá jména se zkrátí, ať se tabulka vejde na šířku. */}
                     <span className="col-name">{column.player.name}</span>
                   </th>
                 ) : (
-                  <th key={column.column.id} scope="col" className="extra-col">
+                  <th
+                    key={column.column.id}
+                    scope="col"
+                    className={extraColumnClass(column.column, playerIndexes)}
+                    aria-label={column.column.ariaLabel}
+                    title={column.column.ariaLabel}
+                  >
                     {column.column.label}
                   </th>
                 ),
@@ -117,23 +180,42 @@ export default function Scorecard({ round }: { round: Round }) {
               <tr key={hole}>
                 <th scope="row">{hole + 1}</th>
                 <td className="par-cell">{parAt(round, hole)}</td>
-                {columns.map((column) =>
-                  column.kind === 'player' ? (
-                    <td key={column.player.id}>
-                      <ScoreCell
-                        score={scoreAt(round, column.player.id, hole)}
-                        par={parAt(round, hole)}
-                      />
-                    </td>
-                  ) : (
+                {columns.map((column) => {
+                  if (column.kind === 'player') {
+                    const decoration = game.scorecardPlayerCell?.(
+                      round,
+                      column.player.id,
+                      hole,
+                    )
+                    return (
+                      <td
+                        key={column.player.id}
+                        className={`${playerColumnClass(column.playerIndex)}${
+                          decoration?.skin ? ' skin-awarded' : ''
+                        }`}
+                        aria-label={decoration?.skin?.ariaLabel}
+                        title={decoration?.skin?.ariaLabel}
+                      >
+                        <ScoreCell
+                          score={scoreAt(round, column.player.id, hole)}
+                          par={parAt(round, hole)}
+                          decoration={decoration}
+                        />
+                      </td>
+                    )
+                  }
+
+                  return (
                     <td
                       key={column.column.id}
-                      className={`extra-col${column.column.cell(round, hole) ? '' : ' empty'}`}
+                      className={`${extraColumnClass(column.column, playerIndexes)}${
+                        column.column.cell(round, hole) ? '' : ' empty'
+                      }`}
                     >
                       {column.column.cell(round, hole) || '–'}
                     </td>
-                  ),
-                )}
+                  )
+                })}
               </tr>
             ))}
           </tbody>
@@ -141,16 +223,64 @@ export default function Scorecard({ round }: { round: Round }) {
             <tr>
               <th scope="row">Σ</th>
               <td className="par-cell">{parTotal}</td>
-              {columns.map((column) =>
-                column.kind === 'player' ? (
-                  <td key={column.player.id}>{strokeTotal(round, column.player.id)}</td>
-                ) : (
-                  <td key={column.column.id} className="extra-col">
+              {columns.map((column) => {
+                if (column.kind === 'player') {
+                  return (
+                    <td
+                      key={column.player.id}
+                      className={playerColumnClass(column.playerIndex)}
+                    >
+                      {strokeTotal(round, column.player.id)}
+                    </td>
+                  )
+                }
+
+                return (
+                  <td
+                    key={column.column.id}
+                    className={extraColumnClass(column.column, playerIndexes)}
+                  >
                     {column.column.total(round)}
                   </td>
-                ),
-              )}
+                )
+              })}
             </tr>
+            {playerTotals.size > 0 && (
+              <tr className="scorecard-game-total-row">
+                <th scope="row" colSpan={2} className="scorecard-total-label">
+                  {t('scorecard.gameTotal')}
+                </th>
+                {columns.map((column) => {
+                  if (column.kind === 'player') {
+                    const total = playerTotals.get(column.player.id)
+                    return (
+                      <td
+                        key={column.player.id}
+                        className={playerColumnClass(column.playerIndex)}
+                      >
+                        {total && (
+                          <span
+                            className="scorecard-game-total-value"
+                            role="img"
+                            aria-label={total.ariaLabel}
+                            title={total.ariaLabel}
+                          >
+                            {total.text}
+                          </span>
+                        )}
+                      </td>
+                    )
+                  }
+
+                  return (
+                    <td
+                      key={column.column.id}
+                      className={extraColumnClass(column.column, playerIndexes)}
+                    />
+                  )
+                })}
+              </tr>
+            )}
           </tfoot>
         </table>
       </div>

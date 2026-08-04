@@ -72,6 +72,8 @@ export default function PlayScreen({
   // Ukončit jde jen kolo, ve kterém se aspoň něco zapsalo.
   const anyScore = round.players.some((p) => holesPlayed(round, p.id) > 0)
   const summaries = game.holeSummary?.(round, hole) ?? []
+  const headerSummary = game.headerSummary?.(round, hole)
+  const hasBonusOptions = game.scoringOptions.bonusIds.length > 0
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
 
@@ -178,14 +180,16 @@ export default function PlayScreen({
                 })}
           </span>
         </div>
-        <button
-          type="button"
-          className={`bonus-button${bonuses.length > 0 ? ' active' : ''}`}
-          onClick={() => setBonusFor(player)}
-          aria-label={t('play.bonusesFor', { name: player.name })}
-        >
-          {bonuses.length > 0 ? (bonusPoints > 0 ? bonusPoints : '•') : '★'}
-        </button>
+        {hasBonusOptions && (
+          <button
+            type="button"
+            className={`bonus-button${bonuses.length > 0 ? ' active' : ''}`}
+            onClick={() => setBonusFor(player)}
+            aria-label={t('play.bonusesFor', { name: player.name })}
+          >
+            {bonuses.length > 0 ? (bonusPoints > 0 ? bonusPoints : '•') : '★'}
+          </button>
+        )}
         <div className="stepper">
           <button
             type="button"
@@ -229,29 +233,57 @@ export default function PlayScreen({
 
   return (
     <div className="screen">
-      <header className="app-header hole-header">
-        <button
-          type="button"
-          className="nav-arrow"
-          onClick={() => onGoToHole(hole - 1)}
-          disabled={hole === 0}
-          aria-label={t('play.previousHole')}
-        >
-          ‹
-        </button>
-        <div className="hole-title">
-          <span className="hole-number">{t('play.hole', { number: hole + 1 })}</span>
-          <span className="hole-of">{t('play.holeOf', { count: round.holeCount })}</span>
+      <header
+        className={`app-header hole-header${
+          headerSummary?.tone === 'outOfPlay' ? ' out-of-play' : ''
+        }`}
+      >
+        <div className="hole-nav">
+          <button
+            type="button"
+            className="nav-arrow"
+            onClick={() => onGoToHole(hole - 1)}
+            disabled={hole === 0}
+            aria-label={t('play.previousHole')}
+          >
+            ‹
+          </button>
+          <div className="hole-center">
+            <div className="hole-title">
+              <span className="hole-number">{t('play.hole', { number: hole + 1 })}</span>
+              <span className="hole-of">
+                {t('play.holeOf', { count: round.holeCount })}
+              </span>
+            </div>
+            {headerSummary && (
+              <div className={`game-header-summary ${headerSummary.tone ?? 'normal'}`}>
+                <div className="game-header-score">
+                  {headerSummary.entries.map((entry, index) => (
+                    <span
+                      key={`${entry.label}-${index}`}
+                      className={`game-header-entry${entry.highlight ? ' highlight' : ''}`}
+                    >
+                      <span>{entry.label}</span>
+                      <strong>{entry.value}</strong>
+                    </span>
+                  ))}
+                </div>
+                {headerSummary.note && (
+                  <span className="game-header-note">{headerSummary.note}</span>
+                )}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className="nav-arrow"
+            onClick={() => onGoToHole(hole + 1)}
+            disabled={isLastHole}
+            aria-label={t('play.nextHole')}
+          >
+            ›
+          </button>
         </div>
-        <button
-          type="button"
-          className="nav-arrow"
-          onClick={() => onGoToHole(hole + 1)}
-          disabled={isLastHole}
-          aria-label={t('play.nextHole')}
-        >
-          ›
-        </button>
       </header>
 
       <main className="content">
