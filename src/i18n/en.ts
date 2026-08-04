@@ -39,6 +39,29 @@ export const en: Record<MessageKey, Message> = {
     'At the end of the round the point difference is converted to money; the losing side pays the winning one.',
   'setup.holeCount': 'Number of holes',
   'setup.holeCountHint': 'You set the par of each hole while playing.',
+  'setup.holeCountFromCourse': 'The selected course sets the number of holes.',
+
+  // Courses and handicaps
+  'setup.course': 'Course',
+  'setup.courseChoice': 'Course',
+  'setup.noCourse': 'No course',
+  'setup.newCourse': 'New course',
+  'setup.editCourse': 'Edit course',
+  'setup.tee': 'Tee',
+  'setup.courseHint': 'Pars and stroke indexes come from the course ({count} holes).',
+  'setup.noCourseHint':
+    'Without a course nothing changes: pars are set while playing and handicaps are not used.',
+  'setup.handicaps': 'Handicaps',
+  'setup.netScoring': 'Play with handicap strokes (net)',
+  'setup.handicapIndex': 'Index',
+  'setup.handicapStrokes': 'Strokes',
+  'setup.handicapFor': 'Handicap for {name}',
+  'setup.noHandicap': 'no HCP',
+  'setup.strokesGiven': { one: '{count} stroke', other: '{count} strokes' },
+  'setup.handicapHintRated':
+    'The playing handicap is calculated from the {tee} tee rating (CR {cr}, SR {sr}).',
+  'setup.handicapHintPlain':
+    'The tee has no rating, so the number you enter is used directly as strokes.',
   'setup.archive': 'Archive of played rounds',
   'setup.archiveWithCount': 'Archive of played rounds ({count})',
   'setup.backup': 'Data backup',
@@ -382,6 +405,32 @@ export const en: Record<MessageKey, Message> = {
   'stableford.received': 'Strokes',
   'stableford.headerNote': 'Points per hole: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Net points based on the stroke index of the hole.',
+
+  // Course editor
+  'course.newTitle': 'New course',
+  'course.editTitle': 'Edit course',
+  'course.name': 'Name',
+  'course.namePlaceholder': 'e.g. St Andrews',
+  'course.nameRequired': 'The course needs a name.',
+  'course.parTotal': 'Course par: {count}',
+  'course.holes': 'Holes',
+  'course.holesHint':
+    'Set the par and difficulty of each hole. The stroke index is moved with the buttons so it stays a ranking without duplicates.',
+  'course.parForHole': 'Par {par} on hole {hole}',
+  'course.siShort': 'SI {si}',
+  'course.harder': 'Hole {hole} is harder',
+  'course.easier': 'Hole {hole} is easier',
+  'course.tees': 'Tees',
+  'course.teesHint':
+    'Course Rating and Slope Rating are only needed to convert a handicap index into playing strokes. The course works without them. For a nine hole course enter the nine hole rating, otherwise the handicap comes out roughly double.',
+  'course.teeName': 'Tee name',
+  'course.teeNamePlaceholder': 'e.g. yellow',
+  'course.courseRating': 'CR',
+  'course.slopeRating': 'SR',
+  'course.addTee': 'Add tee',
+  'course.removeTee': 'Remove tee',
+  'course.delete': 'Delete course',
+  'course.save': 'Save course',
 
   // Match play
   'match.title': 'Match status',

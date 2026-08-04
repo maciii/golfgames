@@ -1480,3 +1480,88 @@ button {
   font-size: 12px;
   font-weight: 700;
 }
+
+/* --- zadání hřiště ------------------------------------------------------- */
+
+.course-hole-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Jamka na jednom řádku: číslo, par a stroke index. Na úzkém telefonu se
+   sloupce zalomí, ať se nic neschovává za vodorovným posuvem. */
+.course-hole-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.course-hole-number {
+  flex: 0 0 28px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.segmented.compact {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.segmented.compact .segment {
+  min-width: 40px;
+  padding: 0 8px;
+}
+
+/* Řádek jamky se musí vejít na šířku telefonu i s osmnácti jamkami pod sebou,
+   takže jsou krokovací tlačítka menší než jinde v aplikaci. */
+.course-si {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.course-si .value-step {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+}
+
+.course-si-value {
+  min-width: 46px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+
+.course-tee {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.course-tee-ratings {
+  display: flex;
+  gap: 12px;
+}
+
+.course-tee-ratings .field {
+  flex: 1 1 0;
+}
+
+/* Chyba i nevratná akce používají stejnou barvu jako ostatní varování
+   v aplikaci (viz .danger-button), ať se nezavádí druhá červená. */
+.hint.error {
+  color: var(--score-birdie);
+}
+
+.link-button.danger {
+  color: var(--score-birdie);
+}

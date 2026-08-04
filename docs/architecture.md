@@ -39,9 +39,11 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
                  └───────────────┬────────────────────┘
                                  │ čte Round
                  ┌───────────────▼────────────────────┐
-   model         │ types.ts  (Round + výpočty)        │
-                 │ money.ts  (přepočet na peníze)     │
-                 │ i18n/     (překlady, formátování)  │
+   model         │ types.ts   (Round + výpočty)       │
+                 │ money.ts   (přepočet na peníze)    │
+                 │ handicap.ts (netto, rozdělení ran) │
+                 │ courses/   (model hřiště)          │
+                 │ i18n/      (překlady, formátování) │
                  └───────────────┬────────────────────┘
                                  │
                  ┌───────────────▼────────────────────┐
@@ -83,6 +85,8 @@ interface Round {
   currentHole: number // 0-based
   settings: RoundSettings // sázka + volby bodování, vlastní kopie
   updatedAt?: string // ISO; poslední skutečná změna dat, řídí synchronizaci
+  course?: RoundCourse // hřiště, se kterým se hrálo - taky vlastní kopie
+  netScoring?: boolean // hraje se na rány s handicapem?
 }
 ```
 
@@ -97,10 +101,11 @@ nemají a `normalizeRound()` jim ho doplní jako `finishedAt ?? createdAt`.
    a nikomu se nezapočítá. Když někdo zapsal, jamka běží a komu zápis chybí,
    ten ji **vzdal**. Tohle je nejčastější zdroj chyb v bodování – každá nová
    hra to musí ošetřit.
-2. **`round.settings` je hluboká kopie.** `createRound()` kopíruje i vnořené
-   `bonusValues` a `resultMultipliers`. Kolo si nastavení nese s sebou, takže
-   pozdější změna předvoleb nepřepočítá archivní kola. Nikdy nedávejte do kola
-   referenci na sdílený objekt nastavení.
+2. **`round.settings` a `round.course` jsou hluboké kopie.** `createRound()`
+   kopíruje i vnořené `bonusValues`, `resultMultipliers` a `strokeIndex`. Kolo
+   si nastavení i hřiště nese s sebou, takže pozdější změna předvoleb ani
+   přenormování hřiště nepřepočítá archivní kola. Nikdy nedávejte do kola
+   referenci na sdílený objekt.
 3. **`pars` má vždy délku `holeCount`** a hodnoty 3/4/5 (výchozí 4).
 4. **Indexy jamek jsou v kódu 0-based, v UI 1-based.** Převádí se výhradně na
    hranici UI (`Jamka {hole + 1}`); výjimka je `RoundCompleteness`, které vrací
@@ -393,6 +398,9 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | seznam extra bodů, jejich značky | `src/types.ts` (`BONUSES`)              |
 | výchozí hodnoty a násobiče       | `src/types.ts` (`DEFAULT_GAME_OPTIONS`) |
 | přepočet bodů na peníze          | `src/money.ts`                          |
+| rozdělení ran a netto výsledky   | `src/handicap.ts`                       |
+| model hřiště a jeho kontrola     | `src/courses/types.ts`                  |
+| zadání hřiště                    | `src/screens/CourseEditScreen.tsx`      |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
 | co se ukládá do telefonu         | `src/storage.ts`                        |
 | tvar souboru se zálohou          | `src/backup.ts`                         |

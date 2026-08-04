@@ -1,18 +1,22 @@
 import type { GameOptions, Round, RoundSettings } from './types'
 import { DEFAULT_SETTINGS, roundTimestamp } from './types'
 import { localeTag } from './i18n'
+import type { Course } from './courses/types'
+import { isValidCourse, normalizeCourse } from './courses/types'
 import type { RosterEntry } from './storage'
 import {
   ARCHIVE_LIMIT,
   isValidRound,
   loadAllGameOptions,
   loadArchive,
+  loadCourses,
   loadCurrentRound,
   loadRoster,
   loadSettings,
   normalizeRound,
   saveAllGameOptions,
   saveArchive,
+  saveCourses,
   saveCurrentRound,
   saveRoster,
   saveSettings,
@@ -48,6 +52,11 @@ export interface BackupData {
   settings: RoundSettings
   /** Volby bodování podle id hry. */
   gameOptions: Record<string, GameOptions>
+  /**
+   * Uložená hřiště. Chybí v zálohách z verzí před jejich zavedením, proto se
+   * schéma nezvedá - starší aplikace pole prostě přehlédne.
+   */
+  courses: Course[]
 }
 
 export interface BackupFile {
@@ -120,10 +129,36 @@ export function mergeRosters(
     const name = entry.name?.trim()
     if (!name || known.has(name.toLowerCase())) continue
     known.add(name.toLowerCase())
-    merged.push({ id: entry.id, name })
+    merged.push({
+      id: entry.id,
+      name,
+      ...(typeof entry.handicapIndex === 'number'
+        ? { handicapIndex: entry.handicapIndex }
+        : {}),
+    })
   }
 
   return merged.sort((a, b) => a.name.localeCompare(b.name, localeTag()))
+}
+
+/**
+ * Sloučí hřiště podle id; při shodě vyhrává novější podle času změny.
+ *
+ * Ruční doplnění SI nebo normy je práce, kterou obnova nesmí zahodit, takže
+ * jako u archivu je výsledek sjednocení obou stran.
+ */
+export function mergeCourses(local: Course[], incoming: Course[]): Course[] {
+  const byId = new Map<string, Course>()
+  const stamp = (course: Course) => Date.parse(course.updatedAt ?? '') || 0
+
+  for (const course of local) byId.set(course.id, course)
+
+  for (const course of incoming) {
+    const existing = byId.get(course.id)
+    if (!existing || stamp(course) > stamp(existing)) byId.set(course.id, course)
+  }
+
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, localeTag()))
 }
 
 /**
@@ -162,6 +197,9 @@ export function parseBackup(text: string): ParseResult {
         Boolean(e && typeof e.name === 'string' && e.name),
       )
     : []
+  const courses = Array.isArray(data.courses)
+    ? data.courses.filter(isValidCourse).map(normalizeCourse)
+    : []
 
   return {
     ok: true,
@@ -179,6 +217,7 @@ export function parseBackup(text: string): ParseResult {
           data.gameOptions && typeof data.gameOptions === 'object'
             ? data.gameOptions
             : {},
+        courses,
       },
     },
   }
@@ -205,6 +244,7 @@ export function createBackup(): BackupFile {
       roster: loadRoster(),
       settings: loadSettings(),
       gameOptions: loadAllGameOptions(),
+      courses: loadCourses(),
     },
   }
 }
@@ -229,8 +269,14 @@ export function applyBackup(backup: BackupFile, mode: ImportMode): ImportSummary
       ? backup.data.roster
       : mergeRosters(localRoster, backup.data.roster)
 
+  const courses =
+    mode === 'replace'
+      ? backup.data.courses
+      : mergeCourses(loadCourses(), backup.data.courses)
+
   saveArchive(archive)
   saveRoster(roster)
+  saveCourses(courses)
 
   // Rozehrané kolo a předvolby přebíráme jen při náhradě, nebo když místně
   // žádné rozehrané kolo není - jinak by obnova smazala rozehranou hru.

@@ -5,9 +5,11 @@ import {
   BACKUP_SCHEMA_VERSION,
   backupFileName,
   mergeArchives,
+  mergeCourses,
   mergeRosters,
   parseBackup,
 } from './backup'
+import type { Course } from './courses/types'
 import type { Round } from './types'
 import { DEFAULT_SETTINGS } from './types'
 import { makeRound } from './games/fixtures'
@@ -40,6 +42,7 @@ function fileWith(data: Partial<BackupData>, overrides: Partial<BackupFile> = {}
       roster: [],
       settings: DEFAULT_SETTINGS,
       gameOptions: {},
+      courses: [],
       ...data,
     },
     ...overrides,
@@ -161,6 +164,68 @@ describe('Záloha - čtení souboru', () => {
     if (result.ok) {
       expect(result.backup.data.archive[0]?.settings.options.bonusValues).toBeDefined()
     }
+  })
+})
+
+describe('Záloha - hřiště', () => {
+  function course(id: string, name: string, updatedAt: string, si = [1, 2, 3]): Course {
+    return {
+      id,
+      name,
+      holeCount: 3,
+      pars: [4, 3, 5],
+      strokeIndex: si,
+      tees: [],
+      source: 'manual',
+      updatedAt,
+    }
+  }
+
+  it('sloučení nic nezahodí a řadí podle jména', () => {
+    const local = [course('a', 'Beroun', '2026-05-01T10:00:00.000Z')]
+    const incoming = [course('b', 'Albatross', '2026-05-01T10:00:00.000Z')]
+
+    expect(mergeCourses(local, incoming).map((c) => c.name)).toEqual([
+      'Albatross',
+      'Beroun',
+    ])
+  })
+
+  it('při shodě id vyhrává novější verze hřiště', () => {
+    // Doplněné SI je ruční práce, o kterou obnova nesmí připravit.
+    const local = [course('a', 'Beroun', '2026-05-01T10:00:00.000Z', [1, 2, 3])]
+    const incoming = [course('a', 'Beroun', '2026-06-01T10:00:00.000Z', [3, 1, 2])]
+
+    expect(mergeCourses(local, incoming)[0]?.strokeIndex).toEqual([3, 1, 2])
+  })
+
+  it('starší verze hřiště tu novější nepřebije', () => {
+    const local = [course('a', 'Beroun', '2026-06-01T10:00:00.000Z', [3, 1, 2])]
+    const incoming = [course('a', 'Beroun', '2026-05-01T10:00:00.000Z', [1, 2, 3])]
+
+    expect(mergeCourses(local, incoming)[0]?.strokeIndex).toEqual([3, 1, 2])
+  })
+
+  it('záloha z verze bez hřišť se načte s prázdným seznamem', () => {
+    const raw = JSON.parse(fileWith({})) as BackupFile
+    delete (raw.data as { courses?: unknown }).courses
+
+    const result = parseBackup(JSON.stringify(raw))
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.backup.data.courses).toEqual([])
+  })
+
+  it('poškozené hřiště se do zálohy nepustí', () => {
+    const broken = { id: 'x', name: 'Bez parů', holeCount: 3 } as unknown as Course
+    const raw = fileWith({
+      courses: [broken, course('a', 'Beroun', '2026-05-01T10:00:00.000Z')],
+    })
+
+    const result = parseBackup(raw)
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.backup.data.courses.map((c) => c.id)).toEqual(['a'])
   })
 })
 

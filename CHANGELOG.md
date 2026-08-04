@@ -7,6 +7,31 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.14.0] – 2026-08-04
+
+### Přidáno
+
+- **Hřiště.** Kolo se dá hrát na uloženém hřišti s pary jamek, stroke indexem
+  a odpališti včetně Course Ratingu a Slope Ratingu. Hřiště se zadává ručně
+  (obrazovka Nové hřiště) a ukládá se natrvalo, takže funguje i bez signálu.
+  Stroke index se posouvá tlačítky, aby zůstal pořadím bez duplicit.
+- **Handicapy a netto.** U kola jde zapnout hru na rány s handicapem. Zadává se
+  buď handicapový index, ze kterého se podle WHS dopočítá hrací handicap
+  z normy odpaliště, nebo rovnou počet ran. Rány se rozdělují podle stroke
+  indexu jamky; plusový handicap je rány naopak vrací.
+- **Stableford** jako čtvrtá hra: body za jamku podle výsledku vůči paru
+  (par 2, birdie 3, eagle 4, bogey 1, dvojbogey a horší nic), hrubě i netto.
+- Handicapový index se pamatuje u uloženého hráče, takže se nezadává
+  před každým kolem znovu.
+- Hřiště se ukládají do zálohy do souboru i do synchronizace k účtu.
+
+### Změněno
+
+- `Round` nese vlastní hlubokou kopii hřiště, se kterým se hrálo. Pozdější
+  přenormování hřiště nebo oprava stroke indexu proto nepřepočítá archivní
+  kola - stejný princip, jaký už platí pro nastavení bodování.
+- Se zvoleným hřištěm určuje počet jamek hřiště, ne nastavení kola.
+
 ## [0.13.1] – 2026-08-04
 
 ### Změněno

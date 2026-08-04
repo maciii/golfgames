@@ -16,6 +16,7 @@ zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 | **Best Aggregate** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
 | **Skins**          | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
 | **Match play**     | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
+| **Stableford**     | 2–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
 
 Přesné vyhodnocení včetně okrajových situací popisuje
 [`docs/games.md`](docs/games.md).
@@ -53,8 +54,12 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Nepovinná záloha do cloudu** – po přihlášení účtem Google se kola průběžně
   zálohují a jsou dostupná z dalších zařízení. Bez přihlášení se nemění vůbec
   nic: aplikace nenaváže spojení a všechno zůstává v telefonu
+- **Hřiště a handicapy** – hřiště se zadá jednou i s pary jamek, stroke indexem
+  a odpališti (CR a SR) a zůstane v telefonu. Kolo pak jde hrát netto: rány se
+  rozdělí podle obtížnosti jamek, hrací handicap se dopočítá z indexu podle
+  WHS, nebo se zadá rovnou v ranách
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
-  vyberou klepnutím
+  vyberou klepnutím; pamatuje se i jejich handicapový index
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
   není potřeba
 - **Česky i anglicky** – jazyk se vybere podle prohlížeče a přepíná se

@@ -45,6 +45,33 @@ export const cs = {
     'Na konci kola se rozdíl bodů přepočítá na peníze; prohrávající strana platí vítězné.',
   'setup.holeCount': 'Počet jamek',
   'setup.holeCountHint': 'Par každé jamky nastavíš přímo při hře.',
+  'setup.holeCountFromCourse': 'Počet jamek určuje zvolené hřiště.',
+
+  // Hřiště a handicapy
+  'setup.course': 'Hřiště',
+  'setup.courseChoice': 'Hřiště',
+  'setup.noCourse': 'Bez hřiště',
+  'setup.newCourse': 'Nové hřiště',
+  'setup.editCourse': 'Upravit hřiště',
+  'setup.tee': 'Odpaliště',
+  'setup.courseHint': 'Pary a stroke indexy se převezmou z hřiště ({count} jamek).',
+  'setup.noCourseHint':
+    'Bez hřiště se hraje jako dosud: pary se nastavují při hře a handicapy se nepočítají.',
+  'setup.handicaps': 'Handicapy',
+  'setup.netScoring': 'Hrát na rány s handicapem (netto)',
+  'setup.handicapIndex': 'Index',
+  'setup.handicapStrokes': 'Rány',
+  'setup.handicapFor': 'Handicap hráče {name}',
+  'setup.noHandicap': 'bez HCP',
+  'setup.strokesGiven': {
+    one: '{count} rána',
+    few: '{count} rány',
+    other: '{count} ran',
+  },
+  'setup.handicapHintRated':
+    'Hrací handicap se počítá z normy odpaliště {tee} (CR {cr}, SR {sr}).',
+  'setup.handicapHintPlain':
+    'Odpaliště nemá zadanou normu, takže se zadané číslo bere rovnou jako počet ran.',
   'setup.archive': 'Archiv odehraných kol',
   'setup.archiveWithCount': 'Archiv odehraných kol ({count})',
   'setup.backup': 'Záloha dat',
@@ -397,6 +424,32 @@ export const cs = {
   'stableford.received': 'Rány',
   'stableford.headerNote': 'Body za jamku: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Netto body podle stroke indexu jamky.',
+
+  // Zadání hřiště
+  'course.newTitle': 'Nové hřiště',
+  'course.editTitle': 'Úprava hřiště',
+  'course.name': 'Název',
+  'course.namePlaceholder': 'Např. Karlštejn',
+  'course.nameRequired': 'Hřiště potřebuje název.',
+  'course.parTotal': 'Par hřiště: {count}',
+  'course.holes': 'Jamky',
+  'course.holesHint':
+    'U každé jamky nastav par a její obtížnost. Stroke index se posouvá tlačítky, aby zůstal pořadím bez duplicit.',
+  'course.parForHole': 'Par {par} na jamce {hole}',
+  'course.siShort': 'SI {si}',
+  'course.harder': 'Jamka {hole} je těžší',
+  'course.easier': 'Jamka {hole} je lehčí',
+  'course.tees': 'Odpaliště',
+  'course.teesHint':
+    'Course Rating a Slope Rating jsou potřeba jen pro dopočet hracího handicapu z indexu. Bez nich hřiště funguje dál. U devítijamkového hřiště zadej devítijamkovou normu, jinak vyjde handicap zhruba dvojnásobný.',
+  'course.teeName': 'Název odpaliště',
+  'course.teeNamePlaceholder': 'Např. žlutá',
+  'course.courseRating': 'CR',
+  'course.slopeRating': 'SR',
+  'course.addTee': 'Přidat odpaliště',
+  'course.removeTee': 'Odebrat odpaliště',
+  'course.delete': 'Smazat hřiště',
+  'course.save': 'Uložit hřiště',
 
   // Match play
   'match.title': 'Stav zápasu',

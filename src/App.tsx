@@ -17,6 +17,8 @@ import GameSettingsScreen from './screens/GameSettingsScreen'
 import BackupScreen from './screens/BackupScreen'
 import AccountScreen from './screens/AccountScreen'
 import PrivacyScreen from './screens/PrivacyScreen'
+import CourseEditScreen from './screens/CourseEditScreen'
+import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 
 type View =
@@ -28,6 +30,7 @@ type View =
   | 'backup'
   | 'account'
   | 'privacy'
+  | 'courseEdit'
 
 /**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
@@ -44,6 +47,10 @@ function AppShell() {
   const [openArchiveId, setOpenArchiveId] = useState<string | null>(null)
   // Hra, jejíž bodování se právě nastavuje.
   const [settingsGameId, setSettingsGameId] = useState<string | null>(null)
+  // Hřiště, které se právě upravuje; null znamená zakládání nového.
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null)
+  // Hřiště předvybrané v nastavení kola po návratu ze zadání.
+  const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>()
 
   useEffect(() => {
     saveCurrentRound(round)
@@ -166,6 +173,30 @@ function AppShell() {
     )
   }
 
+  if (view === 'courseEdit') {
+    const editing = editingCourseId ? findCourse(editingCourseId) : undefined
+    return (
+      <CourseEditScreen
+        {...(editing ? { course: editing } : {})}
+        onSaved={(saved) => {
+          // Uložené hřiště se rovnou předvybere, ať se nehledá v seznamu.
+          setSelectedCourseId(saved.id)
+          setEditingCourseId(null)
+          setView('setup')
+        }}
+        onDeleted={() => {
+          if (selectedCourseId === editingCourseId) setSelectedCourseId(undefined)
+          setEditingCourseId(null)
+          setView('setup')
+        }}
+        onBack={() => {
+          setEditingCourseId(null)
+          setView('setup')
+        }}
+      />
+    )
+  }
+
   if (view === 'backup') {
     return (
       <BackupScreen onImported={reloadFromStorage} onBack={() => setView(mainView())} />
@@ -213,6 +244,11 @@ function AppShell() {
         }}
         onOpenBackup={() => setView('backup')}
         onOpenAccount={() => setView('account')}
+        onEditCourse={(courseId) => {
+          setEditingCourseId(courseId ?? null)
+          setView('courseEdit')
+        }}
+        {...(selectedCourseId ? { selectedCourseId } : {})}
         archiveCount={archive.length}
       />
     )

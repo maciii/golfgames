@@ -4,6 +4,8 @@ import {
   DEFAULT_RESULT_MULTIPLIERS,
   DEFAULT_SETTINGS,
 } from './types'
+import type { Course } from './courses/types'
+import { isValidCourse, normalizeCourse } from './courses/types'
 import { localeTag } from './i18n'
 
 /**
@@ -21,6 +23,7 @@ const ARCHIVE_KEY = 'golfgames.archive.v1'
 const ROSTER_KEY = 'golfgames.roster.v1'
 const SETTINGS_KEY = 'golfgames.settings.v1'
 const GAME_OPTIONS_KEY = 'golfgames.gameOptions.v1'
+const COURSES_KEY = 'golfgames.courses.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -76,8 +79,23 @@ export function isValidRound(round: unknown): round is Round {
  */
 export function normalizeRound(round: Round): Round {
   const settings = { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) }
+
+  // Hřiště s nesedícím stroke indexem by rozdalo rány mimo pole jamek, takže
+  // se radši zahodí celý údaj - kolo se pak počítá hrubě jako dřív.
+  const course =
+    round.course && Array.isArray(round.course.strokeIndex)
+      ? {
+          ...round.course,
+          strokeIndex:
+            round.course.strokeIndex.length === round.holeCount
+              ? [...round.course.strokeIndex]
+              : [],
+        }
+      : undefined
+
   return {
     ...round,
+    ...(course ? { course } : {}),
     // Kola z verzí před synchronizací čas změny nemají; datum ukončení
     // (u nedohraných založení) je nejlepší dostupný odhad.
     updatedAt: round.updatedAt ?? round.finishedAt ?? round.createdAt,
@@ -194,11 +212,74 @@ export function saveAllGameOptions(all: Record<string, GameOptions>): void {
   write(GAME_OPTIONS_KEY, all)
 }
 
+// --- hřiště ---------------------------------------------------------------
+
+/**
+ * Hřiště, která si uživatel zadal nebo naimportoval.
+ *
+ * Katalog hřišť žije na serveru a do telefonu se nikdy nestahuje celý - tady
+ * končí jen ta hřiště, která si někdo opravdu vybral. Ukládají se natrvalo
+ * (ne do Cache API, kterou umí prohlížeč při nedostatku místa sám vyprázdnit),
+ * takže hřiště hrané jednou je k dispozici i bez signálu.
+ */
+export function loadCourses(): Course[] {
+  const courses = read<Course[]>(COURSES_KEY)
+  if (!Array.isArray(courses)) return []
+  return courses
+    .filter(isValidCourse)
+    .map(normalizeCourse)
+    .sort((a, b) => a.name.localeCompare(b.name, localeTag()))
+}
+
+/** Uloží hřiště; stejné id přepíše místo zdvojení. */
+export function saveCourse(course: Course): Course[] {
+  const rest = loadCourses().filter((c) => c.id !== course.id)
+  const courses = [...rest, { ...course, updatedAt: new Date().toISOString() }].sort(
+    (a, b) => a.name.localeCompare(b.name, localeTag()),
+  )
+  write(COURSES_KEY, courses)
+  return courses
+}
+
+export function deleteCourse(courseId: string): Course[] {
+  const courses = loadCourses().filter((c) => c.id !== courseId)
+  write(COURSES_KEY, courses)
+  return courses
+}
+
+export function findCourse(courseId: string): Course | undefined {
+  return loadCourses().find((c) => c.id === courseId)
+}
+
+/** Přepíše celý seznam hřišť - pro obnovu ze zálohy. */
+export function saveCourses(courses: Course[]): void {
+  write(COURSES_KEY, courses.filter(isValidCourse).map(normalizeCourse))
+}
+
 // --- seznam hráčů ---------------------------------------------------------
 
 export interface RosterEntry {
   id: string
   name: string
+  /**
+   * Handicapový index hráče, ať se nezadává před každým kolem znovu.
+   * Chybí u hráčů uložených před zavedením handicapů.
+   */
+  handicapIndex?: number
+}
+
+/** Zapamatuje si handicapový index u uloženého hráče. */
+export function setRosterHandicap(
+  entryId: string,
+  handicapIndex: number | undefined,
+): RosterEntry[] {
+  const roster = loadRoster().map((entry) =>
+    entry.id === entryId
+      ? { ...entry, ...(handicapIndex === undefined ? {} : { handicapIndex }) }
+      : entry,
+  )
+  write(ROSTER_KEY, roster)
+  return roster
 }
 
 /** Uložení spoluhráči, seřazení podle abecedy. */

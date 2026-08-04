@@ -2,13 +2,18 @@ import { useState } from 'react'
 import { DEFAULT_GAME_ID, GAMES, getGame } from '../games'
 import type { RosterEntry } from '../storage'
 import {
+  loadCourses,
   loadGameOptions,
   loadRoster,
   loadSettings,
   removeFromRoster,
   saveSettings,
+  setRosterHandicap,
 } from '../storage'
-import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
+import type { Course } from '../courses/types'
+import { coursePar, findTee } from '../courses/types'
+import { courseHandicap } from '../handicap'
+import type { CreateRoundOptions, Currency, RoundCourse, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
@@ -46,6 +51,10 @@ interface Props {
   onOpenGameSettings: (gameId: string) => void
   onOpenBackup: () => void
   onOpenAccount: () => void
+  /** Otevře zadání hřiště; bez id se zakládá nové. */
+  onEditCourse: (courseId?: string) => void
+  /** Hřiště předvybrané po návratu ze zadání. */
+  selectedCourseId?: string
   archiveCount: number
 }
 
@@ -56,6 +65,8 @@ export default function SetupScreen({
   onOpenGameSettings,
   onOpenBackup,
   onOpenAccount,
+  onEditCourse,
+  selectedCourseId,
   archiveCount,
 }: Props) {
   const { t, locale, setLocale } = useLocale()
@@ -65,7 +76,9 @@ export default function SetupScreen({
     getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
   )
   const [names, setNames] = useState<string[]>(Array(MAX_PLAYERS).fill(''))
-  const [holeCount, setHoleCount] = useState(18)
+  const [holeCount, setHoleCount] = useState(
+    () => loadCourses().find((c) => c.id === selectedCourseId)?.holeCount ?? 18,
+  )
   const [pairing, setPairing] = useState(0)
   const [roster, setRoster] = useState<RosterEntry[]>(() => loadRoster())
   const [rosterEditing, setRosterEditing] = useState(false)
@@ -74,6 +87,29 @@ export default function SetupScreen({
   const [pointValueText, setPointValueText] = useState(
     () => `${loadSettings().pointValue}`,
   )
+
+  // Hřiště je nepovinné - bez něj se kolo založí jako dosud, se samými čtyřkami
+  // a bez handicapů.
+  // Obrazovka se při odchodu na zadání hřiště odpojí, takže seznam stačí načíst
+  // při připojení - po návratu je stejně nový.
+  const [courses] = useState<Course[]>(() => loadCourses())
+  const [courseId, setCourseId] = useState<string>(selectedCourseId ?? '')
+  // Prázdné id znamená "první odpaliště"; findTee() na něj spadne sám.
+  const [teeId, setTeeId] = useState<string>('')
+  const [netScoring, setNetScoring] = useState(false)
+  /**
+   * Zadává se handicapový index, nebo rovnou počet ran?
+   *
+   * Index je běžnější, ale na hřišti bez normy odpaliště se z něj nedá počítat,
+   * takže musí jít zadat i hotové rány.
+   */
+  const [handicapMode, setHandicapMode] = useState<'index' | 'strokes'>('index')
+  /** Handicapové indexy jako text, ať jde pole vymazat bez skoku na nulu. */
+  const [handicapText, setHandicapText] = useState<string[]>(Array(MAX_PLAYERS).fill(''))
+
+  const course = courses.find((c) => c.id === courseId)
+  const tee = course ? findTee(course, teeId) : undefined
+  const canUseNet = course !== undefined
 
   const game = getGame(gameId)
   const usesTeams = game.usesTeams(playerCount)
@@ -142,6 +178,53 @@ export default function SetupScreen({
   )
   const available = roster.filter((entry) => !used.has(entry.name.trim().toLowerCase()))
 
+  function selectCourse(id: string) {
+    setCourseId(id)
+    const next = courses.find((c) => c.id === id)
+    if (!next) {
+      setNetScoring(false)
+      return
+    }
+    setTeeId(findTee(next)?.id ?? '')
+    // Počet jamek určuje hřiště - jiný by znamenal pary a SI mimo rozsah.
+    setHoleCount(next.holeCount)
+  }
+
+  /** Zadaná hodnota u hráče; prázdné pole znamená "hraje bez handicapu". */
+  function handicapValue(index: number): number | undefined {
+    const raw = handicapText[index] ?? ''
+    if (!raw.trim()) return undefined
+    const value = Number.parseFloat(raw.replace(',', '.'))
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  /**
+   * Hrací handicap hráče v ranách.
+   *
+   * V režimu indexu se počítá podle WHS z normy odpaliště. Když odpaliště normu
+   * nemá (typicky ručně zadané hřiště), bere se index rovnou jako počet ran -
+   * jinak by netto na takovém hřišti nešlo hrát vůbec.
+   */
+  function playingHandicapFor(index: number): number | undefined {
+    const value = handicapValue(index)
+    if (value === undefined) return undefined
+    if (handicapMode === 'strokes') return Math.round(value)
+
+    if (course && tee?.courseRating !== undefined && tee?.slopeRating !== undefined) {
+      return courseHandicap(
+        value,
+        tee.slopeRating,
+        tee.courseRating,
+        tee.par ?? coursePar(course),
+      )
+    }
+    return Math.round(value)
+  }
+
+  function updateHandicap(index: number, text: string) {
+    setHandicapText((prev) => prev.map((value, i) => (i === index ? text : value)))
+  }
+
   function start() {
     const teamIndices = usesTeams
       ? playerCount === 4
@@ -159,12 +242,55 @@ export default function SetupScreen({
       },
     }
     saveSettings(effective)
+
+    // Kolo dostane vlastní kopii hřiště; katalog se pak může měnit, aniž by to
+    // přepočítalo odehraná kola.
+    const roundCourse: RoundCourse | undefined = course
+      ? {
+          id: course.id,
+          name: course.name,
+          ...(tee
+            ? {
+                teeId: tee.id,
+                teeName: tee.name,
+                ...(tee.courseRating !== undefined
+                  ? { courseRating: tee.courseRating }
+                  : {}),
+                ...(tee.slopeRating !== undefined
+                  ? { slopeRating: tee.slopeRating }
+                  : {}),
+                par: tee.par ?? coursePar(course),
+              }
+            : { par: coursePar(course) }),
+          strokeIndex: [...course.strokeIndex],
+        }
+      : undefined
+
+    // Zadaný index si u hráče zapamatujeme, ať se příště nevyplňuje znovu.
+    if (handicapMode === 'index') {
+      for (let i = 0; i < playerCount; i++) {
+        const name = names[i]?.trim().toLowerCase()
+        const entry = roster.find((e) => e.name.trim().toLowerCase() === name)
+        const value = handicapValue(i)
+        if (entry && value !== undefined) setRosterHandicap(entry.id, value)
+      }
+    }
+
+    const indexes = Array.from({ length: playerCount }, (_, i) =>
+      handicapMode === 'index' ? handicapValue(i) : undefined,
+    )
+    const strokes = Array.from({ length: playerCount }, (_, i) => playingHandicapFor(i))
+
     onStart({
       gameId,
       playerNames: names.slice(0, playerCount),
       holeCount,
       teamIndices,
       settings: effective,
+      ...(roundCourse ? { course: roundCourse, pars: [...course!.pars] } : {}),
+      ...(netScoring
+        ? { netScoring: true, handicapIndexes: indexes, playingHandicaps: strokes }
+        : {}),
     })
   }
 
@@ -365,6 +491,144 @@ export default function SetupScreen({
         </section>
 
         <section className="section">
+          <h2 className="section-title">{t('setup.course')}</h2>
+
+          <label className="field">
+            <span className="field-label">{t('setup.courseChoice')}</span>
+            <span className="field-input">
+              <select
+                className="name-input"
+                value={courseId}
+                onChange={(e) => selectCourse(e.target.value)}
+                aria-label={t('setup.courseChoice')}
+              >
+                <option value="">{t('setup.noCourse')}</option>
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </span>
+          </label>
+
+          <div className="link-row">
+            <button type="button" className="link-button" onClick={() => onEditCourse()}>
+              {t('setup.newCourse')}
+            </button>
+            {course && (
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => onEditCourse(course.id)}
+              >
+                {t('setup.editCourse')}
+              </button>
+            )}
+          </div>
+
+          {course && course.tees.length > 0 && (
+            <label className="field">
+              <span className="field-label">{t('setup.tee')}</span>
+              <span className="field-input">
+                <select
+                  className="name-input"
+                  value={tee?.id ?? ''}
+                  onChange={(e) => setTeeId(e.target.value)}
+                  aria-label={t('setup.tee')}
+                >
+                  {course.tees.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
+          )}
+
+          <p className="hint">
+            {course
+              ? t('setup.courseHint', { count: course.holeCount })
+              : t('setup.noCourseHint')}
+          </p>
+        </section>
+
+        {canUseNet && (
+          <section className="section">
+            <h2 className="section-title">{t('setup.handicaps')}</h2>
+
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={netScoring}
+                onChange={(e) => setNetScoring(e.target.checked)}
+              />
+              <span>{t('setup.netScoring')}</span>
+            </label>
+
+            {netScoring && (
+              <>
+                <div className="segmented">
+                  <button
+                    type="button"
+                    className={`segment${handicapMode === 'index' ? ' selected' : ''}`}
+                    onClick={() => setHandicapMode('index')}
+                    aria-pressed={handicapMode === 'index'}
+                  >
+                    {t('setup.handicapIndex')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`segment${handicapMode === 'strokes' ? ' selected' : ''}`}
+                    onClick={() => setHandicapMode('strokes')}
+                    aria-pressed={handicapMode === 'strokes'}
+                  >
+                    {t('setup.handicapStrokes')}
+                  </button>
+                </div>
+
+                <div className="name-list">
+                  {Array.from({ length: playerCount }, (_, i) => {
+                    const strokes = playingHandicapFor(i)
+                    return (
+                      <label key={i} className="field">
+                        <span className="field-label">{displayName(i)}</span>
+                        <span className="field-input">
+                          <input
+                            className="name-input value-input"
+                            type="text"
+                            inputMode="decimal"
+                            value={handicapText[i] ?? ''}
+                            onChange={(e) => updateHandicap(i, e.target.value)}
+                            aria-label={t('setup.handicapFor', { name: displayName(i) })}
+                          />
+                          <span className="field-suffix">
+                            {strokes === undefined
+                              ? t('setup.noHandicap')
+                              : t('setup.strokesGiven', { count: strokes })}
+                          </span>
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+
+                <p className="hint">
+                  {handicapMode === 'index' && tee?.slopeRating !== undefined
+                    ? t('setup.handicapHintRated', {
+                        tee: tee.name,
+                        cr: tee.courseRating ?? 0,
+                        sr: tee.slopeRating,
+                      })
+                    : t('setup.handicapHintPlain')}
+                </p>
+              </>
+            )}
+          </section>
+        )}
+
+        <section className="section">
           <h2 className="section-title">{t('setup.holeCount')}</h2>
           <div className="segmented">
             {HOLE_OPTIONS.map((count) => (
@@ -374,12 +638,17 @@ export default function SetupScreen({
                 className={`segment${count === holeCount ? ' selected' : ''}`}
                 onClick={() => setHoleCount(count)}
                 aria-pressed={count === holeCount}
+                // Se zvoleným hřištěm určuje počet jamek ono - jiný by znamenal
+                // pary a stroke indexy mimo rozsah.
+                disabled={course !== undefined}
               >
                 {count}
               </button>
             ))}
           </div>
-          <p className="hint">{t('setup.holeCountHint')}</p>
+          <p className="hint">
+            {course ? t('setup.holeCountFromCourse') : t('setup.holeCountHint')}
+          </p>
         </section>
 
         <div className="link-row">

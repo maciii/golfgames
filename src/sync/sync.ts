@@ -4,17 +4,20 @@ import {
   isValidRound,
   loadAllGameOptions,
   loadArchive,
+  loadCourses,
   loadCurrentRound,
   loadRoster,
   loadSettings,
   normalizeRound,
   saveAllGameOptions,
   saveArchive,
+  saveCourses,
   saveCurrentRound,
   saveRoster,
   saveSettings,
 } from '../storage'
-import { mergeRosters } from '../backup'
+import { isValidCourse, normalizeCourse } from '../courses/types'
+import { mergeCourses, mergeRosters } from '../backup'
 import { fromDocument, toDocument } from './document'
 import { finishedRounds, mergeRounds, pickCurrentRound } from './merge'
 import { loadFirebase } from './firebase'
@@ -102,6 +105,11 @@ interface PrefsDocument {
   roster?: { id: string; name: string }[]
   settings?: unknown
   gameOptions?: unknown
+  /**
+   * Uložená hřiště. Jde o pole objektů, které samy obsahují pole (pary, SI) -
+   * to Firestore zvládne; zakázané je jen pole přímo uvnitř pole.
+   */
+  courses?: unknown[]
   updatedAt?: string
 }
 
@@ -116,6 +124,14 @@ async function syncPrefs(uid: string): Promise<void> {
   // Hráči se vždy sjednotí - seznam spoluhráčů nemá důvod se zmenšovat.
   const roster = mergeRosters(loadRoster(), remote.roster ?? [])
   saveRoster(roster)
+
+  // Hřiště taky: doplněné pary, SI a normy jsou ruční práce, o kterou nemá
+  // smysl přijít jen proto, že na druhém zařízení bylo nastavení novější.
+  const courses = mergeCourses(
+    loadCourses(),
+    (remote.courses ?? []).filter(isValidCourse).map(normalizeCourse),
+  )
+  saveCourses(courses)
 
   // Sázka a volby bodování jsou jedno nastavení, takže se přebírá celé to
   // novější; míchat je po polích by dalo kombinaci, kterou nikdo nenastavil.
@@ -138,6 +154,7 @@ async function syncPrefs(uid: string): Promise<void> {
     roster,
     settings: loadSettings(),
     gameOptions: loadAllGameOptions(),
+    courses,
     updatedAt: stamp,
   })
   savePrefsStamp(stamp)
