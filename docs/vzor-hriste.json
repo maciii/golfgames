@@ -1,0 +1,59 @@
+{
+  "format": "golfgames-backup",
+  "schemaVersion": 1,
+  "appVersion": "0.14.0",
+  "exportedAt": "2026-08-04T20:00:00.000Z",
+  "data": {
+    "courses": [
+      {
+        "id": "golfshot:karlstejn",
+        "name": "Karlštejn",
+        "club": "Golf Resort Karlštejn",
+        "country": "CZ",
+        "lat": 49.9386,
+        "lon": 14.1889,
+        "holeCount": 18,
+        "pars": [4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4],
+        "strokeIndex": [5, 15, 1, 11, 7, 17, 3, 9, 13, 6, 16, 2, 12, 8, 18, 14, 4, 10],
+        "tees": [
+          {
+            "id": "yellow",
+            "name": "Žlutá",
+            "courseRating": 71.2,
+            "slopeRating": 132,
+            "par": 72,
+            "distance": 5834
+          },
+          {
+            "id": "red",
+            "name": "Červená",
+            "courseRating": 71.8,
+            "slopeRating": 128,
+            "par": 72,
+            "distance": 5107
+          }
+        ],
+        "source": "manual",
+        "attribution": "Vlastní zápis ze scorekarty"
+      },
+      {
+        "id": "golfshot:beroun-9",
+        "name": "Beroun (devítka)",
+        "country": "CZ",
+        "holeCount": 9,
+        "pars": [4, 4, 3, 5, 4, 4, 3, 4, 5],
+        "strokeIndex": [3, 7, 17, 1, 11, 5, 15, 13, 9],
+        "tees": [
+          {
+            "id": "yellow",
+            "name": "Žlutá",
+            "courseRating": 35.6,
+            "slopeRating": 124,
+            "par": 36
+          }
+        ],
+        "source": "manual"
+      }
+    ]
+  }
+}
