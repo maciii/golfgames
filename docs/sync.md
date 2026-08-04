@@ -74,7 +74,19 @@ Rules → vložit obsah souboru a publikovat.
    kvóty operace selžou, faktura nepřijde nikdy).
 2. Authentication → Sign-in method → **Google**.
 3. Authentication → Settings → Authorized domains → `golf.kubecka.cz`.
-4. Konfigurace do GitHub jako `VITE_FIREBASE_API_KEY`,
+4. **Vytvořit databázi:** Build → Firestore Database → _Create database_.
+   Authentication a Firestore jsou dva samostatné produkty - zapnutím
+   přihlášení databáze nevznikne a synchronizace by selhávala.
+
+   | Volba    | Co zvolit            | Proč                                                                         |
+   | -------- | -------------------- | ---------------------------------------------------------------------------- |
+   | Název    | nechat `(default)`   | `getFirestore(app)` sahá na výchozí databázi; pojmenovanou by nenašel        |
+   | Umístění | `eur3 (europe-west)` | data zůstanou v EU. **Umístění nejde později změnit**                        |
+   | Režim    | _Production mode_    | test mode pustí na 30 dní k datům kohokoli; vlastní pravidla máme připravená |
+
+5. Nasadit pravidla ze [`firestore.rules`](../firestore.rules) (viz
+   [Zabezpečení](#zabezpečení)).
+6. Konfigurace do GitHub jako `VITE_FIREBASE_API_KEY`,
    `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`
    a `VITE_FIREBASE_APP_ID`; workflow je předá buildu (viz `.env.example`).
 
@@ -136,12 +148,12 @@ před zavedením synchronizace.
 
 ## Časté problémy
 
-| Projev                            | Příčina                                                                     |
-| --------------------------------- | --------------------------------------------------------------------------- |
-| Sekce účtu se vůbec nezobrazí     | build nemá konfiguraci Firebase (chybí tajemství)                           |
-| „Synchronizace se nepovedla"      | většinou nenasazená pravidla nebo chybějící doména v Authorized domains     |
-| Přihlášení se otevře a hned zavře | vyskakovací okno zablokované; aplikace zkusí přesměrování                   |
-| Data z druhého zařízení nenaskočí | synchronizace běží při startu a po přihlášení – pomůže „Synchronizovat teď" |
+| Projev                            | Příčina                                                                               |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| Sekce účtu se vůbec nezobrazí     | build nemá konfiguraci Firebase (chybí tajemství)                                     |
+| „Synchronizace se nepovedla"      | nevytvořená databáze, nenasazená pravidla, nebo chybějící doména v Authorized domains |
+| Přihlášení se otevře a hned zavře | vyskakovací okno zablokované; aplikace zkusí přesměrování                             |
+| Data z druhého zařízení nenaskočí | synchronizace běží při startu a po přihlášení – pomůže „Synchronizovat teď"           |
 
 ## Smazání účtu
 
