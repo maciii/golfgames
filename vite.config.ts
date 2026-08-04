@@ -24,7 +24,7 @@ export default defineConfig({
       output: {
         // Firebase dostane vlastní pojmenovaný chunk, aby ho šlo vynechat
         // z předcachování service workerem (viz workbox.globIgnores níž).
-        advancedChunks: {
+        codeSplitting: {
           groups: [{ name: 'firebase', test: /node_modules[\\/]@?firebase/ }],
         },
       },
