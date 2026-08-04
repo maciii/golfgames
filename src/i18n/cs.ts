@@ -343,6 +343,10 @@ export const cs = {
   'games.match-play.tagline': 'Zápas na jamky, ne na rány',
   'games.match-play.rules':
     'Zápas dvou stran - buď dva hráči proti sobě, nebo dvě dvojice, za které hraje vždy lepší míč. Kdo zahraje jamku líp, jde o jednu nahoru; shodná jamka je dělená. Zápas končí, jakmile je náskok větší než počet zbývajících jamek.',
+  'games.stableford.name': 'Stableford',
+  'games.stableford.tagline': 'Body za jamku, zkažená jamka kolo nezničí',
+  'games.stableford.rules':
+    'Hraje se za jednotlivce, 2 až 4 hráči. Za jamku se počítají body podle výsledku vůči paru: par 2 body, birdie 3, eagle 4, bogey 1, dvojbogey a horší nic. Se zapnutým netto se výsledek počítá po odečtení ran, které hráč na jamce dostává podle jejího stroke indexu. Vyhrává hráč s nejvíc body.',
 
   // Best Aggregate
   'best.points': 'Body',
@@ -381,6 +385,18 @@ export const cs = {
   'skins.headerNote': 'Skiny + extra body',
   'skins.atStake': 'V sázce',
   'skins.takes': 'Bere',
+
+  // Stableford
+  'stableford.title': 'Body',
+  'stableford.description': 'Par 2 body, birdie 3, eagle 4, bogey 1, horší nic.',
+  'stableford.netDescription':
+    'Netto: rány se odečítají podle stroke indexu jamky. Par 2 body, birdie 3, eagle 4, bogey 1, horší nic.',
+  'stableford.grossDetail': 'hrubě',
+  'stableford.netDetail': 'netto, HCP {handicap}',
+  'stableford.column': 'B',
+  'stableford.received': 'Rány',
+  'stableford.headerNote': 'Body za jamku: par 2, birdie 3, eagle 4, bogey 1.',
+  'stableford.headerNetNote': 'Netto body podle stroke indexu jamky.',
 
   // Match play
   'match.title': 'Stav zápasu',

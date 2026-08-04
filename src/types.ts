@@ -12,6 +12,20 @@ export type PlayerId = string
 export interface Player {
   id: PlayerId
   name: string
+  /**
+   * WHS handicapový index hráče (např. 18.4). Z něj a z parametrů odpaliště
+   * se počítá hrací handicap; samotný index se s hřištěm nemění.
+   */
+  handicapIndex?: number
+  /**
+   * Hrací handicap v ranách pro tohle kolo.
+   *
+   * Dopočítá se z indexu, ale jde ho přepsat ručně - na hřišti bez CR a SR je
+   * to jediná cesta, jak netto hrát.
+   */
+  playingHandicap?: number
+  /** Odpaliště, ze kterého hráč hraje; kvůli různým CR/SR u dvojic. */
+  teeId?: string
 }
 
 /** Dvojice hráčů u týmových her. */
@@ -201,6 +215,29 @@ export const DEFAULT_SETTINGS: RoundSettings = {
 /** Jamky, které se při zapnuté volbě počítají dvojnásobně (1-based). */
 export const DOUBLE_HOLES = [9, 18]
 
+/**
+ * Hřiště tak, jak si ho nese odehrané kolo.
+ *
+ * Je to hluboká kopie údajů z katalogu, ne odkaz na něj. Klub může hřiště
+ * přenormovat nebo se může opravit SI, a archivní kolo se tím nesmí
+ * přepočítat - stejný důvod, proč je kopií i `settings`.
+ */
+export interface RoundCourse {
+  /** Id v katalogu; ručně zadané hřiště ho mít nemusí. */
+  id?: string
+  name: string
+  teeId?: string
+  teeName?: string
+  /** Course Rating zvoleného odpaliště. */
+  courseRating?: number
+  /** Slope Rating zvoleného odpaliště. */
+  slopeRating?: number
+  /** Součet parů odpaliště - vstupuje do vzorce pro hrací handicap. */
+  par?: number
+  /** Stroke index jamek (1 = nejtěžší), délka === holeCount. */
+  strokeIndex: number[]
+}
+
 export interface Round {
   id: string
   gameId: string
@@ -231,6 +268,10 @@ export interface Round {
   currentHole: number
   /** Bodování a sázka; kolo si je nese, ať archiv sedí i po změně předvoleb. */
   settings: RoundSettings
+  /** Hřiště, na kterém se hraje; chybí u kola založeného bez výběru hřiště. */
+  course?: RoundCourse
+  /** Hraje se na rány s handicapem? Bez hodnoty se počítá hrubé skóre. */
+  netScoring?: boolean
 }
 
 export const DEFAULT_PAR = 4
@@ -245,6 +286,15 @@ export interface CreateRoundOptions {
   /** Rozdělení do týmů po indexech hráčů, např. [[0, 1], [2, 3]]. */
   teamIndices?: number[][]
   settings?: RoundSettings
+  /** Hřiště, ze kterého se převezmou pary a stroke indexy. */
+  course?: RoundCourse
+  /** Pary jamek z hřiště; bez nich se založí kolo se samými čtyřkami. */
+  pars?: number[]
+  /** Handicapové indexy hráčů ve stejném pořadí jako `playerNames`. */
+  handicapIndexes?: (number | undefined)[]
+  /** Hrací handicapy v ranách ve stejném pořadí jako `playerNames`. */
+  playingHandicaps?: (number | undefined)[]
+  netScoring?: boolean
 }
 
 export function createRound({
@@ -253,10 +303,20 @@ export function createRound({
   holeCount,
   teamIndices,
   settings = DEFAULT_SETTINGS,
+  course,
+  pars,
+  handicapIndexes,
+  playingHandicaps,
+  netScoring,
 }: CreateRoundOptions): Round {
   const players: Player[] = playerNames.map((name, i) => ({
     id: `p${i + 1}`,
     name: name.trim() || t('common.player', { number: i + 1 }),
+    ...(handicapIndexes?.[i] !== undefined ? { handicapIndex: handicapIndexes[i] } : {}),
+    ...(playingHandicaps?.[i] !== undefined
+      ? { playingHandicap: playingHandicaps[i] }
+      : {}),
+    ...(course?.teeId ? { teeId: course.teeId } : {}),
   }))
 
   const scores: Record<PlayerId, (number | null)[]> = {}
@@ -283,7 +343,8 @@ export function createRound({
     players,
     teams,
     holeCount,
-    pars: Array<number>(holeCount).fill(DEFAULT_PAR),
+    pars:
+      pars?.length === holeCount ? [...pars] : Array<number>(holeCount).fill(DEFAULT_PAR),
     scores,
     bonuses,
     currentHole: 0,
@@ -297,6 +358,10 @@ export function createRound({
         resultMultipliers: { ...settings.options.resultMultipliers },
       },
     },
+    // Ze stejného důvodu je kopií i hřiště - přenormování nebo oprava SI
+    // v katalogu nesmí sáhnout na kolo, které se s ním už odehrálo.
+    ...(course ? { course: { ...course, strokeIndex: [...course.strokeIndex] } } : {}),
+    ...(netScoring ? { netScoring: true } : {}),
   }
 }
 

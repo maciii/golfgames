@@ -330,6 +330,10 @@ export const en: Record<MessageKey, Message> = {
   'games.match-play.tagline': 'A match played by holes, not by strokes',
   'games.match-play.rules':
     'A match between two sides – either two players, or two pairs where the better ball counts. Whoever plays the hole better goes one up; a tied hole is halved. The match ends once the lead is greater than the number of remaining holes.',
+  'games.stableford.name': 'Stableford',
+  'games.stableford.tagline': 'Points per hole, one bad hole cannot ruin the round',
+  'games.stableford.rules':
+    'Played by individuals, 2 to 4 players. Each hole scores points against par: par 2 points, birdie 3, eagle 4, bogey 1, double bogey or worse nothing. With net scoring on, the result counts after deducting the strokes a player receives on the hole according to its stroke index. The player with the most points wins.',
 
   // Best Aggregate
   'best.points': 'Points',
@@ -366,6 +370,18 @@ export const en: Record<MessageKey, Message> = {
   'skins.headerNote': 'Skins + extra points',
   'skins.atStake': 'At stake',
   'skins.takes': 'Takes',
+
+  // Stableford
+  'stableford.title': 'Points',
+  'stableford.description': 'Par 2 points, birdie 3, eagle 4, bogey 1, worse nothing.',
+  'stableford.netDescription':
+    'Net: strokes are deducted according to the stroke index of the hole. Par 2 points, birdie 3, eagle 4, bogey 1, worse nothing.',
+  'stableford.grossDetail': 'gross',
+  'stableford.netDetail': 'net, HCP {handicap}',
+  'stableford.column': 'P',
+  'stableford.received': 'Strokes',
+  'stableford.headerNote': 'Points per hole: par 2, birdie 3, eagle 4, bogey 1.',
+  'stableford.headerNetNote': 'Net points based on the stroke index of the hole.',
 
   // Match play
   'match.title': 'Match status',

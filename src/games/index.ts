@@ -2,6 +2,7 @@ import type { GameDefinition } from './types'
 import { bestAggregate } from './bestAggregate'
 import { skins } from './skins'
 import { matchPlay } from './matchPlay'
+import { stableford } from './stableford'
 
 /**
  * Registr her.
@@ -12,7 +13,7 @@ import { matchPlay } from './matchPlay'
  *
  * Pravidla jsou popsaná v docs/games.md.
  */
-export const GAMES: GameDefinition[] = [bestAggregate, skins, matchPlay]
+export const GAMES: GameDefinition[] = [bestAggregate, skins, matchPlay, stableford]
 
 export const DEFAULT_GAME_ID = bestAggregate.id
 
