@@ -53,6 +53,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   vyberou klepnutím
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
   není potřeba
+- **Česky i anglicky** – jazyk se vybere podle prohlížeče a dá se přepnout
+  v nastavení; datum, částky i řazení jmen se řídí zvoleným jazykem
 - **Rozehrané kolo přežije** zavření aplikace i restart telefonu
 
 ## Instalace do telefonu

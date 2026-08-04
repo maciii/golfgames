@@ -1,5 +1,6 @@
 import type { Currency, Round } from './types'
 import { playerName } from './types'
+import { localeTag, t } from './i18n'
 
 /**
  * Přepočet bodů na peníze.
@@ -92,8 +93,8 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
   if (!isPairGame) {
     const rows = balances(parties, pointValue)
     const summary = rows.every((r) => r.amount === 0)
-      ? 'Nikdo nikomu nic nedluží.'
-      : 'Každý bod navíc platí každý ze soupeřů zvlášť.'
+      ? t('money.nobodyOwes')
+      : t('money.eachOpponent')
     return { kind: 'balances', rows, summary }
   }
 
@@ -107,7 +108,7 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
       transfers: [],
       perPlayer: 0,
       unitDiff: 0,
-      summary: 'Nerozhodně, nikdo nikomu nic nedluží.',
+      summary: t('money.draw'),
     }
   }
 
@@ -133,9 +134,11 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
     transfers,
     perPlayer,
     unitDiff,
-    summary:
-      `Rozdíl ${unitDiff} b. × ${formatMoney(pointValue, currency)} = ` +
-      `${formatMoney(perPlayer, currency)}, které platí každý hráč zvlášť.`,
+    summary: t('money.transfers', {
+      units: unitDiff,
+      value: formatMoney(pointValue, currency),
+      amount: formatMoney(perPlayer, currency),
+    }),
   }
 }
 
@@ -147,7 +150,7 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
  */
 export function formatMoney(amount: number, currency: Currency): string {
   const fractionDigits = Number.isInteger(amount) ? 0 : 2
-  return new Intl.NumberFormat('cs-CZ', {
+  return new Intl.NumberFormat(localeTag(), {
     style: 'currency',
     currency,
     minimumFractionDigits: fractionDigits,

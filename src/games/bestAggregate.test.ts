@@ -9,6 +9,13 @@ import {
 import { bestAggregate, holePoints, totalPoints } from './bestAggregate'
 import { makeRound } from './fixtures'
 
+import { beforeAll } from 'vitest'
+import { setActiveLocale } from '../i18n'
+
+// Tenhle test ověřuje konkrétní česká znění, takže si jazyk určuje sám -
+// jinak by závisel na jazyce prostředí, ve kterém běží.
+beforeAll(() => setActiveLocale('cs'))
+
 /** Základní pravidla se testují bez Double Bestu, který je nově zapnutý. */
 const BASE_OPTIONS = {
   ...DEFAULT_GAME_OPTIONS,

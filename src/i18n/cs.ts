@@ -1,0 +1,380 @@
+import type { Message } from './plural'
+
+/**
+ * České texty aplikace.
+ *
+ * Tenhle katalog je **zdroj pravdy pro klíče** - typ `MessageKey` se odvozuje
+ * právě z něj a ostatní jazyky musí mít stejné klíče, jinak je to chyba
+ * překladu (viz `en.ts`).
+ *
+ * Konvence klíčů: `oblast.věc`. Oblast odpovídá obrazovce (`play`, `results`),
+ * nebo doméně (`bonus`, `games`, `score`). Proměnné se píšou `{jmeno}`.
+ *
+ * Texty, které se mění podle počtu, jsou objekt s tvary `one` / `few` /
+ * `other`; správný vybere `Intl.PluralRules` (viz `plural.ts`).
+ */
+export const cs = {
+  // --- společné ----------------------------------------------------------
+  'common.back': 'Zpět',
+  'common.done': 'Hotovo',
+  'common.edit': 'Upravit',
+  'common.version': 'verze {version}',
+  'common.player': 'Hráč {number}',
+  'common.strokes': '{count} ran',
+  'common.points': '{count} b.',
+  'common.dash': '–',
+
+  // --- úvodní obrazovka ---------------------------------------------------
+  'setup.title': 'Golf Games',
+  'setup.subtitle': 'Nové kolo',
+  'setup.game': 'Hra',
+  'setup.gameSettings': 'Nastavení bodování hry',
+  'setup.players': 'Hráči',
+  'setup.fixedPlayers': 'Tahle hra se hraje vždy ve {count} hráčích.',
+  'setup.savedPlayers': 'Uložení hráči',
+  'setup.removePlayer': 'Odebrat {name} ze seznamu',
+  'setup.addPlayer': 'Přidat {name} do kola',
+  'setup.allPlayersUsed': 'Všichni uložení hráči už jsou v kole.',
+  'setup.pairs': 'Dvojice',
+  'setup.versus': 'vs',
+  'setup.stake': 'Sázka',
+  'setup.pointValue': 'Hodnota bodu',
+  'setup.pointValueLabel': 'Hodnota jednoho bodu',
+  'setup.stakeHint':
+    'Na konci kola se rozdíl bodů přepočítá na peníze; prohrávající strana platí vítězné.',
+  'setup.holeCount': 'Počet jamek',
+  'setup.holeCountHint': 'Par každé jamky nastavíš přímo při hře.',
+  'setup.archive': 'Archiv odehraných kol',
+  'setup.archiveWithCount': 'Archiv odehraných kol ({count})',
+  'setup.backup': 'Záloha dat',
+  'setup.signIn': 'Přihlásit se a zálohovat',
+  'setup.account': 'Účet a synchronizace',
+  'setup.start': 'Začít kolo',
+  'setup.language': 'Jazyk',
+  'setup.syncedShort': 'zálohováno',
+  'setup.syncingShort': 'synchronizuji',
+  'setup.offlineShort': 'bez připojení',
+
+  // --- zápis skóre --------------------------------------------------------
+  'play.previousHole': 'Předchozí jamka',
+  'play.nextHole': 'Další jamka',
+  'play.hole': 'Jamka {number}',
+  'play.holeOf': 'z {count}',
+  'play.par': 'Par',
+  'play.noScore': 'zatím bez zápisu',
+  'play.total': '{strokes} ran · {toPar}',
+  'play.bonusesFor': '{name}: extra body',
+  'play.minus': '{name}: ubrat ránu, z prázdné buňky birdie',
+  'play.score': '{name}: zapsat par, přidržením smazat zápis',
+  'play.plus': '{name}: přidat ránu, z prázdné buňky bogey',
+  'play.hint':
+    'Klepnutím doprostřed zapíšeš par ({par}), tlačítkem − birdie a tlačítkem + bogey. Přidržením čísla zápis smažeš.',
+  'play.standings': 'Průběžné výsledky',
+  'play.finish': 'Ukončit kolo',
+  'play.account': 'Účet a záloha',
+  'play.next': 'Další jamka',
+  'play.skip': 'Přeskočit na další',
+  'play.finishAndSave': 'Ukončit a uložit kolo',
+  'play.incompleteTitle': 'Kolo není kompletní.',
+  'play.incompleteConceded':
+    'Chybí zápis na jamkách {holes} – budou se počítat jako vzdané.',
+  'play.incompleteUnplayed': 'Nehrané jamky {holes} se do výsledku nezapočítají.',
+  'play.incompleteConfirm': 'Uložit kolo i tak?',
+
+  // --- extra body ---------------------------------------------------------
+  'bonus.sheetTitle': 'Extra body',
+  'bonus.sheetSubtitle': '{name} · jamka {hole}',
+  'bonus.none':
+    'Pro tuhle jamku nejsou žádné extra body k dispozici. Zapneš je v nastavení hry před začátkem kola; Longest je jen na pětiparových jamkách a Nearest na tříparových.',
+  'bonus.footer':
+    'Extra bod se počítá celé dvojici. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení hry; při bogey a horším se nepočítá.',
+  'bonus.double.name': 'Double',
+  'bonus.double.description': 'Zdvojnásobí výsledek celé jamky pro obě dvojice.',
+  'bonus.longest.name': 'Longest',
+  'bonus.longest.description':
+    'Nejdelší odpal; jen na pětiparových jamkách, pro jednoho hráče.',
+  'bonus.nearest.name': 'Nearest',
+  'bonus.nearest.description':
+    'Nejbližší rána k jamce; jen na tříparových, pro jednoho hráče.',
+  'bonus.bunker.name': 'Bunker (sandie)',
+  'bonus.bunker.description': 'Rána z bunkeru a přesto dobrý výsledek.',
+  'bonus.doubleBunker.name': 'Double bunker',
+  'bonus.doubleBunker.description': 'Dva bunkery na jedné jamce.',
+  'bonus.water.name': 'Water',
+  'bonus.water.description': 'Míč ve vodě a přesto dobrý výsledek.',
+  'bonus.barkie.name': 'Barkie',
+  'bonus.barkie.description': 'Trefa do stromu a přesto dobrý výsledek.',
+  'bonus.arnie.name': 'Arnie',
+  'bonus.arnie.description': 'Dobrý výsledek, aniž by míč byl na fairwayi.',
+
+  // --- nastavení bodování hry --------------------------------------------
+  'gameSettings.title': 'Bodování',
+  'gameSettings.intro':
+    'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším se extra bod nepočítá. Bonus vždy získává celá dvojice.',
+  'gameSettings.extraPoints': 'Extra body',
+  'gameSettings.bonusValue': 'Hodnota bonusu {name}',
+  'gameSettings.pointsSuffix': 'b.',
+  'gameSettings.multipliers': 'Násobiče za výsledek',
+  'gameSettings.multipliersHint':
+    'Kolikrát se hodnota extra bodu počítá, když hráč jamku zahraje pod par. Par platí vždy jednou.',
+  'gameSettings.multiplierFor': 'Násobič za {name}',
+  'gameSettings.otherOptions': 'Další volby',
+  'gameSettings.doubleClosing': '9. a 18. jamka za dvojnásobek',
+  'gameSettings.doubleClosingNote': 'u devítijamkového kola jen poslední jamka',
+  'gameSettings.noDoubleBonuses': 'Nenásobit extra body',
+  'gameSettings.noDoubleBonusesNote':
+    'dvojnásobná jamka ani „double“ nenásobí extra body',
+  'gameSettings.confirmLongest': 'Potvrzovat Longest',
+  'gameSettings.confirmNearest': 'Potvrzovat Nearest',
+  'gameSettings.confirmNote': 'při horším než par bod propadá soupeřům',
+  'gameSettings.doubleBest': 'Double Best',
+  'gameSettings.doubleBestNote':
+    'Bod navíc, když oba partneři zahráli líp než oba soupeři.',
+  'gameSettings.doubleBestValue': 'Hodnota Double Best',
+
+  // --- výsledky -----------------------------------------------------------
+  'results.archived': 'Archivní kolo',
+  'results.final': 'Výsledky',
+  'results.live': 'Průběžné výsledky',
+  'results.onlyPlayed': 'Počítají se jen jamky, které už mají zápis.',
+  'results.conceded': 'Vzdané jamky: {holes} – dvojice na nich přišla o součet.',
+  'results.unplayed': 'Kolo skončilo dřív, jamky {holes} se nehrály.',
+  'results.settlement': 'Vyrovnání',
+  'results.pointWorth': 'Bod je {money}.',
+  'results.doubleClosingNote': '9. a 18. jamka byla za dvojnásobek.',
+  'results.configuration': 'Bodování kola',
+  'results.configDoubleClosing': '9. a 18. jamka dvojnásobně',
+  'results.configDoubleBest': 'Double Best {count} b.',
+  'results.configNoDoubleBonuses': 'extra body se nedoublují',
+  'results.backToArchive': 'Zpět do archivu',
+  'results.editScores': 'Upravit skóre',
+  'results.backToPlay': 'Zpět do hry',
+  'results.newRound': 'Nové kolo',
+  'results.discardConfirm': 'Rozehrané kolo se smaže. Opravdu chceš začít nové?',
+
+  // --- scorekarta ---------------------------------------------------------
+  'scorecard.hole': 'Jamka',
+  'scorecard.holeShort': 'J',
+  'scorecard.par': 'Par',
+  'scorecard.total': 'Celkem',
+
+  // --- archiv -------------------------------------------------------------
+  'archive.title': 'Archiv',
+  'archive.empty': 'Zatím žádné odehrané kolo',
+  'archive.count': {
+    one: '{count} odehrané kolo',
+    few: '{count} odehraná kola',
+    other: '{count} odehraných kol',
+  },
+  'archive.emptyHint':
+    'Dohraná kola se sem ukládají sama, jakmile na poslední jamce klepneš na „Ukončit a uložit kolo“.',
+  'archive.noResult': 'bez výsledku',
+  'archive.draw': 'remíza: {names}',
+  'archive.holes': {
+    one: '{count} jamka',
+    few: '{count} jamky',
+    other: '{count} jamek',
+  },
+  'archive.holesPartial': '{done} z {total} jamek',
+  'archive.deleteConfirm': 'Smazat kolo z {date} z archivu?',
+  'archive.deleteLabel': 'Smazat kolo z {date}',
+
+  // --- záloha do souboru --------------------------------------------------
+  'backup.title': 'Záloha dat',
+  'backup.subtitle': 'Export a obnova',
+  'backup.intro':
+    'Kola, hráči i nastavení jsou uložená jen v tomhle zařízení. Zálohou si je odneseš do souboru – před výměnou telefonu nebo jen pro jistotu.',
+  'backup.exportTitle': 'Zálohovat',
+  'backup.download': 'Stáhnout zálohu',
+  'backup.downloadHint':
+    'Uloží se jeden soubor JSON se vším: rozehrané kolo, archiv, seznam hráčů i nastavení bodování. Na iPhonu se soubor nabídne přes sdílení – ulož ho třeba do Souborů nebo si ho pošli e-mailem.',
+  'backup.downloaded': 'Záloha se stáhla.',
+  'backup.importTitle': 'Obnovit ze zálohy',
+  'backup.merge': 'Sloučit',
+  'backup.replace': 'Nahradit vše',
+  'backup.mergeHint':
+    'Kola ze zálohy se přidají k těm současným a nic se nesmaže. Rozehrané kolo zůstane to současné.',
+  'backup.replaceHint':
+    'Všechna současná data se zahodí a nahradí obsahem zálohy. Hodí se na novém zařízení.',
+  'backup.choose': 'Vybrat soubor se zálohou',
+  'backup.mergeConfirm':
+    'Sloučit zálohu z {date} se současnými daty? Nic se nesmaže, záloha obsahuje {count} kol.',
+  'backup.replaceConfirm':
+    'Nahradit všechna data zálohou z {date}? Současná kola se smažou. Záloha obsahuje {count} kol.',
+  'backup.summary': 'V archivu je {count} kol',
+  'backup.summaryAdded': 'z toho {count} nových',
+  'backup.summaryCurrent': 'obnovilo se i rozehrané kolo',
+  'backup.errorInvalid': 'Tenhle soubor není záloha Golf Games, nebo je poškozený.',
+  'backup.errorTooNew':
+    'Záloha pochází z novější verze aplikace. Aktualizuj aplikaci a zkus to znovu.',
+
+  // --- účet a synchronizace ----------------------------------------------
+  'account.title': 'Účet',
+  'account.subtitle': 'Záloha do cloudu',
+  'account.disabledNotice':
+    'Tahle verze aplikace nemá nastavené připojení k cloudu, takže se nejde přihlásit. Data si zatím zálohuj přes obrazovku „Záloha dat“.',
+  'account.missingTitle': 'Co chybí',
+  'account.missingHint':
+    'Buildu se nedostaly tyhle údaje – doplň je v repozitáři jako GitHub Secrets (Settings → Secrets and variables → Actions) a spusť nasazení znovu:',
+  'account.missingFooter':
+    'Postup je popsaný v docs/sync.md. Verze aplikace je {version} – zkontroluj, že je to ta nasazená.',
+  'account.signedIn': 'Přihlášen',
+  'account.lastSync': 'Naposledy {time}.',
+  'account.syncNow': 'Synchronizovat teď',
+  'account.signOutTitle': 'Odhlášení',
+  'account.signOutHint':
+    'Po odhlášení zůstanou kola v tomhle zařízení a přestanou se zálohovat. Data v cloudu se nemažou – po přihlášení se zase objeví.',
+  'account.signOut': 'Odhlásit se',
+  'account.deleteTitle': 'Smazání účtu',
+  'account.deleteHint':
+    'Smaže účet i všechna data v cloudu. Kola v tomhle telefonu zůstanou – pokud si je chceš odnést, udělej si nejdřív zálohu do souboru.',
+  'account.delete': 'Smazat účet a data v cloudu',
+  'account.deleteConfirm':
+    'Smazat účet a všechna data v cloudu?\n\nKola uložená v tomhle telefonu zůstanou. Přijdeš o zálohu a o přístup z jiných zařízení. Akce je nevratná.',
+  'account.intro':
+    'Bez přihlášení jsou kola uložená jen v tomhle zařízení. Přihlášením účtem Google se začnou zálohovat a dostaneš se k nim odkudkoli – z telefonu, tabletu i počítače.',
+  'account.signIn': 'Přihlásit se účtem Google',
+  'account.signingIn': 'Přihlašuji…',
+  'account.preparing': 'Připravuji přihlášení…',
+  'account.optional':
+    'Nic se nemusí – aplikace funguje bez přihlášení úplně stejně. Zálohu do souboru najdeš na obrazovce „Záloha dat“.',
+  'account.storedTitle': 'Co se ukládá',
+  'account.storedHint':
+    'Odehraná kola, seznam spoluhráčů a nastavení bodování. Z účtu Google jen e-mail a jméno, aby šlo data přiřadit. Nic dalšího se nesbírá a nikomu se nepředává.',
+  'account.privacy': 'Zásady zpracování údajů',
+
+  // stavy synchronizace
+  'sync.disabled': 'Synchronizace není v téhle verzi dostupná.',
+  'sync.anonymous': 'Nepřihlášeno – data jsou jen v tomhle zařízení.',
+  'sync.syncing': 'Synchronizuji…',
+  'sync.synced': 'Data jsou zálohovaná.',
+  'sync.offline': 'Bez připojení. Změny se pošlou, až bude signál.',
+  'sync.error': 'Synchronizace se nepovedla. Zkusím to znovu při dalším spuštění.',
+
+  // chyby přihlášení
+  'signIn.network': 'Přihlášení se nepovedlo kvůli připojení. Zkus to prosím znovu.',
+  'signIn.unavailable': 'Přihlášení se nepovedlo. Zkus to prosím znovu.',
+  'signIn.notReady': 'Přihlášení se ještě připravuje, zkus to prosím za okamžik.',
+  'signIn.unknown': 'Něco se pokazilo. Zkus to prosím znovu.',
+
+  // chyby synchronizace
+  'syncError.permissionDenied':
+    'Databáze odmítla přístup. Nejspíš nejsou nasazená pravidla – Firebase Console → Firestore Database → Rules.',
+  'syncError.notFound':
+    'Databáze Firestore neexistuje. Vytvoř ji: Firebase Console → Build → Firestore Database → Create database.',
+  'syncError.unavailable':
+    'Databáze není dostupná. Buď není vytvořená, nebo se k ní nedá připojit.',
+  'syncError.unauthenticated': 'Přihlášení vypršelo. Odhlas se a přihlas znovu.',
+  'syncError.failedPrecondition':
+    'Firestore hlásí, že projekt není připravený – zkontroluj, že je databáze vytvořená.',
+  'syncError.other': 'Chyba {code}.',
+  'syncError.unknown': 'Neznámá chyba při synchronizaci.',
+
+  // --- zásady zpracování údajů -------------------------------------------
+  'privacy.title': 'Zpracování údajů',
+  'privacy.offlineTitle': 'Bez přihlášení',
+  'privacy.offline':
+    'Aplikace bez přihlášení neodesílá nikam nic. Všechna data – odehraná kola, jména spoluhráčů i nastavení – zůstávají v úložišti prohlížeče ve tvém zařízení. Neexistuje žádný účet ani server, který by o nich věděl.',
+  'privacy.cloudTitle': 'S přihlášením',
+  'privacy.cloud':
+    'Když se přihlásíš účtem Google, ukládají se tato data do služby Google Firebase (Firestore), aby byla zálohovaná a dostupná z dalších zařízení:',
+  'privacy.itemRounds':
+    'odehraná a rozehraná kola včetně skóre, hráčů a nastavení bodování',
+  'privacy.itemRoster': 'seznam uložených spoluhráčů',
+  'privacy.itemSettings': 'předvolby sázky a bodování',
+  'privacy.itemAccount': 'e-mail a jméno z účtu Google, aby šlo data přiřadit',
+  'privacy.accessTitle': 'Kdo k datům má přístup',
+  'privacy.access':
+    'Jen ty. Pravidla databáze jsou nastavená tak, že ke svým datům se dostane výhradně přihlášený vlastník. Data se nikomu nepředávají, nepoužívají se k reklamě ani k profilování. Zpracovatelem úložiště je Google Ireland Limited jako provozovatel Firebase.',
+  'privacy.retentionTitle': 'Jak dlouho',
+  'privacy.retention':
+    'Dokud data sám nesmažeš. Účet i všechna data v cloudu smažeš tlačítkem „Smazat účet a data v cloudu“ na obrazovce Účet. Smazání je okamžité a nevratné.',
+  'privacy.rightsTitle': 'Tvá práva',
+  'privacy.rights':
+    'Máš právo na přístup k údajům, jejich opravu, výmaz a přenositelnost. Přístup i přenositelnost pokrývá tlačítko „Stáhnout zálohu“ na obrazovce Záloha dat, které vydá všechna data v otevřeném formátu JSON. Opravit je můžeš přímo v aplikaci, smazat tlačítkem výše.',
+  'privacy.contactTitle': 'Kontakt',
+  'privacy.contact':
+    'Správcem údajů je provozovatel aplikace. S čímkoli ohledně zpracování se ozvi na',
+  'privacy.publicVersion': 'Veřejná verze téhle stránky je na',
+
+  // --- výsledky na jamce --------------------------------------------------
+  'score.eagle': 'Eagle a lepší',
+  'score.birdie': 'Birdie',
+  'score.par': 'Par',
+  'score.bogey': 'Bogey',
+  'score.double': 'Dvojbogey',
+  'score.triple': 'Trojbogey a horší',
+
+  // --- násobiče za výsledek ----------------------------------------------
+  'tier.birdie.name': 'Birdie',
+  'tier.birdie.note': 'jedna rána pod par',
+  'tier.eagle.name': 'Eagle',
+  'tier.eagle.note': 'dvě rány pod par',
+  'tier.albatross.name': 'Albatros',
+  'tier.albatross.note': 'tři rány pod par',
+  'tier.condor.name': 'Condor',
+  'tier.condor.note': 'čtyři a víc ran pod par',
+
+  // --- hry ----------------------------------------------------------------
+  'games.best-aggregate.name': 'Best Aggregate',
+  'games.best-aggregate.tagline': 'Dvě dvojice, body za lepší míč, součet a birdie',
+  'games.best-aggregate.rules':
+    'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice 1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, 1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice s nejvyšším počtem bodů.',
+  'games.skins.name': 'Skins',
+  'games.skins.tagline': 'Každá jamka je skin, shoda ho přenáší dál',
+  'games.skins.rules':
+    'Hraje se za jednotlivce, 2 až 4 hráči. Každá jamka je jeden skin a bere ho hráč s nejnižším počtem ran. Když je na jamce shoda, skin se nepřiděluje a přičte se k další jamce. Vyhrává hráč s nejvíc skiny.',
+  'games.match-play.name': 'Match play',
+  'games.match-play.tagline': 'Zápas na jamky, ne na rány',
+  'games.match-play.rules':
+    'Zápas dvou stran - buď dva hráči proti sobě, nebo dvě dvojice, za které hraje vždy lepší míč. Kdo zahraje jamku líp, jde o jednu nahoru; shodná jamka je dělená. Zápas končí, jakmile je náskok větší než počet zbývajících jamek.',
+
+  // Best Aggregate
+  'best.points': 'Body',
+  'best.pointsDescription':
+    'Za jamku: 1 bod za lepší míč, 1 za nižší součet, 1 za birdie, 3 za eagle.',
+  'best.best': 'Best',
+  'best.aggregate': 'Součet',
+  'best.holePoints': 'Body',
+  'best.detailBest': 'BEST {count}',
+  'best.detailAggregate': 'Součet {count}',
+  'best.detailDoubleBest': '2×BEST {count}',
+  'best.detailBonus': 'Bonus {count}',
+  'best.detailExtra': 'Extra {count}',
+  'best.conceded': 'vzdáno',
+
+  // Skins
+  'skins.title': 'Skiny',
+  'skins.pending': 'V banku zůstává {count} nerozdělených skinů.',
+  'skins.description': 'Shoda na jamce skin nepřidělí a přenese ho do další.',
+  'skins.noHole': 'zatím žádná jamka',
+  'skins.wonHoles': '{count} vyhraných jamek: {holes}',
+  'skins.column': 'Skin',
+  'skins.atStake': 'V sázce',
+  'skins.takes': 'Bere',
+
+  // Match play
+  'match.title': 'Stav zápasu',
+  'match.notStarted': 'Zápas ještě nezačal',
+  'match.allSquareRemaining': 'Nerozhodně, zbývá {count} jamek',
+  'match.wins': '{name} vyhrává {lead}&{remaining}',
+  'match.dormie': '{name} vede {lead} UP (dormie), zbývá {remaining} jamek',
+  'match.leads': '{name} vede {lead} UP, zbývá {remaining} jamek',
+  'match.allSquare': 'AS',
+  'match.up': '{count} UP',
+  'match.down': '{count} DOWN',
+  'match.detail': '{won} vyhraných jamek · {halved} dělených',
+  'match.takesHole': 'Jamku bere',
+  'match.halved': 'dělená',
+  'match.takes': 'bere',
+  'match.loses': 'ztrácí',
+  'match.bestBall': 'Lepší míč',
+  'match.hole': 'Jamka',
+
+  // --- peněžní vyrovnání --------------------------------------------------
+  'money.nobodyOwes': 'Nikdo nikomu nic nedluží.',
+  'money.eachOpponent': 'Každý bod navíc platí každý ze soupeřů zvlášť.',
+  'money.draw': 'Nerozhodně, nikdo nikomu nic nedluží.',
+  'money.transfers':
+    'Rozdíl {units} b. × {value} = {amount}, které platí každý hráč zvlášť.',
+} satisfies Record<string, Message>

@@ -17,6 +17,7 @@ import type {
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
+import { t } from '../i18n'
 import {
   CONCEDED,
   aggregateWins,
@@ -263,13 +264,6 @@ function settledHoles(round: Round, team: Team): number {
 
 export const bestAggregate: GameDefinition = {
   id: 'best-aggregate',
-  name: 'Best Aggregate',
-  tagline: 'Dvě dvojice, body za lepší míč, součet a birdie',
-  rules:
-    'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice ' +
-    '1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, ' +
-    '1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice ' +
-    's nejvyšším počtem bodů.',
   playerCounts: [4],
   usesTeams: () => true,
   supportsDoubleHoles: true,
@@ -280,11 +274,13 @@ export const bestAggregate: GameDefinition = {
     const rows = round.teams.map((team, index) => {
       const points = totals[index] ?? EMPTY_POINTS
       const detail = [
-        `BEST ${points.best}`,
-        `Součet ${points.aggregate}`,
-        points.doubleBest > 0 ? `2×BEST ${points.doubleBest}` : null,
-        `Bonus ${points.bonus}`,
-        points.extra > 0 ? `Extra ${points.extra}` : null,
+        t('best.detailBest', { count: points.best }),
+        t('best.detailAggregate', { count: points.aggregate }),
+        points.doubleBest > 0
+          ? t('best.detailDoubleBest', { count: points.doubleBest })
+          : null,
+        t('best.detailBonus', { count: points.bonus }),
+        points.extra > 0 ? t('best.detailExtra', { count: points.extra }) : null,
       ]
         .filter(Boolean)
         .join(' · ')
@@ -292,9 +288,9 @@ export const bestAggregate: GameDefinition = {
         id: team.id,
         name: teamName(round, team),
         value: points.total,
-        valueLabel: `${points.total} b.`,
+        valueLabel: t('common.points', { count: points.total }),
         detail,
-        secondary: `${teamStrokeTotal(round, team)} ran`,
+        secondary: t('common.strokes', { count: teamStrokeTotal(round, team) }),
         holesPlayed: settledHoles(round, team),
       }
     })
@@ -302,9 +298,8 @@ export const bestAggregate: GameDefinition = {
     return [
       {
         id: 'points',
-        title: 'Body',
-        description:
-          'Za jamku: 1 bod za lepší míč, 1 za nižší součet, 1 za birdie, 3 za eagle.',
+        title: t('best.points'),
+        description: t('best.pointsDescription'),
         rows: rankRows(rows, 'highest'),
       },
     ]
@@ -317,7 +312,7 @@ export const bestAggregate: GameDefinition = {
   scorecardColumns(round: Round): ScorecardColumn[] {
     return round.teams.map((team, index) => ({
       id: `points-${team.id}`,
-      label: 'Body',
+      label: t('best.holePoints'),
       afterPlayerId: team.playerIds[team.playerIds.length - 1],
       cell: (r, hole) => {
         // Prázdná buňka, dokud se na jamce vůbec nehrálo; vzdaná jamka má 0.
@@ -349,16 +344,16 @@ export const bestAggregate: GameDefinition = {
       winner: leaders === 1 && totals[index] === bestTotal,
       entries: [
         {
-          label: 'Best',
+          label: t('best.best'),
           value: formatSideScore(teamBestBall(round, team, hole)),
           highlight: bestWinner === index,
         },
         {
-          label: 'Součet',
+          label: t('best.aggregate'),
           value: formatAggregate(teamAggregate(round, team, hole)),
           highlight: aggWinner === index,
         },
-        { label: 'Body', value: `${points[index]?.total ?? 0}` },
+        { label: t('best.holePoints'), value: `${points[index]?.total ?? 0}` },
       ],
     }))
   },

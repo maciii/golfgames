@@ -8,6 +8,7 @@ import type {
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
+import { t } from '../i18n'
 
 /**
  * Skins - hra jednotlivců pro 2 až 4 hráče.
@@ -82,12 +83,6 @@ export function carryInto(round: Round, hole: number): number {
 
 export const skins: GameDefinition = {
   id: 'skins',
-  name: 'Skins',
-  tagline: 'Každá jamka je skin, shoda ho přenáší dál',
-  rules:
-    'Hraje se za jednotlivce, 2 až 4 hráči. Každá jamka je jeden skin a bere ' +
-    'ho hráč s nejnižším počtem ran. Když je na jamce shoda, skin se ' +
-    'nepřiděluje a přičte se k další jamce. Vyhrává hráč s nejvíc skiny.',
   playerCounts: [2, 3, 4],
   usesTeams: () => false,
   supportsDoubleHoles: true,
@@ -105,9 +100,12 @@ export const skins: GameDefinition = {
         valueLabel: `${skinCount}`,
         detail:
           won.length === 0
-            ? 'zatím žádná jamka'
-            : `${won.length} vyhraných jamek: ${won.map((r) => r.hole + 1).join(', ')}`,
-        secondary: `${strokeTotal(round, player.id)} ran`,
+            ? t('skins.noHole')
+            : t('skins.wonHoles', {
+                count: won.length,
+                holes: won.map((r) => r.hole + 1).join(', '),
+              }),
+        secondary: t('common.strokes', { count: strokeTotal(round, player.id) }),
         holesPlayed: results.filter((r) => r.winnerId !== null).length,
       }
     })
@@ -116,11 +114,9 @@ export const skins: GameDefinition = {
     return [
       {
         id: 'skins',
-        title: 'Skiny',
+        title: t('skins.title'),
         description:
-          pending > 0
-            ? `V banku zůstává ${pending} nerozdělených skinů.`
-            : 'Shoda na jamce skin nepřidělí a přenese ho do další.',
+          pending > 0 ? t('skins.pending', { count: pending }) : t('skins.description'),
         rows: rankRows(rows, 'highest'),
       },
     ]
@@ -131,7 +127,7 @@ export const skins: GameDefinition = {
     return [
       {
         id: 'skins',
-        label: 'Skin',
+        label: t('skins.column'),
         cell: (round, hole) => {
           const result = skinResults(round)[hole]
           return result?.winnerId ? `${result.skins}` : ''
@@ -153,8 +149,8 @@ export const skins: GameDefinition = {
       {
         id: '_game',
         entries: [
-          { label: 'V sázce', value: `${carry + holeMultiplier(round, hole)}` },
-          { label: 'Bere', value },
+          { label: t('skins.atStake'), value: `${carry + holeMultiplier(round, hole)}` },
+          { label: t('skins.takes'), value },
         ],
       },
     ]

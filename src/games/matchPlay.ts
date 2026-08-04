@@ -2,6 +2,7 @@ import type { PlayerId, Round } from '../types'
 import { isHoleStarted, scoreAt, teamName } from '../types'
 import type { GameDefinition, HoleSummary, StandingsSection } from './types'
 import { rankRows } from './types'
+import { t } from '../i18n'
 import { CONCEDED, formatSideScore, teamBestBall } from './shared'
 
 /**
@@ -100,16 +101,19 @@ export function matchState(round: Round): MatchState {
 
   let label: string
   if (leaderIndex === null) {
-    label = settled === 0 ? 'Zápas ještě nezačal' : `Nerozhodně, zbývá ${remaining} jamek`
+    label =
+      settled === 0
+        ? t('match.notStarted')
+        : t('match.allSquareRemaining', { count: remaining })
   } else {
-    const leaderName = sides[leaderIndex]?.name ?? '?'
+    const name = sides[leaderIndex]?.name ?? '?'
     if (decided) {
       // Golfová notace: náskok & počet jamek, které zbývaly.
-      label = `${leaderName} vyhrává ${lead}&${remaining}`
+      label = t('match.wins', { name, lead, remaining })
     } else if (lead === remaining) {
-      label = `${leaderName} vede ${lead} UP (dormie), zbývá ${remaining} jamek`
+      label = t('match.dormie', { name, lead, remaining })
     } else {
-      label = `${leaderName} vede ${lead} UP, zbývá ${remaining} jamek`
+      label = t('match.leads', { name, lead, remaining })
     }
   }
 
@@ -118,13 +122,6 @@ export function matchState(round: Round): MatchState {
 
 export const matchPlay: GameDefinition = {
   id: 'match-play',
-  name: 'Match play',
-  tagline: 'Zápas na jamky, ne na rány',
-  rules:
-    'Zápas dvou stran - buď dva hráči proti sobě, nebo dvě dvojice, za které ' +
-    'hraje vždy lepší míč. Kdo zahraje jamku líp, jde o jednu nahoru; shodná ' +
-    'jamka je dělená. Zápas končí, jakmile je náskok větší než počet ' +
-    'zbývajících jamek.',
   playerCounts: [2, 4],
   usesTeams: (playerCount) => playerCount === 4,
   supportsDoubleHoles: false,
@@ -136,16 +133,17 @@ export const matchPlay: GameDefinition = {
     const rows = sides.map((side, index) => {
       const wonHoles = state.won[index === 0 ? 0 : 1]
       let valueLabel: string
-      if (state.leaderIndex === null) valueLabel = 'AS'
-      else if (state.leaderIndex === index) valueLabel = `${state.lead} UP`
-      else valueLabel = `${state.lead} DOWN`
+      if (state.leaderIndex === null) valueLabel = t('match.allSquare')
+      else if (state.leaderIndex === index)
+        valueLabel = t('match.up', { count: state.lead })
+      else valueLabel = t('match.down', { count: state.lead })
 
       return {
         id: side.id,
         name: side.name,
         value: wonHoles,
         valueLabel,
-        detail: `${wonHoles} vyhraných jamek · ${state.halved} dělených`,
+        detail: t('match.detail', { won: wonHoles, halved: state.halved }),
         holesPlayed: wonHoles + state.halved,
       }
     })
@@ -153,7 +151,7 @@ export const matchPlay: GameDefinition = {
     return [
       {
         id: 'match',
-        title: 'Stav zápasu',
+        title: t('match.title'),
         description: state.label,
         rows: rankRows(rows, 'highest'),
       },
@@ -170,25 +168,30 @@ export const matchPlay: GameDefinition = {
 
     // U jednotlivců nemá smysl opakovat ránu, která je vidět v zápisu výš.
     if (sideA.playerIds.length === 1) {
-      let value = '–'
+      let value = t('common.dash')
       if (a !== null && b !== null) {
-        value = a === b ? 'dělená' : `${a < b ? sideA.name : sideB.name}`
+        value = a === b ? t('match.halved') : a < b ? sideA.name : sideB.name
       }
-      return [{ id: '_game', entries: [{ label: 'Jamku bere', value }] }]
+      return [{ id: '_game', entries: [{ label: t('match.takesHole'), value }] }]
     }
 
     return sides.map((side, index) => {
       const own = index === 0 ? a : b
       const other = index === 0 ? b : a
-      let outcome = '–'
+      let outcome = t('common.dash')
       if (own !== null && other !== null) {
-        outcome = own === other ? 'dělená' : own < other ? 'bere' : 'ztrácí'
+        outcome =
+          own === other
+            ? t('match.halved')
+            : own < other
+              ? t('match.takes')
+              : t('match.loses')
       }
       return {
         id: side.id,
         entries: [
-          { label: 'Lepší míč', value: formatSideScore(own) },
-          { label: 'Jamka', value: outcome },
+          { label: t('match.bestBall'), value: formatSideScore(own) },
+          { label: t('match.hole'), value: outcome },
         ],
       }
     })

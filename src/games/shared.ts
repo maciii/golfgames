@@ -1,5 +1,6 @@
 import type { Round, Team } from '../types'
 import { isHoleStarted, scoreAt } from '../types'
+import { t } from '../i18n'
 
 /**
  * Výpočty, které potřebuje víc her najednou (lepší míč, součet dvojice).
@@ -76,8 +77,8 @@ export function aggregateWins(
 
 /** Hodnota součtu do UI. */
 export function formatAggregate(result: AggregateResult | null): string {
-  if (!result) return '–'
-  return result.played === 0 ? 'vzdáno' : `${result.strokes}`
+  if (!result) return t('common.dash')
+  return result.played === 0 ? t('best.conceded') : `${result.strokes}`
 }
 
 /** Součet ran dvojice přes celé kolo (jen za zapsané jamky). */
@@ -102,6 +103,6 @@ export function lowerWins(a: number | null, b: number | null): 0 | 1 | null {
 
 /** Hodnota do UI: pomlčka pro nehranou jamku, slovo pro vzdanou. */
 export function formatSideScore(value: number | null): string {
-  if (value === null) return '–'
-  return value === CONCEDED ? 'vzdáno' : `${value}`
+  if (value === null) return t('common.dash')
+  return value === CONCEDED ? t('best.conceded') : `${value}`
 }

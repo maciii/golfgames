@@ -1,5 +1,6 @@
 import type { GameOptions, Round, RoundSettings } from './types'
 import { DEFAULT_SETTINGS, roundTimestamp } from './types'
+import { localeTag } from './i18n'
 import type { RosterEntry } from './storage'
 import {
   ARCHIVE_LIMIT,
@@ -122,7 +123,7 @@ export function mergeRosters(
     merged.push({ id: entry.id, name })
   }
 
-  return merged.sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+  return merged.sort((a, b) => a.name.localeCompare(b.name, localeTag()))
 }
 
 /**

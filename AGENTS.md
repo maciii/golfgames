@@ -61,7 +61,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 5. **Prázdné skóre má dva významy** (nehraná vs. vzdaná jamka), viz níž.
 6. **Extra bod získává celá dvojice**, ne jen hráč, který ho uhrál. Platí to
    i pro hry, které teprve vzniknou.
-7. **Uživatelské texty česky, kód a identifikátory anglicky.**
+7. **Uživatelské texty patří do `src/i18n/`.** Do komponent se nepíšou.
+   Nový text znamená klíč v `cs.ts` a překlad v `en.ts` - `en.ts` je typovaný
+   jako `Record<MessageKey, Message>`, takže chybějící překlad neprojde
+   překladem. Kód a identifikátory zůstávají anglicky.
 8. **Komentáře vysvětlují proč, ne co.** Co dělá řádek, je vidět z kódu.
 9. **Nepřidávej závislosti bez důvodu.** Runtime závislosti jsou dneska jen
    `react` a `react-dom` a je to záměr.
@@ -92,6 +95,12 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **Firebase se nesmí dostat do hlavního bundlu.** Načítá se dynamickým
   importem až při přihlášení a je vynechané z předcachování service workerem.
   Statický `import` z `firebase/*` mimo `src/sync/` tohle rozbije.
+- **Texty her a bonusů se skládají z id** (`games.<id>.name`,
+  `bonus.<id>.name`). TypeScript takový klíč neověří, hlídá to test
+  v `i18n.test.ts` - při přidání hry nebo bonusu ho nech projít.
+- **Jazyk drží i modul, nejen React.** Funkce mimo komponenty (peníze, datum,
+  řazení jmen) čtou `getLocale()` / `localeTag()`. Testy, které ověřují
+  konkrétní znění, si jazyk nastaví přes `setActiveLocale('cs')`.
 - **`updatedAt` na kole zvedá jen skutečná změna dat** (`touchRound()`).
   Listování jamkami ne - jinak by prohlížející zařízení přebilo to hrající.
 
@@ -104,6 +113,7 @@ src/
   money.ts     přepočet bodů na peníze
   backup.ts    export a import dat do souboru JSON
   sync/        nepovinná záloha do Firestore (líné načtení SDK)
+  i18n/        překlady: cs.ts je zdroj pravdy pro klíče, en.ts musí sedět
   games/       pravidla her (GameDefinition), registr v index.ts
   screens/     UI, česky psané texty
 docs/          architektura, pravidla, rozhodnutí, nasazení

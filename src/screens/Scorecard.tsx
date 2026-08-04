@@ -1,6 +1,5 @@
 import type { Player, Round, ScoreCategory } from '../types'
 import {
-  SCORE_CATEGORY_LABEL,
   parAt,
   scoreAt,
   scoreCategory,
@@ -10,6 +9,7 @@ import {
 } from '../types'
 import type { ScorecardColumn } from '../games'
 import { getGame } from '../games'
+import { dynamicKey, useT } from '../i18n'
 
 /**
  * Scorekarta se značkami podle golfové konvence.
@@ -57,6 +57,7 @@ function buildColumns(round: Round, extras: ScorecardColumn[]): Column[] {
 }
 
 export default function Scorecard({ round }: { round: Round }) {
+  const t = useT()
   const game = getGame(round.gameId)
   const extras = game.scorecardColumns?.(round) ?? []
   const columns = buildColumns(round, extras)
@@ -94,8 +95,9 @@ export default function Scorecard({ round }: { round: Round }) {
               </tr>
             )}
             <tr>
-              <th scope="col">J</th>
-              <th scope="col">Par</th>
+              {/* Sloupec jamek má zkratku, na plné slovo v mřížce není místo. */}
+              <th scope="col">{t('scorecard.holeShort')}</th>
+              <th scope="col">{t('scorecard.par')}</th>
               {columns.map((column) =>
                 column.kind === 'player' ? (
                   <th key={column.player.id} scope="col">
@@ -157,7 +159,7 @@ export default function Scorecard({ round }: { round: Round }) {
         {LEGEND_EXAMPLES.map(([category, example]) => (
           <li key={category}>
             <span className={`mark ${category}`}>{example}</span>
-            {SCORE_CATEGORY_LABEL[category]}
+            {t(dynamicKey('score', category))}
           </li>
         ))}
       </ul>

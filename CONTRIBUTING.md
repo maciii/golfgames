@@ -52,6 +52,11 @@ src/
   storage.ts          localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts            přepočet bodů na peníze a formátování částek
   backup.ts           export a import dat do souboru JSON
+  i18n/               překlady (čeština, angličtina)
+    cs.ts             český katalog - zdroj pravdy pro klíče
+    en.ts             anglický katalog
+    index.tsx         kontext, useT(), detekce jazyka
+    plural.ts         množná čísla přes Intl.PluralRules
   sync/               nepovinná záloha do Firestore přes účet Google
     firebase.ts       líné načtení SDK
     auth.ts           přihlášení Googlem
@@ -99,7 +104,10 @@ nový soubor v `src/games/`, zápis do registru, testy, odstavec v dokumentaci.
 
 - Formátuje Prettier (`.prettierrc.json`): bez středníků, jednoduché
   uvozovky, šířka 90 znaků.
-- Uživatelské texty jsou česky, kód a identifikátory anglicky.
+- **Uživatelské texty patří do `src/i18n/`, ne do komponent.** Nový text =
+  klíč v `cs.ts` a překlad v `en.ts`; bez druhého překladu build neprojde.
+- Kód, identifikátory i komentáře jsou anglicky/česky jako dosud - překládají
+  se jen texty, které uvidí uživatel.
 - Komentáře vysvětlují **proč**, ne co – co dělá řádek, je vidět z kódu.
 - Pravidla her žijí výhradně v `src/games/`. Obrazovky o konkrétní hře nic
   nevědí, jen vykreslí, co dostanou z `computeStandings()`.
@@ -132,6 +140,7 @@ peníze nejvyšší a chyba v bodování je nejdražší.
   přidělení Longestu a Nearestu
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 - `src/sync/merge.test.ts` – slučování při synchronizaci
+- `src/i18n/i18n.test.ts` – úplnost katalogů a chování překladu
 
 Pomocník `makeRound` z `src/games/fixtures.ts` postaví kolo s předvyplněnými
 pary a skóre. Testy základních pravidel používají `BASE_OPTIONS` s vypnutými

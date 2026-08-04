@@ -4,6 +4,7 @@ import {
   DEFAULT_RESULT_MULTIPLIERS,
   DEFAULT_SETTINGS,
 } from './types'
+import { localeTag } from './i18n'
 
 /**
  * Perzistence v localStorage.
@@ -206,7 +207,7 @@ export function loadRoster(): RosterEntry[] {
   if (!Array.isArray(roster)) return []
   return roster
     .filter((e): e is RosterEntry => Boolean(e && typeof e.name === 'string' && e.name))
-    .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+    .sort((a, b) => a.name.localeCompare(b.name, localeTag()))
 }
 
 /**
@@ -225,7 +226,7 @@ export function addToRoster(names: string[]): RosterEntry[] {
     roster.push({ id: `r${Date.now()}${Math.random().toString(36).slice(2, 6)}`, name })
   }
 
-  const sorted = roster.sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+  const sorted = roster.sort((a, b) => a.name.localeCompare(b.name, localeTag()))
   write(ROSTER_KEY, sorted)
   return sorted
 }

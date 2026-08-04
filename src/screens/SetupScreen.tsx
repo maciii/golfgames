@@ -12,6 +12,8 @@ import type { CreateRoundOptions, Currency, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
+import { LOCALES, LOCALE_LABEL, useLocale } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
 const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
@@ -56,6 +58,7 @@ export default function SetupScreen({
   onOpenAccount,
   archiveCount,
 }: Props) {
+  const { t, locale, setLocale } = useLocale()
   const { status, account } = useAccount()
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
@@ -75,7 +78,8 @@ export default function SetupScreen({
   const game = getGame(gameId)
   const usesTeams = game.usesTeams(playerCount)
   const needsPairing = usesTeams && playerCount === 4
-  const displayName = (index: number) => names[index]?.trim() || `Hráč ${index + 1}`
+  const displayName = (index: number) =>
+    names[index]?.trim() || t('common.player', { number: index + 1 })
 
   function selectGame(id: string) {
     setGameId(id)
@@ -167,13 +171,13 @@ export default function SetupScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>Golf Games</h1>
-        <p className="subtitle">Nové kolo</p>
+        <h1>{t('setup.title')}</h1>
+        <p className="subtitle">{t('setup.subtitle')}</p>
       </header>
 
       <main className="content">
         <section className="section">
-          <h2 className="section-title">Hra</h2>
+          <h2 className="section-title">{t('setup.game')}</h2>
           <div className="game-list">
             {GAMES.map((g) => (
               <button
@@ -183,23 +187,25 @@ export default function SetupScreen({
                 onClick={() => selectGame(g.id)}
                 aria-pressed={g.id === gameId}
               >
-                <span className="game-name">{g.name}</span>
-                <span className="game-tagline">{g.tagline}</span>
+                <span className="game-name">{t(`games.${g.id}.name` as MessageKey)}</span>
+                <span className="game-tagline">
+                  {t(`games.${g.id}.tagline` as MessageKey)}
+                </span>
               </button>
             ))}
           </div>
-          <p className="hint">{game.rules}</p>
+          <p className="hint">{t(`games.${game.id}.rules` as MessageKey)}</p>
           <button
             type="button"
             className="link-button"
             onClick={() => onOpenGameSettings(gameId)}
           >
-            Nastavení bodování hry
+            {t('setup.gameSettings')}
           </button>
         </section>
 
         <section className="section">
-          <h2 className="section-title">Hráči</h2>
+          <h2 className="section-title">{t('setup.players')}</h2>
           {game.playerCounts.length > 1 ? (
             <div className="segmented">
               {game.playerCounts.map((count) => (
@@ -215,7 +221,7 @@ export default function SetupScreen({
               ))}
             </div>
           ) : (
-            <p className="hint">Tahle hra se hraje vždy ve {playerCount} hráčích.</p>
+            <p className="hint">{t('setup.fixedPlayers', { count: playerCount })}</p>
           )}
 
           <div className="name-list">
@@ -227,7 +233,7 @@ export default function SetupScreen({
                 inputMode="text"
                 autoComplete="off"
                 autoCapitalize="words"
-                placeholder={`Hráč ${i + 1}`}
+                placeholder={t('common.player', { number: i + 1 })}
                 value={names[i] ?? ''}
                 onChange={(e) => updateName(i, e.target.value)}
               />
@@ -237,13 +243,13 @@ export default function SetupScreen({
           {roster.length > 0 && (
             <div className="roster">
               <div className="roster-head">
-                <span className="roster-label">Uložení hráči</span>
+                <span className="roster-label">{t('setup.savedPlayers')}</span>
                 <button
                   type="button"
                   className="roster-toggle"
                   onClick={() => setRosterEditing((v) => !v)}
                 >
-                  {rosterEditing ? 'Hotovo' : 'Upravit'}
+                  {rosterEditing ? t('common.done') : t('common.edit')}
                 </button>
               </div>
               <div className="chip-row">
@@ -257,8 +263,8 @@ export default function SetupScreen({
                     }
                     aria-label={
                       rosterEditing
-                        ? `Odebrat ${entry.name} ze seznamu`
-                        : `Přidat ${entry.name} do kola`
+                        ? t('setup.removePlayer', { name: entry.name })
+                        : t('setup.addPlayer', { name: entry.name })
                     }
                   >
                     {entry.name}
@@ -266,7 +272,7 @@ export default function SetupScreen({
                   </button>
                 ))}
                 {!rosterEditing && available.length === 0 && (
-                  <span className="hint">Všichni uložení hráči už jsou v kole.</span>
+                  <span className="hint">{t('setup.allPlayersUsed')}</span>
                 )}
               </div>
             </div>
@@ -275,7 +281,7 @@ export default function SetupScreen({
 
         {needsPairing && (
           <section className="section">
-            <h2 className="section-title">Dvojice</h2>
+            <h2 className="section-title">{t('setup.pairs')}</h2>
             <div className="game-list">
               {PAIRINGS.map((option, index) => (
                 <button
@@ -287,7 +293,7 @@ export default function SetupScreen({
                 >
                   <span className="pairing-line">
                     {(option[0] ?? []).map(displayName).join(' + ')}
-                    <span className="pairing-vs">vs</span>
+                    <span className="pairing-vs">{t('setup.versus')}</span>
                     {(option[1] ?? []).map(displayName).join(' + ')}
                   </span>
                 </button>
@@ -297,7 +303,7 @@ export default function SetupScreen({
         )}
 
         <section className="section">
-          <h2 className="section-title">Sázka</h2>
+          <h2 className="section-title">{t('setup.stake')}</h2>
           <div className="segmented">
             {CURRENCIES.map((code) => (
               <button
@@ -313,7 +319,7 @@ export default function SetupScreen({
           </div>
 
           <label className="field">
-            <span className="field-label">Hodnota bodu</span>
+            <span className="field-label">{t('setup.pointValue')}</span>
             <span className="field-input">
               <input
                 className="name-input value-input"
@@ -321,20 +327,17 @@ export default function SetupScreen({
                 inputMode="decimal"
                 value={pointValueText}
                 onChange={(e) => updatePointValue(e.target.value)}
-                aria-label="Hodnota jednoho bodu"
+                aria-label={t('setup.pointValueLabel')}
               />
               <span className="field-suffix">{CURRENCY_LABEL[settings.currency]}</span>
             </span>
           </label>
 
-          <p className="hint">
-            Na konci kola se rozdíl bodů přepočítá na peníze; prohrávající strana platí
-            vítězné.
-          </p>
+          <p className="hint">{t('setup.stakeHint')}</p>
         </section>
 
         <section className="section">
-          <h2 className="section-title">Počet jamek</h2>
+          <h2 className="section-title">{t('setup.holeCount')}</h2>
           <div className="segmented">
             {HOLE_OPTIONS.map((count) => (
               <button
@@ -348,33 +351,52 @@ export default function SetupScreen({
               </button>
             ))}
           </div>
-          <p className="hint">Par každé jamky nastavíš přímo při hře.</p>
+          <p className="hint">{t('setup.holeCountHint')}</p>
+        </section>
+
+        <section className="section">
+          <h2 className="section-title">{t('setup.language')}</h2>
+          <div className="segmented">
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`segment${code === locale ? ' selected' : ''}`}
+                onClick={() => setLocale(code)}
+                aria-pressed={code === locale}
+              >
+                {LOCALE_LABEL[code]}
+              </button>
+            ))}
+          </div>
         </section>
 
         <div className="link-row">
           <button type="button" className="link-button" onClick={onOpenArchive}>
-            Archiv odehraných kol{archiveCount > 0 ? ` (${archiveCount})` : ''}
+            {archiveCount > 0
+              ? t('setup.archiveWithCount', { count: archiveCount })
+              : t('setup.archive')}
           </button>
           <button type="button" className="link-button" onClick={onOpenBackup}>
-            Záloha dat
+            {t('setup.backup')}
           </button>
           {/* Odkaz je vidět vždycky. I když cloud není nastavený, uživatel se
               aspoň dozví proč - mlčky schovaná funkce se nedá diagnostikovat. */}
           <button type="button" className="link-button" onClick={onOpenAccount}>
-            {account ? 'Účet a synchronizace' : 'Přihlásit se a zálohovat'}
+            {account ? t('setup.account') : t('setup.signIn')}
           </button>
         </div>
       </main>
 
       <footer className="app-footer">
         <button type="button" className="primary-button" onClick={start}>
-          Začít kolo
+          {t('setup.start')}
         </button>
         <p className="version">
-          verze {APP_VERSION}
-          {status === 'synced' && ' · zálohováno'}
-          {status === 'syncing' && ' · synchronizuji'}
-          {status === 'offline' && ' · bez připojení'}
+          {t('common.version', { version: APP_VERSION })}
+          {status === 'synced' && ` · ${t('setup.syncedShort')}`}
+          {status === 'syncing' && ` · ${t('setup.syncingShort')}`}
+          {status === 'offline' && ` · ${t('setup.offlineShort')}`}
         </p>
       </footer>
     </div>

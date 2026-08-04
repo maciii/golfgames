@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.12.0] – 2026-08-04
+
+### Přidáno
+
+- **Angličtina vedle češtiny.** Jazyk se vybere podle prohlížeče (uložená
+  volba → jazyk prohlížeče → angličtina) a dá se přepnout na úvodní obrazovce.
+  Přeložené je všechno včetně názvů a pravidel her, extra bodů, výsledkových
+  tabulek, hlášek synchronizace i zásad zpracování údajů.
+- Podle jazyka se řídí i **formát částek, datum kola a řazení jmen hráčů**;
+  česká množná čísla mají správné tvary (1 jamka / 3 jamky / 5 jamek).
+
+### Změněno
+
+- Texty se přesunuly z komponent do `src/i18n/`. Český katalog je zdrojem
+  pravdy pro klíče, anglický je typovaný jako `Record<MessageKey, Message>` –
+  chybějící překlad tak neprojde překladem, místo aby v aplikaci zůstal česky.
+- `GameDefinition` a `BonusDefinition` už nenesou texty, jen `id`; překlady se
+  hledají pod `games.<id>.name`, `bonus.<id>.name` a podobně.
+- Startovní stránka a manifest PWA jsou jazykově neutrální – běží dřív, než se
+  aplikace načte, takže tam zvolený jazyk ještě není znám.
+
 ## [0.11.1] – 2026-08-04
 
 ### Opraveno

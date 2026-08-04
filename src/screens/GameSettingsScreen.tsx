@@ -4,6 +4,8 @@ import { BONUSES, RESULT_TIERS } from '../types'
 import { getGame } from '../games'
 import { loadGameOptions, saveGameOptions } from '../storage'
 import { APP_VERSION } from '../version'
+import { dynamicKey, useT } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 interface Props {
   gameId: string
@@ -17,6 +19,7 @@ interface Props {
  * nepřepisují hodnoty navzájem.
  */
 export default function GameSettingsScreen({ gameId, onBack }: Props) {
+  const t = useT()
   const game = getGame(gameId)
   const [options, setOptions] = useState<GameOptions>(() => loadGameOptions(gameId))
   /** Rozepsané hodnoty držíme jako text, ať jde políčko vymazat. */
@@ -66,24 +69,22 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>Bodování</h1>
-        <p className="subtitle">{game.name}</p>
+        <h1>{t('gameSettings.title')}</h1>
+        <p className="subtitle">{t(`games.${game.id}.name` as MessageKey)}</p>
       </header>
 
       <main className="content">
-        <p className="hint">
-          Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota
-          platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším
-          se extra bod nepočítá. Bonus vždy získává celá dvojice.
-        </p>
+        <p className="hint">{t('gameSettings.intro')}</p>
 
         <section className="section">
-          <h2 className="section-title">Extra body</h2>
+          <h2 className="section-title">{t('gameSettings.extraPoints')}</h2>
           {pointBonuses.map((bonus) => (
             <label key={bonus.id} className="field">
               <span className="field-label">
-                {bonus.name}
-                <span className="field-note">{bonus.description}</span>
+                {t(dynamicKey('bonus', bonus.id, 'name'))}
+                <span className="field-note">
+                  {t(dynamicKey('bonus', bonus.id, 'description'))}
+                </span>
               </span>
               <span className="field-input">
                 <input
@@ -92,25 +93,26 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                   inputMode="decimal"
                   value={texts[bonus.id] ?? '0'}
                   onChange={(e) => setValue(bonus.id, e.target.value)}
-                  aria-label={`Hodnota bonusu ${bonus.name}`}
+                  aria-label={t('gameSettings.bonusValue', {
+                    name: t(dynamicKey('bonus', bonus.id, 'name')),
+                  })}
                 />
-                <span className="field-suffix">b.</span>
+                <span className="field-suffix">{t('gameSettings.pointsSuffix')}</span>
               </span>
             </label>
           ))}
         </section>
 
         <section className="section">
-          <h2 className="section-title">Násobiče za výsledek</h2>
-          <p className="hint">
-            Kolikrát se hodnota extra bodu počítá, když hráč jamku zahraje pod par. Par
-            platí vždy jednou.
-          </p>
+          <h2 className="section-title">{t('gameSettings.multipliers')}</h2>
+          <p className="hint">{t('gameSettings.multipliersHint')}</p>
           {RESULT_TIERS.map((tier) => (
             <label key={tier.id} className="field">
               <span className="field-label">
-                {tier.name}
-                <span className="field-note">{tier.note}</span>
+                {t(dynamicKey('tier', tier.id, 'name'))}
+                <span className="field-note">
+                  {t(dynamicKey('tier', tier.id, 'note'))}
+                </span>
               </span>
               <span className="field-input">
                 <input
@@ -119,7 +121,9 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                   inputMode="decimal"
                   value={texts[`tier-${tier.id}`] ?? '1'}
                   onChange={(e) => setTier(tier.id, e.target.value)}
-                  aria-label={`Násobič za ${tier.name}`}
+                  aria-label={t('gameSettings.multiplierFor', {
+                    name: t(dynamicKey('tier', tier.id, 'name')),
+                  })}
                 />
                 <span className="field-suffix">×</span>
               </span>
@@ -128,7 +132,7 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
         </section>
 
         <section className="section">
-          <h2 className="section-title">Další volby</h2>
+          <h2 className="section-title">{t('gameSettings.otherOptions')}</h2>
           {multiplierBonuses.map((bonus) => (
             <label key={bonus.id} className="switch">
               <input
@@ -145,8 +149,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 }
               />
               <span>
-                {bonus.name}
-                <em> {bonus.description}</em>
+                {t(dynamicKey('bonus', bonus.id, 'name'))}
+                <em> {t(dynamicKey('bonus', bonus.id, 'description'))}</em>
               </span>
             </label>
           ))}
@@ -161,8 +165,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 }
               />
               <span>
-                9. a 18. jamka za dvojnásobek
-                <em> u devítijamkového kola jen poslední jamka</em>
+                {t('gameSettings.doubleClosing')}
+                <em> {t('gameSettings.doubleClosingNote')}</em>
               </span>
             </label>
           )}
@@ -174,8 +178,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               onChange={(e) => update({ ...options, noDoubleBonuses: e.target.checked })}
             />
             <span>
-              Nenásobit extra body
-              <em> dvojnásobná jamka ani „double“ nenásobí extra body</em>
+              {t('gameSettings.noDoubleBonuses')}
+              <em> {t('gameSettings.noDoubleBonusesNote')}</em>
             </span>
           </label>
 
@@ -186,8 +190,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               onChange={(e) => update({ ...options, confirmLongest: e.target.checked })}
             />
             <span>
-              Potvrzovat Longest
-              <em> při horším než par bod propadá soupeřům</em>
+              {t('gameSettings.confirmLongest')}
+              <em> {t('gameSettings.confirmNote')}</em>
             </span>
           </label>
 
@@ -198,18 +202,16 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               onChange={(e) => update({ ...options, confirmNearest: e.target.checked })}
             />
             <span>
-              Potvrzovat Nearest
-              <em> při horším než par bod propadá soupeřům</em>
+              {t('gameSettings.confirmNearest')}
+              <em> {t('gameSettings.confirmNote')}</em>
             </span>
           </label>
 
           {game.id === 'best-aggregate' && (
             <label className="field">
               <span className="field-label">
-                Double Best
-                <span className="field-note">
-                  Bod navíc, když oba partneři zahráli líp než oba soupeři.
-                </span>
+                {t('gameSettings.doubleBest')}
+                <span className="field-note">{t('gameSettings.doubleBestNote')}</span>
               </span>
               <span className="field-input">
                 <input
@@ -218,9 +220,9 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                   inputMode="decimal"
                   value={texts.doubleBest ?? '0'}
                   onChange={(e) => setValue('doubleBest', e.target.value)}
-                  aria-label="Hodnota Double Best"
+                  aria-label={t('gameSettings.doubleBestValue')}
                 />
-                <span className="field-suffix">b.</span>
+                <span className="field-suffix">{t('gameSettings.pointsSuffix')}</span>
               </span>
             </label>
           )}
@@ -229,9 +231,9 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
 
       <footer className="app-footer">
         <button type="button" className="primary-button" onClick={onBack}>
-          Hotovo
+          {t('common.done')}
         </button>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

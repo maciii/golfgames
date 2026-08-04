@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <!-- viewport-fit=cover + safe-area insety v CSS kvůli výřezu a home indikátoru -->
@@ -47,18 +47,23 @@
   </head>
   <body>
     <!-- React tenhle obsah při připojení přepíše; když se ale skript vůbec
-         nenačte, zůstane místo prázdné stránky aspoň vysvětlení. -->
+         nenačte, zůstane místo prázdné stránky aspoň vysvětlení.
+
+         Texty jsou dvojjazyčné: tahle část běží dřív, než se vůbec načte
+         aplikace, takže se tu nedá zjistit zvolený jazyk. -->
     <div id="root">
       <div class="boot">
         <p class="boot-title">Golf Games</p>
-        <p class="boot-note" id="boot-note">Načítám…</p>
+        <p class="boot-note" id="boot-note">Načítám… · Loading…</p>
       </div>
     </div>
     <script>
       setTimeout(function () {
         var note = document.getElementById('boot-note')
         if (note) {
-          note.textContent = 'Aplikaci se nepodařilo načíst. Zkus obnovit stránku.'
+          note.textContent =
+            'Aplikaci se nepodařilo načíst, zkus obnovit stránku. · ' +
+            'The app failed to load, please refresh the page.'
         }
       }, 6000)
     </script>

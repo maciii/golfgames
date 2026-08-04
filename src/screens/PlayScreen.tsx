@@ -21,6 +21,7 @@ import {
 } from '../types'
 import { getGame } from '../games'
 import BonusSheet from './BonusSheet'
+import { useT } from '../i18n'
 
 const PAR_OPTIONS = [3, 4, 5]
 
@@ -54,6 +55,7 @@ export default function PlayScreen({
   onShowResults,
   onOpenAccount,
 }: Props) {
+  const t = useT()
   // Na dotyku běží vždy jen jedno přidržení, takže stačí jeden ref pro celou
   // obrazovku.
   const longPress = useRef<{ timer: number | null; fired: boolean }>({
@@ -115,16 +117,14 @@ export default function PlayScreen({
       return
     }
 
-    const lines = ['Kolo není kompletní.', '']
+    const lines = [t('play.incompleteTitle'), '']
     if (conceded.length > 0) {
-      lines.push(
-        `Chybí zápis na jamkách ${formatHoleList(conceded)} – budou se počítat jako vzdané.`,
-      )
+      lines.push(t('play.incompleteConceded', { holes: formatHoleList(conceded) }))
     }
     if (unplayed.length > 0) {
-      lines.push(`Nehrané jamky ${formatHoleList(unplayed)} se do výsledku nezapočítají.`)
+      lines.push(t('play.incompleteUnplayed', { holes: formatHoleList(unplayed) }))
     }
-    lines.push('', 'Uložit kolo i tak?')
+    lines.push('', t('play.incompleteConfirm'))
 
     if (confirm(lines.join('\n'))) onFinish()
   }
@@ -171,15 +171,18 @@ export default function PlayScreen({
           </span>
           <span className="player-total">
             {played === 0
-              ? 'zatím bez zápisu'
-              : `${strokeTotal(round, player.id)} ran · ${formatToPar(toPar)}`}
+              ? t('play.noScore')
+              : t('play.total', {
+                  strokes: strokeTotal(round, player.id),
+                  toPar: formatToPar(toPar),
+                })}
           </span>
         </div>
         <button
           type="button"
           className={`bonus-button${bonuses.length > 0 ? ' active' : ''}`}
           onClick={() => setBonusFor(player)}
-          aria-label={`${player.name}: extra body`}
+          aria-label={t('play.bonusesFor', { name: player.name })}
         >
           {bonuses.length > 0 ? (bonusPoints > 0 ? bonusPoints : '•') : '★'}
         </button>
@@ -188,7 +191,7 @@ export default function PlayScreen({
             type="button"
             className="step-button"
             onClick={() => adjust(player.id, -1)}
-            aria-label={`${player.name}: ubrat ránu, z prázdné buňky birdie`}
+            aria-label={t('play.minus', { name: player.name })}
           >
             −
           </button>
@@ -201,7 +204,7 @@ export default function PlayScreen({
             onPointerLeave={cancelLongPress}
             onPointerCancel={cancelLongPress}
             onContextMenu={(e) => e.preventDefault()}
-            aria-label={`${player.name}: zapsat par, přidržením smazat zápis`}
+            aria-label={t('play.score', { name: player.name })}
           >
             {/* Stejná značka jako ve scorekartě, ať je barva výsledku
                 poznat už při zápisu. */}
@@ -215,7 +218,7 @@ export default function PlayScreen({
             type="button"
             className="step-button"
             onClick={() => adjust(player.id, 1)}
-            aria-label={`${player.name}: přidat ránu, z prázdné buňky bogey`}
+            aria-label={t('play.plus', { name: player.name })}
           >
             +
           </button>
@@ -232,20 +235,20 @@ export default function PlayScreen({
           className="nav-arrow"
           onClick={() => onGoToHole(hole - 1)}
           disabled={hole === 0}
-          aria-label="Předchozí jamka"
+          aria-label={t('play.previousHole')}
         >
           ‹
         </button>
         <div className="hole-title">
-          <span className="hole-number">Jamka {hole + 1}</span>
-          <span className="hole-of">z {round.holeCount}</span>
+          <span className="hole-number">{t('play.hole', { number: hole + 1 })}</span>
+          <span className="hole-of">{t('play.holeOf', { count: round.holeCount })}</span>
         </div>
         <button
           type="button"
           className="nav-arrow"
           onClick={() => onGoToHole(hole + 1)}
           disabled={isLastHole}
-          aria-label="Další jamka"
+          aria-label={t('play.nextHole')}
         >
           ›
         </button>
@@ -253,7 +256,7 @@ export default function PlayScreen({
 
       <main className="content">
         <div className="par-row">
-          <span className="par-label">Par</span>
+          <span className="par-label">{t('play.par')}</span>
           <div className="segmented compact">
             {PAR_OPTIONS.map((value) => (
               <button
@@ -312,23 +315,20 @@ export default function PlayScreen({
           <ul className="player-list">{round.players.map(renderPlayer)}</ul>
         )}
 
-        <p className="hint">
-          Klepnutím doprostřed zapíšeš par ({par}), tlačítkem − birdie a tlačítkem +
-          bogey. Přidržením čísla zápis smažeš.
-        </p>
+        <p className="hint">{t('play.hint', { par })}</p>
 
         <div className="link-row">
           <button type="button" className="link-button" onClick={onShowResults}>
-            Průběžné výsledky
+            {t('play.standings')}
           </button>
           {/* Kolo může skončit kdykoli - třeba když přijde bouřka. */}
           {!isLastHole && anyScore && (
             <button type="button" className="link-button" onClick={finish}>
-              Ukončit kolo
+              {t('play.finish')}
             </button>
           )}
           <button type="button" className="link-button" onClick={onOpenAccount}>
-            Účet a záloha
+            {t('play.account')}
           </button>
         </div>
       </main>
@@ -336,7 +336,7 @@ export default function PlayScreen({
       <footer className="app-footer">
         {isLastHole ? (
           <button type="button" className="primary-button" onClick={finish}>
-            Ukončit a uložit kolo
+            {t('play.finishAndSave')}
           </button>
         ) : (
           <button
@@ -344,7 +344,7 @@ export default function PlayScreen({
             className="primary-button"
             onClick={() => onGoToHole(hole + 1)}
           >
-            {holeDone ? 'Další jamka' : 'Přeskočit na další'}
+            {holeDone ? t('play.next') : t('play.skip')}
           </button>
         )}
       </footer>

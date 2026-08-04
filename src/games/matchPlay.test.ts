@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { matchPlay, matchState } from './matchPlay'
 import { makeRound } from './fixtures'
 
+import { beforeAll } from 'vitest'
+import { setActiveLocale } from '../i18n'
+
+// Tenhle test ověřuje konkrétní česká znění, takže si jazyk určuje sám -
+// jinak by závisel na jazyce prostředí, ve kterém běží.
+beforeAll(() => setActiveLocale('cs'))
+
 describe('Match play - souboj jednotlivců', () => {
   /**
    * jamka 1: Adam 4, Bára 5 -> Adam 1 nahoru

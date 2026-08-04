@@ -357,6 +357,33 @@ Postup nastavení DNS a Pages je v [`deployment.md`](deployment.md).
 
 ---
 
+## 21. Vlastní i18n místo knihovny
+
+**Rozhodnutí.** Češtinu a angličtinu drží `src/i18n/` - vlastních ~250 řádků
+místo `i18next` nebo podobné knihovny.
+
+**Proč.** Textů je pár stovek a potřebujeme z i18n jen dvě věci: dosazení
+proměnných a množná čísla. Pravidla množných čísel umí prohlížeč sám
+(`Intl.PluralRules`), takže knihovna by přinesla hlavně velikost a vlastní
+konfiguraci.
+
+**Co tím získáváme navíc.** Typovou pojistku: český katalog je zdrojem pravdy
+pro `MessageKey` a anglický je `Record<MessageKey, Message>`. Chybějící překlad
+je proto **chyba překladu**, ne text, který v aplikaci tiše zůstane česky. To
+běžná knihovna nenabízí.
+
+**Kde to nestačí.** Klíče skládané z id (`games.<id>.name`) TypeScript ověřit
+neumí - jejich existenci proto hlídá test, který projde všechny registrované
+hry, bonusy i kategorie výsledku.
+
+**Angličtina jako výchozí.** Aplikaci může otevřít kdokoli; čeština se zvolí,
+jen když ji má uživatel v prohlížeči. Uložená volba má vždy přednost.
+
+**Jazyk drží i modul, nejen React.** Formát částek, datum kola a řazení jmen
+hráčů se dějí mimo komponenty, takže by jinak zůstaly v jednom jazyce natvrdo.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
@@ -369,3 +396,7 @@ Věci, o kterých padlo rozhodnutí je odložit:
   synchronizace, kdyby jednou byla potřeba.
 - **Extra body v ostatních hrách.** Model je připravený, vyhodnocuje je zatím
   jen Best Aggregate.
+- **Další jazyky.** Přidání je jen nový katalog vedle `cs.ts` a `en.ts`; kód
+  se měnit nemusí. Zatím na ně není poptávka.
+- **Další měny.** Sázka umí Kč a €. S angličtinou by dávaly smysl i libry
+  a dolary - je to jen rozšíření `Currency` a výchozích hodnot.

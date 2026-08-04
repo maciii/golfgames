@@ -38,8 +38,10 @@ export default defineConfig({
       manifest: {
         name: 'Golf Games',
         short_name: 'Golf',
-        description: 'Zápis skóre po jamkách a vyhodnocení golfových her',
-        lang: 'cs',
+        // Manifest je statický, takže nese neutrální angličtinu; jazyk
+        // samotné aplikace se přepíná v jejím nastavení.
+        description: 'Hole by hole golf scoring for several game formats',
+        lang: 'en',
         start_url: base,
         scope: base,
         display: 'standalone',

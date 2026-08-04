@@ -63,12 +63,11 @@ export interface ScorecardColumn {
 }
 
 export interface GameDefinition {
+  /**
+   * Id je zároveň základ překladových klíčů: `games.<id>.name`,
+   * `games.<id>.tagline` a `games.<id>.rules` (viz src/i18n).
+   */
   id: string
-  name: string
-  /** Jednořádkový popis do výběru hry. */
-  tagline: string
-  /** Delší vysvětlení pravidel do nastavení kola. */
-  rules: string
   /** Povolené počty hráčů. */
   playerCounts: number[]
   /** Hraje se při daném počtu hráčů ve dvojicích? */

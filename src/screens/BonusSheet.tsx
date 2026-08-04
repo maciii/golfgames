@@ -1,5 +1,6 @@
 import type { BonusId, Round } from '../types'
 import { availableBonuses } from '../types'
+import { dynamicKey, useT } from '../i18n'
 
 interface Props {
   round: Round
@@ -25,6 +26,7 @@ export default function BonusSheet({
   onToggle,
   onClose,
 }: Props) {
+  const t = useT()
   // Longest a Nearest se nabízejí jen na svém paru a jdou první.
   const available = availableBonuses(round, hole)
   const options = round.settings.options
@@ -34,18 +36,14 @@ export default function BonusSheet({
       {/* Klepnutí uvnitř panelu nesmí panel zavřít. */}
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <header className="sheet-header">
-          <h2>Extra body</h2>
+          <h2>{t('bonus.sheetTitle')}</h2>
           <p className="subtitle">
-            {playerName} · jamka {hole + 1}
+            {t('bonus.sheetSubtitle', { name: playerName, hole: hole + 1 })}
           </p>
         </header>
 
         {available.length === 0 ? (
-          <p className="hint">
-            Pro tuhle jamku nejsou žádné extra body k dispozici. Zapneš je v nastavení hry
-            před začátkem kola; Longest je jen na pětiparových jamkách a Nearest na
-            tříparových.
-          </p>
+          <p className="hint">{t('bonus.none')}</p>
         ) : (
           <ul className="bonus-list">
             {available.map((bonus) => {
@@ -63,9 +61,11 @@ export default function BonusSheet({
                     <span className="bonus-text">
                       <span className="bonus-name">
                         {bonus.mark && <span className="bonus-mark">{bonus.mark}</span>}
-                        {bonus.name}
+                        {t(dynamicKey('bonus', bonus.id, 'name'))}
                       </span>
-                      <span className="bonus-desc">{bonus.description}</span>
+                      <span className="bonus-desc">
+                        {t(dynamicKey('bonus', bonus.id, 'description'))}
+                      </span>
                     </span>
                     <span className="bonus-value">
                       {bonus.kind === 'multiplier' ? '×2' : `+${value}`}
@@ -77,13 +77,10 @@ export default function BonusSheet({
           </ul>
         )}
 
-        <p className="hint">
-          Extra bod se počítá celé dvojici. Hodnota platí za par, lepší výsledek ji
-          znásobí podle nastavení hry; při bogey a horším se nepočítá.
-        </p>
+        <p className="hint">{t('bonus.footer')}</p>
 
         <button type="button" className="primary-button" onClick={onClose}>
-          Hotovo
+          {t('common.done')}
         </button>
       </div>
     </div>

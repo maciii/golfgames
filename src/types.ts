@@ -1,3 +1,5 @@
+import { localeTag, t } from './i18n'
+
 /**
  * Datový model jednoho kola a základní výpočty nad ním.
  *
@@ -38,8 +40,10 @@ export type BonusId =
 
 export interface BonusDefinition {
   id: BonusId
-  name: string
-  description: string
+  /**
+   * Název a popis se berou z překladů podle id - klíče `bonus.<id>.name`
+   * a `bonus.<id>.description` (viz src/i18n).
+   */
   /** points = přičte body, multiplier = násobí jamku. */
   kind: 'points' | 'multiplier'
   defaultValue: number
@@ -54,16 +58,12 @@ export interface BonusDefinition {
 export const BONUSES: BonusDefinition[] = [
   {
     id: 'double',
-    name: 'Double',
-    description: 'Zdvojnásobí výsledek celé jamky pro obě dvojice.',
     kind: 'multiplier',
     defaultValue: 1,
     mark: '×2',
   },
   {
     id: 'longest',
-    name: 'Longest',
-    description: 'Nejdelší odpal; jen na pětiparových jamkách, pro jednoho hráče.',
     kind: 'points',
     defaultValue: 1,
     onlyPar: 5,
@@ -72,8 +72,6 @@ export const BONUSES: BonusDefinition[] = [
   },
   {
     id: 'nearest',
-    name: 'Nearest',
-    description: 'Nejbližší rána k jamce; jen na tříparových, pro jednoho hráče.',
     kind: 'points',
     defaultValue: 1,
     onlyPar: 3,
@@ -82,36 +80,26 @@ export const BONUSES: BonusDefinition[] = [
   },
   {
     id: 'bunker',
-    name: 'Bunker (sandie)',
-    description: 'Rána z bunkeru a přesto dobrý výsledek.',
     kind: 'points',
     defaultValue: 1,
   },
   {
     id: 'doubleBunker',
-    name: 'Double bunker',
-    description: 'Dva bunkery na jedné jamce.',
     kind: 'points',
     defaultValue: 3,
   },
   {
     id: 'water',
-    name: 'Water',
-    description: 'Míč ve vodě a přesto dobrý výsledek.',
     kind: 'points',
     defaultValue: 1,
   },
   {
     id: 'barkie',
-    name: 'Barkie',
-    description: 'Trefa do stromu a přesto dobrý výsledek.',
     kind: 'points',
     defaultValue: 1,
   },
   {
     id: 'arnie',
-    name: 'Arnie',
-    description: 'Dobrý výsledek, aniž by míč byl na fairwayi.',
     kind: 'points',
     defaultValue: 1,
   },
@@ -124,11 +112,12 @@ export function getBonus(id: BonusId): BonusDefinition | undefined {
 /** Výsledky, které extra bod znásobují. Par je vždy jednonásobek. */
 export type ResultTier = 'birdie' | 'eagle' | 'albatross' | 'condor'
 
-export const RESULT_TIERS: { id: ResultTier; name: string; note: string }[] = [
-  { id: 'birdie', name: 'Birdie', note: 'jedna rána pod par' },
-  { id: 'eagle', name: 'Eagle', note: 'dvě rány pod par' },
-  { id: 'albatross', name: 'Albatros', note: 'tři rány pod par' },
-  { id: 'condor', name: 'Condor', note: 'čtyři a víc ran pod par' },
+/** Názvy a poznámky jsou v překladech pod `tier.<id>.name` a `.note`. */
+export const RESULT_TIERS: { id: ResultTier }[] = [
+  { id: 'birdie' },
+  { id: 'eagle' },
+  { id: 'albatross' },
+  { id: 'condor' },
 ]
 
 export const DEFAULT_RESULT_MULTIPLIERS: Record<ResultTier, number> = {
@@ -267,7 +256,7 @@ export function createRound({
 }: CreateRoundOptions): Round {
   const players: Player[] = playerNames.map((name, i) => ({
     id: `p${i + 1}`,
-    name: name.trim() || `Hráč ${i + 1}`,
+    name: name.trim() || t('common.player', { number: i + 1 }),
   }))
 
   const scores: Record<PlayerId, (number | null)[]> = {}
@@ -637,15 +626,18 @@ export function scoreCategory(score: number, par: number): ScoreCategory {
   return 'triple'
 }
 
-/** Popisky kategorií do legendy. */
-export const SCORE_CATEGORY_LABEL: Record<ScoreCategory, string> = {
-  eagle: 'Eagle a lepší',
-  birdie: 'Birdie',
-  par: 'Par',
-  bogey: 'Bogey',
-  double: 'Dvojbogey',
-  triple: 'Trojbogey a horší',
-}
+/**
+ * Kategorie do legendy. Popisky jsou v překladech pod `score.<kategorie>`;
+ * tenhle seznam drží jejich pořadí.
+ */
+export const SCORE_CATEGORIES: ScoreCategory[] = [
+  'eagle',
+  'birdie',
+  'par',
+  'bogey',
+  'double',
+  'triple',
+]
 
 /** Formátuje rozdíl vůči paru: -2 -> "-2", 0 -> "E", 3 -> "+3". */
 export function formatToPar(toPar: number): string {
@@ -655,7 +647,7 @@ export function formatToPar(toPar: number): string {
 
 /** Datum kola v českém formátu pro archiv. */
 export function formatRoundDate(round: Round): string {
-  return new Date(round.createdAt).toLocaleDateString('cs-CZ', {
+  return new Date(round.createdAt).toLocaleDateString(localeTag(), {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',

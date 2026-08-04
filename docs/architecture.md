@@ -40,6 +40,7 @@ Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
                  ┌───────────────▼────────────────────┐
    model         │ types.ts  (Round + výpočty)        │
                  │ money.ts  (přepočet na peníze)     │
+                 │ i18n/     (překlady, formátování)  │
                  └───────────────┬────────────────────┘
                                  │
                  ┌───────────────▼────────────────────┐
@@ -229,6 +230,30 @@ workerem.
 `updatedAt` (vyhrává novější), nic se nikdy nezahazuje. Podrobnosti včetně
 nastavení projektu jsou v [`sync.md`](sync.md).
 
+## Jazyky
+
+`src/i18n/` drží češtinu a angličtinu. Vlastní řešení místo knihovny - textů je
+pár stovek a potřebujeme z toho jen dosazení proměnných a množná čísla.
+
+| Soubor      | Role                                                                     |
+| ----------- | ------------------------------------------------------------------------ |
+| `cs.ts`     | **zdroj pravdy pro klíče** - typ `MessageKey` se odvozuje z něj          |
+| `en.ts`     | `Record<MessageKey, Message>`, takže chybějící překlad je chyba překladu |
+| `index.tsx` | kontext, `useT()`, detekce jazyka, `translate()`                         |
+| `plural.ts` | výběr tvaru přes `Intl.PluralRules` (čeština má 1 / 2–4 / 5+)            |
+
+Dvě věci, které se snadno přehlédnou:
+
+- **Jazyk drží i modul, nejen React** (`getLocale()`, `localeTag()`). Potřebují
+  ho funkce mimo komponenty - formát peněz, datum kola a řazení jmen hráčů.
+  `setActiveLocale()` je nastaví; volá ji provider a testy.
+- **Texty her a bonusů nejsou v kódu her.** `GameDefinition` má jen `id`
+  a překlady se hledají pod `games.<id>.name`, `bonus.<id>.name` a podobně.
+  Že takový klíč existuje, hlídá test - TypeScript to u skládaného klíče
+  neověří.
+
+Volba jazyka: uložená předvolba → jazyk prohlížeče → angličtina.
+
 ## Stav a navigace
 
 `App.tsx` drží tři věci: rozehrané kolo, archiv a jméno viditelné obrazovky
@@ -329,6 +354,8 @@ vidět hned.
   přidělení Longestu a Nearestu
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 - `src/sync/merge.test.ts` – slučování při synchronizaci (bez Firebase)
+- `src/sync/document.test.ts` – tvar dokumentu pro Firestore
+- `src/i18n/i18n.test.ts` – úplnost katalogů, množná čísla, dosazování
 
 Fixtura `makeRound({ gameId, players, pars, scores, settings })`
 (`src/games/fixtures.ts`) postaví kolo bez zbytečné ceremonie. Testy základních
@@ -350,5 +377,6 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | slučování při synchronizaci      | `src/sync/merge.ts`                     |
 | co a kdy se posílá do cloudu     | `src/sync/sync.ts`                      |
 | přihlášení Googlem               | `src/sync/auth.ts`                      |
+| texty aplikace                   | `src/i18n/cs.ts`, `src/i18n/en.ts`      |
 | ovládání zápisu skóre            | `src/screens/PlayScreen.tsx`            |
 | obsah nastavení bodování         | `src/screens/GameSettingsScreen.tsx`    |

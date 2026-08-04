@@ -2,6 +2,8 @@ import type { Round } from '../types'
 import { formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { APP_VERSION } from '../version'
+import { t as translate, useT } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 interface Props {
   rounds: Round[]
@@ -15,23 +17,29 @@ function winnerLine(round: Round): string {
   const sections = getGame(round.gameId).computeStandings(round)
   const rows = sections[0]?.rows ?? []
   const winners = rows.filter((r) => r.position === 1 && r.holesPlayed > 0)
-  if (winners.length === 0) return 'bez výsledku'
-  if (winners.length > 1) return `remíza: ${winners.map((w) => w.name).join(', ')}`
+  if (winners.length === 0) return translate('archive.noResult')
+  if (winners.length > 1) {
+    return translate('archive.draw', { names: winners.map((w) => w.name).join(', ') })
+  }
   const winner = winners[0]
-  return winner ? `${winner.name} · ${winner.valueLabel}` : 'bez výsledku'
+  return winner ? `${winner.name} · ${winner.valueLabel}` : translate('archive.noResult')
 }
 
 /** Rozsah kola; u předčasně ukončených kol je vidět, kam se došlo. */
 function playedHolesLabel(round: Round): string {
   const played = roundCompleteness(round).unplayed.length
   const done = round.holeCount - played
-  return played === 0 ? `${round.holeCount} jamek` : `${done} z ${round.holeCount} jamek`
+  return played === 0
+    ? translate('archive.holes', { count: round.holeCount })
+    : translate('archive.holesPartial', { done, total: round.holeCount })
 }
 
 /** Archiv odehraných kol - seznam s možností otevřít detail nebo smazat. */
 export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Props) {
+  const t = useT()
+
   function confirmDelete(round: Round) {
-    if (confirm(`Smazat kolo z ${formatRoundDate(round)} z archivu?`)) {
+    if (confirm(t('archive.deleteConfirm', { date: formatRoundDate(round) }))) {
       onDelete(round.id)
     }
   }
@@ -39,20 +47,17 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>Archiv</h1>
+        <h1>{t('archive.title')}</h1>
         <p className="subtitle">
           {rounds.length === 0
-            ? 'Zatím žádné odehrané kolo'
-            : `${rounds.length} odehraných kol`}
+            ? t('archive.empty')
+            : t('archive.count', { count: rounds.length })}
         </p>
       </header>
 
       <main className="content">
         {rounds.length === 0 ? (
-          <p className="hint">
-            Dohraná kola se sem ukládají sama, jakmile na poslední jamce klepneš na
-            „Ukončit a uložit kolo“.
-          </p>
+          <p className="hint">{t('archive.emptyHint')}</p>
         ) : (
           <ul className="archive-list">
             {rounds.map((round) => (
@@ -63,7 +68,9 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
                   onClick={() => onOpen(round.id)}
                 >
                   <span className="archive-top">
-                    <span className="archive-game">{getGame(round.gameId).name}</span>
+                    <span className="archive-game">
+                      {t(`games.${round.gameId}.name` as MessageKey)}
+                    </span>
                     <span className="archive-date">{formatRoundDate(round)}</span>
                   </span>
                   <span className="archive-winner">{winnerLine(round)}</span>
@@ -76,7 +83,9 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
                   type="button"
                   className="archive-delete"
                   onClick={() => confirmDelete(round)}
-                  aria-label={`Smazat kolo z ${formatRoundDate(round)}`}
+                  aria-label={t('archive.deleteLabel', {
+                    date: formatRoundDate(round),
+                  })}
                 >
                   ×
                 </button>
@@ -88,9 +97,9 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
 
       <footer className="app-footer">
         <button type="button" className="primary-button" onClick={onBack}>
-          Zpět
+          {t('common.back')}
         </button>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

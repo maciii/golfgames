@@ -3,27 +3,29 @@ import { useAccount } from '../sync/AccountContext'
 import { missingConfigKeys } from '../sync/firebase'
 import type { SignInError, SyncStatus } from '../sync/AccountContext'
 import { APP_VERSION } from '../version'
+import { useT } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 interface Props {
   onOpenPrivacy: () => void
   onBack: () => void
 }
 
-const STATUS_TEXT: Record<SyncStatus, string> = {
-  disabled: 'Synchronizace není v téhle verzi dostupná.',
-  anonymous: 'Nepřihlášeno – data jsou jen v tomhle zařízení.',
-  syncing: 'Synchronizuji…',
-  synced: 'Data jsou zálohovaná.',
-  offline: 'Bez připojení. Změny se pošlou, až bude signál.',
-  error: 'Synchronizace se nepovedla. Zkusím to znovu při dalším spuštění.',
+const STATUS_TEXT: Record<SyncStatus, MessageKey> = {
+  disabled: 'sync.disabled',
+  anonymous: 'sync.anonymous',
+  syncing: 'sync.syncing',
+  synced: 'sync.synced',
+  offline: 'sync.offline',
+  error: 'sync.error',
 }
 
-const SIGN_IN_ERROR: Record<SignInError, string> = {
-  cancelled: '',
-  network: 'Přihlášení se nepovedlo kvůli připojení. Zkus to prosím znovu.',
-  unavailable: 'Přihlášení se nepovedlo. Zkus to prosím znovu.',
-  notReady: 'Přihlášení se ještě připravuje, zkus to prosím za okamžik.',
-  unknown: 'Něco se pokazilo. Zkus to prosím znovu.',
+/** Zrušené přihlášení uživatel udělal sám, tomu se nic nehlásí. */
+const SIGN_IN_ERROR: Record<Exclude<SignInError, 'cancelled'>, MessageKey> = {
+  network: 'signIn.network',
+  unavailable: 'signIn.unavailable',
+  notReady: 'signIn.notReady',
+  unknown: 'signIn.unknown',
 }
 
 /**
@@ -34,6 +36,7 @@ const SIGN_IN_ERROR: Record<SignInError, string> = {
  * uživateli nic nevyčítala.
  */
 export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
+  const t = useT()
   const {
     status,
     account,
@@ -64,13 +67,7 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
   }
 
   function confirmDelete() {
-    if (
-      !confirm(
-        'Smazat účet a všechna data v cloudu?\n\n' +
-          'Kola uložená v tomhle telefonu zůstanou. Přijdeš o zálohu a o přístup ' +
-          'z jiných zařízení. Akce je nevratná.',
-      )
-    ) {
+    if (!confirm(t('account.deleteConfirm'))) {
       return
     }
     void run(deleteEverything)
@@ -79,22 +76,16 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>Účet</h1>
-        <p className="subtitle">Záloha do cloudu</p>
+        <h1>{t('account.title')}</h1>
+        <p className="subtitle">{t('account.subtitle')}</p>
       </header>
 
       <main className="content">
         {status === 'disabled' ? (
           <section className="section">
-            <p className="notice error">
-              Tahle verze aplikace nemá nastavené připojení k cloudu, takže se nejde
-              přihlásit. Data si zatím zálohuj přes obrazovku „Záloha dat“.
-            </p>
-            <h2 className="section-title">Co chybí</h2>
-            <p className="hint">
-              Buildu se nedostaly tyhle údaje – doplň je v repozitáři jako GitHub Secrets
-              (Settings → Secrets and variables → Actions) a spusť nasazení znovu:
-            </p>
+            <p className="notice error">{t('account.disabledNotice')}</p>
+            <h2 className="section-title">{t('account.missingTitle')}</h2>
+            <p className="hint">{t('account.missingHint')}</p>
             <ul className="bullet-list">
               {missingConfigKeys().map((key) => (
                 <li key={key}>
@@ -102,21 +93,18 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
                 </li>
               ))}
             </ul>
-            <p className="hint">
-              Postup je popsaný v <code>docs/sync.md</code>. Verze aplikace je{' '}
-              {APP_VERSION} – zkontroluj, že je to ta nasazená.
-            </p>
+            <p className="hint">{t('account.missingFooter', { version: APP_VERSION })}</p>
           </section>
         ) : account ? (
           <>
             <section className="section">
-              <h2 className="section-title">Přihlášen</h2>
+              <h2 className="section-title">{t('account.signedIn')}</h2>
               <p className="account-name">{account.name}</p>
               {account.email && <p className="hint">{account.email}</p>}
               <p className={`notice${status === 'error' ? ' error' : ''}`}>
-                {STATUS_TEXT[status]}
+                {t(STATUS_TEXT[status])}
                 {lastSyncAt && status === 'synced' && (
-                  <> Naposledy {lastSyncAt.toLocaleTimeString('cs-CZ')}.</>
+                  <> {t('account.lastSync', { time: lastSyncAt.toLocaleTimeString() })}</>
                 )}
               </p>
               {status === 'error' && syncError && (
@@ -128,49 +116,39 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
                 disabled={busy || status === 'syncing'}
                 onClick={() => void run(syncNow)}
               >
-                Synchronizovat teď
+                {t('account.syncNow')}
               </button>
             </section>
 
             <section className="section">
-              <h2 className="section-title">Odhlášení</h2>
-              <p className="hint">
-                Po odhlášení zůstanou kola v tomhle zařízení a přestanou se zálohovat.
-                Data v cloudu se nemažou – po přihlášení se zase objeví.
-              </p>
+              <h2 className="section-title">{t('account.signOutTitle')}</h2>
+              <p className="hint">{t('account.signOutHint')}</p>
               <button
                 type="button"
                 className="secondary-button"
                 disabled={busy}
                 onClick={() => void run(signOut)}
               >
-                Odhlásit se
+                {t('account.signOut')}
               </button>
             </section>
 
             <section className="section">
-              <h2 className="section-title">Smazání účtu</h2>
-              <p className="hint">
-                Smaže účet i všechna data v cloudu. Kola v tomhle telefonu zůstanou –
-                pokud si je chceš odnést, udělej si nejdřív zálohu do souboru.
-              </p>
+              <h2 className="section-title">{t('account.deleteTitle')}</h2>
+              <p className="hint">{t('account.deleteHint')}</p>
               <button
                 type="button"
                 className="danger-button"
                 disabled={busy}
                 onClick={confirmDelete}
               >
-                Smazat účet a data v cloudu
+                {t('account.delete')}
               </button>
             </section>
           </>
         ) : (
           <>
-            <p className="hint">
-              Bez přihlášení jsou kola uložená jen v tomhle zařízení. Přihlášením účtem
-              Google se začnou zálohovat a dostaneš se k nim odkudkoli – z telefonu,
-              tabletu i počítače.
-            </p>
+            <p className="hint">{t('account.intro')}</p>
 
             <section className="section">
               <button
@@ -180,29 +158,22 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
                 onClick={() => void run(signIn)}
               >
                 {status === 'syncing'
-                  ? 'Přihlašuji…'
+                  ? t('account.signingIn')
                   : authReady
-                    ? 'Přihlásit se účtem Google'
-                    : 'Připravuji přihlášení…'}
+                    ? t('account.signIn')
+                    : t('account.preparing')}
               </button>
-              {signInError && (
-                <p className="notice error">{SIGN_IN_ERROR[signInError]}</p>
+              {signInError && signInError !== 'cancelled' && (
+                <p className="notice error">{t(SIGN_IN_ERROR[signInError])}</p>
               )}
-              <p className="hint">
-                Nic se nemusí – aplikace funguje bez přihlášení úplně stejně. Zálohu do
-                souboru najdeš na obrazovce „Záloha dat“.
-              </p>
+              <p className="hint">{t('account.optional')}</p>
             </section>
 
             <section className="section">
-              <h2 className="section-title">Co se ukládá</h2>
-              <p className="hint">
-                Odehraná kola, seznam spoluhráčů a nastavení bodování. Z účtu Google jen
-                e-mail a jméno, aby šlo data přiřadit. Nic dalšího se nesbírá a nikomu se
-                nepředává.
-              </p>
+              <h2 className="section-title">{t('account.storedTitle')}</h2>
+              <p className="hint">{t('account.storedHint')}</p>
               <button type="button" className="link-button" onClick={onOpenPrivacy}>
-                Zásady zpracování údajů
+                {t('account.privacy')}
               </button>
             </section>
           </>
@@ -211,9 +182,9 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
 
       <footer className="app-footer">
         <button type="button" className="primary-button" onClick={onBack} disabled={busy}>
-          Zpět
+          {t('common.back')}
         </button>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

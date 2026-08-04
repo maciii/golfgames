@@ -4,6 +4,8 @@ import { getGame } from '../games'
 import { formatMoney, settleRound } from '../money'
 import { APP_VERSION } from '../version'
 import Scorecard from './Scorecard'
+import { dynamicKey, useT } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 interface Props {
   round: Round
@@ -27,6 +29,7 @@ export default function ResultsScreen({
   onOpenArchive,
   onBack,
 }: Props) {
+  const t = useT()
   const game = getGame(round.gameId)
   const sections = game.computeStandings(round)
   const finished = Boolean(round.finishedAt)
@@ -47,21 +50,23 @@ export default function ResultsScreen({
    * vidět, podle čeho se body počítaly, i když se předvolby mezitím změnily.
    */
   const configuration = [
-    round.settings.options.doubleClosingHoles ? '9. a 18. jamka dvojnásobně' : null,
+    round.settings.options.doubleClosingHoles ? t('results.configDoubleClosing') : null,
     round.settings.options.doubleBest > 0
-      ? `Double Best ${round.settings.options.doubleBest} b.`
+      ? t('results.configDoubleBest', { count: round.settings.options.doubleBest })
       : null,
     ...BONUSES.filter((b) => (round.settings.options.bonusValues[b.id] ?? 0) > 0).map(
-      (b) =>
-        b.kind === 'multiplier'
-          ? b.name
-          : `${b.name} ${round.settings.options.bonusValues[b.id]} b.`,
+      (b) => {
+        const name = t(dynamicKey('bonus', b.id, 'name'))
+        if (b.kind === 'multiplier') return name
+        const value = round.settings.options.bonusValues[b.id] ?? 0
+        return `${name} ${t('common.points', { count: value })}`
+      },
     ),
-    round.settings.options.noDoubleBonuses ? 'extra body se nedoublují' : null,
+    round.settings.options.noDoubleBonuses ? t('results.configNoDoubleBonuses') : null,
   ].filter(Boolean)
 
   function newRound() {
-    if (finished || confirm('Rozehrané kolo se smaže. Opravdu chceš začít nové?')) {
+    if (finished || confirm(t('results.discardConfirm'))) {
       onNewRound?.()
     }
   }
@@ -70,10 +75,14 @@ export default function ResultsScreen({
     <div className="screen">
       <header className="app-header">
         <h1>
-          {readOnly ? 'Archivní kolo' : finished ? 'Výsledky' : 'Průběžné výsledky'}
+          {readOnly
+            ? t('results.archived')
+            : finished
+              ? t('results.final')
+              : t('results.live')}
         </h1>
         <p className="subtitle">
-          {game.name} · {formatRoundDate(round)}
+          {t(`games.${game.id}.name` as MessageKey)} · {formatRoundDate(round)}
         </p>
       </header>
 
@@ -107,30 +116,25 @@ export default function ResultsScreen({
           </section>
         ))}
 
-        {!finished && !readOnly && (
-          <p className="hint">Počítají se jen jamky, které už mají zápis.</p>
-        )}
+        {!finished && !readOnly && <p className="hint">{t('results.onlyPlayed')}</p>}
 
         {finished && !completeness.complete && (
           <p className="hint">
             {completeness.conceded.length > 0 && (
               <>
-                Vzdané jamky: {formatHoleList(completeness.conceded)} – dvojice na nich
-                přišla o součet.{' '}
+                {t('results.conceded', {
+                  holes: formatHoleList(completeness.conceded),
+                })}{' '}
               </>
             )}
-            {completeness.unplayed.length > 0 && (
-              <>
-                Kolo skončilo dřív, jamky {formatHoleList(completeness.unplayed)} se
-                nehrály.
-              </>
-            )}
+            {completeness.unplayed.length > 0 &&
+              t('results.unplayed', { holes: formatHoleList(completeness.unplayed) })}
           </p>
         )}
 
         {settlement.kind !== 'none' && (
           <section className="section">
-            <h2 className="section-title">Vyrovnání</h2>
+            <h2 className="section-title">{t('results.settlement')}</h2>
 
             {settlement.kind === 'transfers' ? (
               <ul className="settlement">
@@ -169,12 +173,16 @@ export default function ResultsScreen({
               {settlement.kind === 'balances' && (
                 <>
                   {' '}
-                  Bod je {formatMoney(round.settings.pointValue, round.settings.currency)}
-                  .
+                  {t('results.pointWorth', {
+                    money: formatMoney(
+                      round.settings.pointValue,
+                      round.settings.currency,
+                    ),
+                  })}
                 </>
               )}
               {round.settings.options.doubleClosingHoles &&
-                ' 9. a 18. jamka byla za dvojnásobek.'}
+                ` ${t('results.doubleClosingNote')}`}
             </p>
           </section>
         )}
@@ -183,7 +191,7 @@ export default function ResultsScreen({
 
         {configuration.length > 0 && (
           <section className="section">
-            <h2 className="section-title">Bodování kola</h2>
+            <h2 className="section-title">{t('results.configuration')}</h2>
             <p className="hint">{configuration.join(' · ')}</p>
           </section>
         )}
@@ -194,12 +202,12 @@ export default function ResultsScreen({
           <div className="link-row">
             {onOpenArchive && (
               <button type="button" className="link-button" onClick={onOpenArchive}>
-                Archiv odehraných kol
+                {t('setup.archive')}
               </button>
             )}
             {onOpenAccount && (
               <button type="button" className="link-button" onClick={onOpenAccount}>
-                Účet a záloha
+                {t('play.account')}
               </button>
             )}
           </div>
@@ -210,7 +218,7 @@ export default function ResultsScreen({
         <div className="footer-row">
           {readOnly ? (
             <button type="button" className="primary-button" onClick={onBack}>
-              Zpět do archivu
+              {t('results.backToArchive')}
             </button>
           ) : (
             <>
@@ -219,15 +227,15 @@ export default function ResultsScreen({
                 className={finished ? 'secondary-button' : 'primary-button'}
                 onClick={onResume}
               >
-                {finished ? 'Upravit skóre' : 'Zpět do hry'}
+                {finished ? t('results.editScores') : t('results.backToPlay')}
               </button>
               <button type="button" className="secondary-button" onClick={newRound}>
-                Nové kolo
+                {t('results.newRound')}
               </button>
             </>
           )}
         </div>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

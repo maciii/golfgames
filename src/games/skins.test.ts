@@ -3,6 +3,13 @@ import { carryInto, skinResults, skins } from './skins'
 import { DEFAULT_GAME_OPTIONS } from '../types'
 import { makeRound } from './fixtures'
 
+import { beforeAll } from 'vitest'
+import { setActiveLocale } from '../i18n'
+
+// Tenhle test ověřuje konkrétní česká znění, takže si jazyk určuje sám -
+// jinak by závisel na jazyce prostředí, ve kterém běží.
+beforeAll(() => setActiveLocale('cs'))
+
 /**
  * jamka 1: 4 / 4 / 5 -> shoda na nejnižším skóre, skin se přenáší
  * jamka 2: 3 / 5 / 5 -> Adam bere jamku i přenesený skin (2 skiny)

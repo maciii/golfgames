@@ -4,6 +4,13 @@ import type { RoundSettings } from './types'
 import { DEFAULT_SETTINGS } from './types'
 import { makeRound } from './games/fixtures'
 
+import { beforeAll } from 'vitest'
+import { setActiveLocale } from './i18n'
+
+// Tenhle test ověřuje konkrétní česká znění, takže si jazyk určuje sám -
+// jinak by závisel na jazyce prostředí, ve kterém běží.
+beforeAll(() => setActiveLocale('cs'))
+
 const CZK: RoundSettings = { ...DEFAULT_SETTINGS, pointValue: 10 }
 
 /** Kolo dvou dvojic; skóre není podstatné, body dodáváme přímo. */

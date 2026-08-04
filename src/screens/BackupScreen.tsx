@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import type { ImportMode, ImportSummary } from '../backup'
 import { applyBackup, backupFileName, createBackup, parseBackup } from '../backup'
 import { APP_VERSION } from '../version'
+import { useT } from '../i18n'
+import type { MessageKey } from '../i18n'
 
 interface Props {
   /** Zavolá se po úspěšném importu, ať aplikace načte nový stav z úložiště. */
@@ -10,9 +12,9 @@ interface Props {
 }
 
 /** Hlášky k důvodům, proč soubor nešel načíst. */
-const PARSE_ERROR: Record<'invalid' | 'tooNew', string> = {
-  invalid: 'Tenhle soubor není záloha Golf Games, nebo je poškozený.',
-  tooNew: 'Záloha pochází z novější verze aplikace. Aktualizuj aplikaci a zkus to znovu.',
+const PARSE_ERROR: Record<'invalid' | 'tooNew', MessageKey> = {
+  invalid: 'backup.errorInvalid',
+  tooNew: 'backup.errorTooNew',
 }
 
 /**
@@ -22,6 +24,7 @@ const PARSE_ERROR: Record<'invalid' | 'tooNew', string> = {
  * ven - před výměnou zařízení nebo prostě pro klid.
  */
 export default function BackupScreen({ onImported, onBack }: Props) {
+  const t = useT()
   const fileInput = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -39,13 +42,13 @@ export default function BackupScreen({ onImported, onBack }: Props) {
     link.click()
     // Bez uvolnění by objekt držel data v paměti až do zavření karty.
     URL.revokeObjectURL(url)
-    setMessage('Záloha se stáhla.')
+    setMessage(t('backup.downloaded'))
   }
 
   function summaryText(summary: ImportSummary): string {
-    const parts = [`V archivu je ${summary.archive} kol`]
-    if (summary.added > 0) parts.push(`z toho ${summary.added} nových`)
-    if (summary.currentRoundReplaced) parts.push('obnovilo se i rozehrané kolo')
+    const parts = [t('backup.summary', { count: summary.archive })]
+    if (summary.added > 0) parts.push(t('backup.summaryAdded', { count: summary.added }))
+    if (summary.currentRoundReplaced) parts.push(t('backup.summaryCurrent'))
     return `${parts.join(', ')}.`
   }
 
@@ -55,15 +58,18 @@ export default function BackupScreen({ onImported, onBack }: Props) {
 
     const result = parseBackup(await file.text())
     if (!result.ok) {
-      setError(PARSE_ERROR[result.reason])
+      setError(t(PARSE_ERROR[result.reason]))
       return
     }
 
-    const rounds = result.backup.data.archive.length
+    const params = {
+      date: result.backup.exportedAt.slice(0, 10),
+      count: result.backup.data.archive.length,
+    }
     const question =
       mode === 'replace'
-        ? `Nahradit všechna data zálohou z ${result.backup.exportedAt.slice(0, 10)}? Současná kola se smažou. Záloha obsahuje ${rounds} kol.`
-        : `Sloučit zálohu z ${result.backup.exportedAt.slice(0, 10)} se současnými daty? Nic se nesmaže, záloha obsahuje ${rounds} kol.`
+        ? t('backup.replaceConfirm', params)
+        : t('backup.mergeConfirm', params)
     if (!confirm(question)) return
 
     setMessage(summaryText(applyBackup(result.backup, mode)))
@@ -73,30 +79,23 @@ export default function BackupScreen({ onImported, onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>Záloha dat</h1>
-        <p className="subtitle">Export a obnova</p>
+        <h1>{t('backup.title')}</h1>
+        <p className="subtitle">{t('backup.subtitle')}</p>
       </header>
 
       <main className="content">
-        <p className="hint">
-          Kola, hráči i nastavení jsou uložená jen v tomhle zařízení. Zálohou si je
-          odneseš do souboru – před výměnou telefonu nebo jen pro jistotu.
-        </p>
+        <p className="hint">{t('backup.intro')}</p>
 
         <section className="section">
-          <h2 className="section-title">Zálohovat</h2>
+          <h2 className="section-title">{t('backup.exportTitle')}</h2>
           <button type="button" className="primary-button" onClick={download}>
-            Stáhnout zálohu
+            {t('backup.download')}
           </button>
-          <p className="hint">
-            Uloží se jeden soubor JSON se vším: rozehrané kolo, archiv, seznam hráčů i
-            nastavení bodování. Na iPhonu se soubor nabídne přes sdílení – ulož ho třeba
-            do Souborů nebo si ho pošli e-mailem.
-          </p>
+          <p className="hint">{t('backup.downloadHint')}</p>
         </section>
 
         <section className="section">
-          <h2 className="section-title">Obnovit ze zálohy</h2>
+          <h2 className="section-title">{t('backup.importTitle')}</h2>
 
           <div className="segmented">
             <button
@@ -105,7 +104,7 @@ export default function BackupScreen({ onImported, onBack }: Props) {
               onClick={() => setMode('merge')}
               aria-pressed={mode === 'merge'}
             >
-              Sloučit
+              {t('backup.merge')}
             </button>
             <button
               type="button"
@@ -113,14 +112,12 @@ export default function BackupScreen({ onImported, onBack }: Props) {
               onClick={() => setMode('replace')}
               aria-pressed={mode === 'replace'}
             >
-              Nahradit vše
+              {t('backup.replace')}
             </button>
           </div>
 
           <p className="hint">
-            {mode === 'merge'
-              ? 'Kola ze zálohy se přidají k těm současným a nic se nesmaže. Rozehrané kolo zůstane to současné.'
-              : 'Všechna současná data se zahodí a nahradí obsahem zálohy. Hodí se na novém zařízení.'}
+            {mode === 'merge' ? t('backup.mergeHint') : t('backup.replaceHint')}
           </p>
 
           <button
@@ -128,7 +125,7 @@ export default function BackupScreen({ onImported, onBack }: Props) {
             className="secondary-button"
             onClick={() => fileInput.current?.click()}
           >
-            Vybrat soubor se zálohou
+            {t('backup.choose')}
           </button>
           <input
             ref={fileInput}
@@ -150,9 +147,9 @@ export default function BackupScreen({ onImported, onBack }: Props) {
 
       <footer className="app-footer">
         <button type="button" className="primary-button" onClick={onBack}>
-          Zpět
+          {t('common.back')}
         </button>
-        <p className="version">verze {APP_VERSION}</p>
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )
