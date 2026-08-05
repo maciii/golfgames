@@ -1,4 +1,4 @@
-import type { BonusId, Round } from '../types'
+import type { BonusId, PlayerId, Round } from '../types'
 
 /**
  * Společné rozhraní všech her.
@@ -42,6 +42,36 @@ export interface HoleSummary {
   winner?: boolean
   /** highlight zvýrazní hodnotu, která na jamce vyhrála. */
   entries: { label: string; value: string; highlight?: boolean }[]
+}
+
+/** Jedna volba při přípravě aktuální jamky před zápisem skóre. */
+export interface HoleSetupOption {
+  id: string
+  label: string
+}
+
+/** Hráč a jeho aktuálně zvolená volba přípravy jamky. */
+export interface HoleSetupEntry {
+  playerId: PlayerId
+  name: string
+  selectedOptionId?: string
+}
+
+/** Přehled skupiny vzniklé z voleb hráčů. */
+export interface HoleSetupGroup {
+  optionId: string
+  label: string
+  playerNames: string[]
+}
+
+/** Obecný model přípravy jamky; konkrétní pravidla zůstávají ve hře. */
+export interface HoleSetup {
+  title: string
+  message: string
+  options: HoleSetupOption[]
+  entries: HoleSetupEntry[]
+  groups: HoleSetupGroup[]
+  complete: boolean
 }
 
 /**
@@ -129,6 +159,8 @@ export interface GameDefinition {
    */
   supportsDoubleHoles: boolean
   computeStandings(round: Round): StandingsSection[]
+  holeSetup?(round: Round, hole: number): HoleSetup
+  setHoleSetup?(round: Round, hole: number, playerId: PlayerId, optionId: string): Round
   holeSummary?(round: Round, hole: number): HoleSummary[]
   headerSummary?(round: Round, hole: number): HeaderSummary
   scorecardPlayerCell?(round: Round, playerId: string, hole: number): ScorecardPlayerCell

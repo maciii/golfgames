@@ -108,6 +108,7 @@ export function normalizeRound(round: Round): Round {
     // (u nedohraných založení) je nejlepší dostupný odhad.
     updatedAt: round.updatedAt ?? round.finishedAt ?? round.createdAt,
     teams: Array.isArray(round.teams) ? round.teams : [],
+    holePairings: round.holePairings ?? {},
     bonuses: round.bonuses ?? {},
     settings: {
       ...settings,

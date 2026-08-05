@@ -735,6 +735,81 @@ button {
   color: var(--text-dim);
 }
 
+.hole-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.hole-setup-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hole-setup-heading .section-title,
+.hole-setup-heading .hint {
+  margin: 0;
+}
+
+.hole-setup-heading .hint {
+  text-align: right;
+}
+
+.hole-setup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hole-setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hole-setup-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.hole-setup-options {
+  flex: 0 0 170px;
+}
+
+.hole-setup-options .segment {
+  min-height: 40px;
+}
+
+.hole-setup-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.hole-setup-group {
+  display: flex;
+  gap: 5px;
+}
+
+.hole-setup-group strong {
+  color: var(--text);
+}
+
 /* --- zápis skóre -------------------------------------------------------- */
 
 .team-block {
@@ -1040,6 +1115,27 @@ button {
 }
 
 @media (max-width: 480px) {
+  .hole-setup-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hole-setup-heading .hint {
+    text-align: left;
+  }
+
+  .hole-setup-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hole-setup-options {
+    flex-basis: auto;
+    width: 100%;
+  }
+
   .field {
     flex-direction: column;
     align-items: stretch;

@@ -3,6 +3,7 @@ import { bestAggregate } from './bestAggregate'
 import { skins } from './skins'
 import { matchPlay } from './matchPlay'
 import { stableford } from './stableford'
+import { leftRight } from './leftRight'
 
 /**
  * Registr her.
@@ -13,7 +14,13 @@ import { stableford } from './stableford'
  *
  * Pravidla jsou popsaná v docs/games.md.
  */
-export const GAMES: GameDefinition[] = [bestAggregate, skins, matchPlay, stableford]
+export const GAMES: GameDefinition[] = [
+  bestAggregate,
+  leftRight,
+  skins,
+  matchPlay,
+  stableford,
+]
 
 export const DEFAULT_GAME_ID = bestAggregate.id
 
@@ -26,6 +33,7 @@ export type {
   GameDefinition,
   GameScoringOptions,
   HeaderSummary,
+  HoleSetup,
   HoleSummary,
   ScorecardColumn,
   ScorecardPlayerCell,

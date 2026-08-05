@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.28.0] – 2026-08-05
+
+### Přidáno
+
+- **Levá-Pravá.** Nová hra pro čtyři hráče používá pravidla Best Aggregate,
+  ale dvojice se určují z prvních ran na každé jamce zvlášť. Body se připisují
+  oběma členům aktuální dvojice a ve výsledcích se vedou jednotlivě.
+- **Setup jamky před zápisem.** Herní pravidla mohou dodat obecný výběr, který
+  musí být hotový před zadáním skóre; Levá-Pravá ho používá pro volbu levé a
+  pravé strany.
+
 ## [0.27.0] – 2026-08-05
 
 ### Přidáno

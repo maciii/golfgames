@@ -1,0 +1,224 @@
+import { beforeAll, describe, expect, it } from 'vitest'
+import { setActiveLocale } from '../i18n'
+import { DEFAULT_GAME_OPTIONS } from '../types'
+import { makeRound } from './fixtures'
+import {
+  isPairingComplete,
+  leftRight,
+  setHoleSide,
+  teamsForHole,
+  totalPlayerPoints,
+} from './leftRight'
+
+beforeAll(() => setActiveLocale('cs'))
+
+const BASE_OPTIONS = {
+  ...DEFAULT_GAME_OPTIONS,
+  doubleBest: 0,
+  doubleClosingHoles: false,
+}
+
+type Assignment = readonly [string, 'left' | 'right']
+
+function roundWithPairings(
+  scores: (number | null)[][],
+  assignments: readonly Assignment[][],
+  pars = [4],
+) {
+  let round = makeRound({
+    gameId: 'left-right',
+    players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+    pars,
+    scores: Array.from({ length: 4 }, () => Array<number | null>(pars.length).fill(null)),
+    settings: { options: BASE_OPTIONS },
+  })
+
+  for (const [hole, players] of assignments.entries()) {
+    if (hole >= pars.length) break
+    for (const [playerId, side] of players) {
+      round = setHoleSide(round, hole, playerId, side)
+    }
+  }
+  scores.forEach((playerScores, index) => {
+    round.scores[`p${index + 1}`] = [...playerScores]
+  })
+  return round
+}
+
+function pairedRound(scores: (number | null)[][], pars = [4]) {
+  return roundWithPairings(
+    scores,
+    pars.map(
+      () =>
+        [
+          ['p1', 'left'],
+          ['p2', 'left'],
+          ['p3', 'right'],
+          ['p4', 'right'],
+        ] as const,
+    ),
+    pars,
+  )
+}
+
+describe('Levá-Pravá - příprava jamky', () => {
+  it('vyžaduje čtyři hráče a dvě dvojice na každé jamce', () => {
+    expect(leftRight.playerCounts).toEqual([4])
+    expect(leftRight.usesTeams(4)).toBe(false)
+
+    const round = makeRound({
+      gameId: 'left-right',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      pars: [4],
+      scores: [[null], [null], [null], [null]],
+    })
+
+    expect(isPairingComplete(round, 0)).toBe(false)
+    expect(teamsForHole(round, 0)).toEqual([])
+    expect(leftRight.holeSetup?.(round, 0).complete).toBe(false)
+  })
+
+  it('uloží nové složení dvojic zvlášť pro každou jamku', () => {
+    const round = roundWithPairings(
+      [
+        [4, 3],
+        [5, 4],
+        [3, 5],
+        [5, 4],
+      ],
+      [
+        [
+          ['p1', 'left'],
+          ['p2', 'left'],
+          ['p3', 'right'],
+          ['p4', 'right'],
+        ],
+        [
+          ['p1', 'left'],
+          ['p3', 'left'],
+          ['p2', 'right'],
+          ['p4', 'right'],
+        ],
+      ],
+      [4, 4],
+    )
+
+    expect(teamsForHole(round, 0).map((team) => team.playerIds)).toEqual([
+      ['p1', 'p2'],
+      ['p3', 'p4'],
+    ])
+    expect(teamsForHole(round, 1).map((team) => team.playerIds)).toEqual([
+      ['p1', 'p3'],
+      ['p2', 'p4'],
+    ])
+    expect(round.holePairings).toMatchObject({
+      '0': { p1: 'left', p2: 'left', p3: 'right', p4: 'right' },
+      '1': { p1: 'left', p3: 'left', p2: 'right', p4: 'right' },
+    })
+  })
+
+  it('změna dvojice po zápisu smaže skóre a bonusy dané jamky', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+    round.bonuses.p1 = [['bunker']]
+
+    const changed = setHoleSide(round, 0, 'p1', 'right')
+
+    expect(changed.scores).toEqual({
+      p1: [null],
+      p2: [null],
+      p3: [null],
+      p4: [null],
+    })
+    expect(changed.bonuses).toEqual({
+      p1: [[]],
+      p2: [[]],
+      p3: [[]],
+      p4: [[]],
+    })
+  })
+})
+
+describe('Levá-Pravá - body', () => {
+  it('připíše body dvojice oběma hráčům zvlášť', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+
+    // Pravá dvojice má lepší míč, nižší součet a Bára birdie.
+    expect(totalPlayerPoints(round, 'p1')).toBe(0)
+    expect(totalPlayerPoints(round, 'p2')).toBe(0)
+    expect(totalPlayerPoints(round, 'p3')).toBe(3)
+    expect(totalPlayerPoints(round, 'p4')).toBe(3)
+  })
+
+  it('použije pro dynamické dvojice stejné netto výpočty jako Best Aggregate', () => {
+    const round = pairedRound([[5], [5], [4], [4]])
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 3
+    round.players[1]!.playingHandicap = 3
+
+    // Levá dvojice má po odečtu HCP dvě netto eagly: BEST, Součet a 2 × eagle.
+    expect(totalPlayerPoints(round, 'p1')).toBe(8)
+    expect(totalPlayerPoints(round, 'p2')).toBe(8)
+    expect(totalPlayerPoints(round, 'p3')).toBe(0)
+    expect(totalPlayerPoints(round, 'p4')).toBe(0)
+  })
+
+  it('změna dvojic mezi jamkami změní i adresáta bodů', () => {
+    const round = roundWithPairings(
+      [
+        [4, 3],
+        [5, 4],
+        [3, 4],
+        [5, 4],
+      ],
+      [
+        [
+          ['p1', 'left'],
+          ['p2', 'left'],
+          ['p3', 'right'],
+          ['p4', 'right'],
+        ],
+        [
+          ['p1', 'left'],
+          ['p3', 'left'],
+          ['p2', 'right'],
+          ['p4', 'right'],
+        ],
+      ],
+      [4, 4],
+    )
+    // Druhá jamka má nové složení: levá = Adam + Bára, pravá = Alena + Bořek.
+    const changed = round
+
+    expect(totalPlayerPoints(changed, 'p1')).toBe(3)
+    expect(totalPlayerPoints(changed, 'p2')).toBe(0)
+    expect(totalPlayerPoints(changed, 'p3')).toBe(6)
+    expect(totalPlayerPoints(changed, 'p4')).toBe(3)
+  })
+
+  it('řadí čtyři hráče podle jejich osobního součtu bodů', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+    const rows = leftRight.computeStandings(round)[0]?.rows ?? []
+
+    expect(rows.map((row) => [row.name, row.valueLabel, row.position])).toEqual([
+      ['Bára', '3 b.', 1],
+      ['Bořek', '3 b.', 1],
+      ['Adam', '0 b.', 3],
+      ['Alena', '0 b.', 3],
+    ])
+  })
+
+  it('přidá bodovací sloupec každému hráči', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+    const columns = leftRight.scorecardColumns?.(round) ?? []
+
+    expect(columns.map((column) => column.afterPlayerId)).toEqual([
+      'p1',
+      'p2',
+      'p3',
+      'p4',
+    ])
+    expect(columns.map((column) => column.cell(round, 0))).toEqual(['0', '0', '3', '3'])
+    expect(columns.map((column) => column.total(round))).toEqual(['0', '0', '3', '3'])
+  })
+})

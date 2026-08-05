@@ -131,7 +131,11 @@ function extraPoints(round: Round, team: Team, hole: number): number {
  *
  * Vrací body pro obě dvojice ve stejném pořadí jako round.teams.
  */
-function longestNearestPoints(round: Round, hole: number): [number, number] {
+function longestNearestPoints(
+  round: Round,
+  hole: number,
+  teams: Team[],
+): [number, number] {
   const { bonusValues } = round.settings.options
   const awarded: [number, number] = [0, 0]
 
@@ -144,7 +148,7 @@ function longestNearestPoints(round: Round, hole: number): [number, number] {
     )
     if (!holder) continue
 
-    const teamIndex = round.teams.findIndex((t) => t.playerIds.includes(holder.id))
+    const teamIndex = teams.findIndex((t) => t.playerIds.includes(holder.id))
     if (teamIndex < 0) continue
 
     const outcome = exclusiveBonusOutcome(round, holder.id, hole, bonusId)
@@ -163,8 +167,8 @@ function longestNearestPoints(round: Round, hole: number): [number, number] {
  * oba míče soupeře. Vzdaný míč se počítá jako nejhorší možný, takže dvojice
  * s nedohraným míčem Double Best nezíská.
  */
-function doubleBestWinner(round: Round, hole: number): 0 | 1 | null {
-  const [teamA, teamB] = round.teams
+function doubleBestWinner(round: Round, hole: number, teams: Team[]): 0 | 1 | null {
+  const [teamA, teamB] = teams
   if (!teamA || !teamB || !isHoleStarted(round, hole)) return null
 
   const scores = (team: Team) =>
@@ -194,9 +198,13 @@ function bonusPoints(round: Round, team: Team, hole: number): number {
  * Body obou dvojic na jedné jamce.
  * Vrací pole ve stejném pořadí jako round.teams.
  */
-export function holePoints(round: Round, hole: number): TeamHolePoints[] {
-  const [teamA, teamB] = round.teams
-  if (!teamA || !teamB) return round.teams.map(() => ({ ...EMPTY_POINTS }))
+export function holePointsForTeams(
+  round: Round,
+  teams: Team[],
+  hole: number,
+): TeamHolePoints[] {
+  const [teamA, teamB] = teams
+  if (!teamA || !teamB) return teams.map(() => ({ ...EMPTY_POINTS }))
 
   const bestWinner = lowerWins(
     teamBestBall(round, teamA, hole),
@@ -207,13 +215,13 @@ export function holePoints(round: Round, hole: number): TeamHolePoints[] {
     teamAggregate(round, teamB, hole),
   )
   const dbWinner =
-    round.settings.options.doubleBest > 0 ? doubleBestWinner(round, hole) : null
+    round.settings.options.doubleBest > 0 ? doubleBestWinner(round, hole, teams) : null
 
   // Dvojnásobná devátá/osmnáctá a zvolený "double" se násobí mezi sebou.
   const multiplier = holeMultiplier(round, hole)
   // Volba "nedoublovat extra body" nechává extra body v základní hodnotě.
   const extraMultiplier = round.settings.options.noDoubleBonuses ? 1 : multiplier
-  const exclusive = longestNearestPoints(round, hole)
+  const exclusive = longestNearestPoints(round, hole, teams)
 
   return [teamA, teamB].map((team, index) => {
     const best = (bestWinner === index ? POINTS.best : 0) * multiplier
@@ -233,6 +241,10 @@ export function holePoints(round: Round, hole: number): TeamHolePoints[] {
       total: best + aggregate + doubleBest + bonus + extra,
     }
   })
+}
+
+export function holePoints(round: Round, hole: number): TeamHolePoints[] {
+  return holePointsForTeams(round, round.teams, hole)
 }
 
 /** Součet bodů dvojic přes celé kolo. */

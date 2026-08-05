@@ -21,6 +21,7 @@ import CourseEditScreen from './screens/CourseEditScreen'
 import CoursePickerScreen from './screens/CoursePickerScreen'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
+import { getGame } from './games'
 
 type View =
   | 'setup'
@@ -137,6 +138,19 @@ function AppShell() {
     // setHolePar zároveň zahodí Longest/Nearest, když na novém paru nepatří.
     setRound((prev) => (prev ? touchRound(setHolePar(prev, hole, par)) : prev))
   }, [])
+
+  const setHoleSetup = useCallback(
+    (hole: number, playerId: PlayerId, optionId: string) => {
+      setRound((prev) => {
+        if (!prev) return prev
+        const update = getGame(prev.gameId).setHoleSetup
+        if (!update) return prev
+        const next = update(prev, hole, playerId, optionId)
+        return next === prev ? prev : touchRound(next)
+      })
+    },
+    [],
+  )
 
   const goToHole = useCallback((hole: number) => {
     setRound((prev) => {
@@ -342,6 +356,7 @@ function AppShell() {
       onSetScore={setScore}
       onToggleBonus={setBonus}
       onSetPar={setPar}
+      onSetHoleSetup={setHoleSetup}
       onGoToHole={goToHole}
       onFinish={finishRound}
       onShowResults={() => setView('results')}

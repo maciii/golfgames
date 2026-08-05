@@ -86,12 +86,17 @@ describe('Dokument z Firestore', () => {
     const source = round()
     source.bonuses.p1 = [['longest'], [], ['bunker']]
     source.bonuses.p3 = [[], ['nearest'], []]
+    source.holePairings = {
+      '0': { p1: 'left', p2: 'left', p3: 'right', p4: 'right' },
+      '1': { p1: 'right', p2: 'left', p3: 'right', p4: 'left' },
+    }
 
     const restored = fromDocument(toDocument(source)) as Round
 
     expect(restored.bonuses).toEqual(source.bonuses)
     expect(restored.scores).toEqual(source.scores)
     expect(restored.teams).toEqual(source.teams)
+    expect(restored.holePairings).toEqual(source.holePairings)
   })
 
   it('doplní prázdné jamky až do konce kola', () => {

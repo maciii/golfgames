@@ -25,7 +25,7 @@ Společné pro všechny hry:
 - [Nastavení bodování hry](#nastavení-bodování-hry)
 - [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
 - [Značky výsledku na jamce](#značky-výsledku-na-jamce)
-- [Best Aggregate](#best-aggregate) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
+- [Best Aggregate](#best-aggregate) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
 - [Přidání další hry](#přidání-další-hry)
 
 ## Vzdaná jamka vs. nehraná jamka
@@ -419,6 +419,48 @@ v jednom souboru:
 
 ---
 
+## Levá-Pravá
+
+**Hráči:** vždy 4, dvojice se určují na každé jamce
+**Soubor:** [`src/games/leftRight.ts`](../src/games/leftRight.ts)
+
+Levá-Pravá používá stejné bodování jako Best Aggregate, ale dvojice nejsou
+pevné pro celé kolo. Před každou jamkou se u každého hráče zvolí, jestli jeho
+první rána z odpaliště šla **vlevo**, nebo **vpravo**. Na každé straně musí být
+právě dva hráči; teprve potom aplikace povolí zápis skóre.
+
+| Za co                                              | Body          |
+| -------------------------------------------------- | ------------- |
+| BEST – nižší lepší míč než druhá strana            | 1             |
+| Součet – nižší součet ran obou hráčů na straně     | 1             |
+| Birdie kteréhokoli hráče na straně                 | 1             |
+| Eagle kteréhokoli hráče na straně                  | 3             |
+| **Double Best** – oba míče lepší než oba soupeřovy | 1 (volitelné) |
+| **Extra body** – bunker, water, longest…           | dle nastavení |
+
+Body získané stranou se na dané jamce připíšou **oběma hráčům**, ale výsledky
+se sčítají a zobrazují jednotlivě. První výsledková tabulka proto obsahuje
+čtyři hráče a peněžní vyrovnání používá pravidla pro jednotlivce. Scorekarta
+má za každým hráčem vlastní sloupec `B` s body za jeho aktuální dvojici.
+
+V kole s HCP se `BEST`, `Součet`, `Double Best` i birdie/eagle vyhodnocují
+stejně jako u Best Aggregate z netto ran. Násobič běžných extra bodů se bere z
+hrubého výsledku; Longest a Nearest se potvrzují podle stejného pravidla jako
+u Best Aggregate.
+
+### Rozhodnutí tam, kde pravidla mlčí
+
+- **Neúplné přiřazení** – dokud nejsou na obou stranách právě dva hráči,
+  skóre ani bonusy nejdou zapsat a jamka nedává body.
+- **Oprava po zápisu** – změna strany po zapsání skóre smaže skóre i bonusy
+  celé jamky. Jinak by se body počítaly pod dvojicí, která už neplatí.
+- **Uložení** – přiřazení se ukládá pro každou jamku zvlášť v `Round.holePairings`;
+  změna dvojic na jedné jamce neovlivní žádnou jinou.
+- **Vzdaná jamka** – po dokončení dvojic se řídí stejným pravidlem jako Best
+  Aggregate; chybějící výsledek je vzdaný míč.
+
+---
+
 ## Skins
 
 **Hráči:** 2, 3 nebo 4, každý sám za sebe
@@ -563,6 +605,8 @@ Rozhraní hry vrací:
   počtem ran hráče; Skins zde zobrazuje v novém řádku pod součtem ran `B`/`P`
   a hodnotu skinů s nenulovými extra body
 - `scorecardColumns(round)` – nepovinné sloupce navíc ve scorekartě
+- `holeSetup(round, hole)` a `setHoleSetup(...)` – nepovinný setup před
+  zápisem skóre, pokud hra potřebuje doplnit stav konkrétní jamky
 
 Hra také deklaruje `scoringOptions`: které bonusy, násobiče a další volby
 skutečně používá a zda extra body připadnou celé dvojici, nebo jednotlivému

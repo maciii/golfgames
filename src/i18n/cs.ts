@@ -378,6 +378,10 @@ export const cs = {
   'games.best-aggregate.tagline': 'Dvě dvojice, body za lepší míč, součet a birdie',
   'games.best-aggregate.rules':
     'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice 1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, 1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice s nejvyšším počtem bodů.',
+  'games.left-right.name': 'Levá-Pravá',
+  'games.left-right.tagline': 'Dvojice podle prvních ran, nová dvojice na každé jamce',
+  'games.left-right.rules':
+    'Hrají vždy čtyři hráči. Před každou jamkou se podle prvních ran určí dvě dvojice. Bodování je stejné jako u Best Aggregate, ale body se zapisují každému hráči zvlášť podle dvojice, ve které na dané jamce hraje.',
   'games.skins.name': 'Skins',
   'games.skins.tagline': 'Každá jamka je skin, shoda ho přenáší dál',
   'games.skins.rules':
@@ -405,6 +409,20 @@ export const cs = {
   'best.detailBonus': 'Bonus {count}',
   'best.detailExtra': 'Extra {count}',
   'best.conceded': 'vzdáno',
+
+  // Levá-Pravá
+  'leftRight.left': 'Levá',
+  'leftRight.right': 'Pravá',
+  'leftRight.setupTitle': 'První rány',
+  'leftRight.setupHint': 'Urči, kdo zahrál první ránu vlevo a kdo vpravo.',
+  'leftRight.setupReady': 'Dvojice jsou připravené.',
+  'leftRight.title': 'Body hráčů',
+  'leftRight.description': 'Body dvojice se na každé jamce připíšou oběma jejím hráčům.',
+  'leftRight.detail': 'Body za dvojici na jednotlivých jamkách',
+  'leftRight.headerNote': 'Součet osobních bodů',
+  'leftRight.pairing': 'Dvojice',
+  'leftRight.notReady': 'nejdřív urč dvojice',
+  'leftRight.column': 'B',
 
   // Skins
   'skins.title': 'Skiny',

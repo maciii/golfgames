@@ -5,16 +5,29 @@ patří konkrétní cíl, rozhodnutí a ověřitelný výsledek.
 
 ## Cíl
 
-Doplnit po domluvě.
+Doplnit a ověřit hru Levá-Pravá pro čtyři hráče: na každé jamce určit dvojice
+podle prvních ran, potom zapsat skóre a připsat body jednotlivě.
 
 ## Úkoly
 
-- [ ] Definovat první cíl nového plánu
+- [x] Přidat per-jamkové přiřazení stran do serializovatelného kola
+- [x] Přidat obecný hook setupu jamky a zablokovat skóre do jeho dokončení
+- [x] Implementovat bodování Levá-Pravá znovupoužitím pravidel Best Aggregate
+- [x] Přidat testy dynamických dvojic a individuálních součtů
+- [x] Doplnit překlady, dokumentaci a changelog
+- [x] Spustit kompletní kontrolu a produkční build
 
 ## Rozhodnutí
 
-Sem patří rozhodnutí, která ovlivní architekturu nebo chování aplikace.
+- Dvojice se ukládají jako `Round.holePairings`, mapa `jamka -> hráč ->
+left/right`, aby zůstala data JSON i Firestore kompatibilní.
+- Levá-Pravá nepoužívá statické `Round.teams`; přiřazení se na každé jamce
+  ověří a z něj se vytvoří dočasné dvě dvojice pro výpočet.
+- Oprava dvojice po zápisu smaže skóre a bonusy dané jamky, aby archiv nikdy
+  nemíchal výsledek se starým složením.
 
 ## Ověření
 
-Sem patří testy, kontrolní příkazy a případné kroky publikace.
+- `npx vitest run src/games/leftRight.test.ts`
+- `npm run check`
+- `npx vite build`

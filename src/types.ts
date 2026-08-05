@@ -9,6 +9,12 @@ import { localeTag, t } from './i18n'
 
 export type PlayerId = string
 
+/** Strana hřiště použitá při určování dvojice na jamce. */
+export type HoleSide = 'left' | 'right'
+
+/** Přiřazení hráčů ke stranám na jednotlivých jamkách. */
+export type HolePairings = Record<string, Partial<Record<PlayerId, HoleSide>>>
+
 export interface Player {
   id: PlayerId
   name: string
@@ -289,6 +295,8 @@ export interface Round {
   course?: RoundCourse
   /** Hraje se na rány s handicapem? Bez hodnoty se počítá hrubé skóre. */
   netScoring?: boolean
+  /** Strany prvních ran, podle kterých se u dynamických her skládají dvojice. */
+  holePairings?: HolePairings
   /**
    * Číslo první hrané jamky (1-based); chybí u kola hraného od jedničky.
    *
@@ -372,6 +380,7 @@ export function createRound({
     updatedAt: now,
     players,
     teams,
+    holePairings: {},
     holeCount,
     pars:
       pars?.length === holeCount ? [...pars] : Array<number>(holeCount).fill(DEFAULT_PAR),

@@ -14,7 +14,7 @@ Doplňující čtení:
 ## Co to je
 
 PWA pro zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých
-typů golfových her (Best Aggregate, Skins, Match play) včetně peněžního
+typů golfových her (Best Aggregate, Levá-Pravá, Skins, Match play) včetně peněžního
 vyrovnání sázky.
 
 Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
@@ -73,7 +73,7 @@ beze změny tvaru.
 ```ts
 interface Round {
   id: string // `${timestamp}-${random}`
-  gameId: string // 'best-aggregate' | 'skins' | 'match-play'
+  gameId: string // 'best-aggregate' | 'left-right' | 'skins' | ...
   createdAt: string // ISO
   finishedAt?: string // chybí => kolo je rozehrané
   players: Player[] // id 'p1'..'p4'
@@ -87,6 +87,8 @@ interface Round {
   updatedAt?: string // ISO; poslední skutečná změna dat, řídí synchronizaci
   course?: RoundCourse // hřiště, se kterým se hrálo - taky vlastní kopie
   netScoring?: boolean // hraje se na rány s handicapem?
+  holePairings?: Record<string, Partial<Record<PlayerId, 'left' | 'right'>>>
+  // přiřazení ke stranám na jamce; používají ho hry s dynamickými dvojicemi
   startHole?: number // číslo první hrané jamky; chybí u kola od jedničky
 }
 ```
@@ -136,6 +138,9 @@ tohle kolo.
 5. **`teams[i].playerIds` má stabilní pořadí.** Peněžní vyrovnání dvojic páruje
    protějšky podle indexu (první platí prvnímu), takže přeházení pořadí změní,
    kdo komu platí.
+6. **Dynamické dvojice patří do `holePairings`, ne do `teams`.** Mapa je
+   indexovaná číslem jamky a hráčem; hra ji smí použít až po ověření, že každá
+   strana má právě dva hráče. Neúplné přiřazení nesmí pustit zápis skóre.
 
 ### Sentinel `CONCEDED`
 
@@ -157,6 +162,8 @@ Hra je jeden objekt implementující `GameDefinition`
 | `supportsDoubleHoles`        | ano     | dává smysl volba „9. a 18. za dvojnásobek"?  |
 | `scoringOptions`             | ano     | které bonusy a volby mají v této hře význam  |
 | `computeStandings(round)`    | ano     | výsledkové tabulky (jedna nebo víc)          |
+| `holeSetup(round, hole)`     | ne      | volby nutné před zápisem aktuální jamky      |
+| `setHoleSetup(...)`          | ne      | čistá změna setupu v `Round`                 |
 | `holeSummary(round, hole)`   | ne      | shrnutí u právě zapisované jamky             |
 | `headerSummary(round, hole)` | ne      | průběžné skóre a stav aktuální jamky         |
 | `scorecardPlayerCell(...)`   | ne      | dekorace výsledku hráče (např. skin a bonus) |
@@ -190,6 +197,19 @@ volby hra používá a jestli extra body připadnou celé dvojici, nebo jednotli
 **Pozor na příjemce bonusu:** týmové hry připisují extra bod celé dvojici,
 individuální hry hráči, který ho uhrál. Rozsah je součástí
 `GameDefinition.scoringOptions`, ne předpoklad obrazovky.
+
+### Setup před jamkou
+
+Některé hry potřebují před zadáním skóre zaznamenat další skutečnost z jamky,
+například složení dvojic podle prvních ran. Pro ně `GameDefinition` nabízí
+`holeSetup(round, hole)` a `setHoleSetup(...)`. Hook vrací jen serializovatelná
+data pro obecný přepínač v `PlayScreen`; obrazovka nezná význam jednotlivých
+voleb. Dokud hook nevrátí `complete: true`, ovladače skóre a bonusů jsou
+zablokované.
+
+Změna setupu po zapsání skóre musí buď staré skóre zneplatnit, nebo jinak
+zajistit, že se nikdy nevyhodnotí podle jiné konfigurace. Levá-Pravá při takové
+opravě smaže skóre i bonusy celé jamky.
 
 ## Extra body (bonusy)
 
