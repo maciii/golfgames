@@ -74,6 +74,15 @@ export const en: Record<MessageKey, Message> = {
   'setup.backup': 'Data backup',
   'setup.signIn': 'Sign in and back up',
   'setup.account': 'Account and sync',
+  'setup.installApp': 'Add Golf Games to home screen',
+  'setup.installAppBenefit':
+    'Open the app with one tap without the address bar. Scoring stays available even without a signal.',
+  'setup.installIosTitle': 'Add to home screen',
+  'setup.installIosHint': 'In Safari, tap Share and choose Add to Home Screen.',
+  'setup.installBrowserTitle': 'Install the app',
+  'setup.installBrowserHint':
+    'Open the browser menu and choose Install app or Add to home screen.',
+  'setup.installClose': 'Close instructions',
   'setup.start': 'Start round',
   'setup.language': 'Language',
   'setup.syncedShort': 'backed up',

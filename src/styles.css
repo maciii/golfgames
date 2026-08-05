@@ -231,6 +231,41 @@ button {
   gap: 8px 24px;
 }
 
+.pwa-install {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.pwa-install-button {
+  padding-inline: 12px;
+}
+
+.pwa-install-benefit {
+  max-width: 440px;
+}
+
+.pwa-install-help {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  text-align: left;
+}
+
+.pwa-install-help p {
+  margin: 4px 0 0;
+}
+
+.pwa-install-help .link-button {
+  padding-left: 0;
+}
+
 /* Výběr souboru se spouští z vlastního tlačítka, nativní pole je schované. */
 .file-input {
   display: none;

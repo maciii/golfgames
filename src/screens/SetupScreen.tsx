@@ -14,6 +14,7 @@ import { coursePar, findTee } from '../courses/types'
 import { courseHandicap } from '../handicap'
 import type { CreateRoundOptions, Currency, RoundCourse, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
+import { usePwaInstall } from '../pwa'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
 import {
@@ -154,6 +155,8 @@ export default function SetupScreen({
 }: Props) {
   const { t, locale, setLocale } = useLocale()
   const { status, account } = useAccount()
+  const { canInstall, install, isIOS, isMobile, isStandalone } = usePwaInstall()
+  const [installHelp, setInstallHelp] = useState(false)
   const [gameId, setGameId] = useState(initialDraft?.gameId ?? DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
     initialDraft?.playerCount ?? getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
@@ -255,8 +258,14 @@ export default function SetupScreen({
   const game = getGame(gameId)
   const usesTeams = game.usesTeams(playerCount)
   const needsPairing = usesTeams && playerCount === 4
+  const showInstall = !isStandalone && (canInstall || isIOS || isMobile)
   const displayName = (index: number) =>
     names[index]?.trim() || t('common.player', { number: index + 1 })
+
+  async function installApp() {
+    const result = await install()
+    if (result === 'unavailable') setInstallHelp(true)
+  }
 
   function selectGame(id: string) {
     setGameId(id)
@@ -830,6 +839,34 @@ export default function SetupScreen({
             {account ? t('setup.account') : t('setup.signIn')}
           </button>
         </div>
+
+        {showInstall && (
+          <section className="pwa-install">
+            <button
+              type="button"
+              className="link-button pwa-install-button"
+              onClick={() => void installApp()}
+            >
+              {t('setup.installApp')}
+            </button>
+            <p className="hint pwa-install-benefit">{t('setup.installAppBenefit')}</p>
+            {installHelp && (
+              <div className="pwa-install-help" role="status">
+                <strong>
+                  {t(isIOS ? 'setup.installIosTitle' : 'setup.installBrowserTitle')}
+                </strong>
+                <p>{t(isIOS ? 'setup.installIosHint' : 'setup.installBrowserHint')}</p>
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => setInstallHelp(false)}
+                >
+                  {t('setup.installClose')}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
       </main>
 
       <footer className="app-footer">

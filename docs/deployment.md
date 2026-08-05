@@ -104,6 +104,19 @@ Base se propisuje i do PWA manifestu (`start_url`, `scope`) a do
 `navigateFallback` service workeru, takže špatná hodnota se projeví hlavně
 u aplikace přidané na plochu.
 
+## Přidání na plochu
+
+Na úvodní obrazovce je tlačítko **Přidat Golf Games na plochu**. Aplikace ho
+zobrazuje jen mimo standalone režim a na mobilním profilu nebo v prohlížeči,
+který podporuje instalaci PWA.
+
+- **Android a podporované prohlížeče:** tlačítko otevře nativní instalační
+  dialog přes `beforeinstallprompt`.
+- **iPhone/iPad:** Safari nedovolí webu instalaci spustit programově, takže
+  tlačítko zobrazí návod **Sdílet → Přidat na plochu**.
+- Po instalaci nebo spuštění z ikony na ploše se nabídka skryje. Instalace
+  otevře aplikaci bez adresního řádku a zachová její offline provoz.
+
 ## Aktualizace u uživatele
 
 Service worker běží v režimu `autoUpdate`: po nasazení si aplikace stáhne novou

@@ -84,6 +84,15 @@ export const cs = {
   'setup.backup': 'Záloha dat',
   'setup.signIn': 'Přihlásit se a zálohovat',
   'setup.account': 'Účet a synchronizace',
+  'setup.installApp': 'Přidat Golf Games na plochu',
+  'setup.installAppBenefit':
+    'Spustíš aplikaci jedním klepnutím bez adresního řádku. Zápis skóre zůstane dostupný i bez signálu.',
+  'setup.installIosTitle': 'Přidání na plochu',
+  'setup.installIosHint': 'V Safari klepni na Sdílet a zvol Přidat na plochu.',
+  'setup.installBrowserTitle': 'Přidání aplikace',
+  'setup.installBrowserHint':
+    'V nabídce prohlížeče zvol Instalovat aplikaci nebo Přidat na plochu.',
+  'setup.installClose': 'Zavřít návod',
   'setup.start': 'Začít kolo',
   'setup.language': 'Jazyk',
   'setup.syncedShort': 'zálohováno',

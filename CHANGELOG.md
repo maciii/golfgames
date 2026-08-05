@@ -7,6 +7,14 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.30.0] – 2026-08-05
+
+### Přidáno
+
+- **Přidání Golf Games na plochu.** Na úvodní obrazovce lze PWA nainstalovat
+  nativním dialogem na Androidu; na iPhonu aplikace zobrazí krátký návod Safari.
+  Po instalaci se nabídka skryje.
+
 ## [0.29.7] – 2026-08-05
 
 ### Změněno
