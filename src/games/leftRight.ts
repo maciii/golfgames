@@ -6,6 +6,7 @@ import type {
   GameDefinition,
   HeaderSummary,
   HoleSetup,
+  HoleSetupSelection,
   HoleSummary,
   ScorecardColumn,
   StandingsSection,
@@ -15,6 +16,12 @@ import { rankRows } from './types'
 const LEFT: HoleSide = 'left'
 const RIGHT: HoleSide = 'right'
 const SIDES: HoleSide[] = [LEFT, RIGHT]
+
+const PAIRING_CHOICES = [
+  { id: '12-34', left: [0, 1], right: [2, 3] },
+  { id: '13-24', left: [0, 2], right: [1, 3] },
+  { id: '14-23', left: [0, 3], right: [1, 2] },
+] as const
 
 function pairingAt(round: Round, hole: number): Partial<Record<PlayerId, HoleSide>> {
   return round.holePairings?.[String(hole)] ?? {}
@@ -37,34 +44,57 @@ export function isPairingComplete(round: Round, hole: number): boolean {
   return teamsForHole(round, hole).length === 2
 }
 
-/** Změní směr první rány a při opravě smaže skóre pod předchozí dvojicí. */
-export function setHoleSide(
+function pairingAssignments(
+  round: Round,
+  choice: (typeof PAIRING_CHOICES)[number],
+): Partial<Record<PlayerId, HoleSide>> | undefined {
+  const assignments: Partial<Record<PlayerId, HoleSide>> = {}
+  for (const [side, indexes] of [
+    [LEFT, choice.left],
+    [RIGHT, choice.right],
+  ] as const) {
+    for (const index of indexes) {
+      const player = round.players[index]
+      if (!player) return undefined
+      assignments[player.id] = side
+    }
+  }
+  return assignments
+}
+
+function selectedChoiceId(round: Round, hole: number): string | undefined {
+  const pairing = pairingAt(round, hole)
+  return PAIRING_CHOICES.find((choice) => {
+    const assignments = pairingAssignments(round, choice)
+    return (
+      assignments !== undefined &&
+      round.players.every((player) => pairing[player.id] === assignments[player.id])
+    )
+  })?.id
+}
+
+function updatePairing(
   round: Round,
   hole: number,
-  playerId: PlayerId,
-  side: string,
+  nextPairing: Partial<Record<PlayerId, HoleSide>>,
 ): Round {
-  if (!SIDES.includes(side as HoleSide)) return round
-  if (!round.players.some((player) => player.id === playerId)) return round
-  if (hole < 0 || hole >= round.holeCount) return round
+  const currentPairing = pairingAt(round, hole)
+  const changed = round.players.some(
+    (player) => currentPairing[player.id] !== nextPairing[player.id],
+  )
+  if (!changed) return round
 
-  const current = pairingAt(round, hole)[playerId]
   const holePairings: HolePairings = {
     ...(round.holePairings ?? {}),
-    [String(hole)]: {
-      ...pairingAt(round, hole),
-      [playerId]: side as HoleSide,
-    },
+    [String(hole)]: nextPairing,
   }
-  if (current === side) return round
-
-  const scores = { ...round.scores }
-  const bonuses = { ...round.bonuses }
   const hasScore = round.players.some(
     (player) => scoreAt(round, player.id, hole) !== null,
   )
   if (!hasScore) return { ...round, holePairings }
 
+  const scores = { ...round.scores }
+  const bonuses = { ...round.bonuses }
   for (const player of round.players) {
     const playerScores = [...(scores[player.id] ?? [])]
     playerScores[hole] = null
@@ -76,6 +106,36 @@ export function setHoleSide(
   }
 
   return { ...round, holePairings, scores, bonuses }
+}
+
+/** Změní směr první rány a při opravě smaže skóre pod předchozí dvojicí. */
+export function setHoleSide(
+  round: Round,
+  hole: number,
+  playerId: PlayerId,
+  side: string,
+): Round {
+  if (!SIDES.includes(side as HoleSide)) return round
+  if (!round.players.some((player) => player.id === playerId)) return round
+  if (hole < 0 || hole >= round.holeCount) return round
+
+  return updatePairing(round, hole, {
+    ...pairingAt(round, hole),
+    [playerId]: side as HoleSide,
+  })
+}
+
+function setHolePairing(round: Round, hole: number, choiceId: string): Round {
+  if (hole < 0 || hole >= round.holeCount) return round
+  const choice = PAIRING_CHOICES.find((option) => option.id === choiceId)
+  const assignments = choice ? pairingAssignments(round, choice) : undefined
+  return assignments ? updatePairing(round, hole, assignments) : round
+}
+
+function setHoleSetup(round: Round, hole: number, selection: HoleSetupSelection): Round {
+  return selection.kind === 'choice'
+    ? setHolePairing(round, hole, selection.choiceId)
+    : setHoleSide(round, hole, selection.playerId, selection.optionId)
 }
 
 function playerHolePoints(round: Round, playerId: PlayerId, hole: number): number {
@@ -95,33 +155,28 @@ export function totalPlayerPoints(round: Round, playerId: PlayerId): number {
 }
 
 function setupForHole(round: Round, hole: number): HoleSetup {
-  const pairing = pairingAt(round, hole)
-  const options = [
-    { id: LEFT, label: t('leftRight.left') },
-    { id: RIGHT, label: t('leftRight.right') },
-  ]
-  const entries = round.players.map((player) => ({
-    playerId: player.id,
-    name: player.name,
-    ...(pairing[player.id] ? { selectedOptionId: pairing[player.id] } : {}),
-  }))
-  const groups = options.map((option) => ({
-    optionId: option.id,
-    label: option.label,
-    playerNames: round.players
-      .filter((player) => pairing[player.id] === option.id)
-      .map((player) => player.name),
-  }))
+  const selected = selectedChoiceId(round, hole)
+  const choices = PAIRING_CHOICES.flatMap((choice) => {
+    const assignments = pairingAssignments(round, choice)
+    if (!assignments) return []
+    const playerName = (index: number) => round.players[index]?.name ?? '?'
+    return [
+      {
+        id: choice.id,
+        label: `${playerName(choice.left[0])} + ${playerName(choice.left[1])} ${t('setup.versus')} ${playerName(choice.right[0])} + ${playerName(choice.right[1])}`,
+        selected: choice.id === selected,
+      },
+    ]
+  })
 
   return {
     title: t('leftRight.setupTitle'),
-    message: isPairingComplete(round, hole)
-      ? t('leftRight.setupReady')
-      : t('leftRight.setupHint'),
-    options,
-    entries,
-    groups,
-    complete: isPairingComplete(round, hole),
+    message: selected ? t('leftRight.setupReady') : t('leftRight.setupHint'),
+    options: [],
+    entries: [],
+    groups: [],
+    choices,
+    complete: selected !== undefined,
   }
 }
 
@@ -150,7 +205,7 @@ export const leftRight: GameDefinition = {
   },
 
   holeSetup: setupForHole,
-  setHoleSetup: setHoleSide,
+  setHoleSetup,
 
   computeStandings(round: Round): StandingsSection[] {
     const rows = round.players.map((player) => {

@@ -22,6 +22,7 @@ import CoursePickerScreen from './screens/CoursePickerScreen'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 import { getGame } from './games'
+import type { HoleSetupSelection } from './games'
 
 type View =
   | 'setup'
@@ -139,18 +140,15 @@ function AppShell() {
     setRound((prev) => (prev ? touchRound(setHolePar(prev, hole, par)) : prev))
   }, [])
 
-  const setHoleSetup = useCallback(
-    (hole: number, playerId: PlayerId, optionId: string) => {
-      setRound((prev) => {
-        if (!prev) return prev
-        const update = getGame(prev.gameId).setHoleSetup
-        if (!update) return prev
-        const next = update(prev, hole, playerId, optionId)
-        return next === prev ? prev : touchRound(next)
-      })
-    },
-    [],
-  )
+  const setHoleSetup = useCallback((hole: number, selection: HoleSetupSelection) => {
+    setRound((prev) => {
+      if (!prev) return prev
+      const update = getGame(prev.gameId).setHoleSetup
+      if (!update) return prev
+      const next = update(prev, hole, selection)
+      return next === prev ? prev : touchRound(next)
+    })
+  }, [])
 
   const goToHole = useCallback((hole: number) => {
     setRound((prev) => {

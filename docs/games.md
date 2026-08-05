@@ -426,15 +426,19 @@ v jednom souboru:
 
 ---
 
-## Levá-Pravá
+## Levá-Pravá (Kraje-Středy)
 
 **Hráči:** vždy 4, dvojice se určují na každé jamce
 **Soubor:** [`src/games/leftRight.ts`](../src/games/leftRight.ts)
 
-Levá-Pravá používá stejné bodování jako Best Aggregate, ale dvojice nejsou
-pevné pro celé kolo. Před každou jamkou se u každého hráče zvolí, jestli jeho
-první rána z odpaliště šla **vlevo**, nebo **vpravo**. Na každé straně musí být
-právě dva hráči; teprve potom aplikace povolí zápis skóre.
+Levá-Pravá, které se také říká **Kraje-Středy**, používá stejné bodování jako
+Best Aggregate, ale dvojice nejsou pevné pro celé kolo. Před každou jamkou se
+vybere jedna ze tří možných dvojic podle toho, kam hráči zahráli první ránu z
+odpaliště: vlevo nebo vpravo. Na každé straně jsou právě dva hráči; teprve
+potom aplikace povolí zápis skóre.
+
+Volba dvojic má tři tlačítka se jmény hráčů, stejně jako výběr dvojic u Best
+Aggregate. Jedním klepnutím se uloží celé složení jamky.
 
 | Za co                                              | Body          |
 | -------------------------------------------------- | ------------- |

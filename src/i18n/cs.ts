@@ -379,7 +379,8 @@ export const cs = {
   'games.best-aggregate.rules':
     'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice 1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, 1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice s nejvyšším počtem bodů.',
   'games.left-right.name': 'Levá-Pravá',
-  'games.left-right.tagline': 'Dvojice podle prvních ran, nová dvojice na každé jamce',
+  'games.left-right.tagline':
+    '(Kraje-Středy) · dvojice podle prvních ran, nová dvojice na každé jamce',
   'games.left-right.rules':
     'Hrají vždy čtyři hráči. Před každou jamkou se podle prvních ran určí dvě dvojice. Bodování je stejné jako u Best Aggregate, ale body se zapisují každému hráči zvlášť podle dvojice, ve které na dané jamce hraje.',
   'games.skins.name': 'Skins',
@@ -413,8 +414,8 @@ export const cs = {
   // Levá-Pravá
   'leftRight.left': 'Levá',
   'leftRight.right': 'Pravá',
-  'leftRight.setupTitle': 'První rány',
-  'leftRight.setupHint': 'Urči, kdo zahrál první ránu vlevo a kdo vpravo.',
+  'leftRight.setupTitle': 'Dvojice',
+  'leftRight.setupHint': 'Vyber dvojici podle prvních ran z odpaliště.',
   'leftRight.setupReady': 'Dvojice jsou připravené.',
   'leftRight.title': 'Body hráčů',
   'leftRight.description': 'Body dvojice se na každé jamce připíšou oběma jejím hráčům.',

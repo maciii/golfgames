@@ -361,7 +361,8 @@ export const en: Record<MessageKey, Message> = {
   'games.best-aggregate.rules':
     'Always four players in two pairs. On every hole a pair scores 1 point for the lower best ball, 1 point for the lower aggregate of both partners, 1 point for each birdie and 3 points for each eagle. The pair with the most points wins.',
   'games.left-right.name': 'Left-Right',
-  'games.left-right.tagline': 'Pairs from the first shots, new pairs on every hole',
+  'games.left-right.tagline':
+    '(Edges-Centers) · pairs from the first shots, new pairs on every hole',
   'games.left-right.rules':
     'Always four players. Before every hole, the two pairs are set according to the first shots. Scoring is the same as Best Aggregate, but the points are recorded for each player separately according to the pair they play in on that hole.',
   'games.skins.name': 'Skins',
@@ -395,9 +396,8 @@ export const en: Record<MessageKey, Message> = {
   // Left-Right
   'leftRight.left': 'Left',
   'leftRight.right': 'Right',
-  'leftRight.setupTitle': 'First shots',
-  'leftRight.setupHint':
-    'Choose who played the first shot to the left and who to the right.',
+  'leftRight.setupTitle': 'Pairs',
+  'leftRight.setupHint': 'Choose the pairs from the first shots off the tee.',
   'leftRight.setupReady': 'Pairs are ready.',
   'leftRight.title': 'Player points',
   'leftRight.description': 'The pair points on each hole are credited to both players.',

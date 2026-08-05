@@ -33,6 +33,8 @@ export type {
   GameDefinition,
   GameScoringOptions,
   HeaderSummary,
+  HoleSetupChoice,
+  HoleSetupSelection,
   HoleSetup,
   HoleSummary,
   ScorecardColumn,

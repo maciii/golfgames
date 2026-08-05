@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.29.1] – 2026-08-05
+
+### Změněno
+
+- **Rychlejší volba dvojic v Levá-Pravá.** Na každé jamce jsou tři tlačítka
+  s hotovými kombinacemi hráčů; celé složení dvojice se vybere jedním klepnutím.
+- **Název varianty.** Levá-Pravá se v nabídce i dokumentaci označuje také jako
+  Kraje-Středy.
+- **Opravený komentář bodování.** Popis Best Aggregate už neslibuje osobní par
+  pro Nearest, který se potvrzuje hrubě.
+
 ## [0.29.0] – 2026-08-05
 
 ### Změněno

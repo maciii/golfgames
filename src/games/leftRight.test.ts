@@ -78,6 +78,40 @@ describe('Levá-Pravá - příprava jamky', () => {
     expect(leftRight.holeSetup?.(round, 0).complete).toBe(false)
   })
 
+  it('nabídne tři hotové dvojice a jedním výběrem připraví celou jamku', () => {
+    const round = makeRound({
+      gameId: 'left-right',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      pars: [4],
+      scores: [[null], [null], [null], [null]],
+    })
+    const setup = leftRight.holeSetup?.(round, 0)
+
+    expect(setup?.choices?.map((choice) => choice.label)).toEqual([
+      'Adam + Alena vs Bára + Bořek',
+      'Adam + Bára vs Alena + Bořek',
+      'Adam + Bořek vs Alena + Bára',
+    ])
+
+    const selected = leftRight.setHoleSetup?.(round, 0, {
+      kind: 'choice',
+      choiceId: '13-24',
+    })
+    expect(selected).toBeDefined()
+    expect(teamsForHole(selected!, 0).map((team) => team.playerIds)).toEqual([
+      ['p1', 'p3'],
+      ['p2', 'p4'],
+    ])
+    expect(leftRight.holeSetup?.(selected!, 0)).toMatchObject({
+      complete: true,
+      choices: [
+        { id: '12-34', selected: false },
+        { id: '13-24', selected: true },
+        { id: '14-23', selected: false },
+      ],
+    })
+  })
+
   it('uloží nové složení dvojic zvlášť pro každou jamku', () => {
     const round = roundWithPairings(
       [
@@ -121,15 +155,18 @@ describe('Levá-Pravá - příprava jamky', () => {
     const round = pairedRound([[4], [5], [3], [5]])
     round.bonuses.p1 = [['bunker']]
 
-    const changed = setHoleSide(round, 0, 'p1', 'right')
+    const changed = leftRight.setHoleSetup?.(round, 0, {
+      kind: 'choice',
+      choiceId: '13-24',
+    })
 
-    expect(changed.scores).toEqual({
+    expect(changed?.scores).toEqual({
       p1: [null],
       p2: [null],
       p3: [null],
       p4: [null],
     })
-    expect(changed.bonuses).toEqual({
+    expect(changed?.bonuses).toEqual({
       p1: [[]],
       p2: [[]],
       p3: [[]],

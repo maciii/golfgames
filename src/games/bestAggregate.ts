@@ -92,7 +92,7 @@ const EMPTY_POINTS: TeamHolePoints = {
  * Násobí se **hrubý** výsledek, i když se kolo hraje netto. Rozdané rány mění
  * to, kdo jamku vyhrál, ne to, jak se zahrála - jinak by hráč s ranou na jamce
  * dostal za bunker na par dva body místo jednoho. Jediná výjimka je potvrzení
- * Longestu a Nearestu, které o osobní par naopak stojí.
+ * Longestu, který může v netto kole stát na osobním paru.
  */
 function extraPoints(round: Round, team: Team, hole: number): number {
   const values = round.settings.options.bonusValues

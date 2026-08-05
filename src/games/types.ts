@@ -64,6 +64,18 @@ export interface HoleSetupGroup {
   playerNames: string[]
 }
 
+/** Jedna předdefinovaná kombinace skupin pro rychlou volbu setupu jamky. */
+export interface HoleSetupChoice {
+  id: string
+  label: string
+  selected?: boolean
+}
+
+/** Výběr buď hotové kombinace, nebo jedné položky v obecném setupu. */
+export type HoleSetupSelection =
+  | { kind: 'choice'; choiceId: string }
+  | { kind: 'entry'; playerId: PlayerId; optionId: string }
+
 /** Obecný model přípravy jamky; konkrétní pravidla zůstávají ve hře. */
 export interface HoleSetup {
   title: string
@@ -71,6 +83,7 @@ export interface HoleSetup {
   options: HoleSetupOption[]
   entries: HoleSetupEntry[]
   groups: HoleSetupGroup[]
+  choices?: HoleSetupChoice[]
   complete: boolean
 }
 
@@ -160,7 +173,7 @@ export interface GameDefinition {
   supportsDoubleHoles: boolean
   computeStandings(round: Round): StandingsSection[]
   holeSetup?(round: Round, hole: number): HoleSetup
-  setHoleSetup?(round: Round, hole: number, playerId: PlayerId, optionId: string): Round
+  setHoleSetup?(round: Round, hole: number, selection: HoleSetupSelection): Round
   holeSummary?(round: Round, hole: number): HoleSummary[]
   headerSummary?(round: Round, hole: number): HeaderSummary
   scorecardPlayerCell?(round: Round, playerId: string, hole: number): ScorecardPlayerCell

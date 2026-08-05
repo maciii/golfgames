@@ -20,7 +20,7 @@ import {
   teamPlayers,
 } from '../types'
 import { getGame } from '../games'
-import type { HoleSetup } from '../games'
+import type { HoleSetup, HoleSetupSelection } from '../games'
 import { exclusiveBonusOutcome, strokesReceived } from '../handicap'
 import { APP_VERSION } from '../version'
 import BonusSheet from './BonusSheet'
@@ -56,7 +56,7 @@ interface Props {
   onSetScore: (playerId: PlayerId, hole: number, value: number | null) => void
   onToggleBonus: (playerId: PlayerId, hole: number, bonusId: BonusId) => void
   onSetPar: (hole: number, par: number) => void
-  onSetHoleSetup: (hole: number, playerId: PlayerId, optionId: string) => void
+  onSetHoleSetup: (hole: number, selection: HoleSetupSelection) => void
   onGoToHole: (hole: number) => void
   onFinish: () => void
   onShowResults: () => void
@@ -372,29 +372,53 @@ export default function PlayScreen({
               <h2 className="section-title">{holeSetup.title}</h2>
               <p className="hint">{holeSetup.message}</p>
             </div>
-            <ul className="hole-setup-list">
-              {holeSetup.entries.map((entry) => (
-                <li key={entry.playerId} className="hole-setup-row">
-                  <span className="hole-setup-name">{entry.name}</span>
-                  <div className="segmented hole-setup-options">
-                    {holeSetup.options.map((option) => (
-                      <button
-                        key={option.id}
-                        type="button"
-                        className={`segment${
-                          entry.selectedOptionId === option.id ? ' selected' : ''
-                        }`}
-                        onClick={() => onSetHoleSetup(hole, entry.playerId, option.id)}
-                        aria-pressed={entry.selectedOptionId === option.id}
-                        aria-label={`${entry.name}: ${option.label}`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {holeSetup.choices ? (
+              <div className="game-list hole-setup-choices">
+                {holeSetup.choices.map((choice) => (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    className={`game-card${choice.selected ? ' selected' : ''}`}
+                    onClick={() =>
+                      onSetHoleSetup(hole, { kind: 'choice', choiceId: choice.id })
+                    }
+                    aria-pressed={choice.selected === true}
+                  >
+                    <span className="pairing-line">{choice.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <ul className="hole-setup-list">
+                {holeSetup.entries.map((entry) => (
+                  <li key={entry.playerId} className="hole-setup-row">
+                    <span className="hole-setup-name">{entry.name}</span>
+                    <div className="segmented hole-setup-options">
+                      {holeSetup.options.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`segment${
+                            entry.selectedOptionId === option.id ? ' selected' : ''
+                          }`}
+                          onClick={() =>
+                            onSetHoleSetup(hole, {
+                              kind: 'entry',
+                              playerId: entry.playerId,
+                              optionId: option.id,
+                            })
+                          }
+                          aria-pressed={entry.selectedOptionId === option.id}
+                          aria-label={`${entry.name}: ${option.label}`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
             {holeSetup.complete && (
               <div className="hole-setup-groups">
                 {holeSetup.groups.map((group) => (

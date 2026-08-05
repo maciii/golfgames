@@ -202,10 +202,11 @@ individuální hry hráči, který ho uhrál. Rozsah je součástí
 
 Některé hry potřebují před zadáním skóre zaznamenat další skutečnost z jamky,
 například složení dvojic podle prvních ran. Pro ně `GameDefinition` nabízí
-`holeSetup(round, hole)` a `setHoleSetup(...)`. Hook vrací jen serializovatelná
-data pro obecný přepínač v `PlayScreen`; obrazovka nezná význam jednotlivých
-voleb. Dokud hook nevrátí `complete: true`, ovladače skóre a bonusů jsou
-zablokované.
+`holeSetup(round, hole)` a `setHoleSetup(...)`. Hook může vrátit buď jednotlivé
+volby hráčů, nebo hotové `choices` skupin; v obou případech vrací jen
+serializovatelná data pro obecné ovládání v `PlayScreen`. Obrazovka nezná
+význam jednotlivých voleb. Dokud hook nevrátí `complete: true`, ovladače skóre
+a bonusů jsou zablokované.
 
 Změna setupu po zapsání skóre musí buď staré skóre zneplatnit, nebo jinak
 zajistit, že se nikdy nevyhodnotí podle jiné konfigurace. Levá-Pravá při takové
