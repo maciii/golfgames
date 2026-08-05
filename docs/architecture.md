@@ -209,14 +209,15 @@ jamky násobí.
 
 Všechno je v `localStorage` pod klíči s verzí:
 
-| Klíč                         | Obsah                                       |
-| ---------------------------- | ------------------------------------------- |
-| `golfgames.currentRound.v1`  | rozehrané kolo (přežije zavření aplikace)   |
-| `golfgames.archive.v1`       | až 100 odehraných kol, nejnovější první     |
-| `golfgames.roster.v1`        | uložení spoluhráči                          |
-| `golfgames.settings.v1`      | naposledy použitá sázka (předvyplnění)      |
-| `golfgames.gameOptions.v1`   | volby bodování, mapa `gameId → GameOptions` |
-| `golfgames.deletedRounds.v1` | místní tombstony explicitně zahozených kol  |
+| Klíč                           | Obsah                                       |
+| ------------------------------ | ------------------------------------------- |
+| `golfgames.currentRound.v1`    | rozehrané kolo (přežije zavření aplikace)   |
+| `golfgames.archive.v1`         | až 100 odehraných kol, nejnovější první     |
+| `golfgames.roster.v1`          | uložení spoluhráči                          |
+| `golfgames.settings.v1`        | naposledy použitá sázka (předvyplnění)      |
+| `golfgames.gameOptions.v1`     | volby bodování, mapa `gameId → GameOptions` |
+| `golfgames.favoriteCourses.v1` | oblíbená hřiště podle stabilního id         |
+| `golfgames.deletedRounds.v1`   | místní tombstony explicitně zahozených kol  |
 
 Pravidla:
 

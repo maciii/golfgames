@@ -438,6 +438,14 @@ export const en: Record<MessageKey, Message> = {
   'picker.errorBroken':
     'The catalogue returned something the app does not understand. Courses saved on this phone still work.',
   'picker.search': 'Search by name or club',
+  'picker.sortNearest': 'Sort by distance from my location',
+  'picker.sortGrouped': 'Sort by groups and alphabetically',
+  'picker.country': 'Country',
+  'picker.allCountries': 'All countries',
+  'picker.locationUnavailable':
+    'Location is unavailable. Showing courses by groups and alphabetically.',
+  'picker.addFavorite': 'Add {name} to favorites',
+  'picker.removeFavorite': 'Remove {name} from favorites',
   'picker.noCourseMeta': 'Pars are set while playing, handicaps are not used.',
   'picker.holes': { one: '{count} hole', other: '{count} holes' },
   'picker.tees': { one: '{count} tee', other: '{count} tees' },

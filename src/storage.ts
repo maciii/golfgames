@@ -24,6 +24,7 @@ const ROSTER_KEY = 'golfgames.roster.v1'
 const SETTINGS_KEY = 'golfgames.settings.v1'
 const GAME_OPTIONS_KEY = 'golfgames.gameOptions.v1'
 const COURSES_KEY = 'golfgames.courses.v1'
+const FAVORITE_COURSES_KEY = 'golfgames.favoriteCourses.v1'
 const DELETED_ROUNDS_KEY = 'golfgames.deletedRounds.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
@@ -270,6 +271,7 @@ export function saveCourse(course: Course): Course[] {
 export function deleteCourse(courseId: string): Course[] {
   const courses = loadCourses().filter((c) => c.id !== courseId)
   write(COURSES_KEY, courses)
+  saveFavoriteCourseIds(loadFavoriteCourseIds().filter((id) => id !== courseId))
   return courses
 }
 
@@ -280,6 +282,31 @@ export function findCourse(courseId: string): Course | undefined {
 /** Přepíše celý seznam hřišť - pro obnovu ze zálohy. */
 export function saveCourses(courses: Course[]): void {
   write(COURSES_KEY, courses.filter(isValidCourse).map(normalizeCourse))
+}
+
+/** Ids hřišť označených jako oblíbená; fungují i pro katalogová hřiště dosud bez kopie. */
+export function loadFavoriteCourseIds(): string[] {
+  const ids = read<unknown>(FAVORITE_COURSES_KEY)
+  if (!Array.isArray(ids)) return []
+  return [
+    ...new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0)),
+  ]
+}
+
+export function saveFavoriteCourseIds(ids: string[]): void {
+  write(FAVORITE_COURSES_KEY, [
+    ...new Set(ids.filter((id) => typeof id === 'string' && id.length > 0)),
+  ])
+}
+
+export function toggleFavoriteCourse(courseId: string): boolean {
+  if (!courseId) return false
+  const favorites = new Set(loadFavoriteCourseIds())
+  const wasFavorite = favorites.has(courseId)
+  if (wasFavorite) favorites.delete(courseId)
+  else favorites.add(courseId)
+  saveFavoriteCourseIds([...favorites])
+  return !wasFavorite
 }
 
 // --- seznam hráčů ---------------------------------------------------------

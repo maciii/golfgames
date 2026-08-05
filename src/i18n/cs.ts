@@ -459,6 +459,14 @@ export const cs = {
   'picker.errorBroken':
     'Katalog vrátil něco, čemu aplikace nerozumí. Hřiště uložená v telefonu fungují dál.',
   'picker.search': 'Hledat podle názvu nebo klubu',
+  'picker.sortNearest': 'Řadit podle vzdálenosti od mé polohy',
+  'picker.sortGrouped': 'Řadit podle skupin a abecedy',
+  'picker.country': 'Země',
+  'picker.allCountries': 'Všechny země',
+  'picker.locationUnavailable':
+    'Poloha není dostupná. Zobrazuji hřiště podle skupin a abecedy.',
+  'picker.addFavorite': 'Přidat hřiště {name} mezi oblíbená',
+  'picker.removeFavorite': 'Odebrat hřiště {name} z oblíbených',
   'picker.noCourseMeta': 'Pary se nastavují při hře, handicapy se nepočítají.',
   'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },
   'picker.tees': {

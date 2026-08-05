@@ -11,6 +11,7 @@ import {
   loadArchive,
   loadCourses,
   loadCurrentRound,
+  loadFavoriteCourseIds,
   loadRoster,
   loadSettings,
   normalizeRound,
@@ -18,6 +19,7 @@ import {
   saveArchive,
   saveCourses,
   saveCurrentRound,
+  saveFavoriteCourseIds,
   saveRoster,
   saveSettings,
 } from './storage'
@@ -52,6 +54,8 @@ export interface BackupData {
   settings: RoundSettings
   /** Volby bodování podle id hry. */
   gameOptions: Record<string, GameOptions>
+  /** Oblíbená hřiště podle stabilního id. */
+  favoriteCourseIds?: string[]
   /**
    * Uložená hřiště. Chybí v zálohách z verzí před jejich zavedením, proto se
    * schéma nezvedá - starší aplikace pole prostě přehlédne.
@@ -200,6 +204,11 @@ export function parseBackup(text: string): ParseResult {
   const courses = Array.isArray(data.courses)
     ? data.courses.filter(isValidCourse).map(normalizeCourse)
     : []
+  const favoriteCourseIds = Array.isArray(data.favoriteCourseIds)
+    ? data.favoriteCourseIds.filter(
+        (id): id is string => typeof id === 'string' && id.length > 0,
+      )
+    : []
 
   return {
     ok: true,
@@ -218,6 +227,7 @@ export function parseBackup(text: string): ParseResult {
             ? data.gameOptions
             : {},
         courses,
+        favoriteCourseIds: [...new Set(favoriteCourseIds)],
       },
     },
   }
@@ -245,6 +255,7 @@ export function createBackup(): BackupFile {
       settings: loadSettings(),
       gameOptions: loadAllGameOptions(),
       courses: loadCourses(),
+      favoriteCourseIds: loadFavoriteCourseIds(),
     },
   }
 }
@@ -259,6 +270,7 @@ export function createBackup(): BackupFile {
 export function applyBackup(backup: BackupFile, mode: ImportMode): ImportSummary {
   const localArchive = loadArchive()
   const localRoster = loadRoster()
+  const localFavoriteIds = loadFavoriteCourseIds()
 
   const archive =
     mode === 'replace'
@@ -273,10 +285,15 @@ export function applyBackup(backup: BackupFile, mode: ImportMode): ImportSummary
     mode === 'replace'
       ? backup.data.courses
       : mergeCourses(loadCourses(), backup.data.courses)
+  const favoriteCourseIds =
+    mode === 'replace'
+      ? (backup.data.favoriteCourseIds ?? [])
+      : [...new Set([...localFavoriteIds, ...(backup.data.favoriteCourseIds ?? [])])]
 
   saveArchive(archive)
   saveRoster(roster)
   saveCourses(courses)
+  saveFavoriteCourseIds(favoriteCourseIds)
 
   // Rozehrané kolo a předvolby přebíráme jen při náhradě, nebo když místně
   // žádné rozehrané kolo není - jinak by obnova smazala rozehranou hru.

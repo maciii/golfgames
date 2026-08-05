@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { hasNewerCatalogVersion, isCatalogCourse } from '../courses/types'
 import type { Course } from '../courses/types'
+import { distanceKm } from '../courses/geo'
 import type { CatalogEntry } from '../courses/catalog'
 import { CatalogError, fetchCourse, fetchIndex } from '../courses/catalog'
-import { loadCourses, saveCourse } from '../storage'
+import {
+  loadCourses,
+  loadFavoriteCourseIds,
+  saveCourse,
+  toggleFavoriteCourse,
+} from '../storage'
+import { localeTag } from '../i18n'
 import type { MessageKey } from '../i18n'
 import { useT } from '../i18n'
 
@@ -43,12 +50,49 @@ interface Row {
   meta: string
   stored: boolean
   status: CourseStatus
+  country?: string
+  distanceKm?: number
 }
 
 const CATALOG_ERROR: Record<CatalogError['reason'], MessageKey> = {
   offline: 'picker.errorOffline',
   missing: 'picker.errorMissing',
   broken: 'picker.errorBroken',
+}
+
+type LocationState = 'loading' | 'ready' | 'unavailable'
+
+interface GeoPoint {
+  latitude: number
+  longitude: number
+}
+
+function countryName(code: string, locale: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
+function courseGroup(row: Row, favorites: Set<string>): number {
+  if (row.status === 'private') return 0
+  if (favorites.has(row.id)) return 1
+  if (row.status === 'downloaded') return 2
+  return 3
+}
+
+function compareGroupedRows(a: Row, b: Row, favorites: Set<string>): number {
+  const groupDifference = courseGroup(a, favorites) - courseGroup(b, favorites)
+  if (groupDifference !== 0) return groupDifference
+  return a.name.localeCompare(b.name, localeTag(), { sensitivity: 'base' })
+}
+
+function compareNearbyRows(a: Row, b: Row, favorites: Set<string>): number {
+  const aDistance = a.distanceKm ?? Number.POSITIVE_INFINITY
+  const bDistance = b.distanceKm ?? Number.POSITIVE_INFINITY
+  if (aDistance !== bDistance) return aDistance - bDistance
+  return compareGroupedRows(a, b, favorites)
 }
 
 /** Obnoví uložené katalogové kopie, ale soukromá hřiště nechá offline. */
@@ -91,6 +135,31 @@ export default function CoursePickerScreen({
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => loadFavoriteCourseIds())
+  const [country, setCountry] = useState('')
+  const [nearestFirst, setNearestFirst] = useState(true)
+  const [location, setLocation] = useState<GeoPoint | null>(null)
+  const [locationState, setLocationState] = useState<LocationState>('loading')
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationState('unavailable')
+      setNearestFirst(false)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setLocation({ latitude: coords.latitude, longitude: coords.longitude })
+        setLocationState('ready')
+      },
+      () => {
+        setLocationState('unavailable')
+        setNearestFirst(false)
+      },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+    )
+  }, [])
 
   useEffect(() => {
     let live = true
@@ -113,9 +182,10 @@ export default function CoursePickerScreen({
     }
   }, [])
 
-  const rows = useMemo<Row[]>(() => {
-    const storedIds = new Set(stored.map((course) => course.id))
+  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds])
 
+  const allRows = useMemo<Row[]>(() => {
+    const storedIds = new Set(stored.map((course) => course.id))
     const fromStorage: Row[] = stored.map((course) => ({
       id: course.id,
       name: course.name,
@@ -131,6 +201,8 @@ export default function CoursePickerScreen({
         .join(' · '),
       stored: true,
       status: isCatalogCourse(course) ? 'downloaded' : 'private',
+      ...(course.country ? { country: course.country } : {}),
+      ...(location ? { distanceKm: distanceKm(location, course.lat, course.lon) } : {}),
     }))
 
     // Katalogové hřiště, které už je v telefonu, se nenabízí podruhé.
@@ -149,13 +221,37 @@ export default function CoursePickerScreen({
           .join(' · '),
         stored: false,
         status: 'catalog',
+        ...(entry.country ? { country: entry.country } : {}),
+        ...(location ? { distanceKm: distanceKm(location, entry.lat, entry.lon) } : {}),
       }))
 
-    const all = [...fromStorage, ...fromCatalog]
+    return [...fromStorage, ...fromCatalog].sort((a, b) =>
+      nearestFirst && location
+        ? compareNearbyRows(a, b, favoriteSet)
+        : compareGroupedRows(a, b, favoriteSet),
+    )
+  }, [catalog, favoriteSet, location, nearestFirst, stored, t])
+
+  const countries = useMemo(
+    () =>
+      [...new Set(allRows.flatMap((row) => (row.country ? [row.country] : [])))].sort(
+        (a, b) => countryName(a, localeTag()).localeCompare(countryName(b, localeTag())),
+      ),
+    [allRows],
+  )
+
+  const rows = useMemo(() => {
     const needle = foldText(query.trim())
-    if (!needle) return all
-    return all.filter((row) => foldText(`${row.name} ${row.meta}`).includes(needle))
-  }, [stored, catalog, query, t])
+    return allRows.filter((row) => {
+      if (country && row.country !== country) return false
+      return !needle || foldText(`${row.name} ${row.meta}`).includes(needle)
+    })
+  }, [allRows, country, query])
+
+  function toggleFavorite(rowId: string) {
+    toggleFavoriteCourse(rowId)
+    setFavoriteIds(loadFavoriteCourseIds())
+  }
 
   async function choose(row: Row) {
     if (row.stored) {
@@ -194,16 +290,49 @@ export default function CoursePickerScreen({
       </header>
 
       <main className="content">
-        <input
-          className="name-input"
-          type="search"
-          inputMode="search"
-          autoComplete="off"
-          placeholder={t('picker.search')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label={t('picker.search')}
-        />
+        <div className="picker-search-row">
+          <input
+            className="name-input"
+            type="search"
+            inputMode="search"
+            autoComplete="off"
+            placeholder={t('picker.search')}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label={t('picker.search')}
+          />
+          <button
+            type="button"
+            className={`location-sort-button${nearestFirst ? ' active' : ''}`}
+            onClick={() => setNearestFirst((value) => !value)}
+            aria-label={nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')}
+            aria-pressed={nearestFirst}
+            title={nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')}
+          >
+            ⌖
+          </button>
+        </div>
+
+        <label className="country-filter">
+          <span className="sr-only">{t('picker.country')}</span>
+          <select
+            className="name-input"
+            value={country}
+            onChange={(event) => setCountry(event.target.value)}
+            aria-label={t('picker.country')}
+          >
+            <option value="">{t('picker.allCountries')}</option>
+            {countries.map((code) => (
+              <option key={code} value={code}>
+                {countryName(code, localeTag())} ({code})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {locationState === 'unavailable' && (
+          <p className="hint">{t('picker.locationUnavailable')}</p>
+        )}
 
         {catalogError && <p className="notice error">{t(catalogError)}</p>}
 
@@ -222,27 +351,49 @@ export default function CoursePickerScreen({
           )}
 
           {rows.map((row) => (
-            <button
+            <div
               key={row.id}
-              type="button"
               className={`course-item${row.id === selectedId ? ' selected' : ''}`}
-              onClick={() => void choose(row)}
-              disabled={downloading !== null}
             >
-              <span className="course-item-name">
-                {row.name}
-                <span className={`course-item-tag course-item-tag-${row.status}`}>
-                  {row.status === 'catalog'
-                    ? downloading === row.id
-                      ? t('picker.downloading')
-                      : t('picker.inCatalog')
-                    : row.status === 'downloaded'
-                      ? t('picker.downloaded')
-                      : t('picker.privateCourse')}
+              <button
+                type="button"
+                className="course-item-main"
+                onClick={() => void choose(row)}
+                disabled={downloading !== null}
+              >
+                <span className="course-item-name">
+                  {row.name}
+                  <span className={`course-item-tag course-item-tag-${row.status}`}>
+                    {row.status === 'catalog'
+                      ? downloading === row.id
+                        ? t('picker.downloading')
+                        : t('picker.inCatalog')
+                      : row.status === 'downloaded'
+                        ? t('picker.downloaded')
+                        : t('picker.privateCourse')}
+                  </span>
                 </span>
-              </span>
-              <span className="course-item-meta">{row.meta}</span>
-            </button>
+                <span className="course-item-meta">{row.meta}</span>
+              </button>
+              <button
+                type="button"
+                className={`course-favorite${favoriteSet.has(row.id) ? ' active' : ''}`}
+                onClick={() => toggleFavorite(row.id)}
+                aria-label={
+                  favoriteSet.has(row.id)
+                    ? t('picker.removeFavorite', { name: row.name })
+                    : t('picker.addFavorite', { name: row.name })
+                }
+                aria-pressed={favoriteSet.has(row.id)}
+                title={
+                  favoriteSet.has(row.id)
+                    ? t('picker.removeFavorite', { name: row.name })
+                    : t('picker.addFavorite', { name: row.name })
+                }
+              >
+                {favoriteSet.has(row.id) ? '♥' : '♡'}
+              </button>
+            </div>
           ))}
 
           {rows.length === 0 && !loading && (

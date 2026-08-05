@@ -56,6 +56,13 @@ geohashe.
   **staženo** (lokální kopie katalogového hřiště) a **vlastní** (soukromé
   hřiště zadané uživatelem). Barevný odznak je prezentační, id hřiště zůstává
   stejné.
+- Výchozí řazení používá polohu zařízení a řadí hřiště od nejbližšího. Poloha
+  se používá jen v paměti pro výpočet vzdálenosti a nikam se neukládá ani
+  neposílá. Když ji prohlížeč neposkytne, řazení se přepne na soukromá,
+  oblíbená, stažená a nakonec katalogová hřiště, každou skupinu abecedně.
+- Srdíčkem lze označit oblíbené hřiště i před jeho stažením. Oblíbené id se
+  ukládají lokálně a jsou součástí JSON zálohy.
+- Nabídku lze omezit filtrem podle země.
 - Při otevření výběru se lokální katalogové kopie na pozadí porovnají s jejich
   centrální scorekartou. Pokud má vzdálený záznam novější `updatedAt`, kopie se
   sama uloží znovu; soukromá hřiště se nikdy nekontrolují ani neposílají na

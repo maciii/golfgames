@@ -7,6 +7,23 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.22.1] – 2026-08-05
+
+### Opraveno
+
+- **Černá odpaliště jsou lépe viditelná.** Volba má kontrastní světlý rámeček
+  a bílý obrys vzorníku, takže nezaniká na tmavém pozadí.
+
+## [0.22.0] – 2026-08-05
+
+### Přidáno
+
+- **Řazení hřišť podle polohy.** Výběr hřiště se standardně řadí od
+  nejbližšího; tlačítkem vedle hledání lze přepnout na skupiny a abecedu.
+- **Oblíbená hřiště.** Hřiště lze označit srdíčkem, oblíbená se ve skupinovém
+  řazení zobrazí před staženými kopiemi.
+- **Filtr zemí.** Seznam hřišť lze omezit na jednu zemi.
+
 ## [0.21.0] – 2026-08-05
 
 ### Změněno

@@ -419,6 +419,25 @@ button {
 
 .tee-option-black {
   --tee-color: #111827;
+  --tee-contrast: #f8fafc;
+  border-color: #64748b;
+}
+
+.tee-option-black:hover,
+.tee-option-black:focus-visible {
+  border-color: var(--tee-contrast);
+}
+
+.tee-option-black.selected {
+  border-color: var(--tee-contrast);
+  box-shadow:
+    inset 0 0 0 2px var(--tee-contrast),
+    0 0 0 1px var(--tee-color);
+}
+
+.tee-option-black .tee-swatch {
+  border: 2px solid var(--tee-contrast);
+  box-shadow: 0 0 0 1px var(--tee-color);
 }
 
 .tee-option-blue {
@@ -1730,6 +1749,60 @@ button {
   gap: 6px;
 }
 
+.picker-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picker-search-row .name-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.location-sort-button {
+  flex: 0 0 var(--tap);
+  width: var(--tap);
+  height: var(--tap);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.location-sort-button.active {
+  border-color: var(--accent);
+  background: var(--bg-input);
+  color: var(--accent);
+}
+
+.location-sort-button:focus-visible,
+.location-sort-button:hover {
+  border-color: var(--accent);
+}
+
+.country-filter {
+  display: block;
+}
+
+.country-filter .name-input {
+  width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .course-item {
   display: flex;
   flex-direction: column;
@@ -1740,6 +1813,12 @@ button {
   background: var(--bg-elevated);
   border: 1.5px solid transparent;
   min-height: var(--tap);
+}
+
+div.course-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .course-item.selected {
@@ -1755,6 +1834,36 @@ button {
 .course-item-meta {
   font-size: 13px;
   color: var(--text-dim);
+}
+
+.course-item-main {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  text-align: left;
+}
+
+.course-item-main:disabled {
+  opacity: 0.6;
+}
+
+.course-favorite {
+  flex: 0 0 var(--tap);
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 12px;
+  color: var(--text-dim);
+  font-size: 27px;
+  line-height: 1;
+}
+
+.course-favorite:hover,
+.course-favorite:focus-visible,
+.course-favorite.active {
+  color: var(--score-birdie);
 }
 
 /* Odznak u hřiště, které je zatím jen v katalogu a stáhne se až klepnutím. */
