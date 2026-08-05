@@ -45,7 +45,9 @@ export default defineConfig({
         start_url: base,
         scope: base,
         display: 'standalone',
-        orientation: 'portrait',
+        // Při zápisu se používá výška, ale otočení na šířku je rychlý
+        // náhled scorekarty. Pevné portrait by ho v nainstalované PWA blokovalo.
+        orientation: 'any',
         background_color: '#0f1c14',
         theme_color: '#0f1c14',
         icons: [

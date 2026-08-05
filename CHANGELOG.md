@@ -7,6 +7,21 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.17.0] – 2026-08-05
+
+### Přidáno
+
+- **Scorekarta po otočení telefonu.** Při rozehraném kole se na dotykovém
+  telefonu po otočení na šířku zobrazí živá scorekarta místo ovládání zápisu.
+  Aktuální jamka se zvýrazní a po otočení zpět se vrátí běžný zápis bez změny
+  skóre.
+- **Stableford a HCP v seznamu hráčů.** Uložený HCP index se ve Stablefordu
+  ukazuje vedle jména a po výběru hráče se předvyplní; platný nově zadaný index
+  se uloží i pro nového hráče.
+- **Stablefordové tečky ve scorekartě.** Netto scorekarta označuje rány k
+  dobru proti nejnižšímu hracímu handicapu ve flightu, rozdělené podle stroke
+  indexu jamky. Tečky jsou jen informační a nemění bodování.
+
 ## [0.16.1] – 2026-08-05
 
 ### Opraveno

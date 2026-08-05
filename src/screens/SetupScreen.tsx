@@ -8,7 +8,6 @@ import {
   loadSettings,
   removeFromRoster,
   saveSettings,
-  setRosterHandicap,
 } from '../storage'
 import type { Course } from '../courses/types'
 import { coursePar, findTee } from '../courses/types'
@@ -161,13 +160,17 @@ export default function SetupScreen({
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)))
   }
 
-  /** Klepnutí na uloženého hráče ho doplní do prvního volného políčka. */
-  function useRosterName(name: string) {
-    setNames((prev) => {
-      const slot = prev.slice(0, playerCount).findIndex((n) => !n.trim())
-      if (slot === -1) return prev
-      return prev.map((n, i) => (i === slot ? name : n))
-    })
+  /** Klepnutí na uloženého hráče doplní i jeho Stablefordový HCP index. */
+  function useRosterEntry(entry: RosterEntry) {
+    const slot = names.slice(0, playerCount).findIndex((name) => !name.trim())
+    if (slot === -1) return
+
+    setNames((prev) => prev.map((name, index) => (index === slot ? entry.name : name)))
+    if (gameId === 'stableford' && entry.handicapIndex !== undefined) {
+      setHandicapText((prev) =>
+        prev.map((value, index) => (index === slot ? `${entry.handicapIndex}` : value)),
+      )
+    }
   }
 
   function forgetPlayer(entry: RosterEntry) {
@@ -258,16 +261,6 @@ export default function SetupScreen({
           strokeIndex: [...course.strokeIndex],
         }
       : undefined
-
-    // Zadaný index si u hráče zapamatujeme, ať se příště nevyplňuje znovu.
-    if (handicapMode === 'index') {
-      for (let i = 0; i < playerCount; i++) {
-        const name = names[i]?.trim().toLowerCase()
-        const entry = roster.find((e) => e.name.trim().toLowerCase() === name)
-        const value = handicapValue(i)
-        if (entry && value !== undefined) setRosterHandicap(entry.id, value)
-      }
-    }
 
     const indexes = Array.from({ length: playerCount }, (_, i) =>
       handicapMode === 'index' ? handicapValue(i) : undefined,
@@ -406,7 +399,7 @@ export default function SetupScreen({
                     type="button"
                     className={`chip${rosterEditing ? ' removable' : ''}`}
                     onClick={() =>
-                      rosterEditing ? forgetPlayer(entry) : useRosterName(entry.name)
+                      rosterEditing ? forgetPlayer(entry) : useRosterEntry(entry)
                     }
                     aria-label={
                       rosterEditing
@@ -414,7 +407,12 @@ export default function SetupScreen({
                         : t('setup.addPlayer', { name: entry.name })
                     }
                   >
-                    {entry.name}
+                    {gameId === 'stableford' && entry.handicapIndex !== undefined
+                      ? t('setup.savedPlayerWithHandicap', {
+                          name: entry.name,
+                          handicap: entry.handicapIndex,
+                        })
+                      : entry.name}
                     {rosterEditing && <span className="chip-x">×</span>}
                   </button>
                 ))}

@@ -64,6 +64,7 @@ export const cs = {
   'setup.handicapStrokes': 'Rány',
   'setup.handicapFor': 'Handicap hráče {name}',
   'setup.noHandicap': 'bez HCP',
+  'setup.savedPlayerWithHandicap': '{name} · HCP {handicap}',
   'setup.strokesGiven': {
     one: '{count} rána',
     few: '{count} rány',
@@ -428,12 +429,18 @@ export const cs = {
   'stableford.netDetail': 'netto, HCP {handicap}',
   'stableford.column': 'B',
   'stableford.received': 'Rány',
+  'stableford.relativeStrokes': {
+    one: '{name}: {count} rána k dobru vůči nejlepšímu HCP',
+    few: '{name}: {count} rány k dobru vůči nejlepšímu HCP',
+    other: '{name}: {count} ran k dobru vůči nejlepšímu HCP',
+  },
   'stableford.headerNote': 'Body za jamku: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Netto body podle stroke indexu jamky.',
 
   // Zadání hřiště
   'scorecard.strokeIndex': 'Stroke index jamky',
   'scorecard.strokeIndexShort': 'SI',
+  'scorecard.title': 'Scorekarta',
 
   // Výběr hřiště
   'picker.title': 'Výběr hřiště',

@@ -5,7 +5,9 @@ implementovaná v samostatném souboru v `src/games/` a pokrytá testy vedle ně
 
 Společné pro všechny hry:
 
-- Zapisuje se **hrubé skóre** (počet ran). Handicapy se zatím nepoužívají.
+- Zapisuje se **hrubé skóre** (počet ran). Se zvoleným hřištěm lze zapnout
+  netto: hráči pak dostávají rány podle svého hracího handicapu a stroke indexu
+  jamky.
 - Par každé jamky se nastavuje při hře (3, 4 nebo 5), výchozí je 4.
 - Průběžné pořadí se počítá jen z jamek, které už mají zápis, takže tabulka
   dává smysl i uprostřed kola.
@@ -19,7 +21,7 @@ Společné pro všechny hry:
 - [Nastavení bodování hry](#nastavení-bodování-hry)
 - [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
 - [Značky výsledku na jamce](#značky-výsledku-na-jamce)
-- [Best Aggregate](#best-aggregate) · [Skins](#skins) · [Match play](#match-play)
+- [Best Aggregate](#best-aggregate) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
 - [Přidání další hry](#přidání-další-hry)
 
 ## Vzdaná jamka vs. nehraná jamka
@@ -41,6 +43,8 @@ Vzdaná jamka se tedy počítá, a to v neprospěch toho, kdo ji nedohrál:
   i ten.
 - **Skins** – kdo jamku vzdal, se o skin ucházet nemůže; skin bere nejnižší
   z těch, kdo dohráli.
+- **Stableford** – vzdaná jamka je nula bodů, stejně jako netto dvojbogey a
+  horší výsledek.
 - **Match play** – kdo jamku vzdal, ji prohrává.
 
 Při zápisu je vzdaný výsledek označený slovem „vzdáno“.
@@ -267,8 +271,9 @@ dekoraci hráčova výsledku (`scorecardPlayerCell`). Best Aggregate takhle
 ukazuje body dvojice na každé jamce; Skins označuje vítěze skinu podbarvením
 a rámečkem celé buňky a extra body zapisuje jako `+N` za výsledkem. Ve
 spodním řádku pod součtem ran scorekarta Skins zobrazuje `B` v češtině a `P`
-v angličtině. Nenulové extra body se zapisují jako `skiny + extra = celkem`;
-pokud jsou nulové, zobrazí se jen počet skinů.
+v angličtině. Stableford v netto hře přidává tečky za rány k dobru vůči
+nejnižšímu hracímu handicapu ve flightu. Nenulové extra body se zapisují jako
+`skiny + extra = celkem`; pokud jsou nulové, zobrazí se jen počet skinů.
 
 ---
 
@@ -354,6 +359,30 @@ započítají hráči, nebo se při horším než par nezapočítají.
 - **Dvojnásobná jamka** – do hry jde rovnou dvojnásobný skin, přenesený
   i vyhraný.
 - **Extra body** se počítají samostatně pro hráče a nemění bank skinů.
+
+---
+
+## Stableford
+
+**Hráči:** 2 až 4, každý sám za sebe
+**Soubor:** [`src/games/stableford.ts`](../src/games/stableford.ts)
+
+Za výsledek vůči paru dostane hráč par 2 body, birdie 3, eagle 4, bogey 1 a
+dvojbogey nebo horší 0 bodů. Vyhrává nejvyšší součet bodů; jedna zkažená jamka
+tak nemůže sebrat víc než dva body.
+
+Při zapnutém netto se od hrubého skóre odečtou rány podle hracího handicapu a
+stroke indexu jamky. HCP index uloženého hráče se při výběru do Stablefordu
+předvyplní a nové platné indexy se zapamatují pro příště. Při porovnání hráčů
+ukazuje scorekarta tečky za rozdíl jejich hracího handicapu proti nejnižšímu
+HCP ve flightu; tečky bodování nijak nemění.
+
+### Rozhodnutí tam, kde pravidla mlčí
+
+- **Vzdaná jamka** má nula bodů.
+- **Dvojnásobná jamka** násobí získané body.
+- **Tečky HCP** se rozdají po jamkách od nejtěžší podle stroke indexu; hráč s
+  nejnižším hracím HCP žádnou nedostane.
 
 ---
 

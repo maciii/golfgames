@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { Player, Round, ScoreCategory } from '../types'
 import {
   parAt,
@@ -101,8 +102,16 @@ function extraColumnClass(
     : `extra-col ${playerColumnToneClass(playerIndex)}`
 }
 
-export default function Scorecard({ round }: { round: Round }) {
+interface Props {
+  round: Round
+  /** Živý náhled na šířku schová pomocné prvky a drží aktuální jamku na očích. */
+  mode?: 'results' | 'live'
+}
+
+export default function Scorecard({ round, mode = 'results' }: Props) {
   const t = useT()
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const currentHoleRef = useRef<HTMLTableRowElement>(null)
   const game = getGame(round.gameId)
   const extras = game.scorecardColumns?.(round) ?? []
   const columns = buildColumns(round, extras)
@@ -138,10 +147,25 @@ export default function Scorecard({ round }: { round: Round }) {
   const groupedSpan = teamGroups.reduce((sum, g) => sum + g.span, 0)
   const ungrouped = columns.length - groupedSpan
 
+  useEffect(() => {
+    if (mode !== 'live') return
+
+    const wrap = wrapRef.current
+    const row = currentHoleRef.current
+    if (!wrap || !row) return
+
+    wrap.scrollTop = Math.max(
+      0,
+      row.offsetTop - (wrap.clientHeight - row.offsetHeight) / 2,
+    )
+  }, [mode, round.currentHole])
+
   return (
-    <section className="section">
-      <h2 className="section-title">Scorecard</h2>
-      <div className="scorecard-wrap">
+    <section
+      className={`section scorecard-section${mode === 'live' ? ' scorecard-live' : ''}`}
+    >
+      {mode === 'results' && <h2 className="section-title">{t('scorecard.title')}</h2>}
+      <div ref={wrapRef} className="scorecard-wrap">
         <table className="scorecard">
           <thead>
             {teamGroups.length > 0 && (
@@ -190,7 +214,19 @@ export default function Scorecard({ round }: { round: Round }) {
           </thead>
           <tbody>
             {Array.from({ length: round.holeCount }, (_, hole) => (
-              <tr key={hole}>
+              <tr
+                key={hole}
+                ref={
+                  mode === 'live' && hole === round.currentHole
+                    ? currentHoleRef
+                    : undefined
+                }
+                className={
+                  mode === 'live' && hole === round.currentHole
+                    ? 'current-hole'
+                    : undefined
+                }
+              >
                 <th scope="row">{hole + 1}</th>
                 <td className="par-cell">{parAt(round, hole)}</td>
                 {showStrokeIndex && (
@@ -306,14 +342,16 @@ export default function Scorecard({ round }: { round: Round }) {
         </table>
       </div>
 
-      <ul className="legend">
-        {LEGEND_EXAMPLES.map(([category, example]) => (
-          <li key={category}>
-            <span className={`mark ${category}`}>{example}</span>
-            {t(dynamicKey('score', category))}
-          </li>
-        ))}
-      </ul>
+      {mode === 'results' && (
+        <ul className="legend">
+          {LEGEND_EXAMPLES.map(([category, example]) => (
+            <li key={category}>
+              <span className={`mark ${category}`}>{example}</span>
+              {t(dynamicKey('score', category))}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

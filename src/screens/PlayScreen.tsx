@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { BonusId, Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
@@ -22,12 +22,32 @@ import {
 import { getGame } from '../games'
 import { strokesReceived } from '../handicap'
 import BonusSheet from './BonusSheet'
+import Scorecard from './Scorecard'
 import { useT } from '../i18n'
 
 const PAR_OPTIONS = [3, 4, 5]
 
 /** Jak dlouho se drží číslo, než se zápis smaže. */
 const LONG_PRESS_MS = 500
+const MOBILE_LANDSCAPE_QUERY =
+  '(orientation: landscape) and (pointer: coarse) and (max-height: 600px)'
+
+/** Na desktopu zůstává zápis skóre vždy viditelný, i když je okno široké. */
+function useMobileLandscape(): boolean {
+  const [matches, setMatches] = useState(
+    () => window.matchMedia(MOBILE_LANDSCAPE_QUERY).matches,
+  )
+
+  useEffect(() => {
+    const media = window.matchMedia(MOBILE_LANDSCAPE_QUERY)
+    const onChange = () => setMatches(media.matches)
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
+  return matches
+}
 
 interface Props {
   round: Round
@@ -65,6 +85,7 @@ export default function PlayScreen({
   })
   // Hráč, pro kterého je otevřený výběr extra bodů.
   const [bonusFor, setBonusFor] = useState<Player | null>(null)
+  const showLandscapeScorecard = useMobileLandscape()
   const game = getGame(round.gameId)
   const hole = round.currentHole
   const par = parAt(round, hole)
@@ -77,6 +98,12 @@ export default function PlayScreen({
   const hasBonusOptions = game.scoringOptions.bonusIds.length > 0
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
+
+  useEffect(() => {
+    // Výběr bonusu by v přehledu překryl scorekartu a nejde v něm pokračovat
+    // bez návratu k ovládání zápisu.
+    if (showLandscapeScorecard) setBonusFor(null)
+  }, [showLandscapeScorecard])
 
   /**
    * Z prázdné buňky zapíše "+" bogey a "−" birdie; par se vkládá klepnutím
@@ -241,6 +268,14 @@ export default function PlayScreen({
           </button>
         </div>
       </li>
+    )
+  }
+
+  if (showLandscapeScorecard) {
+    return (
+      <div className="landscape-scorecard">
+        <Scorecard round={round} mode="live" />
+      </div>
     )
   }
 

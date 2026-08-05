@@ -120,6 +120,30 @@ export function strokesReceived(round: Round, playerId: PlayerId, hole: number):
 }
 
 /**
+ * Rány k dobru proti hráči s nejnižším hracím handicapem ve flightu.
+ *
+ * Stableford se boduje z plného vlastního HCP vůči paru, ale při společné hře
+ * se rozdíl handicapů tradičně zapisuje tečkami. Tečky proto nesmí měnit
+ * skóre ani body - jsou jen srozumitelným vysvětlením vzájemné výhody.
+ */
+export function strokesRelativeToBest(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+): number {
+  if (!isNetRound(round)) return 0
+
+  const bestHandicap = Math.min(
+    ...round.players.map((player) => player.playingHandicap ?? 0),
+  )
+  const difference = playingHandicap(round, playerId) - bestHandicap
+  if (difference <= 0) return 0
+
+  const strokeIndex = roundStrokeIndex(round)[hole] ?? hole + 1
+  return strokesForHole(difference, strokeIndex, round.holeCount)
+}
+
+/**
  * Netto rány hráče na jamce; null, dokud jamku nezapsal.
  *
  * U hrubého kola vrací zapsané skóre beze změny - hry proto můžou volat tuhle

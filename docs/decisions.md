@@ -425,12 +425,34 @@ počtem plateb. Optimalizace nemění žádný zůstatek, pouze slučuje převod
 
 ---
 
+## 23. Landscape je živý přehled scorekarty
+
+**Rozhodnutí.** Při rozehraném kole telefon na šířku nahradí ovládání zápisu
+živou scorekartou pouze pro čtení. Návrat na výšku okamžitě vrátí zápis na
+stejné jamce.
+
+**Proč.** Na šířku se tabulka vejde výrazně lépe než velká tlačítka pro zápis;
+naopak přímé úpravy buněk by přidaly malé ovladače a riziko nechtěného zápisu.
+Aktuální jamka se proto ve scorekartě zvýrazní a automaticky posune do středu.
+
+---
+
+## 24. Stablefordové tečky ukazují relativní HCP
+
+**Rozhodnutí.** HCP index se pamatuje u uloženého hráče a při výběru do
+Stablefordu se předvyplní. Tečky ve scorekartě ukazují rozdíl hracího HCP
+hráče vůči nejnižšímu hracímu HCP ve flightu, rozdělený podle stroke indexu.
+
+**Proč.** Samotné Stablefordové body se počítají z vlastního plného HCP vůči
+paru. Relativní tečky jsou jen srozumitelná informace pro společnou hru a
+neměly by nenápadně měnit už zavedené bodování.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
 
-- **Handicapy.** Zapisuje se jen hrubé skóre. Netto výsledky by znamenaly HCP
-  u hráče, HCP jamky (SI) a přepočet ve všech hrách.
 - **Extra body v dalších hrách.** Best Aggregate a Skins je vyhodnocují,
   Match play je záměrně nepoužívá. Nová hra musí rozsah deklarovat přes
   `GameDefinition.scoringOptions`.

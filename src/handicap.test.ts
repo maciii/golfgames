@@ -5,6 +5,7 @@ import {
   stablefordPoints,
   strokesForHole,
   strokesReceived,
+  strokesRelativeToBest,
   netDiffToPar,
 } from './handicap'
 import { makeRound } from './games/fixtures'
@@ -169,5 +170,20 @@ describe('výpočty nad kolem', () => {
   it('hráč bez zadaného handicapu hraje hrubě i v netto kole', () => {
     const round = netRound(2, [5, 4, 6])
     expect(strokesReceived(round, 'p2', 0)).toBe(0)
+  })
+
+  it('rozdíl vůči nejnižšímu HCP rozdělí podle stroke indexu', () => {
+    // Anna má proti Bobovi o dvě rány k dobru, proto je dostane na SI 1 a 2.
+    const round = netRound(2, [5, 4, 6])
+    expect(strokesRelativeToBest(round, 'p1', 0)).toBe(1)
+    expect(strokesRelativeToBest(round, 'p1', 1)).toBe(0)
+    expect(strokesRelativeToBest(round, 'p1', 2)).toBe(1)
+    expect(strokesRelativeToBest(round, 'p2', 0)).toBe(0)
+  })
+
+  it('relativní rány u hrubého kola nezobrazuje', () => {
+    const round = netRound(2, [5, 4, 6])
+    round.netScoring = false
+    expect(strokesRelativeToBest(round, 'p1', 0)).toBe(0)
   })
 })

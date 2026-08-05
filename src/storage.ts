@@ -294,17 +294,38 @@ export function loadRoster(): RosterEntry[] {
 /**
  * Doplní jména do seznamu hráčů. Volá se při startu kola, takže spoluhráči
  * přibývají sami a nikde se nemusí zakládat ručně. Duplicity (bez ohledu na
- * velikost písmen) se ignorují.
+ * velikost písmen) se ignorují, ale nově zadaný HCP index se u nich obnoví.
  */
-export function addToRoster(names: string[]): RosterEntry[] {
+export function addToRoster(
+  names: string[],
+  handicapIndexes?: (number | undefined)[],
+): RosterEntry[] {
   const roster = loadRoster()
-  const known = new Set(roster.map((e) => e.name.trim().toLowerCase()))
 
-  for (const raw of names) {
+  for (const [index, raw] of names.entries()) {
     const name = raw.trim()
-    if (!name || known.has(name.toLowerCase())) continue
-    known.add(name.toLowerCase())
-    roster.push({ id: `r${Date.now()}${Math.random().toString(36).slice(2, 6)}`, name })
+    if (!name) continue
+
+    const handicapIndex = handicapIndexes?.[index]
+    const storedIndex =
+      typeof handicapIndex === 'number' && Number.isFinite(handicapIndex)
+        ? handicapIndex
+        : undefined
+    const known = roster.find(
+      (entry) => entry.name.trim().toLowerCase() === name.toLowerCase(),
+    )
+
+    if (known) {
+      // Prázdný nebo ručně zadaný počet ran nesmí přepsat uložený HCP index.
+      if (storedIndex !== undefined) known.handicapIndex = storedIndex
+      continue
+    }
+
+    roster.push({
+      id: `r${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
+      name,
+      ...(storedIndex !== undefined ? { handicapIndex: storedIndex } : {}),
+    })
   }
 
   const sorted = roster.sort((a, b) => a.name.localeCompare(b.name, localeTag()))

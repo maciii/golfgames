@@ -1046,6 +1046,40 @@ button {
   background: var(--bg-elevated);
 }
 
+/* Řádek aktuální jamky je v živé scorekartě rychlým bodem orientace. */
+.scorecard tr.current-hole > th,
+.scorecard tr.current-hole > td {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* Landscape náhled se vykreslí jen z PlayScreen na dotykovém telefonu. */
+.landscape-scorecard {
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.landscape-scorecard .scorecard-section {
+  height: 100%;
+  min-height: 100dvh;
+}
+
+.scorecard-live .scorecard-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.scorecard-live .scorecard th,
+.scorecard-live .scorecard td {
+  padding: 5px 3px;
+}
+
+.scorecard-live .mark {
+  width: 22px;
+  height: 22px;
+}
+
 .scorecard {
   width: 100%;
   border-collapse: collapse;

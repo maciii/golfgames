@@ -58,6 +58,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.handicapStrokes': 'Strokes',
   'setup.handicapFor': 'Handicap for {name}',
   'setup.noHandicap': 'no HCP',
+  'setup.savedPlayerWithHandicap': '{name} · HCP {handicap}',
   'setup.strokesGiven': { one: '{count} stroke', other: '{count} strokes' },
   'setup.handicapHintRated':
     'The playing handicap is calculated from the {tee} tee rating (CR {cr}, SR {sr}).',
@@ -408,12 +409,17 @@ export const en: Record<MessageKey, Message> = {
   'stableford.netDetail': 'net, HCP {handicap}',
   'stableford.column': 'P',
   'stableford.received': 'Strokes',
+  'stableford.relativeStrokes': {
+    one: '{name}: {count} stroke received from the best HCP',
+    other: '{name}: {count} strokes received from the best HCP',
+  },
   'stableford.headerNote': 'Points per hole: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Net points based on the stroke index of the hole.',
 
   // Course editor
   'scorecard.strokeIndex': 'Stroke index of the hole',
   'scorecard.strokeIndexShort': 'SI',
+  'scorecard.title': 'Scorecard',
 
   // Course picker
   'picker.title': 'Choose a course',

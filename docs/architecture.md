@@ -296,18 +296,18 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 
 ## Obrazovky
 
-| Soubor                   | Co dělá                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek; vstup do nastavení hry |
-| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola       |
-| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                             |
-| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby           |
-| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                 |
-| `Scorecard.tsx`          | tabulka se značkami skóre a vlastními sloupci hry               |
-| `ArchiveScreen.tsx`      | seznam odehraných kol                                           |
-| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                        |
-| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat              |
-| `PrivacyScreen.tsx`      | zásady zpracování údajů                                         |
+| Soubor                   | Co dělá                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek; vstup do nastavení hry                                  |
+| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta |
+| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                              |
+| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                            |
+| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                  |
+| `Scorecard.tsx`          | tabulka se značkami skóre a vlastními sloupci hry                                                |
+| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                            |
+| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                         |
+| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                               |
+| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                          |
 
 ### Ovládání zápisu skóre
 

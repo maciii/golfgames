@@ -141,6 +141,33 @@ describe('netto', () => {
     round.netScoring = false
     expect(totalPoints(round, 'p1')).toBe(totalPoints(round, 'p2'))
   })
+
+  it('ve scorekartě označí jen rány k dobru proti nejlepšímu HCP', () => {
+    const round = withNet(
+      makeStableford([
+        [5, 4, 6],
+        [5, 4, 6],
+      ]),
+      { Anna: 2, Bob: 0 },
+    )
+
+    expect(stableford.scorecardPlayerCell?.(round, 'p1', 0)?.suffix?.text).toBe('•')
+    expect(stableford.scorecardPlayerCell?.(round, 'p1', 1)).toEqual({})
+    expect(stableford.scorecardPlayerCell?.(round, 'p1', 2)?.suffix?.text).toBe('•')
+    expect(stableford.scorecardPlayerCell?.(round, 'p2', 0)).toEqual({})
+  })
+
+  it('zobrazí více teček, když rozdíl HCP přesáhne počet jamek', () => {
+    const round = withNet(
+      makeStableford([
+        [5, 4, 6],
+        [5, 4, 6],
+      ]),
+      { Anna: 6, Bob: 0 },
+    )
+
+    expect(stableford.scorecardPlayerCell?.(round, 'p1', 0)?.suffix?.text).toBe('••')
+  })
 })
 
 describe('výsledková tabulka', () => {
