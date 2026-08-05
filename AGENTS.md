@@ -139,6 +139,7 @@ src/
   storage.ts   localStorage: rozehrané kolo, archiv, hráči, předvolby
   money.ts     přepočet bodů na peníze
   backup.ts    export a import dat do souboru JSON
+  pwa.ts       detekce standalone režimu a instalace PWA na plochu
   sync/        nepovinná záloha do Firestore (líné načtení SDK)
   i18n/        překlady: cs.ts je zdroj pravdy pro klíče, en.ts musí sedět
   games/       pravidla her (GameDefinition), registr v index.ts

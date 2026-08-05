@@ -11,12 +11,13 @@ zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 
 ## Hry
 
-| Hra               | Hráči              | Princip                                         |
-| ----------------- | ------------------ | ----------------------------------------------- |
-| **Best + Součet** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
-| **Skins**         | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
-| **Match play**    | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
-| **Stableford**    | 1–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
+| Hra                           | Hráči                 | Princip                                         |
+| ----------------------------- | --------------------- | ----------------------------------------------- |
+| **Best + Součet**             | 4 (dvě dvojice)       | Body za lepší míč, nižší součet, birdie a eagle |
+| **Levá-Pravá (Kraje-Středy)** | 4 (dynamické dvojice) | Best + Součet, nové dvojice na každé jamce      |
+| **Skins**                     | 2–4 jednotlivci       | Skiny a extra body pro každého hráče            |
+| **Match play**                | 2 nebo 4 (dvojice)    | Zápas na jamky, ne na rány                      |
+| **Stableford**                | 1–4 jednotlivci       | Body za jamku, hrubě i netto s handicapem       |
 
 Přesné vyhodnocení včetně okrajových situací popisuje
 [`docs/games.md`](docs/games.md).
@@ -29,8 +30,16 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Extra body** – dvojnásobná sázka, longest, nearest, bunker, double bunker,
   water, barkie, arnie. Volby se nastavují zvlášť pro každou hru; týmové hry
   připisují bonus celé dvojici, Skins hráči, který ho uhrál
-- **Longest a Nearest s potvrzením** – kdo je zapsal, musí jamku dohrát na par
-  nebo líp, jinak bod propadá soupeřům; barva značky u jména to hlásí průběžně
+- **Levá-Pravá (Kraje-Středy)** – před každou jamkou se jedním klepnutím vybere
+  jedna ze tří kombinací dvojic. Dvojice lze kdykoli změnit a skóre se podle
+  nového složení okamžitě přepočítá; scorekarta označí skóre i body vybrané
+  dvojice společným žlutým rámečkem
+- **Skins s potvrzením parem** – volitelná varianta vyžaduje, aby vítěz jamky
+  zahrál na další jamce alespoň par; čekající výhra se zobrazí jako „Rezervuje:
+  hráč“ a při bogey se vrátí do banku
+- **Longest a Nearest s potvrzením** – v týmových hrách při horším výsledku bod
+  propadá soupeřům, ve Skins se bonus nezapočítá; v kole s HCP se Longest řídí
+  osobním parem a Nearest hrubým parem
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
 - **Průběžné skóre v hlavičce** – každá hra ukazuje svůj stav u aktuální jamky;
   Match play navíc hlásí náskok, dormie, zbývající jamky a jamky mimo hru po
@@ -72,15 +81,20 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 
 1. Otevřít adresu aplikace v **Safari** (jiné prohlížeče na iOS instalaci na
    plochu nenabízejí).
-2. Tlačítko _Sdílet_ → **Přidat na plochu**.
-3. Spouštět z ikony – aplikace běží na celou obrazovku bez adresního řádku.
+2. Na úvodní obrazovce klepnout na **Přidat Golf Games na plochu**.
+3. V návodu aplikace klepnout na _Sdílet_ → **Přidat na plochu**.
+4. Spouštět z ikony – aplikace běží na celou obrazovku bez adresního řádku.
 
 **Android**
 
 1. Otevřít adresu v **Chrome**.
-2. Přijmout nabídku _Nainstalovat aplikaci_, nebo v nabídce ⋮ zvolit
-   **Přidat na plochu**.
-3. Aplikace se nainstaluje jako WebAPK s vlastní ikonou v seznamu aplikací.
+2. Na úvodní obrazovce klepnout na **Přidat Golf Games na plochu**.
+3. Potvrdit nativní nabídku instalace. Když se nezobrazí, otevřít nabídku ⋮ a
+   zvolit **Instalovat aplikaci** nebo **Přidat na plochu**.
+4. Aplikace se nainstaluje jako WebAPK s názvem **Golf Games** a vlastní ikonou.
+
+Tlačítko se v nainstalované aplikaci nezobrazuje náhodou – instalace přidá ikonu
+na plochu, otevře aplikaci bez adresního řádku a zachová offline provoz.
 
 ## Proč PWA
 

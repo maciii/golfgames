@@ -65,6 +65,7 @@ src/
     sync.ts           pull/push a fronta neodeslaných změn
     AccountContext.tsx  stav účtu a synchronizace pro celou aplikaci
   version.ts          verze vpečená při buildu
+  pwa.ts              detekce standalone režimu a instalace PWA na plochu
   styles.css          jediný stylopis, barvy jako CSS proměnné
   games/              pravidla jednotlivých her
     types.ts          rozhraní GameDefinition + řazení pořadí

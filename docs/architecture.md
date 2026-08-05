@@ -13,8 +13,8 @@ Doplňující čtení:
 
 ## Co to je
 
-PWA pro zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých
-typů golfových her (Best + Součet, Levá-Pravá, Skins, Match play) včetně peněžního
+PWA pro zápis golfového skóre po jamkách pro 1–4 hráče a vyhodnocení různých
+typů golfových her (Best + Součet, Levá-Pravá, Skins, Stableford, Match play) včetně peněžního
 vyrovnání sázky.
 
 Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
@@ -424,6 +424,8 @@ Podrobný výpočet i příklad je v [`games.md`](games.md#jak-se-počítají-pe
   buildem, v CI se přeskakuje.
 - **PWA** zajišťuje `vite-plugin-pwa` (`registerType: 'autoUpdate'`), workbox
   předcachuje všechno a `navigateFallback` drží aplikaci funkční offline.
+  Úvodní obrazovka nabízí instalaci na plochu; Android použije nativní prompt,
+  iPhone zobrazí návod Safari.
 - **`base`** se bere z `BASE_PATH` (výchozí `/`), protože aplikace běží na
   vlastní doméně. Bez ní by GitHub Pages potřebovaly `/golfgames/`.
 - **CI** (`.github/workflows/deploy.yml`) na každém pushi pustí typy, testy
@@ -456,6 +458,7 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | Chci změnit…                     | Soubor                                  |
 | -------------------------------- | --------------------------------------- |
 | bodování Best + Součet           | `src/games/bestAggregate.ts`            |
+| PWA instalace a režim            | `src/pwa.ts`                            |
 | chování vzdané jamky             | `src/games/shared.ts` + konkrétní hra   |
 | seznam extra bodů, jejich značky | `src/types.ts` (`BONUSES`)              |
 | výchozí hodnoty a násobiče       | `src/types.ts` (`DEFAULT_GAME_OPTIONS`) |

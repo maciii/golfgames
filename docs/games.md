@@ -440,8 +440,8 @@ vybere jedna ze tří možných dvojic podle toho, kam hráči zahráli první r
 odpaliště: vlevo nebo vpravo. Na každé straně jsou právě dva hráči; teprve
 potom aplikace povolí zápis skóre.
 
-Volba dvojic má tři tlačítka se jmény hráčů, stejně jako výběr dvojic u Best
-Aggregate. Jedním klepnutím se uloží celé složení jamky.
+Volba dvojic má tři tlačítka se jmény hráčů, stejně jako výběr dvojic u Best +
+Součet. Jedním klepnutím se uloží celé složení jamky.
 
 | Za co                                              | Body          |
 | -------------------------------------------------- | ------------- |
@@ -472,8 +472,8 @@ u Best + Součet.
   zůstávají a body jamky se okamžitě přepočítají podle nového složení.
 - **Uložení** – přiřazení se ukládá pro každou jamku zvlášť v `Round.holePairings`;
   změna dvojic na jedné jamce neovlivní žádnou jinou.
-- **Vzdaná jamka** – po dokončení dvojic se řídí stejným pravidlem jako Best
-  Aggregate; chybějící výsledek je vzdaný míč.
+- **Vzdaná jamka** – po dokončení dvojic se řídí stejným pravidlem jako Best +
+  Součet; chybějící výsledek je vzdaný míč.
 
 ---
 
