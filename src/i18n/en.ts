@@ -45,6 +45,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.course': 'Course',
   'setup.courseChoice': 'Course',
   'setup.noCourse': 'No course',
+  'setup.chooseCourse': 'Choose a course',
   'setup.newCourse': 'New course',
   'setup.editCourse': 'Edit course',
   'setup.tee': 'Tee',
@@ -413,6 +414,16 @@ export const en: Record<MessageKey, Message> = {
   // Course editor
   'scorecard.strokeIndex': 'Stroke index of the hole',
   'scorecard.strokeIndexShort': 'SI',
+
+  // Course picker
+  'picker.title': 'Choose a course',
+  'picker.count': { one: '{count} saved course', other: '{count} saved courses' },
+  'picker.search': 'Search by name or club',
+  'picker.noCourseMeta': 'Pars are set while playing, handicaps are not used.',
+  'picker.holes': { one: '{count} hole', other: '{count} holes' },
+  'picker.tees': { one: '{count} tee', other: '{count} tees' },
+  'picker.noTees': 'no tees',
+  'picker.nothingFound': 'Nothing found. Try another name, or add the course manually.',
 
   'course.newTitle': 'New course',
   'course.editTitle': 'Edit course',

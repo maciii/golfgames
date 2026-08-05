@@ -1581,3 +1581,38 @@ button {
   color: var(--text-dim);
   font-size: 13px;
 }
+
+/* --- výběr hřiště -------------------------------------------------------- */
+
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.course-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1.5px solid transparent;
+  min-height: var(--tap);
+}
+
+.course-item.selected {
+  border-color: var(--accent);
+  background: var(--bg-input);
+}
+
+.course-item-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.course-item-meta {
+  font-size: 13px;
+  color: var(--text-dim);
+}

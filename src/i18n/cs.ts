@@ -51,6 +51,7 @@ export const cs = {
   'setup.course': 'Hřiště',
   'setup.courseChoice': 'Hřiště',
   'setup.noCourse': 'Bez hřiště',
+  'setup.chooseCourse': 'Vybrat hřiště',
   'setup.newCourse': 'Nové hřiště',
   'setup.editCourse': 'Upravit hřiště',
   'setup.tee': 'Odpaliště',
@@ -433,6 +434,24 @@ export const cs = {
   // Zadání hřiště
   'scorecard.strokeIndex': 'Stroke index jamky',
   'scorecard.strokeIndexShort': 'SI',
+
+  // Výběr hřiště
+  'picker.title': 'Výběr hřiště',
+  'picker.count': {
+    one: '{count} uložené hřiště',
+    few: '{count} uložená hřiště',
+    other: '{count} uložených hřišť',
+  },
+  'picker.search': 'Hledat podle názvu nebo klubu',
+  'picker.noCourseMeta': 'Pary se nastavují při hře, handicapy se nepočítají.',
+  'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },
+  'picker.tees': {
+    one: '{count} odpaliště',
+    few: '{count} odpaliště',
+    other: '{count} odpališť',
+  },
+  'picker.noTees': 'bez odpališť',
+  'picker.nothingFound': 'Nic nenalezeno. Zkus jiný název, nebo hřiště přidej ručně.',
 
   'course.newTitle': 'Nové hřiště',
   'course.editTitle': 'Úprava hřiště',

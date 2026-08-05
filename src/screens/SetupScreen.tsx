@@ -53,6 +53,8 @@ interface Props {
   onOpenAccount: () => void
   /** Otevře zadání hřiště; bez id se zakládá nové. */
   onEditCourse: (courseId?: string) => void
+  /** Otevře výběr hřiště s hledáním. */
+  onPickCourse: () => void
   /** Hřiště předvybrané po návratu ze zadání. */
   selectedCourseId?: string
   archiveCount: number
@@ -66,6 +68,7 @@ export default function SetupScreen({
   onOpenBackup,
   onOpenAccount,
   onEditCourse,
+  onPickCourse,
   selectedCourseId,
   archiveCount,
 }: Props) {
@@ -93,7 +96,9 @@ export default function SetupScreen({
   // Obrazovka se při odchodu na zadání hřiště odpojí, takže seznam stačí načíst
   // při připojení - po návratu je stejně nový.
   const [courses] = useState<Course[]>(() => loadCourses())
-  const [courseId, setCourseId] = useState<string>(selectedCourseId ?? '')
+  // Výběr hřiště se děje na vlastní obrazovce, takže sem přichází hotový
+  // zvenčí; obrazovka se mezitím odpojí a stav se stejně staví znovu.
+  const courseId = selectedCourseId ?? ''
   // Prázdné id znamená "první odpaliště"; findTee() na něj spadne sám.
   const [teeId, setTeeId] = useState<string>('')
   const [netScoring, setNetScoring] = useState(false)
@@ -177,18 +182,6 @@ export default function SetupScreen({
       .filter(Boolean),
   )
   const available = roster.filter((entry) => !used.has(entry.name.trim().toLowerCase()))
-
-  function selectCourse(id: string) {
-    setCourseId(id)
-    const next = courses.find((c) => c.id === id)
-    if (!next) {
-      setNetScoring(false)
-      return
-    }
-    setTeeId(findTee(next)?.id ?? '')
-    // Počet jamek určuje hřiště - jiný by znamenal pary a SI mimo rozsah.
-    setHoleCount(next.holeCount)
-  }
 
   /** Zadaná hodnota u hráče; prázdné pole znamená "hraje bez handicapu". */
   function handicapValue(index: number): number | undefined {
@@ -493,24 +486,11 @@ export default function SetupScreen({
         <section className="section">
           <h2 className="section-title">{t('setup.course')}</h2>
 
-          <label className="field">
-            <span className="field-label">{t('setup.courseChoice')}</span>
-            <span className="field-input">
-              <select
-                className="name-input"
-                value={courseId}
-                onChange={(e) => selectCourse(e.target.value)}
-                aria-label={t('setup.courseChoice')}
-              >
-                <option value="">{t('setup.noCourse')}</option>
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </label>
+          {/* Se třemi stovkami naimportovaných hřišť se v rozbalovací nabídce
+              nedá nic najít, takže výběr má vlastní obrazovku s hledáním. */}
+          <button type="button" className="secondary-button" onClick={onPickCourse}>
+            {course ? course.name : t('setup.chooseCourse')}
+          </button>
 
           <div className="link-row">
             <button type="button" className="link-button" onClick={() => onEditCourse()}>

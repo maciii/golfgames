@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.14.2] – 2026-08-05
+
+### Přidáno
+
+- **Výběr hřiště má vlastní obrazovku s hledáním.** Vyhledává se podle názvu,
+  klubu i země a nezáleží na diakritice – „karlstejn" najde Karlštejn.
+  Rozbalovací nabídka přestala stačit ve chvíli, kdy si šlo naimportovat
+  tři stovky hřišť.
+- `data/hriste.json` – sada 307 hřišť (107 českých, 21 slovenských) k importu
+  přes _Záloha dat → Obnovit ze zálohy_, viz [`data/README.md`](data/README.md).
+- `npm run check:courses` – kontrola sady hřišť; odděluje chyby, které by
+  rozbily výpočty, od podezření k ověření.
+
 ## [0.14.1] – 2026-08-04
 
 ### Opraveno

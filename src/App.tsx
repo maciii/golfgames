@@ -18,6 +18,7 @@ import BackupScreen from './screens/BackupScreen'
 import AccountScreen from './screens/AccountScreen'
 import PrivacyScreen from './screens/PrivacyScreen'
 import CourseEditScreen from './screens/CourseEditScreen'
+import CoursePickerScreen from './screens/CoursePickerScreen'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 
@@ -31,6 +32,7 @@ type View =
   | 'account'
   | 'privacy'
   | 'courseEdit'
+  | 'coursePicker'
 
 /**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
@@ -173,6 +175,23 @@ function AppShell() {
     )
   }
 
+  if (view === 'coursePicker') {
+    return (
+      <CoursePickerScreen
+        {...(selectedCourseId ? { selectedId: selectedCourseId } : {})}
+        onSelect={(course) => {
+          setSelectedCourseId(course?.id)
+          setView('setup')
+        }}
+        onNewCourse={() => {
+          setEditingCourseId(null)
+          setView('courseEdit')
+        }}
+        onBack={() => setView('setup')}
+      />
+    )
+  }
+
   if (view === 'courseEdit') {
     const editing = editingCourseId ? findCourse(editingCourseId) : undefined
     return (
@@ -248,6 +267,7 @@ function AppShell() {
           setEditingCourseId(courseId ?? null)
           setView('courseEdit')
         }}
+        onPickCourse={() => setView('coursePicker')}
         {...(selectedCourseId ? { selectedCourseId } : {})}
         archiveCount={archive.length}
       />
