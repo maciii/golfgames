@@ -50,7 +50,7 @@ export function totalPoints(round: Round, playerId: PlayerId): number {
 
 export const stableford: GameDefinition = {
   id: 'stableford',
-  playerCounts: [2, 3, 4],
+  playerCounts: [1, 2, 3, 4],
   usesTeams: () => false,
   supportsDoubleHoles: true,
 

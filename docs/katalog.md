@@ -53,6 +53,15 @@ geohashe.
 - Hřiště z katalogu prochází stejnou kontrolou (`isValidCourse`) jako hřiště ze
   zálohy — poškozený záznam se do výpočtů nedostane.
 
+### Názvy odpališť
+
+Katalog ukládá odpaliště se stabilním `id` a původním názvem. Standardní názvy
+(`yellow`, `red`, `white`, `blue` a další obecné varianty) se při zobrazení
+překládají podle jazyka aplikace; v češtině se tedy ukáže například „Žlutá“ a
+v angličtině „Yellow“. Vlastní názvy odpališť se nepřepisují a zůstávají tak,
+jak je uživatel nebo katalog zadal. Lokalizace je pouze prezentační, takže
+změna jazyka nemění uložená hřiště ani rozehraná kola.
+
 ## Údržba dat
 
 Hřiště se přidávají a opravují **ručně** úpravou souboru v `courses/`

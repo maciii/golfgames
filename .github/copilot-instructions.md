@@ -1,6 +1,6 @@
 # Pokyny pro GitHub Copilot
 
-Golfová PWA pro zápis skóre po jamkách (React 19, TypeScript 7, Vite 8).
+Golfová PWA pro zápis skóre po jamkách pro 1–4 hráče podle zvolené hry (React 19, TypeScript 7, Vite 8).
 Vlastní backend nemá – data drží `localStorage`, jedinou serverovou částí je
 nepovinná záloha do Firestore. Rozhraní je česky a anglicky.
 

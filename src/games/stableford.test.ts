@@ -113,6 +113,22 @@ describe('body za jamku', () => {
   })
 })
 
+describe('hra jednoho hráče', () => {
+  it('povolí a vyhodnotí Stableford pro jednoho hráče', () => {
+    const round = makeRound({
+      gameId: 'stableford',
+      players: ['Anna'],
+      pars: [4],
+      scores: [[4]],
+      settings: { options: { ...makeBaseOptions() } },
+    })
+
+    expect(stableford.playerCounts).toContain(1)
+    expect(totalPoints(round, 'p1')).toBe(2)
+    expect(stableford.computeStandings(round)[0]?.rows).toHaveLength(1)
+  })
+})
+
 describe('netto', () => {
   it('rána na jamce zvedne body podle stroke indexu', () => {
     // Anna hraje s handicapem 2: rány dostává na SI 1 (jamka 1) a SI 2 (jamka 3).

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { BonusId, CreateRoundOptions, PlayerId, Round } from './types'
 import { createRound, setHolePar, toggleBonus, touchRound } from './types'
 import {
@@ -55,6 +55,7 @@ function AppShell() {
   const { noteRoundChange, dataVersion } = useAccount()
   // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
+  const persistedDataVersion = useRef(dataVersion)
   // Obrazovka se neukládá, takže se po refreshi odvodí z kola. Bez toho by
   // dohrané kolo skončilo zpátky v zapisování skóre na první jamce, což vypadá
   // jako rozjetá nová hra.
@@ -69,11 +70,15 @@ function AppShell() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>()
 
   useEffect(() => {
+    if (dataVersion !== persistedDataVersion.current) {
+      persistedDataVersion.current = dataVersion
+      return
+    }
     saveCurrentRound(round)
     // Synchronizace si změnu jen poznamená; odešle ji s odkladem, aby jedno
     // kolo nestálo osmnáct zápisů do cloudu.
     if (round) noteRoundChange(round)
-  }, [round, noteRoundChange])
+  }, [round, noteRoundChange, dataVersion])
 
   const startRound = useCallback((options: CreateRoundOptions) => {
     // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.

@@ -7,7 +7,24 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.18.0] – 2026-08-05
+
+### Přidáno
+
+- **Stableford pro jednoho hráče.** Stableford lze nově založit i jako
+  individuální kolo bez soupeřů.
+
+### Změněno
+
+- **Názvy odpališť respektují jazyk aplikace.** Standardní katalogová odpaliště
+  se v češtině zobrazují česky a v angličtině anglicky; vlastní názvy zůstávají.
+
 ## [0.17.0] – 2026-08-05
+
+### Opraveno
+
+- **Obnovení přihlášeného kola po refreshi.** Synchronizace už nemůže mezitím
+  přepsat právě stažené kolo starým stavem z prvního vykreslení aplikace.
 
 ### Přidáno
 

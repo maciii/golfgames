@@ -16,7 +16,7 @@ import type { CreateRoundOptions, Currency, RoundCourse, RoundSettings } from '.
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
-import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, useLocale } from '../i18n'
+import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, localizedTeeName, useLocale } from '../i18n'
 import type { MessageKey } from '../i18n'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
@@ -517,7 +517,7 @@ export default function SetupScreen({
                 >
                   {course.tees.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.name}
+                      {localizedTeeName(option.id, option.name)}
                     </option>
                   ))}
                 </select>
@@ -595,7 +595,7 @@ export default function SetupScreen({
                 <p className="hint">
                   {handicapMode === 'index' && tee?.slopeRating !== undefined
                     ? t('setup.handicapHintRated', {
-                        tee: tee.name,
+                        tee: localizedTeeName(tee.id, tee.name),
                         cr: tee.courseRating ?? 0,
                         sr: tee.slopeRating,
                       })

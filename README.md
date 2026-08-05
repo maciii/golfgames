@@ -1,6 +1,6 @@
 # Golf Games
 
-Zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých typů
+Zápis golfového skóre po jamkách pro 1–4 hráče podle zvolené hry a vyhodnocení různých typů
 golfových her – včetně extra bodů a peněžního vyrovnání sázky.
 
 Aplikace je **PWA** – běží v prohlížeči, na iPhonu i Androidu se přidá na
@@ -16,7 +16,7 @@ zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 | **Best Aggregate** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
 | **Skins**          | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
 | **Match play**     | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
-| **Stableford**     | 2–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
+| **Stableford**     | 1–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
 
 Přesné vyhodnocení včetně okrajových situací popisuje
 [`docs/games.md`](docs/games.md).

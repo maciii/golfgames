@@ -41,6 +41,28 @@ const LOCALE_TAG: Record<Locale, string> = {
 
 const CATALOGS: Record<Locale, Record<string, Message>> = { cs, en }
 
+/** Katalogová id odpališť, která mají obecný význam a mají se překládat. */
+const TEE_NAME_KEYS: Record<string, MessageKey> = {
+  black: 'course.tee.black',
+  blue: 'course.tee.blue',
+  bronze: 'course.tee.bronze',
+  'dark-green': 'course.tee.darkGreen',
+  gold: 'course.tee.gold',
+  green: 'course.tee.green',
+  jade: 'course.tee.jade',
+  members: 'course.tee.members',
+  men: 'course.tee.men',
+  middle: 'course.tee.middle',
+  orange: 'course.tee.orange',
+  players: 'course.tee.players',
+  purple: 'course.tee.purple',
+  red: 'course.tee.red',
+  silver: 'course.tee.silver',
+  tournament: 'course.tee.tournament',
+  white: 'course.tee.white',
+  yellow: 'course.tee.yellow',
+}
+
 /** Klíče se odvozují z českého katalogu, ten je zdrojem pravdy. */
 export type MessageKey = keyof typeof cs
 
@@ -122,6 +144,15 @@ export function translate(locale: Locale, key: MessageKey, params?: Params): str
 /** Překlad podle aktuálního jazyka - pro kód mimo komponenty. */
 export function t(key: MessageKey, params?: Params): string {
   return translate(current, key, params)
+}
+
+/** Přeloží standardní katalogové odpaliště; vlastní názvy nechá beze změny. */
+export function localizedTeeName(id: string, fallback: string): string {
+  const key = TEE_NAME_KEYS[id]
+  if (key) return t(key)
+
+  const numbered = /^tee-(\d+)$/.exec(id)?.[1]
+  return numbered ? t('course.tee.number', { number: numbered }) : fallback
 }
 
 interface LocaleValue {

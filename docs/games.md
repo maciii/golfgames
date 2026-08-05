@@ -364,7 +364,7 @@ započítají hráči, nebo se při horším než par nezapočítají.
 
 ## Stableford
 
-**Hráči:** 2 až 4, každý sám za sebe
+**Hráči:** 1 až 4, každý sám za sebe
 **Soubor:** [`src/games/stableford.ts`](../src/games/stableford.ts)
 
 Za výsledek vůči paru dostane hráč par 2 body, birdie 3, eagle 4, bogey 1 a

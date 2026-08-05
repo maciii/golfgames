@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LOCALES, translate } from './index'
+import { getLocale, localizedTeeName, LOCALES, setActiveLocale, translate } from './index'
 import type { MessageKey } from './index'
 import { cs } from './cs'
 import { en } from './en'
@@ -80,6 +80,20 @@ describe('Klíče odvozené z dat', () => {
 })
 
 describe('Překlad', () => {
+  it('lokalizuje standardní odpaliště a vlastní název nechá být', () => {
+    const previous = getLocale()
+    try {
+      setActiveLocale('cs')
+      expect(localizedTeeName('yellow', 'Yellow')).toBe('Žlutá')
+      expect(localizedTeeName('tee-54', 'Tee 54')).toBe('Odpaliště 54')
+      expect(localizedTeeName('local-tee', 'Klubové')).toBe('Klubové')
+      setActiveLocale('en')
+      expect(localizedTeeName('yellow', 'Yellow')).toBe('Yellow')
+    } finally {
+      setActiveLocale(previous)
+    }
+  })
+
   it('dosadí proměnnou do textu', () => {
     expect(translate('cs', 'play.hole', { number: 7 })).toBe('Jamka 7')
     expect(translate('en', 'play.hole', { number: 7 })).toBe('Hole 7')
