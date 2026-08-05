@@ -21,6 +21,7 @@ import {
 } from '../types'
 import { getGame } from '../games'
 import { strokesReceived } from '../handicap'
+import { APP_VERSION } from '../version'
 import BonusSheet from './BonusSheet'
 import Scorecard from './Scorecard'
 import { useT } from '../i18n'
@@ -432,6 +433,7 @@ export default function PlayScreen({
             {holeDone ? t('play.next') : t('play.skip')}
           </button>
         )}
+        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
 
       {bonusFor && (

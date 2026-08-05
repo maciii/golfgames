@@ -34,6 +34,10 @@ function playedHolesLabel(round: Round): string {
     : translate('archive.holesPartial', { done, total: round.holeCount })
 }
 
+function handicapModeLabel(round: Round): string {
+  return translate(round.netScoring ? 'archive.netScoring' : 'archive.grossScoring')
+}
+
 /** Archiv odehraných kol - seznam s možností otevřít detail nebo smazat. */
 export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Props) {
   const t = useT()
@@ -76,7 +80,7 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
                   <span className="archive-winner">{winnerLine(round)}</span>
                   <span className="archive-players">
                     {round.players.map((p) => p.name).join(', ')} ·{' '}
-                    {playedHolesLabel(round)}
+                    {handicapModeLabel(round)} · {playedHolesLabel(round)}
                   </span>
                 </button>
                 <button

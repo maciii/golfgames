@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_GAME_OPTIONS,
   bonusesAt,
+  createRound,
   exclusiveBonusOutcome,
   formatHoleList,
   isHoleStarted,
@@ -49,6 +50,33 @@ describe('Rozehraná jamka', () => {
     })
 
     expect(roundCompleteness(full).complete).toBe(true)
+  })
+})
+
+describe('HCP v kole', () => {
+  it('uchová HCP hráčů i mimo Stableford', () => {
+    const round = createRound({
+      gameId: 'match-play',
+      playerNames: ['Adam', 'Bára'],
+      holeCount: 18,
+      handicapIndexes: [12.4, 7.8],
+      playingHandicaps: [14, 9],
+      netScoring: true,
+    })
+
+    expect(round.netScoring).toBe(true)
+    expect(round.players).toEqual([
+      expect.objectContaining({
+        name: 'Adam',
+        handicapIndex: 12.4,
+        playingHandicap: 14,
+      }),
+      expect.objectContaining({
+        name: 'Bára',
+        handicapIndex: 7.8,
+        playingHandicap: 9,
+      }),
+    ])
   })
 })
 

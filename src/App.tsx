@@ -109,10 +109,7 @@ function AppShell() {
 
   const startRound = useCallback((options: CreateRoundOptions) => {
     // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
-    addToRoster(
-      options.playerNames,
-      options.gameId === 'stableford' ? options.handicapIndexes : undefined,
-    )
+    addToRoster(options.playerNames, options.handicapIndexes)
     setSetupDraft(undefined)
     setRound(createRound(options))
     setView('play')

@@ -261,13 +261,13 @@ export default function SetupScreen({
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)))
   }
 
-  /** Klepnutí na uloženého hráče doplní i jeho Stablefordový HCP index. */
+  /** Klepnutí na uloženého hráče doplní i jeho HCP index v každé hře. */
   function useRosterEntry(entry: RosterEntry) {
     const slot = names.slice(0, playerCount).findIndex((name) => !name.trim())
     if (slot === -1) return
 
     setNames((prev) => prev.map((name, index) => (index === slot ? entry.name : name)))
-    if (gameId === 'stableford' && entry.handicapIndex !== undefined) {
+    if (entry.handicapIndex !== undefined) {
       setHandicapText((prev) =>
         prev.map((value, index) => (index === slot ? `${entry.handicapIndex}` : value)),
       )
@@ -508,7 +508,7 @@ export default function SetupScreen({
                         : t('setup.addPlayer', { name: entry.name })
                     }
                   >
-                    {gameId === 'stableford' && entry.handicapIndex !== undefined
+                    {entry.handicapIndex !== undefined
                       ? t('setup.savedPlayerWithHandicap', {
                           name: entry.name,
                           handicap: entry.handicapIndex,

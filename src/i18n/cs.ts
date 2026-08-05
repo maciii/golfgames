@@ -224,6 +224,8 @@ export const cs = {
     other: '{count} jamek',
   },
   'archive.holesPartial': '{done} z {total} jamek',
+  'archive.netScoring': 's HCP',
+  'archive.grossScoring': 'bez HCP',
   'archive.deleteConfirm': 'Smazat kolo z {date} z archivu?',
   'archive.deleteLabel': 'Smazat kolo z {date}',
 

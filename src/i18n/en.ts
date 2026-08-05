@@ -204,6 +204,8 @@ export const en: Record<MessageKey, Message> = {
   'archive.draw': 'draw: {names}',
   'archive.holes': { one: '{count} hole', other: '{count} holes' },
   'archive.holesPartial': '{done} of {total} holes',
+  'archive.netScoring': 'net HCP',
+  'archive.grossScoring': 'gross',
   'archive.deleteConfirm': 'Delete the round from {date} from the archive?',
   'archive.deleteLabel': 'Delete the round from {date}',
 

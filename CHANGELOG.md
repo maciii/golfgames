@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.25.1] – 2026-08-05
+
+### Opraveno
+
+- **HCP se ukládá pro všechny hry.** HCP indexy zadané při založení kola se
+  ukládají do seznamu hráčů a znovu se předvyplní i u Match Play, Skins a Best
+  Aggregate.
+- **Archiv ukazuje režim HCP.** Přehled kol nově uvádí, zda se hrálo `s HCP`
+  (netto), nebo `bez HCP` (hrubě).
+
 ## [0.25.0] – 2026-08-05
 
 ### Opraveno
