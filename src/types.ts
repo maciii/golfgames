@@ -186,6 +186,8 @@ export interface GameOptions {
    * kolo volba nemá vliv, tam žádný osobní par neexistuje.
    */
   confirmByPersonalPar: boolean
+  /** Vítěz skinu musí na následující jamce zahrát alespoň hrubý par. */
+  confirmSkinsByPar: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */
   resultMultipliers: Record<ResultTier, number>
   /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
@@ -202,6 +204,7 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   confirmLongest: true,
   confirmNearest: true,
   confirmByPersonalPar: true,
+  confirmSkinsByPar: false,
   resultMultipliers: DEFAULT_RESULT_MULTIPLIERS,
   doubleClosingHoles: true,
 }

@@ -68,6 +68,7 @@ export interface HoleSetupGroup {
 export interface HoleSetupChoice {
   id: string
   label: string
+  pairing?: { left: string; right: string }
   selected?: boolean
 }
 
@@ -106,6 +107,8 @@ export interface GameScoringOptions {
   confirmLongest: boolean
   /** Hra potvrzuje Nearest podle výsledku hráče. */
   confirmNearest: boolean
+  /** Skins může vyžadovat potvrzení výhry parem na další jamce. */
+  confirmSkinsByPar?: boolean
   /** Komu připadne běžný bonus: celé dvojici, nebo jednotlivci. */
   bonusScope: 'team' | 'player'
 }
@@ -126,6 +129,8 @@ export interface HeaderSummary {
 export interface ScorecardPlayerCell {
   skin?: { ariaLabel: string }
   suffix?: { text: string; ariaLabel: string }
+  /** Označení hráče v dynamické dvojici na konkrétní jamce. */
+  pairing?: { ariaLabel: string }
 }
 
 /** Souhrn hry zobrazený za celkovým počtem ran hráče. */

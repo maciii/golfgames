@@ -8,7 +8,9 @@ import {
   holeNumber,
   holesPlayed,
   isHoleStarted,
+  parAt,
   playerName,
+  scoreAt,
   strokeTotal,
 } from '../types'
 import { exclusiveBonusOutcome, netScoreAt } from '../handicap'
@@ -48,6 +50,12 @@ export interface SkinResult {
   skins: number
   /** Kolik skinů se po jamce přenáší dál. */
   carry: number
+}
+
+interface PendingSkin {
+  hole: number
+  winnerId: PlayerId
+  skins: number
 }
 
 const POINT_BONUSES: BonusId[] = [
@@ -132,16 +140,52 @@ function skinAwardHoles(round: Round): Record<PlayerId, Set<number>> {
 
 /**
  * Projde kolo jamku po jamce a rozdělí skiny včetně přenášení banku.
+ * Při potvrzení parem se výhra drží dočasně u vítěze a rozhodne ji až jeho
+ * skóre na následující jamce. Poslední jamka se potvrzuje automaticky - další
+ * jamka, na které by šla výhra ověřit, už neexistuje.
  * Vrací záznam za každou jamku kola.
  */
 export function skinResults(round: Round): SkinResult[] {
   const results: SkinResult[] = []
   let carry = 0
+  let pending: PendingSkin | null = null
 
   for (let hole = 0; hole < round.holeCount; hole++) {
+    // Přeskočená následující jamka potvrzení nesplní. Pozdější zápis už nesmí
+    // zpětně potvrdit výhru přes jamku, která zůstala nehraná.
+    if (pending && hole > pending.hole + 1) {
+      carry += pending.skins
+      const previous = results[pending.hole]
+      if (previous) previous.carry = carry
+      pending = null
+    }
+
+    if (pending && hole === pending.hole + 1 && isHoleStarted(round, hole)) {
+      const score = scoreAt(round, pending.winnerId, hole)
+      const previous = results[pending.hole]
+      const confirmed = score !== null && score <= parAt(round, hole)
+
+      if (confirmed) {
+        if (previous) {
+          previous.winnerId = pending.winnerId
+          previous.skins = pending.skins
+          previous.carry = 0
+        }
+      } else {
+        carry += pending.skins
+        if (previous) previous.carry = carry
+      }
+      pending = null
+    }
+
     if (!isHoleStarted(round, hole)) {
       // Na jamku se ještě nedošlo - nevyhodnocuje se a bank se nemění.
-      results.push({ hole, winnerId: null, skins: 0, carry })
+      results.push({
+        hole,
+        winnerId: null,
+        skins: 0,
+        carry: carry + (pending?.skins ?? 0),
+      })
       continue
     }
 
@@ -152,17 +196,22 @@ export function skinResults(round: Round): SkinResult[] {
     // Kdo jamku vzdal, o skin se ucházet nemůže. Porovnává se netto skóre,
     // takže v kole s HCP bere skin hráč, který jamku zahrál líp po odečtu ran
     // - při shodě hrubých ran rozhodne tečka na jamce.
-    const scores = round.players.map((p) => ({
+    const holeScores: { id: PlayerId; score: number }[] = round.players.map((p) => ({
       id: p.id,
       score: netScoreAt(round, p.id, hole) ?? CONCEDED,
     }))
-    const lowest = Math.min(...scores.map((s) => s.score))
-    const leaders = scores.filter((s) => s.score === lowest)
+    const lowest = Math.min(...holeScores.map((entry) => entry.score))
+    const leaders = holeScores.filter((entry) => entry.score === lowest)
 
     if (leaders.length === 1 && leaders[0]) {
       const skins = carry + stake
       carry = 0
-      results.push({ hole, winnerId: leaders[0].id, skins, carry })
+      if (round.settings.options.confirmSkinsByPar && hole < round.holeCount - 1) {
+        pending = { hole, winnerId: leaders[0].id, skins }
+        results.push({ hole, winnerId: null, skins: 0, carry: skins })
+      } else {
+        results.push({ hole, winnerId: leaders[0].id, skins, carry })
+      }
     } else {
       // Dělená jamka: skin se přenáší do další.
       carry += stake
@@ -199,6 +248,7 @@ export const skins: GameDefinition = {
     noDoubleBonuses: true,
     confirmLongest: true,
     confirmNearest: true,
+    confirmSkinsByPar: true,
     bonusScope: 'player',
   },
   supportsDoubleHoles: true,

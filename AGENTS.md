@@ -47,6 +47,16 @@ npm run check    # typy + testy + formát – tohle musí projít před commitem
 5. Když se mění pravidlo hry nebo chování, aktualizuj i `docs/games.md`;
    když se mění důvod nějakého rozhodnutí, `docs/decisions.md`.
 
+### Testování rozhraní
+
+- Všechny browser, Playwright, screenshotové a lokální preview testy prováděj
+  v režimu mobilního telefonu, výchozí viewport je `390x844` s touch/mobile
+  emulací. Testy orientované na šířku použijí mobilní landscape, nikdy desktop
+  viewport jako hlavní testovací profil.
+- Mobilní viewport nastav ještě před první akcí v aplikaci a zachovej ho i při
+  pořizování screenshotů. Čistě výpočetní Vitest testy viewport nemají a toto
+  pravidlo se na ně nevztahuje.
+
 ## Nepřekročitelná pravidla
 
 Tohle nejsou preference, ale věci, které v projektu drží konzistenci:

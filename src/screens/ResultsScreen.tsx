@@ -76,6 +76,9 @@ export default function ResultsScreen({
     scoring.noDoubleBonuses && round.settings.options.noDoubleBonuses
       ? t('results.configNoDoubleBonuses')
       : null,
+    scoring.confirmSkinsByPar && round.settings.options.confirmSkinsByPar
+      ? t('results.configConfirmSkinsByPar')
+      : null,
   ].filter(Boolean)
 
   function newRound() {

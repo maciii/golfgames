@@ -87,6 +87,11 @@ describe('Levá-Pravá - příprava jamky', () => {
     })
     const setup = leftRight.holeSetup?.(round, 0)
 
+    expect(setup?.choices?.map((choice) => choice.pairing)).toEqual([
+      { left: 'Adam + Alena', right: 'Bára + Bořek' },
+      { left: 'Adam + Bára', right: 'Alena + Bořek' },
+      { left: 'Adam + Bořek', right: 'Alena + Bára' },
+    ])
     expect(setup?.choices?.map((choice) => choice.label)).toEqual([
       'Adam + Alena vs Bára + Bořek',
       'Adam + Bára vs Alena + Bořek',
@@ -151,7 +156,7 @@ describe('Levá-Pravá - příprava jamky', () => {
     })
   })
 
-  it('změna dvojice po zápisu smaže skóre a bonusy dané jamky', () => {
+  it('změna dvojice po zápisu zachová skóre a přepočítá body jamky', () => {
     const round = pairedRound([[4], [5], [3], [5]])
     round.bonuses.p1 = [['bunker']]
 
@@ -160,18 +165,12 @@ describe('Levá-Pravá - příprava jamky', () => {
       choiceId: '13-24',
     })
 
-    expect(changed?.scores).toEqual({
-      p1: [null],
-      p2: [null],
-      p3: [null],
-      p4: [null],
-    })
-    expect(changed?.bonuses).toEqual({
-      p1: [[]],
-      p2: [[]],
-      p3: [[]],
-      p4: [[]],
-    })
+    expect(changed?.scores).toEqual(round.scores)
+    expect(changed?.bonuses).toEqual(round.bonuses)
+    expect(totalPlayerPoints(changed!, 'p1')).toBe(4)
+    expect(totalPlayerPoints(changed!, 'p2')).toBe(0)
+    expect(totalPlayerPoints(changed!, 'p3')).toBe(4)
+    expect(totalPlayerPoints(changed!, 'p4')).toBe(0)
   })
 })
 
@@ -257,5 +256,54 @@ describe('Levá-Pravá - body', () => {
     ])
     expect(columns.map((column) => column.cell(round, 0))).toEqual(['0', '0', '3', '3'])
     expect(columns.map((column) => column.total(round))).toEqual(['0', '0', '3', '3'])
+  })
+
+  it('označí ve scorekartě první dvojici barevným rámečkem', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+    const firstPair = leftRight.scorecardPlayerCell?.(round, 'p1', 0)
+    const secondPair = leftRight.scorecardPlayerCell?.(round, 'p3', 0)
+
+    expect(firstPair?.pairing?.ariaLabel).toBe('Dvojice: Adam + Alena')
+    expect(secondPair?.pairing).toBeUndefined()
+
+    const changed = leftRight.setHoleSetup?.(round, 0, {
+      kind: 'choice',
+      choiceId: '13-24',
+    })
+    expect(leftRight.scorecardPlayerCell?.(changed!, 'p1', 0)?.pairing?.ariaLabel).toBe(
+      'Dvojice: Adam + Bára',
+    )
+    expect(leftRight.scorecardPlayerCell?.(changed!, 'p2', 0)?.pairing).toBeUndefined()
+  })
+
+  it('má bodovací sloupec stejného hráče ve stejné označené dvojici', () => {
+    const round = pairedRound([[4], [5], [3], [5]])
+    const columns = leftRight.scorecardColumns?.(round) ?? []
+
+    expect(columns.map((column) => column.afterPlayerId)).toEqual([
+      'p1',
+      'p2',
+      'p3',
+      'p4',
+    ])
+    expect(
+      columns
+        .slice(0, 2)
+        .map(
+          (column) =>
+            leftRight.scorecardPlayerCell?.(round, column.afterPlayerId!, 0).pairing,
+        ),
+    ).toEqual([
+      { ariaLabel: 'Dvojice: Adam + Alena' },
+      { ariaLabel: 'Dvojice: Adam + Alena' },
+    ])
+    expect(
+      columns
+        .slice(2)
+        .map(
+          (column) =>
+            leftRight.scorecardPlayerCell?.(round, column.afterPlayerId!, 0).pairing,
+        ),
+    ).toEqual([undefined, undefined])
   })
 })

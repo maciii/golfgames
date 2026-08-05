@@ -234,17 +234,18 @@ zbytek jamky násobí.
 Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
 **zvlášť pro každou hru** – Best Aggregate a Skins si je nepřepisují navzájem.
 
-| Volba                          | Výchozí     | Popis                                            |
-| ------------------------------ | ----------- | ------------------------------------------------ |
-| Hodnoty extra bodů             | viz výš     | 0 = vypnuto                                      |
-| Násobiče za výsledek           | 2/3/10/1000 | birdie, eagle, albatros, condor                  |
-| Dvojnásobná sázka              | zapnuto     | volba, která násobí sázku na jamce               |
-| 9. a 18. jamka za dvojnásobek  | zapnuto     | jen u her, které to podporují                    |
-| Nenásobit extra body           | vypnuto     | dvojnásobná jamka ani double nenásobí extra body |
-| Potvrzovat Longest             | zapnuto     | při horším než par bod propadá soupeřům          |
-| Potvrzovat Nearest             | zapnuto     | při horším než par bod propadá soupeřům          |
-| Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest hrubě    |
-| Double Best                    | 1 b.        | jen Best Aggregate; bod za oba lepší míče        |
+| Volba                          | Výchozí     | Popis                                               |
+| ------------------------------ | ----------- | --------------------------------------------------- |
+| Hodnoty extra bodů             | viz výš     | 0 = vypnuto                                         |
+| Násobiče za výsledek           | 2/3/10/1000 | birdie, eagle, albatros, condor                     |
+| Dvojnásobná sázka              | zapnuto     | volba, která násobí sázku na jamce                  |
+| 9. a 18. jamka za dvojnásobek  | zapnuto     | jen u her, které to podporují                       |
+| Nenásobit extra body           | vypnuto     | dvojnásobná jamka ani double nenásobí extra body    |
+| Potvrzovat Longest             | zapnuto     | při horším než par bod propadá soupeřům             |
+| Potvrzovat Nearest             | zapnuto     | při horším než par bod propadá soupeřům             |
+| Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest hrubě       |
+| Potvrzení parem                | vypnuto     | jen Skins; vítěz potvrdí výhru parem na další jamce |
+| Double Best                    | 1 b.        | jen Best Aggregate; bod za oba lepší míče           |
 
 Nabídka voleb je **pro každou hru zvlášť**. U každé hry se otevírá ozubeným
 tlačítkem přímo u její karty. Best Aggregate má týmové bonusy a Double Best,
@@ -364,6 +365,8 @@ spodním řádku pod součtem ran scorekarta Skins zobrazuje `B` v češtině a 
 v angličtině. Stableford v netto hře přidává tečky za rány k dobru vůči
 nejnižšímu hracímu handicapu ve flightu. Nenulové extra body se zapisují jako
 `skiny + extra = celkem`; pokud jsou nulové, zobrazí se jen počet skinů.
+Levá-Pravá přes `scorecardPlayerCell` označuje barevným rámečkem buňky první
+dvojice aktuální jamky.
 
 ---
 
@@ -452,7 +455,9 @@ Aggregate. Jedním klepnutím se uloží celé složení jamky.
 Body získané stranou se na dané jamce připíšou **oběma hráčům**, ale výsledky
 se sčítají a zobrazují jednotlivě. První výsledková tabulka proto obsahuje
 čtyři hráče a peněžní vyrovnání používá pravidla pro jednotlivce. Scorekarta
-má za každým hráčem vlastní sloupec `B` s body za jeho aktuální dvojici.
+má za každým hráčem vlastní sloupec `B` s body za jeho aktuální dvojici. U
+první dvojice jsou buňky se skóre na každé jamce označené barevným rámečkem;
+rámeček se proto přesouvá podle zvoleného složení dvojic.
 
 V kole s HCP se `BEST`, `Součet`, `Double Best` i birdie/eagle vyhodnocují
 stejně jako u Best Aggregate z netto ran. Násobič běžných extra bodů se bere z
@@ -463,8 +468,8 @@ u Best Aggregate.
 
 - **Neúplné přiřazení** – dokud nejsou na obou stranách právě dva hráči,
   skóre ani bonusy nejdou zapsat a jamka nedává body.
-- **Oprava po zápisu** – změna strany po zapsání skóre smaže skóre i bonusy
-  celé jamky. Jinak by se body počítaly pod dvojicí, která už neplatí.
+- **Změna po zápisu** – dvojice jde změnit kdykoli. Zapsané skóre a bonusy
+  zůstávají a body jamky se okamžitě přepočítají podle nového složení.
 - **Uložení** – přiřazení se ukládá pro každou jamku zvlášť v `Round.holePairings`;
   změna dvojic na jedné jamce neovlivní žádnou jinou.
 - **Vzdaná jamka** – po dokončení dvojic se řídí stejným pravidlem jako Best
@@ -505,6 +510,15 @@ započítají hráči, nebo se při horším než par nezapočítají.
 - **Dvojnásobná jamka** – do hry jde rovnou dvojnásobný skin, přenesený
   i vyhraný.
 - **Extra body** se počítají samostatně pro hráče a nemění bank skinů.
+
+### Potvrzení parem
+
+Volitelná varianta **Potvrzení parem** vyžaduje, aby hráč, který vyhrál jamku,
+zahrál na následující jamce alespoň hrubý par. Teprve potom se jeho výhra
+započítá. Pokud zahraje bogey nebo hůř, skin se nepotvrdí a vrátí se do banku,
+takže ho může získat vítěz další rozhodnuté jamky. Dokud následující jamka nemá
+zápis, zůstává výhra nepotvrzená. Poslední jamka se potvrzuje automaticky,
+protože už nemá další jamku, na které by šla ověřit.
 
 ---
 

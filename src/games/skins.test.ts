@@ -85,6 +85,91 @@ describe('Skins - rozdělení jamek', () => {
     expect(carryInto(round, 1)).toBe(1)
     expect(carryInto(round, 2)).toBe(0)
   })
+
+  it('potvrdí výhru parem na následující jamce', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril'],
+      pars: [4, 4],
+      scores: [
+        [3, 4],
+        [4, 5],
+        [5, 5],
+      ],
+      settings: {
+        options: { ...DEFAULT_GAME_OPTIONS, confirmSkinsByPar: true },
+      },
+    })
+
+    expect(skinResults(round)).toEqual([
+      { hole: 0, winnerId: 'p1', skins: 1, carry: 0 },
+      { hole: 1, winnerId: 'p1', skins: 1, carry: 0 },
+    ])
+  })
+
+  it('nepotvrzený skin vrátí do banku a další vítěz ho získá', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril'],
+      pars: [4, 4, 4],
+      scores: [
+        [3, 5, 5],
+        [4, 4, 3],
+        [5, 5, 5],
+      ],
+      settings: {
+        options: { ...DEFAULT_GAME_OPTIONS, confirmSkinsByPar: true },
+      },
+    })
+
+    expect(skinResults(round)).toEqual([
+      { hole: 0, winnerId: null, skins: 0, carry: 1 },
+      { hole: 1, winnerId: 'p2', skins: 2, carry: 0 },
+      { hole: 2, winnerId: 'p2', skins: 1, carry: 0 },
+    ])
+  })
+
+  it('poslední jamku potvrdí automaticky, protože už nemá pokračování', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4],
+      scores: [[3], [5]],
+      settings: {
+        options: { ...DEFAULT_GAME_OPTIONS, confirmSkinsByPar: true },
+      },
+    })
+
+    expect(skinResults(round)[0]).toEqual({
+      hole: 0,
+      winnerId: 'p1',
+      skins: 1,
+      carry: 0,
+    })
+  })
+
+  it('vypnuté potvrzení zachová běžné okamžité přidělení skinu', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [3, 5],
+        [4, 5],
+      ],
+      settings: {
+        options: { ...DEFAULT_GAME_OPTIONS, confirmSkinsByPar: false },
+      },
+    })
+
+    expect(skinResults(round)[0]).toEqual({
+      hole: 0,
+      winnerId: 'p1',
+      skins: 1,
+      carry: 0,
+    })
+    expect(skins.scoringOptions.confirmSkinsByPar).toBe(true)
+  })
 })
 
 describe('Skins - dvojnásobná devátá a osmnáctá', () => {

@@ -1,5 +1,5 @@
 import type { HolePairings, HoleSide, PlayerId, Round, Team } from '../types'
-import { holesPlayed, isHoleStarted, scoreAt, strokeTotal, teamName } from '../types'
+import { holesPlayed, isHoleStarted, strokeTotal, teamName } from '../types'
 import { t } from '../i18n'
 import { holePointsForTeams } from './bestAggregate'
 import type {
@@ -9,6 +9,7 @@ import type {
   HoleSetupSelection,
   HoleSummary,
   ScorecardColumn,
+  ScorecardPlayerCell,
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
@@ -88,27 +89,10 @@ function updatePairing(
     ...(round.holePairings ?? {}),
     [String(hole)]: nextPairing,
   }
-  const hasScore = round.players.some(
-    (player) => scoreAt(round, player.id, hole) !== null,
-  )
-  if (!hasScore) return { ...round, holePairings }
-
-  const scores = { ...round.scores }
-  const bonuses = { ...round.bonuses }
-  for (const player of round.players) {
-    const playerScores = [...(scores[player.id] ?? [])]
-    playerScores[hole] = null
-    scores[player.id] = playerScores
-
-    const playerBonuses = [...(bonuses[player.id] ?? [])]
-    playerBonuses[hole] = []
-    bonuses[player.id] = playerBonuses
-  }
-
-  return { ...round, holePairings, scores, bonuses }
+  return { ...round, holePairings }
 }
 
-/** Změní směr první rány a při opravě smaže skóre pod předchozí dvojicí. */
+/** Změní směr první rány; zapsané skóre zůstane a přepočítá se podle nové dvojice. */
 export function setHoleSide(
   round: Round,
   hole: number,
@@ -160,10 +144,13 @@ function setupForHole(round: Round, hole: number): HoleSetup {
     const assignments = pairingAssignments(round, choice)
     if (!assignments) return []
     const playerName = (index: number) => round.players[index]?.name ?? '?'
+    const left = `${playerName(choice.left[0])} + ${playerName(choice.left[1])}`
+    const right = `${playerName(choice.right[0])} + ${playerName(choice.right[1])}`
     return [
       {
         id: choice.id,
-        label: `${playerName(choice.left[0])} + ${playerName(choice.left[1])} ${t('setup.versus')} ${playerName(choice.right[0])} + ${playerName(choice.right[1])}`,
+        label: `${left} ${t('setup.versus')} ${right}`,
+        pairing: { left, right },
         selected: choice.id === selected,
       },
     ]
@@ -262,6 +249,20 @@ export const leftRight: GameDefinition = {
         })),
       },
     ]
+  },
+
+  /** Označí první z aktuálních dvojic; druhá je zřejmá z neoznačených buněk. */
+  scorecardPlayerCell(round: Round, playerId: string, hole: number): ScorecardPlayerCell {
+    const firstTeam = teamsForHole(round, hole)[0]
+    if (!firstTeam?.playerIds.includes(playerId)) return {}
+
+    return {
+      pairing: {
+        ariaLabel: t('leftRight.scorecardPair', {
+          pair: teamName(round, firstTeam),
+        }),
+      },
+    }
   },
 
   scorecardColumns(round: Round): ScorecardColumn[] {

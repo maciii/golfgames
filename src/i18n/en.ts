@@ -166,6 +166,9 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.confirmByPersonalPar': 'Confirm Longest against personal par',
   'gameSettings.confirmByPersonalParNote':
     'in a handicap round Longest is confirmed against the hole par plus the strokes the player receives there; Nearest is always confirmed against gross par and a gross round is unaffected',
+  'gameSettings.confirmSkinsByPar': 'Confirm with par',
+  'gameSettings.confirmSkinsByParNote':
+    'The hole winner must make at least par on the next hole or the skin carries into the pot.',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'An extra point when both partners played better than both opponents.',
@@ -188,6 +191,7 @@ export const en: Record<MessageKey, Message> = {
   'results.configDoubleClosing': 'holes 9 and 18 double',
   'results.configDoubleBest': 'Double Best {count} pts',
   'results.configNoDoubleBonuses': 'extra points are not doubled',
+  'results.configConfirmSkinsByPar': 'winning skins are confirmed with par',
   'results.backToArchive': 'Back to archive',
   'results.editScores': 'Edit scores',
   'results.backToPlay': 'Back to the round',
@@ -405,6 +409,7 @@ export const en: Record<MessageKey, Message> = {
   'leftRight.headerNote': 'Total individual points',
   'leftRight.pairing': 'Pairs',
   'leftRight.notReady': 'set pairs first',
+  'leftRight.scorecardPair': 'Pair: {pair}',
   'leftRight.column': 'P',
 
   // Skins

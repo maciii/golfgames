@@ -26,6 +26,16 @@ v [`docs/decisions.md`](../docs/decisions.md).
   a identifikátory zůstávají anglicky.
 - Komentáře vysvětlují **proč**, ne co.
 
+## Testování UI
+
+- Všechny browser, Playwright, screenshotové a lokální preview testy prováděj
+  v režimu mobilního telefonu: výchozí viewport `390x844`, touch/mobile
+  emulace. Pro funkce určené na šířku použij mobilní landscape; desktop není
+  hlavní testovací profil.
+- Mobilní viewport nastav před první akcí v aplikaci a zachovej ho na
+  screenshotech. Výpočetní Vitest testy viewport nemají, takže se toto pravidlo
+  týká testů přes browser nebo lokální preview.
+
 ## Texty a jazyky
 
 - Nový text = klíč v `src/i18n/cs.ts` **a** překlad v `en.ts`. Český katalog je

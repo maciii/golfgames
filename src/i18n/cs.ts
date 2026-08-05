@@ -179,6 +179,9 @@ export const cs = {
   'gameSettings.confirmByPersonalPar': 'Potvrzovat Longest osobním PARem',
   'gameSettings.confirmByPersonalParNote':
     'v kole s HCP se Longest potvrzuje parem jamky včetně ran, které na ní hráč dostává; Nearest se potvrzuje vždy hrubým parem a hrubého kola se volba netýká',
+  'gameSettings.confirmSkinsByPar': 'Potvrzení parem',
+  'gameSettings.confirmSkinsByParNote':
+    'Vítěz jamky musí na následující jamce zahrát alespoň par, jinak se skin přenese do banku.',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'Bod navíc, když oba partneři zahráli líp než oba soupeři.',
@@ -201,6 +204,7 @@ export const cs = {
   'results.configDoubleClosing': '9. a 18. jamka dvojnásobně',
   'results.configDoubleBest': 'Double Best {count} b.',
   'results.configNoDoubleBonuses': 'extra body se nedoublují',
+  'results.configConfirmSkinsByPar': 'vítězné skiny se potvrzují parem',
   'results.backToArchive': 'Zpět do archivu',
   'results.editScores': 'Upravit skóre',
   'results.backToPlay': 'Zpět do hry',
@@ -423,6 +427,7 @@ export const cs = {
   'leftRight.headerNote': 'Součet osobních bodů',
   'leftRight.pairing': 'Dvojice',
   'leftRight.notReady': 'nejdřív urč dvojice',
+  'leftRight.scorecardPair': 'Dvojice: {pair}',
   'leftRight.column': 'B',
 
   // Skins

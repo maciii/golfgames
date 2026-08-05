@@ -208,9 +208,9 @@ serializovatelná data pro obecné ovládání v `PlayScreen`. Obrazovka nezná
 význam jednotlivých voleb. Dokud hook nevrátí `complete: true`, ovladače skóre
 a bonusů jsou zablokované.
 
-Změna setupu po zapsání skóre musí buď staré skóre zneplatnit, nebo jinak
-zajistit, že se nikdy nevyhodnotí podle jiné konfigurace. Levá-Pravá při takové
-opravě smaže skóre i bonusy celé jamky.
+Změna setupu po zapsání skóre musí zachovat konzistentní výpočet podle nového
+stavu. Levá-Pravá proto ponechá skóre i bonusy a při dalším výpočtu použije nové
+složení dvojic.
 
 ## Extra body (bonusy)
 
@@ -243,6 +243,10 @@ v [`games.md`](games.md#extra-body).
 **Longest** osobním parem (volba `confirmByPersonalPar`); Nearest se potvrzuje
 vždycky hrubým parem. Ptá se na něj hra i `PlayScreen`, aby barva značky
 u jména a skutečně přidělené body nemohly tvrdit každá něco jiného.
+
+Skins mají vlastní volbu `confirmSkinsByPar`, která se ukládá spolu s ostatními
+volbami hry. Při zapnutí se výhra skinu drží do další jamky a potvrzuje se
+hrubým parem vítěze; při neúspěchu se částka vrátí do banku.
 
 ## Násobení jamky
 
@@ -354,18 +358,18 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 
 ## Obrazovky
 
-| Soubor                   | Co dělá                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek (u osmnáctky i která devítka); vstup do nastavení hry    |
-| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta |
-| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                              |
-| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                            |
-| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                  |
-| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami a vlastními sloupci hry; u netto her přepínač reference HCP     |
-| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                            |
-| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                         |
-| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                               |
-| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                          |
+| Soubor                   | Co dělá                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek (u osmnáctky i která devítka); vstup do nastavení hry            |
+| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta         |
+| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                      |
+| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                                    |
+| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                          |
+| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami, dekoracemi a vlastními sloupci hry; u netto her přepínač reference HCP |
+| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                                    |
+| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                                 |
+| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                       |
+| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                  |
 
 ### Ovládání zápisu skóre
 

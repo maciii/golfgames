@@ -43,6 +43,7 @@ function makeBaseOptions() {
     confirmLongest: false,
     confirmNearest: false,
     confirmByPersonalPar: true,
+    confirmSkinsByPar: false,
     resultMultipliers: { birdie: 2, eagle: 3, albatross: 10, condor: 1000 },
     doubleClosingHoles: false,
   }

@@ -7,6 +7,37 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.29.5] – 2026-08-05
+
+### Změněno
+
+- **Rámeček dvojice ve scorekartě.** Označení Levá-Pravá nyní obepíná skóre i
+  bodový sloupec daného hráče jako jeden širší obdélník.
+- **Skins s potvrzením parem.** Volitelná varianta vyžaduje, aby vítěz jamky
+  na následující jamce zahrál alespoň par; jinak se skin vrátí do banku.
+
+## [0.29.4] – 2026-08-05
+
+### Změněno
+
+- **Označení dvojice ve scorekartě.** Rámeček Levá-Pravá je nyní tenčí a má
+  stejnou žlutou barvu jako Eagle.
+
+## [0.29.3] – 2026-08-05
+
+### Změněno
+
+- **Přepočet po změně dvojic.** V Levá-Pravá lze dvojici změnit kdykoli po
+  zapsání jamky; skóre a bonusy zůstanou zachované a body se přepočítají podle
+  nového složení.
+
+## [0.29.2] – 2026-08-05
+
+### Změněno
+
+- **Dvojice ve scorekartě.** Levá-Pravá barevným rámečkem buněk označuje první
+  dvojici, která spolu hrála na konkrétní jamce; složení se mění podle jamky.
+
 ## [0.29.1] – 2026-08-05
 
 ### Změněno

@@ -367,7 +367,11 @@ export default function PlayScreen({
         </div>
 
         {holeSetup && (
-          <section className={`hole-setup${holeSetup.complete ? ' complete' : ''}`}>
+          <section
+            className={`hole-setup${holeSetup.complete ? ' complete' : ''}${
+              holeSetup.choices ? ' choices-mode' : ''
+            }`}
+          >
             <div className="hole-setup-heading">
               <h2 className="section-title">{holeSetup.title}</h2>
               <p className="hint">{holeSetup.message}</p>
@@ -384,7 +388,17 @@ export default function PlayScreen({
                     }
                     aria-pressed={choice.selected === true}
                   >
-                    <span className="pairing-line">{choice.label}</span>
+                    <span className="pairing-line">
+                      {choice.pairing ? (
+                        <>
+                          <span>{choice.pairing.left}</span>
+                          <span className="pairing-vs">{t('setup.versus')}</span>
+                          <span>{choice.pairing.right}</span>
+                        </>
+                      ) : (
+                        choice.label
+                      )}
+                    </span>
                   </button>
                 ))}
               </div>

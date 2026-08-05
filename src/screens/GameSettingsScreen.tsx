@@ -155,7 +155,8 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
     multiplierBonuses.length > 0 ||
     game.supportsDoubleHoles ||
     scoring.noDoubleBonuses ||
-    confirmsExclusive
+    confirmsExclusive ||
+    scoring.confirmSkinsByPar === true
   const hasScoringOptions =
     pointBonuses.length > 0 || scoring.resultMultipliers || hasOtherOptions
   const confirmNote =
@@ -373,6 +374,22 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 <span>
                   {t('gameSettings.confirmByPersonalPar')}
                   <em> {t('gameSettings.confirmByPersonalParNote')}</em>
+                </span>
+              </label>
+            )}
+
+            {scoring.confirmSkinsByPar && (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={options.confirmSkinsByPar}
+                  onChange={(e) =>
+                    update({ ...options, confirmSkinsByPar: e.target.checked })
+                  }
+                />
+                <span>
+                  {t('gameSettings.confirmSkinsByPar')}
+                  <em> {t('gameSettings.confirmSkinsByParNote')}</em>
                 </span>
               </label>
             )}

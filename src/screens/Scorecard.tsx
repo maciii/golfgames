@@ -310,14 +310,19 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                             ),
                           }
                         : undefined
+                    const labels = [
+                      decoration?.pairing?.ariaLabel,
+                      decoration?.skin?.ariaLabel,
+                    ].filter((label): label is string => Boolean(label))
+                    const decorationLabel = labels.join(' · ')
                     return (
                       <td
                         key={column.player.id}
                         className={`${playerColumnClass(column.playerIndex)}${
                           decoration?.skin ? ' skin-awarded' : ''
-                        }`}
-                        aria-label={decoration?.skin?.ariaLabel}
-                        title={decoration?.skin?.ariaLabel}
+                        }${decoration?.pairing ? ' pairing-marked' : ''}`}
+                        aria-label={decorationLabel || undefined}
+                        title={decorationLabel || undefined}
                       >
                         <ScoreCell
                           score={scoreAt(round, column.player.id, hole)}
@@ -329,12 +334,17 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                     )
                   }
 
+                  const pairingDecoration = column.column.afterPlayerId
+                    ? game.scorecardPlayerCell?.(round, column.column.afterPlayerId, hole)
+                    : undefined
                   return (
                     <td
                       key={column.column.id}
                       className={`${extraColumnClass(column.column, playerIndexes)}${
                         column.column.cell(round, hole) ? '' : ' empty'
-                      }`}
+                      }${pairingDecoration?.pairing ? ' pairing-marked-extra' : ''}`}
+                      aria-label={pairingDecoration?.pairing?.ariaLabel}
+                      title={pairingDecoration?.pairing?.ariaLabel}
                     >
                       {column.column.cell(round, hole) || '–'}
                     </td>
