@@ -176,9 +176,9 @@ export const cs = {
   'gameSettings.confirmNearest': 'Potvrzovat Nearest',
   'gameSettings.confirmNote': 'při horším výsledku než PAR bod propadá soupeřům',
   'gameSettings.confirmPlayerNote': 'při horším než par se bonus nepočítá',
-  'gameSettings.confirmByPersonalPar': 'Potvrzovat osobním PARem',
+  'gameSettings.confirmByPersonalPar': 'Potvrzovat Longest osobním PARem',
   'gameSettings.confirmByPersonalParNote':
-    'v kole s HCP se Longest a Nearest potvrzují parem jamky včetně ran, které na ní hráč dostává; hrubého kola se volba netýká',
+    'v kole s HCP se Longest potvrzuje parem jamky včetně ran, které na ní hráč dostává; Nearest se potvrzuje vždy hrubým parem a hrubého kola se volba netýká',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'Bod navíc, když oba partneři zahráli líp než oba soupeři.',

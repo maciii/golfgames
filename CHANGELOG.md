@@ -7,6 +7,15 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.29.0] – 2026-08-05
+
+### Změněno
+
+- **Osobní PAR potvrzuje jen Longest.** Volba se přejmenovala na _Potvrzovat
+  Longest osobním PARem_ a na Nearest se už nevztahuje – ten se v kole s HCP
+  potvrzuje vždycky hrubým parem. Nearest je rána na tříparovou jamku, kde
+  délka hřiště slabšího hráče netrestá, takže na ni handicap nepatří.
+
 ## [0.28.0] – 2026-08-05
 
 ### Přidáno

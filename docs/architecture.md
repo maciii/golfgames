@@ -238,10 +238,10 @@ mění, kdo jamku vyhrál, ne to, jak se zahrála. Longest a Nearest se
 (`exclusiveBonusOutcome()` v `handicap.ts`), popsané
 v [`games.md`](games.md#extra-body).
 
-`exclusiveBonusOutcome()` bydlí v `handicap.ts`, protože v netto kole
-potvrzuje **osobním parem** (volba `confirmByPersonalPar`). Ptá se na něj hra
-i `PlayScreen`, aby barva značky u jména a skutečně přidělené body nemohly
-tvrdit každá něco jiného.
+`exclusiveBonusOutcome()` bydlí v `handicap.ts`, protože v netto kole potvrzuje
+**Longest** osobním parem (volba `confirmByPersonalPar`); Nearest se potvrzuje
+vždycky hrubým parem. Ptá se na něj hra i `PlayScreen`, aby barva značky
+u jména a skutečně přidělené body nemohly tvrdit každá něco jiného.
 
 ## Násobení jamky
 

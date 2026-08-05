@@ -360,4 +360,23 @@ describe('Potvrzování osobním parem', () => {
 
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('opponent')
   })
+
+  /**
+   * Nearest se hraje na tříparovou jamku, kde délka hřiště slabšího hráče
+   * netrestá - proto se potvrzuje vždycky hrubým parem, i když má hráč na
+   * jamce ránu a Longest by za stejných okolností prošel.
+   */
+  it('Nearest se osobním parem neřídí ani se zapnutou volbou', () => {
+    const round = netRoundWith(true)
+
+    expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('opponent')
+    expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('own')
+  })
+
+  it('Nearest zahraný na hrubý par platí dál', () => {
+    const round = netRoundWith(true)
+    round.scores.p1 = [4]
+
+    expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('own')
+  })
 })

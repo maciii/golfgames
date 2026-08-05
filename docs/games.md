@@ -101,7 +101,8 @@ mění, kdo jamku vyhrál, ne to, jak se zahrála.**
 | Body za birdie a eagle v Best Aggregate          | netto      |
 | Stablefordovy body                               | netto      |
 | **Násobič extra bodů podle výsledku**            | **hrubý**  |
-| **Potvrzení Longestu a Nearestu**                | osobní par |
+| **Potvrzení Longestu**                           | osobní par |
+| **Potvrzení Nearestu**                           | **hrubý**  |
 | Součty ran ve výsledcích a ve scorekartě         | hrubý      |
 
 Extra body jsou tedy jediná část bodování, kterou handicap nezvedá. Bunker za
@@ -109,9 +110,10 @@ Extra body jsou tedy jediná část bodování, kterou handicap nezvedá. Bunker
 tehdy, když jamku zahrál na **hrubé** birdie. Bez toho by hráč s ranou na
 jamce dostal za stejný výkon dvojnásobek a s dvěma ranami trojnásobek.
 
-Výjimkou je potvrzování Longestu a Nearestu, které naopak stojí na osobním
-paru – jinak by slabší hráč bonus prakticky nikdy neuhrál. Podrobnosti jsou
-v kapitole [Potvrzování osobním parem](#potvrzování-osobním-parem).
+Jedinou výjimkou je potvrzování **Longestu**, které naopak stojí na osobním
+paru – jinak by slabší hráč bonus na dlouhé pětiparové jamce prakticky nikdy
+neuhrál. Nearest se potvrzuje hrubým parem. Podrobnosti jsou v kapitole
+[Potvrzování osobním parem](#potvrzování-osobním-parem).
 
 ## Předčasně ukončené kolo
 
@@ -172,8 +174,8 @@ Příklad: bunker za 1 bod zahraný na birdie dá v Best Aggregate dvojici
 
 **Rozhoduje hrubý výsledek, i když se hraje netto.** Rozdané rány mění to, kdo
 jamku vyhrál, ne to, jak se zahrála – hráč s tečkou na jamce má za bunker na
-par jeden bod jako každý jiný, ne dva. Jediná výjimka je potvrzování Longestu
-a Nearestu, které o osobní par naopak stojí (viz níž).
+par jeden bod jako každý jiný, ne dva. Jediná výjimka je potvrzování Longestu,
+které o osobní par naopak stojí (viz níž).
 
 ### Longest a Nearest
 
@@ -192,15 +194,20 @@ horším výsledku bonus nepočítá, protože tam není soupeřova dvojice, kte
 
 #### Potvrzování osobním parem
 
-V kole s HCP se ve výchozím stavu potvrzuje **osobním parem** – parem jamky
-plus ranami, které na ní hráč podle svého handicapu dostává. Slabší hráč tak
-Longest uhraje bogeyem na jamce, kde má tečku, protože netto je to par.
+**Týká se jen Longestu.** V kole s HCP se ve výchozím stavu potvrzuje
+**osobním parem** – parem jamky plus ranami, které na ní hráč podle svého
+handicapu dostává. Slabší hráč tak Longest uhraje bogeyem na jamce, kde má
+tečku, protože netto je to par.
 
 Kdyby se potvrzoval hrubý par, byla by hra s vyrovnáním handicapů proti
-slabším hráčům dvakrát: jednou na skóre a podruhé na bonusech, které by
-prakticky nikdy nepotvrdili. Volbu **Potvrzovat osobním PARem** jde v nastavení
-bodování hry vypnout a vrátit se ke hrubému paru. Na hrubé kolo volba nemá vliv
-– tam žádný osobní par neexistuje.
+slabším hráčům dvakrát: jednou na skóre a podruhé na bonusu, který by na dlouhé
+pětiparové jamce prakticky nikdy nepotvrdili. Volbu **Potvrzovat Longest
+osobním PARem** jde v nastavení bodování hry vypnout a vrátit se ke hrubému
+paru. Na hrubé kolo volba nemá vliv – tam žádný osobní par neexistuje.
+
+**Nearest se potvrzuje vždycky hrubým parem**, ať je volba zapnutá, nebo ne. Je
+to rána na tříparovou jamku, kde délka hřiště slabšího hráče netrestá, takže
+handicap na ni nepatří.
 
 Značka u jména napoví, jak to dopadne:
 
@@ -227,17 +234,17 @@ zbytek jamky násobí.
 Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
 **zvlášť pro každou hru** – Best Aggregate a Skins si je nepřepisují navzájem.
 
-| Volba                         | Výchozí     | Popis                                            |
-| ----------------------------- | ----------- | ------------------------------------------------ |
-| Hodnoty extra bodů            | viz výš     | 0 = vypnuto                                      |
-| Násobiče za výsledek          | 2/3/10/1000 | birdie, eagle, albatros, condor                  |
-| Dvojnásobná sázka             | zapnuto     | volba, která násobí sázku na jamce               |
-| 9. a 18. jamka za dvojnásobek | zapnuto     | jen u her, které to podporují                    |
-| Nenásobit extra body          | vypnuto     | dvojnásobná jamka ani double nenásobí extra body |
-| Potvrzovat Longest            | zapnuto     | při horším než par bod propadá soupeřům          |
-| Potvrzovat Nearest            | zapnuto     | při horším než par bod propadá soupeřům          |
-| Potvrzovat osobním PARem      | zapnuto     | v kole s HCP se potvrzuje par jamky včetně teček |
-| Double Best                   | 1 b.        | jen Best Aggregate; bod za oba lepší míče        |
+| Volba                          | Výchozí     | Popis                                            |
+| ------------------------------ | ----------- | ------------------------------------------------ |
+| Hodnoty extra bodů             | viz výš     | 0 = vypnuto                                      |
+| Násobiče za výsledek           | 2/3/10/1000 | birdie, eagle, albatros, condor                  |
+| Dvojnásobná sázka              | zapnuto     | volba, která násobí sázku na jamce               |
+| 9. a 18. jamka za dvojnásobek  | zapnuto     | jen u her, které to podporují                    |
+| Nenásobit extra body           | vypnuto     | dvojnásobná jamka ani double nenásobí extra body |
+| Potvrzovat Longest             | zapnuto     | při horším než par bod propadá soupeřům          |
+| Potvrzovat Nearest             | zapnuto     | při horším než par bod propadá soupeřům          |
+| Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest hrubě    |
+| Double Best                    | 1 b.        | jen Best Aggregate; bod za oba lepší míče        |
 
 Nabídka voleb je **pro každou hru zvlášť**. U každé hry se otevírá ozubeným
 tlačítkem přímo u její karty. Best Aggregate má týmové bonusy a Double Best,

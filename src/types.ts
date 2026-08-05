@@ -177,12 +177,13 @@ export interface GameOptions {
   /** Nearest platí jen při paru a lepším, jinak bod bere soupeř. */
   confirmNearest: boolean
   /**
-   * V netto kole se Longest a Nearest potvrzují **osobním parem** - parem
-   * jamky plus ranami, které na ní hráč podle handicapu dostává.
+   * V netto kole se **Longest** potvrzuje osobním parem - parem jamky plus
+   * ranami, které na ní hráč podle handicapu dostává.
    *
-   * Bez toho by potvrzování bralo hrubý par a slabší hráč by bonus prakticky
-   * nikdy neuhrál, i když jamku netto zahrál dobře. Na hrubé kolo volba nemá
-   * vliv, tam žádný osobní par neexistuje.
+   * Bez toho by potvrzování bralo hrubý par a slabší hráč by bonus na dlouhé
+   * pětiparové jamce prakticky nikdy neuhrál, i když ji netto zahrál dobře.
+   * Nearest se tímhle neřídí - ten se potvrzuje vždycky hrubým parem. Na hrubé
+   * kolo volba nemá vliv, tam žádný osobní par neexistuje.
    */
   confirmByPersonalPar: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */

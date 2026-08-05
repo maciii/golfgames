@@ -765,6 +765,24 @@ describe('Best Aggregate - Longest a Nearest', () => {
     expect(teamB?.extra).toBe(1)
   })
 
+  /**
+   * Stejná situace jako u Longestu výš, jen na tříparové jamce s Nearestem:
+   * Adam má na jamce ránu a zahraje bogey, které je netto parem. Longest by
+   * tím prošel, Nearest ne - ten se potvrzuje vždycky hrubým parem.
+   */
+  it('Nearest se osobním parem neřídí', () => {
+    const round = longestRound(4, true)
+    round.pars = [3]
+    round.bonuses.p1 = [['nearest']]
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 1
+
+    const [teamA, teamB] = holePoints(round, 0)
+    expect(teamA?.extra).toBe(0)
+    expect(teamB?.extra).toBe(1)
+  })
+
   it('osobní par nenásobí hodnotu bonusu', () => {
     // Adam s ranou zahraje 5 na par 5 - netto birdie, ale Longest je za 1 bod.
     const round = longestRound(5, true)

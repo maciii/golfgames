@@ -163,9 +163,9 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.confirmNote':
     'with a result worse than PAR, the point goes to the opponents',
   'gameSettings.confirmPlayerNote': 'worse than par and the bonus scores nothing',
-  'gameSettings.confirmByPersonalPar': 'Confirm against personal par',
+  'gameSettings.confirmByPersonalPar': 'Confirm Longest against personal par',
   'gameSettings.confirmByPersonalParNote':
-    'in a handicap round Longest and Nearest are confirmed against the hole par plus the strokes the player receives there; a gross round is unaffected',
+    'in a handicap round Longest is confirmed against the hole par plus the strokes the player receives there; Nearest is always confirmed against gross par and a gross round is unaffected',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'An extra point when both partners played better than both opponents.',

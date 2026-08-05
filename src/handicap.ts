@@ -9,7 +9,7 @@ import { diffToPar, parAt, scoreAt } from './types'
  * dokumentovaný; aplikace ale žádný oficiální handicap nevede ani nepočítá,
  * jen pracuje s indexem, který si hráč zadá sám.
  *
- * Patří sem i přidělení Longestu a Nearestu: o jejich potvrzení rozhoduje
+ * Patří sem i přidělení Longestu a Nearestu: o potvrzení Longestu rozhoduje
  * osobní par, tedy handicapový výpočet. Hry i obrazovky se ptají tady, aby
  * značka u jména a skutečné body nemohly tvrdit každá něco jiného.
  */
@@ -183,19 +183,26 @@ export function netDiffToPar(
 }
 
 /**
- * Rozdíl vůči paru, kterým se potvrzuje Longest a Nearest.
+ * Rozdíl vůči paru, kterým se potvrzuje Longest nebo Nearest.
  *
- * V netto kole je to se zapnutou volbou osobní par (par jamky plus rány, které
- * na ní hráč dostává); jinak hrubý par. Jinde se handicap do extra bodů
- * nepromítá - hodnota bonusu se násobí podle **hrubého** výsledku, protože
- * rozdané rány nemají s tím, jak se jamka zahrála, nic společného.
+ * Osobním parem (par jamky plus rány, které na ní hráč dostává) se v netto kole
+ * potvrzuje **jen Longest**, a jen se zapnutou volbou. Nearest se potvrzuje
+ * vždycky hrubým parem: je to rána na tříparovou jamku, kde délka hřiště
+ * slabšího hráče netrestá, takže na ni handicap nepatří.
+ *
+ * Jinde se handicap do extra bodů nepromítá vůbec - hodnota bonusu se násobí
+ * podle **hrubého** výsledku, protože rozdané rány nemají s tím, jak se jamka
+ * zahrála, nic společného.
  */
 export function confirmDiffToPar(
   round: Round,
   playerId: PlayerId,
   hole: number,
+  bonusId: BonusId,
 ): number | null {
-  return round.settings.options.confirmByPersonalPar && isNetRound(round)
+  const personal = bonusId === 'longest' && round.settings.options.confirmByPersonalPar
+
+  return personal && isNetRound(round)
     ? netDiffToPar(round, playerId, hole)
     : diffToPar(round, playerId, hole)
 }
@@ -219,7 +226,7 @@ export function exclusiveBonusOutcome(
       : round.settings.options.confirmNearest
   if (!confirm) return 'own'
 
-  const diff = confirmDiffToPar(round, playerId, hole)
+  const diff = confirmDiffToPar(round, playerId, hole, bonusId)
   if (diff === null) return 'pending'
   return diff <= 0 ? 'own' : 'opponent'
 }
