@@ -209,13 +209,14 @@ jamky násobí.
 
 Všechno je v `localStorage` pod klíči s verzí:
 
-| Klíč                        | Obsah                                       |
-| --------------------------- | ------------------------------------------- |
-| `golfgames.currentRound.v1` | rozehrané kolo (přežije zavření aplikace)   |
-| `golfgames.archive.v1`      | až 100 odehraných kol, nejnovější první     |
-| `golfgames.roster.v1`       | uložení spoluhráči                          |
-| `golfgames.settings.v1`     | naposledy použitá sázka (předvyplnění)      |
-| `golfgames.gameOptions.v1`  | volby bodování, mapa `gameId → GameOptions` |
+| Klíč                         | Obsah                                       |
+| ---------------------------- | ------------------------------------------- |
+| `golfgames.currentRound.v1`  | rozehrané kolo (přežije zavření aplikace)   |
+| `golfgames.archive.v1`       | až 100 odehraných kol, nejnovější první     |
+| `golfgames.roster.v1`        | uložení spoluhráči                          |
+| `golfgames.settings.v1`      | naposledy použitá sázka (předvyplnění)      |
+| `golfgames.gameOptions.v1`   | volby bodování, mapa `gameId → GameOptions` |
+| `golfgames.deletedRounds.v1` | místní tombstony explicitně zahozených kol  |
 
 Pravidla:
 
@@ -245,8 +246,9 @@ workerem.
 | `AccountContext.tsx` | stav účtu pro celou aplikaci                           |
 
 `localStorage` zůstává zdrojem pravdy; cloud je zrcadlo. Konflikty řeší
-`updatedAt` (vyhrává novější), nic se nikdy nezahazuje. Podrobnosti včetně
-nastavení projektu jsou v [`sync.md`](sync.md).
+`updatedAt` (vyhrává novější); explicitně zahozené kolo je jediná výjimka a
+přenáší se tombstonem. Podrobnosti včetně nastavení projektu jsou v
+[`sync.md`](sync.md).
 
 ## Jazyky
 
@@ -274,9 +276,11 @@ Volba jazyka: uložená předvolba → jazyk prohlížeče → angličtina.
 
 ## Stav a navigace
 
-`App.tsx` drží tři věci: rozehrané kolo, archiv a jméno viditelné obrazovky
-(`'setup' | 'play' | 'results' | 'archive' | 'gameSettings'`). Router tu není
-záměrně – navigace je plochá a router by byl jen váha navíc.
+`App.tsx` drží čtyři věci: rozehrané kolo, archiv, jméno viditelné obrazovky
+(`'setup' | 'play' | 'results' | 'archive' | 'gameSettings'`) a rozepsaný draft
+nastavení nového kola. Draft zůstává v kořeni aplikace, aby přechod do výběru
+hřiště nebo jiné podobrazovky nesmazal zadané hráče, hru ani handicapy. Router
+tu není záměrně – navigace je plochá a router by byl jen váha navíc.
 
 Kolo se ukládá `useEffect`em při každé změně, takže ho není potřeba ukládat
 ručně z obrazovek. Všechny změny skóre jdou přes callbacky v `App.tsx`, které

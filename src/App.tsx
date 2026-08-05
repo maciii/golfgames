@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { BonusId, CreateRoundOptions, PlayerId, Round } from './types'
 import { createRound, setHolePar, toggleBonus, touchRound } from './types'
 import {
@@ -9,7 +9,7 @@ import {
   loadCurrentRound,
   saveCurrentRound,
 } from './storage'
-import SetupScreen from './screens/SetupScreen'
+import SetupScreen, { type SetupDraft } from './screens/SetupScreen'
 import PlayScreen from './screens/PlayScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import ArchiveScreen from './screens/ArchiveScreen'
@@ -52,7 +52,7 @@ function viewForRound(round: Round | null): View {
  * takže se nikam nezanořuje a router by byl zbytečná váha.
  */
 function AppShell() {
-  const { noteRoundChange, dataVersion } = useAccount()
+  const { noteRoundChange, dataVersion, discardRound: discardSyncedRound } = useAccount()
   // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
   const persistedDataVersion = useRef(dataVersion)
@@ -68,6 +68,33 @@ function AppShell() {
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null)
   // Hřiště předvybrané v nastavení kola po návratu ze zadání.
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>()
+  const [setupDraft, setSetupDraft] = useState<SetupDraft | undefined>()
+  const setupScrollTop = useRef(0)
+  const restoreSetupScroll = useRef(false)
+
+  const rememberSetupDraft = useCallback((draft: SetupDraft) => {
+    setSetupDraft(draft)
+  }, [])
+
+  const leaveSetup = useCallback(() => {
+    restoreSetupScroll.current = true
+    setView('setup')
+  }, [])
+
+  const openSetupSubscreen = useCallback((nextView: View) => {
+    setupScrollTop.current = window.scrollY
+    restoreSetupScroll.current = true
+    setView(nextView)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (view !== 'setup' || !restoreSetupScroll.current) return
+    restoreSetupScroll.current = false
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: setupScrollTop.current, behavior: 'auto' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [view])
 
   useEffect(() => {
     if (dataVersion !== persistedDataVersion.current) {
@@ -86,6 +113,7 @@ function AppShell() {
       options.playerNames,
       options.gameId === 'stableford' ? options.handicapIndexes : undefined,
     )
+    setSetupDraft(undefined)
     setRound(createRound(options))
     setView('play')
   }, [])
@@ -139,9 +167,13 @@ function AppShell() {
   }, [])
 
   const discardRound = useCallback(() => {
+    if (!round) return
+    // Dohrané kolo už je v archivu; Nové kolo jen opustí jeho výsledky.
+    if (!round.finishedAt) discardSyncedRound(round.id)
+    setSetupDraft(undefined)
     setRound(null)
     setView('setup')
-  }, [])
+  }, [round, discardSyncedRound])
 
   const removeArchived = useCallback(
     (roundId: string) => {
@@ -200,13 +232,13 @@ function AppShell() {
         {...(selectedCourseId ? { selectedId: selectedCourseId } : {})}
         onSelect={(course) => {
           setSelectedCourseId(course?.id)
-          setView('setup')
+          leaveSetup()
         }}
         onNewCourse={() => {
           setEditingCourseId(null)
           setView('courseEdit')
         }}
-        onBack={() => setView('setup')}
+        onBack={leaveSetup}
       />
     )
   }
@@ -220,16 +252,16 @@ function AppShell() {
           // Uložené hřiště se rovnou předvybere, ať se nehledá v seznamu.
           setSelectedCourseId(saved.id)
           setEditingCourseId(null)
-          setView('setup')
+          leaveSetup()
         }}
         onDeleted={() => {
           if (selectedCourseId === editingCourseId) setSelectedCourseId(undefined)
           setEditingCourseId(null)
-          setView('setup')
+          leaveSetup()
         }}
         onBack={() => {
           setEditingCourseId(null)
-          setView('setup')
+          leaveSetup()
         }}
       />
     )
@@ -278,16 +310,18 @@ function AppShell() {
         onOpenArchive={openArchive}
         onOpenGameSettings={(gameId) => {
           setSettingsGameId(gameId)
-          setView('gameSettings')
+          openSetupSubscreen('gameSettings')
         }}
         onOpenBackup={() => setView('backup')}
         onOpenAccount={() => setView('account')}
         onEditCourse={(courseId) => {
           setEditingCourseId(courseId ?? null)
-          setView('courseEdit')
+          openSetupSubscreen('courseEdit')
         }}
-        onPickCourse={() => setView('coursePicker')}
+        onPickCourse={() => openSetupSubscreen('coursePicker')}
         {...(selectedCourseId ? { selectedCourseId } : {})}
+        {...(setupDraft ? { initialDraft: setupDraft } : {})}
+        onDraftChange={rememberSetupDraft}
         archiveCount={archive.length}
       />
     )

@@ -19,6 +19,7 @@ import {
   watchAccount,
 } from './auth'
 import { isSyncConfigured } from './firebase'
+import { loadDeletedRoundIds, markRoundDeleted } from '../storage'
 import {
   cancelScheduledPush,
   deleteCloudData,
@@ -74,6 +75,8 @@ interface AccountValue {
   syncNow: () => Promise<boolean>
   /** Ohlásí změnu kola, aby se s odkladem odeslalo. */
   noteRoundChange: (round: Round) => void
+  /** Zahodí rozehrané kolo lokálně i v synchronizaci. */
+  discardRound: (roundId: string) => void
   /** Smaže data v cloudu i účet; data v zařízení zůstanou. */
   deleteEverything: () => Promise<void>
 }
@@ -121,7 +124,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       setSyncError(null)
       setStatus('synced')
       // Obrazovky si po tomhle znovu načtou data z úložiště.
-      if (result.rounds > 0) setDataVersion((n) => n + 1)
+      if (result.rounds > 0 || result.deleted > 0) setDataVersion((n) => n + 1)
     } catch (error) {
       // Bez signálu to není chyba - data zůstala v zařízení a pošlou se pak.
       if (navigator.onLine) {
@@ -173,7 +176,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   /** Neodeslané změny posíláme při odchodu z aplikace a po návratu signálu. */
   useEffect(() => {
     function flush() {
-      if (uid.current) void flushQueue(uid.current)
+      if (!uid.current) return
+      if (loadDeletedRoundIds().length > 0) void runSync(uid.current)
+      else void flushQueue(uid.current)
     }
     function onVisibility() {
       if (document.visibilityState === 'hidden') flush()
@@ -185,7 +190,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('online', flush)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [])
+  }, [runSync])
 
   const signIn = useCallback(async () => {
     setSignInError(null)
@@ -238,6 +243,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (uid.current) scheduleRoundPush(uid.current, round)
   }, [])
 
+  const discardRound = useCallback(
+    (roundId: string) => {
+      cancelScheduledPush()
+      markRoundDeleted(roundId)
+      if (uid.current) void runSync(uid.current)
+    },
+    [runSync],
+  )
+
   const deleteEverything = useCallback(async () => {
     const userId = uid.current
     if (!userId) return
@@ -267,6 +281,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         signOut,
         syncNow,
         noteRoundChange,
+        discardRound,
         deleteEverything,
       }}
     >

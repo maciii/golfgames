@@ -98,8 +98,10 @@ navíc - to je podmínka toho, že se pro něj nic nemění.
 
 ## 2d. Konflikty: vyhrává poslední zápis
 
-**Rozhodnutí.** Kola se párují podle `id`, rozhoduje `updatedAt`. Nic se nikdy
-nezahazuje - výsledek je vždy sjednocení obou stran.
+**Rozhodnutí.** Kola se párují podle `id`, rozhoduje `updatedAt`. Běžná
+synchronizace nic nezahazuje - výsledek je vždy sjednocení obou stran. Když
+uživatel výslovně potvrdí zahození rozehraného kola, uloží se tombstone do
+společných předvoleb a vzdálený dokument se smaže.
 
 **Proč ne něco chytřejšího.** Slučování po jamkách by řešilo případ, kdy dva
 lidé zapisují stejné kolo na dvou telefonech. To se ale nestává - kolo zapisuje
@@ -109,6 +111,11 @@ bylo potřeba udržovat u každé nové hry.
 **`updatedAt` zvedá jen skutečná změna dat.** Listování jamkami ne. Kdyby ano,
 zařízení, na kterém se jen kouká do výsledků, by přebilo zápis z toho, kde se
 zrovna hraje - a to je přímá cesta ke ztrátě skóre.
+
+**Proč tombstone.** Samotné smazání dokumentu nestačí: zařízení, které ještě
+má starou lokální kopii, by ji při příštím slučování znovu nahrálo. Tombstone
+proto zůstává v `users/{uid}/prefs/app` a filtruje kolo před slučováním na
+každém zařízení.
 
 ---
 

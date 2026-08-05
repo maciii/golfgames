@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { finishedRounds, mergeRounds, pickCurrentRound } from './merge'
+import {
+  finishedRounds,
+  mergeRounds,
+  pickCurrentRound,
+  removeDeletedRounds,
+} from './merge'
 import type { Round } from '../types'
 import { makeRound } from '../games/fixtures'
 
@@ -90,6 +95,14 @@ describe('Synchronizace - slučování kol', () => {
 })
 
 describe('Synchronizace - rozehrané kolo', () => {
+  it('vyřadí explicitně smazané kolo před synchronizací', () => {
+    const rounds = [round('ponechat', DRIVE), round('smazat', LATER, false)]
+
+    expect(removeDeletedRounds(rounds, ['smazat']).map((item) => item.id)).toEqual([
+      'ponechat',
+    ])
+  })
+
   it('rozehrané kolo se pozná podle chybějícího ukončení', () => {
     const rounds = [round('hotove', LATER), round('rozehrane', DRIVE, false)]
 

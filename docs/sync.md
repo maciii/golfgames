@@ -17,7 +17,7 @@ u nepřihlášeného hráče neproletí za celé kolo jediný požadavek na Fire
 
 ```
 users/{uid}/rounds/{roundId}   celé kolo jako JSON
-users/{uid}/prefs/app          hráči, sázka a volby bodování
+users/{uid}/prefs/app          hráči, sázka, volby bodování a smazaná kola
 ```
 
 Jedno kolo = jeden dokument, bez mapování na tabulky.
@@ -38,11 +38,19 @@ cestou.
 Rozehrané kolo není nic zvláštního – je to obyčejné kolo bez `finishedAt`.
 Na novém zařízení se pozná právě podle toho (`pickCurrentRound()`).
 
+Explicitně zahozené rozehrané kolo je výjimka z běžného slučování. Jeho id se
+uloží jako tombstone do `prefs/app` (`deletedRoundIds`) a dokument kola se
+smaže. Tombstone zůstává i po smazání dokumentu, aby zařízení, které ještě má
+starou lokální kopii, kolo znovu nenahrálo. Bez přihlášení se tombstone drží jen
+v `localStorage`; po návratu signálu se synchronizace zopakuje.
+
 ## Slučování a konflikty
 
 Kola se párují podle `id` a rozhoduje `updatedAt`: **vyhrává novější zápis**.
-Při shodě časů zůstává místní verze. Nic se nikdy nezahazuje – výsledek je
-vždy sjednocení obou stran.
+Při shodě časů zůstává místní verze. Běžná synchronizace nic nezahazuje –
+výsledek je vždy sjednocení obou stran. Výjimkou je pouze explicitní potvrzení
+uživatele, že chce rozehrané kolo zahodit; to se přenese tombstonem na všechna
+zařízení.
 
 `Round.updatedAt` zvedá `touchRound()` jen při **skutečné změně dat** (skóre,
 extra body, par, ukončení kola). Listování jamkami ho záměrně nezvedá: jinak
@@ -56,20 +64,23 @@ funkce bez jediného odkazu na Firebase, takže ji pokrývají běžné testy.
 
 ## Kdy se zapisuje
 
-| Událost                | Co se stane                                                            |
-| ---------------------- | ---------------------------------------------------------------------- |
-| Přihlášení             | stáhnou se všechna vzdálená kola, sloučí s místními, rozdíl se nahraje |
-| Start aplikace s účtem | totéž, aby se zachytily změny z jiného zařízení                        |
-| Změna zápisu           | kolo se zařadí do fronty a odešle **s odkladem 10 s**                  |
-| Odchod z aplikace      | fronta se odešle hned (`visibilitychange`)                             |
-| Návrat signálu         | fronta se odešle (`online`)                                            |
+| Událost                   | Co se stane                                                            |
+| ------------------------- | ---------------------------------------------------------------------- |
+| Přihlášení                | stáhnou se všechna vzdálená kola, sloučí s místními, rozdíl se nahraje |
+| Start aplikace s účtem    | totéž, aby se zachytily změny z jiného zařízení                        |
+| Změna zápisu              | kolo se zařadí do fronty a odešle **s odkladem 10 s**                  |
+| Zahození rozehraného kola | uloží se tombstone, místní kolo zmizí hned, cloudový dokument se smaže |
+| Odchod z aplikace         | fronta se odešle hned (`visibilitychange`)                             |
+| Návrat signálu            | synchronizace zopakuje i čekající mazání (`online`)                    |
 
 Odklad je důležitý kvůli kvótám: bez něj by osmnáctijamkové kolo znamenalo
 osmnáct zápisů, s ním vyjde na jednotky. Denní limit bezplatného plánu je tak
 mimo dosah i při velkém počtu hráčů.
 
 Neodeslané změny čekají v `golfgames.syncQueue.v1`, takže přežijí i zavření
-aplikace bez signálu.
+aplikace bez signálu. Čekající zahození kol je v
+`golfgames.deletedRounds.v1`; při další synchronizaci má přednost před
+nahráním kola.
 
 ## Zabezpečení
 

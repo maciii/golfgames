@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DEFAULT_GAME_ID, GAMES, getGame } from '../games'
 import type { RosterEntry } from '../storage'
 import {
@@ -24,6 +24,39 @@ const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
 
 const MAX_PLAYERS = 4
 const HOLE_OPTIONS = [9, 18]
+const TEE_COLOR_IDS = new Set([
+  'black',
+  'blue',
+  'bronze',
+  'dark-green',
+  'gold',
+  'green',
+  'jade',
+  'members',
+  'men',
+  'middle',
+  'orange',
+  'players',
+  'purple',
+  'red',
+  'silver',
+  'tournament',
+  'white',
+  'yellow',
+])
+
+function teeColorClass(teeId: string): string {
+  return TEE_COLOR_IDS.has(teeId) ? teeId : 'neutral'
+}
+
+function initialTeeId(selectedCourseId: string | undefined, draftTeeId?: string): string {
+  const course = selectedCourseId
+    ? loadCourses().find((entry) => entry.id === selectedCourseId)
+    : undefined
+  if (course?.tees.some((tee) => tee.id === draftTeeId)) return draftTeeId ?? ''
+  if (course?.tees.some((tee) => tee.id === 'yellow')) return 'yellow'
+  return draftTeeId ?? ''
+}
 
 /**
  * Tři možná rozdělení čtyř hráčů do dvojic. Víc jich neexistuje - u čtyř
@@ -44,6 +77,20 @@ const PAIRINGS: number[][][] = [
   ],
 ]
 
+export interface SetupDraft {
+  gameId: string
+  playerCount: number
+  names: string[]
+  holeCount: number
+  pairing: number
+  settings: RoundSettings
+  pointValueText: string
+  teeId: string
+  netScoring: boolean
+  handicapMode: 'index' | 'strokes'
+  handicapText: string[]
+}
+
 interface Props {
   onStart: (options: CreateRoundOptions) => void
   onOpenArchive: () => void
@@ -56,6 +103,9 @@ interface Props {
   onPickCourse: () => void
   /** Hřiště předvybrané po návratu ze zadání. */
   selectedCourseId?: string
+  /** Rozepsané nastavení přežívající návrat z podobrazovky. */
+  initialDraft?: SetupDraft
+  onDraftChange?: (draft: SetupDraft) => void
   archiveCount: number
 }
 
@@ -69,25 +119,34 @@ export default function SetupScreen({
   onEditCourse,
   onPickCourse,
   selectedCourseId,
+  initialDraft,
+  onDraftChange,
   archiveCount,
 }: Props) {
   const { t, locale, setLocale } = useLocale()
   const { status, account } = useAccount()
-  const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
+  const [gameId, setGameId] = useState(initialDraft?.gameId ?? DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
-    getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
+    initialDraft?.playerCount ?? getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2,
   )
-  const [names, setNames] = useState<string[]>(Array(MAX_PLAYERS).fill(''))
+  const [names, setNames] = useState<string[]>(
+    () => initialDraft?.names.slice() ?? Array(MAX_PLAYERS).fill(''),
+  )
   const [holeCount, setHoleCount] = useState(
-    () => loadCourses().find((c) => c.id === selectedCourseId)?.holeCount ?? 18,
+    () =>
+      loadCourses().find((c) => c.id === selectedCourseId)?.holeCount ??
+      initialDraft?.holeCount ??
+      18,
   )
-  const [pairing, setPairing] = useState(0)
+  const [pairing, setPairing] = useState(initialDraft?.pairing ?? 0)
   const [roster, setRoster] = useState<RosterEntry[]>(() => loadRoster())
   const [rosterEditing, setRosterEditing] = useState(false)
   // Předvolby se pamatují z minulého kola, ať se sázka nezadává pořád dokola.
-  const [settings, setSettings] = useState<RoundSettings>(() => loadSettings())
+  const [settings, setSettings] = useState<RoundSettings>(
+    () => initialDraft?.settings ?? loadSettings(),
+  )
   const [pointValueText, setPointValueText] = useState(
-    () => `${loadSettings().pointValue}`,
+    () => initialDraft?.pointValueText ?? `${loadSettings().pointValue}`,
   )
 
   // Hřiště je nepovinné - bez něj se kolo založí jako dosud, se samými čtyřkami
@@ -99,17 +158,52 @@ export default function SetupScreen({
   // zvenčí; obrazovka se mezitím odpojí a stav se stejně staví znovu.
   const courseId = selectedCourseId ?? ''
   // Prázdné id znamená "první odpaliště"; findTee() na něj spadne sám.
-  const [teeId, setTeeId] = useState<string>('')
-  const [netScoring, setNetScoring] = useState(false)
+  const [teeId, setTeeId] = useState<string>(() =>
+    initialTeeId(selectedCourseId, initialDraft?.teeId),
+  )
+  const [netScoring, setNetScoring] = useState(initialDraft?.netScoring ?? false)
   /**
    * Zadává se handicapový index, nebo rovnou počet ran?
    *
    * Index je běžnější, ale na hřišti bez normy odpaliště se z něj nedá počítat,
    * takže musí jít zadat i hotové rány.
    */
-  const [handicapMode, setHandicapMode] = useState<'index' | 'strokes'>('index')
+  const [handicapMode, setHandicapMode] = useState<'index' | 'strokes'>(
+    initialDraft?.handicapMode ?? 'index',
+  )
   /** Handicapové indexy jako text, ať jde pole vymazat bez skoku na nulu. */
-  const [handicapText, setHandicapText] = useState<string[]>(Array(MAX_PLAYERS).fill(''))
+  const [handicapText, setHandicapText] = useState<string[]>(
+    () => initialDraft?.handicapText.slice() ?? Array(MAX_PLAYERS).fill(''),
+  )
+
+  useEffect(() => {
+    onDraftChange?.({
+      gameId,
+      playerCount,
+      names: [...names],
+      holeCount,
+      pairing,
+      settings,
+      pointValueText,
+      teeId,
+      netScoring,
+      handicapMode,
+      handicapText: [...handicapText],
+    })
+  }, [
+    gameId,
+    playerCount,
+    names,
+    holeCount,
+    pairing,
+    settings,
+    pointValueText,
+    teeId,
+    netScoring,
+    handicapMode,
+    handicapText,
+    onDraftChange,
+  ])
 
   const course = courses.find((c) => c.id === courseId)
   const tee = course ? findTee(course, teeId) : undefined
@@ -506,23 +600,28 @@ export default function SetupScreen({
           </div>
 
           {course && course.tees.length > 0 && (
-            <label className="field">
+            <div className="field tee-field">
               <span className="field-label">{t('setup.tee')}</span>
-              <span className="field-input">
-                <select
-                  className="name-input"
-                  value={tee?.id ?? ''}
-                  onChange={(e) => setTeeId(e.target.value)}
-                  aria-label={t('setup.tee')}
-                >
-                  {course.tees.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {localizedTeeName(option.id, option.name)}
-                    </option>
-                  ))}
-                </select>
-              </span>
-            </label>
+              <div className="tee-options" role="radiogroup" aria-label={t('setup.tee')}>
+                {course.tees.map((option) => {
+                  const selected = tee?.id === option.id
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`tee-option tee-option-${teeColorClass(option.id)}${
+                        selected ? ' selected' : ''
+                      }`}
+                      onClick={() => setTeeId(option.id)}
+                      aria-pressed={selected}
+                    >
+                      <span className="tee-swatch" aria-hidden="true" />
+                      <span>{localizedTeeName(option.id, option.name)}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           )}
 
           <p className="hint">

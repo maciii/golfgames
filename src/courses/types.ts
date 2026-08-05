@@ -14,6 +14,9 @@
 /** Odkud údaje pocházejí. Rozhoduje o tom, co smí přepsat import. */
 export type CourseSource = 'opengolfapi' | 'osm' | 'manual'
 
+/** Jestli je uložené hřiště kopií katalogu, nebo soukromý údaj uživatele. */
+export type CourseOrigin = 'catalog' | 'private'
+
 /**
  * Odpaliště. CR a SR jsou potřeba jen pro dopočet hracího handicapu; bez nich
  * hřiště funguje dál, jen se handicap musí zadat rovnou v ranách.
@@ -48,10 +51,14 @@ export interface Course {
   strokeIndex: number[]
   tees: CourseTee[]
   source: CourseSource
+  /** Prezentační původ uložené kopie; starší data ho nemají a doplní se. */
+  origin?: CourseOrigin
   /** ODbL vyžaduje uvést původ dat. */
   attribution?: string
   /** ISO timestamp poslední změny - kvůli synchronizaci. */
   updatedAt?: string
+  /** Čas poslední verze, kterou vydal centrální katalog. */
+  catalogUpdatedAt?: string
 }
 
 /** Nejvyšší rozumný par jamky; vyšší hodnota je skoro jistě překlep. */
@@ -88,6 +95,14 @@ export function isValidCourse(course: unknown): course is Course {
 
 /** Doplní pole, která v uloženém nebo naimportovaném hřišti chybí. */
 export function normalizeCourse(course: Course): Course {
+  const source = course.source ?? 'manual'
+  const origin =
+    course.origin === 'catalog' || course.origin === 'private'
+      ? course.origin
+      : source === 'manual' && course.id.startsWith('local:')
+        ? 'private'
+        : 'catalog'
+
   return {
     ...course,
     pars: [...course.pars],
@@ -96,7 +111,34 @@ export function normalizeCourse(course: Course): Course {
         ? [...course.strokeIndex]
         : defaultStrokeIndex(course.holeCount),
     tees: Array.isArray(course.tees) ? course.tees.map((tee) => ({ ...tee })) : [],
-    source: course.source ?? 'manual',
+    source,
+    origin,
+  }
+}
+
+/** Rozpozná katalogovou kopii i ve starších uložených hřištích. */
+export function isCatalogCourse(course: Course): boolean {
+  return normalizeCourse(course).origin === 'catalog'
+}
+
+/** Vrátí true, když centrální scorekarta předběhla lokální katalogovou kopii. */
+export function hasNewerCatalogVersion(local: Course, remote: Course): boolean {
+  const remoteStamp = Date.parse(remote.updatedAt ?? '')
+  const localStamp = Date.parse(local.catalogUpdatedAt ?? '')
+  return (
+    !Number.isNaN(remoteStamp) && (Number.isNaN(localStamp) || remoteStamp > localStamp)
+  )
+}
+
+/** Vytvoří soukromou kopii katalogového hřiště pro lokální úpravy. */
+export function copyAsPrivateCourse(course: Course): Course {
+  return {
+    ...course,
+    id: `local:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    source: 'manual',
+    origin: 'private',
+    catalogUpdatedAt: undefined,
+    updatedAt: new Date().toISOString(),
   }
 }
 
@@ -139,6 +181,7 @@ export function createCourse(name: string, holeCount: number): Course {
     strokeIndex: defaultStrokeIndex(holeCount),
     tees: [],
     source: 'manual',
+    origin: 'private',
     updatedAt: new Date().toISOString(),
   }
 }

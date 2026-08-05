@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import type { Course, CourseTee } from '../courses/types'
-import { coursePar, createCourse, defaultStrokeIndex } from '../courses/types'
+import {
+  copyAsPrivateCourse,
+  coursePar,
+  createCourse,
+  defaultStrokeIndex,
+  isCatalogCourse,
+} from '../courses/types'
 import { deleteCourse, saveCourse } from '../storage'
 import { useT } from '../i18n'
 
@@ -159,13 +165,14 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
       setNameError(true)
       return
     }
-    const saved: Course = {
+    const edited: Course = {
       ...draft,
       name,
       tees: draft.tees
         .filter((tee) => tee.name.trim())
         .map((tee) => ({ ...tee, name: tee.name.trim() })),
     }
+    const saved = course && isCatalogCourse(course) ? copyAsPrivateCourse(edited) : edited
     saveCourse(saved)
     onSaved(saved)
   }

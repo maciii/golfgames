@@ -52,6 +52,18 @@ geohashe.
   funguje vždycky.
 - Hřiště z katalogu prochází stejnou kontrolou (`isValidCourse`) jako hřiště ze
   zálohy — poškozený záznam se do výpočtů nedostane.
+- V seznamu jsou hřiště rozlišená stavem: **v katalogu** (zatím jen online),
+  **staženo** (lokální kopie katalogového hřiště) a **vlastní** (soukromé
+  hřiště zadané uživatelem). Barevný odznak je prezentační, id hřiště zůstává
+  stejné.
+- Při otevření výběru se lokální katalogové kopie na pozadí porovnají s jejich
+  centrální scorekartou. Pokud má vzdálený záznam novější `updatedAt`, kopie se
+  sama uloží znovu; soukromá hřiště se nikdy nekontrolují ani neposílají na
+  katalogový server. Bez připojení zůstávají lokální kopie použitelné a
+  aktualizace se zkusí při příštím otevření výběru.
+- Úprava staženého katalogového hřiště nikdy nepřepíše originál. Editor uloží
+  nový soukromý `local:` klon; původní katalogové hřiště zůstane v telefonu i
+  v centrální nabídce.
 
 ### Názvy odpališť
 
@@ -61,6 +73,10 @@ překládají podle jazyka aplikace; v češtině se tedy ukáže například �
 v angličtině „Yellow“. Vlastní názvy odpališť se nepřepisují a zůstávají tak,
 jak je uživatel nebo katalog zadal. Lokalizace je pouze prezentační, takže
 změna jazyka nemění uložená hřiště ani rozehraná kola.
+
+U stažené kopie se vedle lokálního času uložení drží také `catalogUpdatedAt`.
+Ten je časem centrální scorekarty a rozhoduje, zda je při dalším otevření
+výběru potřeba kopii obnovit.
 
 ## Údržba dat
 

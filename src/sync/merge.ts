@@ -21,6 +21,13 @@ export interface MergePlan {
   push: Round[]
 }
 
+/** Vyřadí kola, která uživatel explicitně smazal a nesmí se znovu objevit. */
+export function removeDeletedRounds(rounds: Round[], deletedIds: string[]): Round[] {
+  if (deletedIds.length === 0) return rounds
+  const deleted = new Set(deletedIds)
+  return rounds.filter((round) => !deleted.has(round.id))
+}
+
 /**
  * Sloučí místní kola se vzdálenými a zároveň řekne, co je potřeba nahrát.
  *

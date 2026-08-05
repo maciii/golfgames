@@ -7,6 +7,41 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.21.0] – 2026-08-05
+
+### Změněno
+
+- **Návrat z výběru hřiště zachová pozici stránky na mobilu.** Úvodní
+  nastavení se po návratu nevrátí na začátek.
+- **Úprava katalogového hřiště vytváří soukromý klon.** Původní katalogová
+  kopie zůstane zachovaná a další aktualizace katalogu ji mohou dál obnovovat.
+
+## [0.20.0] – 2026-08-05
+
+### Přidáno
+
+- **Rozlišení hřišť v pickeru.** Katalogová nabídka, lokálně stažená kopie a
+  vlastní soukromé hřiště mají odlišné barevné odznaky.
+- **Automatická aktualizace katalogových kopií.** Při otevření výběru se
+  uložené kopie porovnají s centrální scorekartou a novější verze se stáhnou.
+
+## [0.19.0] – 2026-08-05
+
+### Změněno
+
+- **Nastavení nového kola přežije výběr hřiště.** Zadaní hráči, hra, počet
+  hráčů, handicapy i další volby zůstanou zachované po návratu z podobrazovky.
+- **Odpaliště jsou vidět najednou.** Každé odpaliště má vlastní barevné tlačítko
+  a žluté se předvolí, pokud ho hřiště nabízí.
+
+## [0.18.1] – 2026-08-05
+
+### Opraveno
+
+- **Zahození rozehraného kola se synchronizuje.** Potvrzené „Nové kolo“ už
+  nesmaže jen místní kopii; cloudové kolo se odstraní a tombstone zabrání jeho
+  návratu při refreshi nebo na jiném zařízení.
+
 ## [0.18.0] – 2026-08-05
 
 ### Přidáno

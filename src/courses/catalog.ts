@@ -41,6 +41,8 @@ export interface CatalogEntry {
   tees: number
   /** Má aspoň jedno odpaliště normu? Bez ní se handicap nedopočítá z indexu. */
   rated: boolean
+  /** Volitelné; starší rejstříky ho nemají, scorekarta ho má vždy. */
+  updatedAt?: string
 }
 
 /** Rejstřík se drží v paměti, ať se při každém hledání netahá znovu. */
@@ -104,7 +106,12 @@ export async function fetchCourse(id: string): Promise<Course> {
   // Hřiště z katalogu prochází stejnou kontrolou jako hřiště ze zálohy -
   // poškozený záznam se nesmí dostat do výpočtů.
   if (!isValidCourse(data)) throw new CatalogError('broken')
-  return normalizeCourse(data)
+  const course = normalizeCourse(data)
+  return {
+    ...course,
+    origin: 'catalog',
+    ...(course.updatedAt ? { catalogUpdatedAt: course.updatedAt } : {}),
+  }
 }
 
 /** Adresa katalogu pro diagnostiku v UI. */

@@ -426,6 +426,8 @@ export const en: Record<MessageKey, Message> = {
   'picker.count': '{stored} on this phone, {total} available',
   'picker.loading': 'Loading the course catalogue…',
   'picker.inCatalog': 'in catalogue',
+  'picker.downloaded': 'downloaded',
+  'picker.privateCourse': 'private',
   'picker.downloading': 'downloading…',
   'picker.rated': 'rated',
   'picker.notRated': 'not rated',

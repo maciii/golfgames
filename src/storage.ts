@@ -24,6 +24,7 @@ const ROSTER_KEY = 'golfgames.roster.v1'
 const SETTINGS_KEY = 'golfgames.settings.v1'
 const GAME_OPTIONS_KEY = 'golfgames.gameOptions.v1'
 const COURSES_KEY = 'golfgames.courses.v1'
+const DELETED_ROUNDS_KEY = 'golfgames.deletedRounds.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -131,6 +132,30 @@ export function saveCurrentRound(round: Round | null): void {
   else write(CURRENT_KEY, round)
 }
 
+/** Ids kol, která uživatel výslovně zahodil a nesmí se vrátit ze synchronizace. */
+export function loadDeletedRoundIds(): string[] {
+  const ids = read<unknown>(DELETED_ROUNDS_KEY)
+  if (!Array.isArray(ids)) return []
+  return [
+    ...new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0)),
+  ]
+}
+
+export function markRoundDeleted(roundId: string): void {
+  if (!roundId) return
+  write(DELETED_ROUNDS_KEY, [...new Set([...loadDeletedRoundIds(), roundId])])
+}
+
+/** Po úspěšné synchronizaci odstraní lokální tombstony, které už cloud zná. */
+export function clearDeletedRoundIds(roundIds: string[]): void {
+  if (roundIds.length === 0) return
+  const deleted = new Set(roundIds)
+  write(
+    DELETED_ROUNDS_KEY,
+    loadDeletedRoundIds().filter((roundId) => !deleted.has(roundId)),
+  )
+}
+
 // --- archiv odehraných kol ------------------------------------------------
 
 export function loadArchive(): Round[] {
@@ -234,9 +259,10 @@ export function loadCourses(): Course[] {
 /** Uloží hřiště; stejné id přepíše místo zdvojení. */
 export function saveCourse(course: Course): Course[] {
   const rest = loadCourses().filter((c) => c.id !== course.id)
-  const courses = [...rest, { ...course, updatedAt: new Date().toISOString() }].sort(
-    (a, b) => a.name.localeCompare(b.name, localeTag()),
-  )
+  const courses = [
+    ...rest,
+    normalizeCourse({ ...course, updatedAt: new Date().toISOString() }),
+  ].sort((a, b) => a.name.localeCompare(b.name, localeTag()))
   write(COURSES_KEY, courses)
   return courses
 }

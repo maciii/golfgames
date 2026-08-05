@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { hasNewerCatalogVersion, isCatalogCourse } from '../courses/types'
 import type { Course } from '../courses/types'
 import type { CatalogEntry } from '../courses/catalog'
 import { CatalogError, fetchCourse, fetchIndex } from '../courses/catalog'
@@ -34,17 +35,47 @@ function foldText(value: string): string {
 }
 
 /** Řádek seznamu: buď hřiště v telefonu, nebo nabídka z katalogu. */
+type CourseStatus = 'catalog' | 'downloaded' | 'private'
+
 interface Row {
   id: string
   name: string
   meta: string
   stored: boolean
+  status: CourseStatus
 }
 
 const CATALOG_ERROR: Record<CatalogError['reason'], MessageKey> = {
   offline: 'picker.errorOffline',
   missing: 'picker.errorMissing',
   broken: 'picker.errorBroken',
+}
+
+/** Obnoví uložené katalogové kopie, ale soukromá hřiště nechá offline. */
+async function refreshStoredCatalogCourses(
+  courses: Course[],
+  entries: CatalogEntry[],
+): Promise<boolean> {
+  const available = new Set(entries.map((entry) => entry.id))
+  const candidates = courses.filter(
+    (course) => isCatalogCourse(course) && available.has(course.id),
+  )
+
+  const changed = await Promise.all(
+    candidates.map(async (local) => {
+      try {
+        const remote = await fetchCourse(local.id)
+        if (!hasNewerCatalogVersion(local, remote)) return false
+        saveCourse(remote)
+        return true
+      } catch {
+        // Lokální kopie je pořád použitelná; aktualizace se zkusí příště.
+        return false
+      }
+    }),
+  )
+
+  return changed.some(Boolean)
 }
 
 export default function CoursePickerScreen({
@@ -64,7 +95,13 @@ export default function CoursePickerScreen({
   useEffect(() => {
     let live = true
     fetchIndex()
-      .then((entries) => live && setCatalog(entries))
+      .then((entries) => {
+        if (!live) return
+        setCatalog(entries)
+        void refreshStoredCatalogCourses(stored, entries).then((changed) => {
+          if (live && changed) setStored(loadCourses())
+        })
+      })
       .catch((error: unknown) => {
         if (!live) return
         const reason = error instanceof CatalogError ? error.reason : 'broken'
@@ -93,6 +130,7 @@ export default function CoursePickerScreen({
         .filter(Boolean)
         .join(' · '),
       stored: true,
+      status: isCatalogCourse(course) ? 'downloaded' : 'private',
     }))
 
     // Katalogové hřiště, které už je v telefonu, se nenabízí podruhé.
@@ -110,6 +148,7 @@ export default function CoursePickerScreen({
           .filter(Boolean)
           .join(' · '),
         stored: false,
+        status: 'catalog',
       }))
 
     const all = [...fromStorage, ...fromCatalog]
@@ -192,13 +231,15 @@ export default function CoursePickerScreen({
             >
               <span className="course-item-name">
                 {row.name}
-                {!row.stored && (
-                  <span className="course-item-tag">
-                    {downloading === row.id
+                <span className={`course-item-tag course-item-tag-${row.status}`}>
+                  {row.status === 'catalog'
+                    ? downloading === row.id
                       ? t('picker.downloading')
-                      : t('picker.inCatalog')}
-                  </span>
-                )}
+                      : t('picker.inCatalog')
+                    : row.status === 'downloaded'
+                      ? t('picker.downloaded')
+                      : t('picker.privateCourse')}
+                </span>
               </span>
               <span className="course-item-meta">{row.meta}</span>
             </button>

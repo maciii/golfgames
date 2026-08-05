@@ -1,11 +1,13 @@
 import type { Round } from '../types'
 import { roundTimestamp } from '../types'
 import {
+  clearDeletedRoundIds,
   isValidRound,
   loadAllGameOptions,
   loadArchive,
   loadCourses,
   loadCurrentRound,
+  loadDeletedRoundIds,
   loadRoster,
   loadSettings,
   normalizeRound,
@@ -19,7 +21,12 @@ import {
 import { isValidCourse, normalizeCourse } from '../courses/types'
 import { mergeCourses, mergeRosters } from '../backup'
 import { fromDocument, toDocument } from './document'
-import { finishedRounds, mergeRounds, pickCurrentRound } from './merge'
+import {
+  finishedRounds,
+  mergeRounds,
+  pickCurrentRound,
+  removeDeletedRounds,
+} from './merge'
 import { loadFirebase } from './firebase'
 
 /**
@@ -99,6 +106,23 @@ async function uploadRounds(uid: string, rounds: Round[]): Promise<void> {
   await batch.commit()
 }
 
+/** Smaže dokumenty kol po potvrzení explicitního zahození uživatelem. */
+async function deleteRounds(uid: string, roundIds: string[]): Promise<void> {
+  if (roundIds.length === 0) return
+  const { db } = await loadFirebase()
+  const { doc, writeBatch } = await import('firebase/firestore')
+
+  // Firestore omezuje jednu dávku na 500 operací; tombstony mohou přežít více
+  // kol, takže mazání rozdělíme, i když běžně půjde o jediný dokument.
+  for (let start = 0; start < roundIds.length; start += 500) {
+    const batch = writeBatch(db)
+    for (const roundId of roundIds.slice(start, start + 500)) {
+      batch.delete(doc(db, 'users', uid, 'rounds', roundId))
+    }
+    await batch.commit()
+  }
+}
+
 // --- předvolby ------------------------------------------------------------
 
 interface PrefsDocument {
@@ -110,16 +134,43 @@ interface PrefsDocument {
    * to Firestore zvládne; zakázané je jen pole přímo uvnitř pole.
    */
   courses?: unknown[]
+  /** Id kol, která uživatel výslovně zahodil; brání jejich návratu na jiném zařízení. */
+  deletedRoundIds?: unknown
   updatedAt?: string
 }
 
-async function syncPrefs(uid: string): Promise<void> {
+function stringIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return [
+    ...new Set(
+      value.filter((id): id is string => typeof id === 'string' && id.length > 0),
+    ),
+  ]
+}
+
+async function fetchPrefs(uid: string): Promise<PrefsDocument> {
   const { db } = await loadFirebase()
-  const { doc, getDoc, setDoc } = await import('firebase/firestore')
+  const { doc, getDoc } = await import('firebase/firestore')
 
   const reference = doc(db, 'users', uid, 'prefs', 'app')
   const snapshot = await getDoc(reference)
-  const remote = (snapshot.exists() ? snapshot.data() : {}) as PrefsDocument
+  return (snapshot.exists() ? snapshot.data() : {}) as PrefsDocument
+}
+
+async function fetchDeletedRoundIds(uid: string): Promise<string[]> {
+  const remote = await fetchPrefs(uid)
+  return stringIds(remote.deletedRoundIds)
+}
+
+async function syncPrefs(uid: string, deletedRoundIds: string[]): Promise<void> {
+  const { db } = await loadFirebase()
+  const { doc, setDoc } = await import('firebase/firestore')
+
+  const reference = doc(db, 'users', uid, 'prefs', 'app')
+  const remote = await fetchPrefs(uid)
+  const remoteDeleted = stringIds(remote.deletedRoundIds)
+  const mergedDeleted = [...new Set([...remoteDeleted, ...deletedRoundIds])]
+  const deletedChanged = mergedDeleted.length !== remoteDeleted.length
 
   // Hráči se vždy sjednotí - seznam spoluhráčů nemá důvod se zmenšovat.
   const roster = mergeRosters(loadRoster(), remote.roster ?? [])
@@ -140,11 +191,17 @@ async function syncPrefs(uid: string): Promise<void> {
   const remoteWins =
     !Number.isNaN(remoteTime) && (Number.isNaN(localTime) || remoteTime > localTime)
 
-  if (remoteWins && remote.settings) {
-    saveSettings(remote.settings as ReturnType<typeof loadSettings>)
+  const remoteSettings = remoteWins
+    ? (remote.settings as ReturnType<typeof loadSettings> | undefined)
+    : undefined
+  if (remoteSettings) {
+    saveSettings(remoteSettings)
     if (remote.gameOptions) {
       saveAllGameOptions(remote.gameOptions as ReturnType<typeof loadAllGameOptions>)
     }
+  }
+
+  if (remoteSettings && !deletedChanged) {
     savePrefsStamp(remote.updatedAt ?? new Date().toISOString())
     return
   }
@@ -155,6 +212,7 @@ async function syncPrefs(uid: string): Promise<void> {
     settings: loadSettings(),
     gameOptions: loadAllGameOptions(),
     courses,
+    deletedRoundIds: mergedDeleted,
     updatedAt: stamp,
   })
   savePrefsStamp(stamp)
@@ -185,6 +243,8 @@ export interface SyncResult {
   rounds: number
   /** Kolik se jich nahrálo do cloudu. */
   uploaded: number
+  /** Kolik místních kol zmizelo kvůli explicitnímu zahození. */
+  deleted: number
 }
 
 /**
@@ -194,8 +254,15 @@ export interface SyncResult {
  * Volá se po přihlášení a při startu aplikace s přihlášeným účtem.
  */
 export async function syncAll(uid: string): Promise<SyncResult> {
-  const local = localRounds()
-  const remote = await fetchRounds(uid)
+  const localDeleted = loadDeletedRoundIds()
+  const [remoteRounds, remoteDeleted] = await Promise.all([
+    fetchRounds(uid),
+    fetchDeletedRoundIds(uid),
+  ])
+  const deletedRoundIds = [...new Set([...remoteDeleted, ...localDeleted])]
+  const localBeforeDeletion = localRounds()
+  const local = removeDeletedRounds(localBeforeDeletion, deletedRoundIds)
+  const remote = removeDeletedRounds(remoteRounds, deletedRoundIds)
   const plan = mergeRounds(local, remote)
 
   // Rozehrané kolo si drží identitu - když si uživatel zrovna prohlíží
@@ -208,11 +275,17 @@ export async function syncAll(uid: string): Promise<SyncResult> {
   saveArchive(finishedRounds(plan.local))
   saveCurrentRound(nextCurrent)
 
+  await syncPrefs(uid, deletedRoundIds)
+  await deleteRounds(uid, deletedRoundIds)
   await uploadRounds(uid, plan.push)
-  await syncPrefs(uid)
+  clearDeletedRoundIds(localDeleted)
   writeQueue([])
 
-  return { rounds: plan.local.length, uploaded: plan.push.length }
+  return {
+    rounds: plan.local.length,
+    uploaded: plan.push.length,
+    deleted: localBeforeDeletion.length - local.length,
+  }
 }
 
 /**
@@ -241,7 +314,9 @@ export async function flushQueue(uid: string): Promise<void> {
   if (ids.length === 0) return
 
   const byId = new Map(localRounds().map((r) => [r.id, r]))
+  const deleted = new Set(loadDeletedRoundIds())
   const rounds = ids.flatMap((id) => {
+    if (deleted.has(id)) return []
     const round = byId.get(id)
     return round ? [round] : []
   })

@@ -447,6 +447,8 @@ export const cs = {
   'picker.count': '{stored} v telefonu, {total} k dispozici',
   'picker.loading': 'Načítám katalog hřišť…',
   'picker.inCatalog': 'v katalogu',
+  'picker.downloaded': 'staženo',
+  'picker.privateCourse': 'vlastní',
   'picker.downloading': 'stahuji…',
   'picker.rated': 's normou',
   'picker.notRated': 'bez normy',
