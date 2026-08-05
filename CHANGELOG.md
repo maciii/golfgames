@@ -7,6 +7,13 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.30.1] – 2026-08-05
+
+### Opraveno
+
+- **Název instalace PWA.** Přidání aplikace na plochu nyní používá název
+  `Golf Games` místo zkráceného názvu `Golf` na Androidu i iOS.
+
 ## [0.30.0] – 2026-08-05
 
 ### Přidáno
