@@ -9,6 +9,8 @@ declare const __APP_VERSION__: string
  * Když chybí, aplikace běží bez účtu jako čistě místní (viz sync/firebase.ts).
  */
 interface ImportMetaEnv {
+  /** Adresa katalogu hřišť; bez ní se čte z domény aplikace. */
+  readonly VITE_COURSES_URL?: string
   readonly VITE_FIREBASE_API_KEY?: string
   readonly VITE_FIREBASE_AUTH_DOMAIN?: string
   readonly VITE_FIREBASE_PROJECT_ID?: string
