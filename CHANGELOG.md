@@ -7,6 +7,35 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.27.0] – 2026-08-05
+
+### Přidáno
+
+- **Potvrzovat osobním PARem.** Nová volba v nastavení bodování hry (výchozí
+  zapnutá): v kole s HCP se Longest a Nearest potvrzují parem jamky včetně
+  ran, které na ní hráč dostává. Slabší hráč tak bonus uhraje bogeyem na
+  jamce, kde má tečku. Vypnutím se vrátí potvrzování hrubým parem; hrubého
+  kola se volba netýká.
+
+### Opraveno
+
+- **Extra body se v kole s HCP nenafukují.** Násobič podle výsledku se bral
+  z netto skóre, takže hráč s tečkou na jamce dostal za bunker na par dva body
+  místo jednoho a se dvěma tečkami tři. Nově rozhoduje hrubý výsledek –
+  handicap mění, kdo jamku vyhrál, ne to, jak se zahrála.
+- **Skins s HCP.** O skin se nově soutěží netto. Když všichni zahrají jamku na
+  čtyři rány a jeden z nich na ní má tečku, skin bere on; dřív byla jamka
+  dělená a skin se přenášel dál.
+- **Match play s HCP.** Jamka se rozhoduje netto, u four-ballu včetně lepšího
+  míče dvojice. Dřív se i v kole s HCP porovnávaly hrubé rány.
+- **Značka Longestu ukazuje, co se opravdu započítá.** Barva `L` a `N` u jména
+  při zápisu se v netto kole řídila hrubým parem, zatímco body se přidělovaly
+  podle netto – značka tak mohla svítit červeně u bonusu, který dvojici
+  zůstal.
+
+Přepočet se týká i archivních kol hraných s HCP: jejich body se po aktualizaci
+spočítají podle opravených pravidel.
+
 ## [0.26.0] – 2026-08-05
 
 ### Přidáno

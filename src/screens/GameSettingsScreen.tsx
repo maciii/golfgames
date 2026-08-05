@@ -149,12 +149,13 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
   const multiplierBonuses = BONUSES.filter(
     (b) => b.kind === 'multiplier' && scoring.bonusIds.includes(b.id),
   )
+  /** Potvrzuje tahle hra vůbec Longest nebo Nearest? */
+  const confirmsExclusive = scoring.confirmLongest || scoring.confirmNearest
   const hasOtherOptions =
     multiplierBonuses.length > 0 ||
     game.supportsDoubleHoles ||
     scoring.noDoubleBonuses ||
-    scoring.confirmLongest ||
-    scoring.confirmNearest
+    confirmsExclusive
   const hasScoringOptions =
     pointBonuses.length > 0 || scoring.resultMultipliers || hasOtherOptions
   const confirmNote =
@@ -354,6 +355,24 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 <span>
                   {t('gameSettings.confirmNearest')}
                   <em> {confirmNote}</em>
+                </span>
+              </label>
+            )}
+
+            {/* Nabízí se, i když se zrovna hraje hrubě - nastavení hry se
+                otevírá dřív, než je jasné, jestli se zapne netto. */}
+            {confirmsExclusive && (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={options.confirmByPersonalPar}
+                  onChange={(e) =>
+                    update({ ...options, confirmByPersonalPar: e.target.checked })
+                  }
+                />
+                <span>
+                  {t('gameSettings.confirmByPersonalPar')}
+                  <em> {t('gameSettings.confirmByPersonalParNote')}</em>
                 </span>
               </label>
             )}

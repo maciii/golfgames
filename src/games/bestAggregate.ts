@@ -2,6 +2,7 @@ import type { Round, Team } from '../types'
 import {
   bonusMultiplier,
   bonusesAt,
+  diffToPar,
   getBonus,
   holeMultiplier,
   isHoleStarted,
@@ -17,14 +18,15 @@ import type {
 } from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
-import { netDiffToPar, netScoreAt } from '../handicap'
-import type { AggregateResult } from './shared'
+import { exclusiveBonusOutcome, netDiffToPar, netScoreAt } from '../handicap'
 import {
   CONCEDED,
   aggregateWins,
   formatAggregate,
   formatSideScore,
   lowerWins,
+  teamAggregate,
+  teamBestBall,
   teamStrokeTotal,
 } from './shared'
 
@@ -80,50 +82,24 @@ const EMPTY_POINTS: TeamHolePoints = {
   total: 0,
 }
 
-/** Lepší míč pro Best Aggregate, po odečtu ran podle HCP v netto kole. */
-function scoringBestBall(round: Round, team: Team, hole: number): number | null {
-  if (!isHoleStarted(round, hole)) return null
-
-  const entered = team.playerIds.flatMap((id) => {
-    const score = netScoreAt(round, id, hole)
-    return score === null ? [] : [score]
-  })
-
-  return entered.length > 0 ? Math.min(...entered) : CONCEDED
-}
-
-/** Součet dvojice pro Best Aggregate, po odečtu HCP ran každého hráče. */
-function scoringAggregate(
-  round: Round,
-  team: Team,
-  hole: number,
-): AggregateResult | null {
-  if (!isHoleStarted(round, hole)) return null
-
-  const entered = team.playerIds.flatMap((id) => {
-    const score = netScoreAt(round, id, hole)
-    return score === null ? [] : [score]
-  })
-
-  return {
-    played: entered.length,
-    strokes: entered.reduce((sum, score) => sum + score, 0),
-  }
-}
-
 /**
  * Extra body dvojice na jamce.
  *
  * Hodnota bonusu se násobí podle výsledku hráče: par jednou, birdie dvakrát,
  * eagle a lepší třikrát. Bogey a horší extra bod neuhraje. Bonus se počítá
  * celé dvojici, i když ho zahrál jen jeden z partnerů.
+ *
+ * Násobí se **hrubý** výsledek, i když se kolo hraje netto. Rozdané rány mění
+ * to, kdo jamku vyhrál, ne to, jak se zahrála - jinak by hráč s ranou na jamce
+ * dostal za bunker na par dva body místo jednoho. Jediná výjimka je potvrzení
+ * Longestu a Nearestu, které o osobní par naopak stojí.
  */
 function extraPoints(round: Round, team: Team, hole: number): number {
   const values = round.settings.options.bonusValues
   let total = 0
 
   for (const player of teamPlayers(round, team)) {
-    const diff = netDiffToPar(round, player.id, hole)
+    const diff = diffToPar(round, player.id, hole)
     if (diff === null) continue
     const multiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
     if (multiplier === 0) continue
@@ -146,7 +122,9 @@ function extraPoints(round: Round, team: Team, hole: number): number {
  *
  * Se zapnutým potvrzováním platí, že hráč musí jamku zahrát na par nebo líp -
  * jinak bod propadá soupeřově dvojici. Bez potvrzování bod vždy zůstává
- * dvojici, která bonus zapsala.
+ * dvojici, která bonus zapsala. V netto kole rozhoduje osobní par, pokud je
+ * volba zapnutá; o obojím rozhoduje `exclusiveBonusOutcome()`, takže značka
+ * u jména při zápisu ukazuje přesně to, co se pak započítá.
  *
  * Na rozdíl od ostatních extra bodů se hodnota nenásobí podle výsledku;
  * o přiznání rozhoduje právě potvrzovací pravidlo.
@@ -154,7 +132,7 @@ function extraPoints(round: Round, team: Team, hole: number): number {
  * Vrací body pro obě dvojice ve stejném pořadí jako round.teams.
  */
 function longestNearestPoints(round: Round, hole: number): [number, number] {
-  const { bonusValues, confirmLongest, confirmNearest } = round.settings.options
+  const { bonusValues } = round.settings.options
   const awarded: [number, number] = [0, 0]
 
   for (const bonusId of ['longest', 'nearest'] as const) {
@@ -169,17 +147,11 @@ function longestNearestPoints(round: Round, hole: number): [number, number] {
     const teamIndex = round.teams.findIndex((t) => t.playerIds.includes(holder.id))
     if (teamIndex < 0) continue
 
-    const confirm = bonusId === 'longest' ? confirmLongest : confirmNearest
-    if (!confirm) {
-      awarded[teamIndex === 0 ? 0 : 1] += value
-      continue
-    }
-
-    const diff = netDiffToPar(round, holder.id, hole)
+    const outcome = exclusiveBonusOutcome(round, holder.id, hole, bonusId)
     // Dokud hráč jamku nezapsal, není co potvrzovat.
-    if (diff === null) continue
-    // Par a lepší bonus potvrdí, horší výsledek ho posílá soupeři.
-    const winner = diff <= 0 ? teamIndex : 1 - teamIndex
+    if (outcome === 'pending') continue
+
+    const winner = outcome === 'own' ? teamIndex : 1 - teamIndex
     awarded[winner === 0 ? 0 : 1] += value
   }
 
@@ -227,12 +199,12 @@ export function holePoints(round: Round, hole: number): TeamHolePoints[] {
   if (!teamA || !teamB) return round.teams.map(() => ({ ...EMPTY_POINTS }))
 
   const bestWinner = lowerWins(
-    scoringBestBall(round, teamA, hole),
-    scoringBestBall(round, teamB, hole),
+    teamBestBall(round, teamA, hole),
+    teamBestBall(round, teamB, hole),
   )
   const aggWinner = aggregateWins(
-    scoringAggregate(round, teamA, hole),
-    scoringAggregate(round, teamB, hole),
+    teamAggregate(round, teamA, hole),
+    teamAggregate(round, teamB, hole),
   )
   const dbWinner =
     round.settings.options.doubleBest > 0 ? doubleBestWinner(round, hole) : null
@@ -287,7 +259,7 @@ export function totalPoints(round: Round): TeamHolePoints[] {
 function settledHoles(round: Round, team: Team): number {
   let count = 0
   for (let hole = 0; hole < round.holeCount; hole++) {
-    if (scoringBestBall(round, team, hole) !== null) count += 1
+    if (teamBestBall(round, team, hole) !== null) count += 1
   }
   return count
 }
@@ -388,14 +360,11 @@ export const bestAggregate: GameDefinition = {
     const bestWinner =
       teamA &&
       teamB &&
-      lowerWins(scoringBestBall(round, teamA, hole), scoringBestBall(round, teamB, hole))
+      lowerWins(teamBestBall(round, teamA, hole), teamBestBall(round, teamB, hole))
     const aggWinner =
       teamA &&
       teamB &&
-      aggregateWins(
-        scoringAggregate(round, teamA, hole),
-        scoringAggregate(round, teamB, hole),
-      )
+      aggregateWins(teamAggregate(round, teamA, hole), teamAggregate(round, teamB, hole))
     const totals = round.teams.map((_, i) => points[i]?.total ?? 0)
     const bestTotal = Math.max(...totals, 0)
     // Vítěze jamky zvýrazníme jen když opravdu vede, ne při shodě.
@@ -407,12 +376,12 @@ export const bestAggregate: GameDefinition = {
       entries: [
         {
           label: t('best.best'),
-          value: formatSideScore(scoringBestBall(round, team, hole)),
+          value: formatSideScore(teamBestBall(round, team, hole)),
           highlight: bestWinner === index,
         },
         {
           label: t('best.aggregate'),
-          value: formatAggregate(scoringAggregate(round, team, hole)),
+          value: formatAggregate(teamAggregate(round, team, hole)),
           highlight: aggWinner === index,
         },
         { label: t('best.holePoints'), value: `${points[index]?.total ?? 0}` },

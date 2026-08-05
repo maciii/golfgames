@@ -170,6 +170,15 @@ export interface GameOptions {
   confirmLongest: boolean
   /** Nearest platí jen při paru a lepším, jinak bod bere soupeř. */
   confirmNearest: boolean
+  /**
+   * V netto kole se Longest a Nearest potvrzují **osobním parem** - parem
+   * jamky plus ranami, které na ní hráč podle handicapu dostává.
+   *
+   * Bez toho by potvrzování bralo hrubý par a slabší hráč by bonus prakticky
+   * nikdy neuhrál, i když jamku netto zahrál dobře. Na hrubé kolo volba nemá
+   * vliv, tam žádný osobní par neexistuje.
+   */
+  confirmByPersonalPar: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */
   resultMultipliers: Record<ResultTier, number>
   /** Devátá a osmnáctá jamka se počítají dvojnásobně. */
@@ -185,6 +194,7 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   noDoubleBonuses: false,
   confirmLongest: true,
   confirmNearest: true,
+  confirmByPersonalPar: true,
   resultMultipliers: DEFAULT_RESULT_MULTIPLIERS,
   doubleClosingHoles: true,
 }
@@ -456,30 +466,6 @@ export function doubleCallMultiplier(round: Round, hole: number): number {
     bonusesAt(round, p.id, hole).includes('double'),
   ).length
   return 2 ** calls
-}
-
-/**
- * Komu na jamce připadne bonus, který drží jediný hráč (Longest, Nearest).
- *
- * Bez potvrzování zůstává vždy jeho straně. S potvrzováním rozhoduje výsledek:
- * par a lepší bonus potvrdí, horší ho posílá soupeři. Dokud hráč jamku
- * nezapsal, není rozhodnuto.
- */
-export function exclusiveBonusOutcome(
-  round: Round,
-  playerId: PlayerId,
-  hole: number,
-  bonusId: BonusId,
-): 'own' | 'opponent' | 'pending' {
-  const confirm =
-    bonusId === 'longest'
-      ? round.settings.options.confirmLongest
-      : round.settings.options.confirmNearest
-  if (!confirm) return 'own'
-
-  const diff = diffToPar(round, playerId, hole)
-  if (diff === null) return 'pending'
-  return diff <= 0 ? 'own' : 'opponent'
 }
 
 /** Bonusy, které jde na dané jamce zvolit; ty vázané na par jdou první. */

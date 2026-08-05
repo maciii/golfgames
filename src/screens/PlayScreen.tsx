@@ -3,7 +3,6 @@ import type { BonusId, Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
   bonusesAt,
-  exclusiveBonusOutcome,
   formatHoleList,
   getBonus,
   playerBonusPoints,
@@ -21,7 +20,7 @@ import {
   teamPlayers,
 } from '../types'
 import { getGame } from '../games'
-import { strokesReceived } from '../handicap'
+import { exclusiveBonusOutcome, strokesReceived } from '../handicap'
 import { APP_VERSION } from '../version'
 import BonusSheet from './BonusSheet'
 import Scorecard from './Scorecard'

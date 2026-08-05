@@ -42,6 +42,7 @@ function makeBaseOptions() {
     noDoubleBonuses: false,
     confirmLongest: false,
     confirmNearest: false,
+    confirmByPersonalPar: true,
     resultMultipliers: { birdie: 2, eagle: 3, albatross: 10, condor: 1000 },
     doubleClosingHoles: false,
   }

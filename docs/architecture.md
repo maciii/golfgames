@@ -212,9 +212,16 @@ hodnota `0` znamená vypnuto a bonus se pak vůbec nenabídne
 
 Násobení podle výsledku řeší `bonusMultiplier(diff, resultMultipliers)`:
 par ×1, birdie/eagle/albatros/condor podle nastavení (výchozí 2/3/10/1000),
-bogey a horší = 0. Longest a Nearest se **nenásobí** – o jejich přiznání
-rozhoduje potvrzovací pravidlo (`exclusiveBonusOutcome()`), popsané
+bogey a horší = 0. Do `diff` patří **hrubý** výsledek i v netto kole – handicap
+mění, kdo jamku vyhrál, ne to, jak se zahrála. Longest a Nearest se
+**nenásobí** – o jejich přiznání rozhoduje potvrzovací pravidlo
+(`exclusiveBonusOutcome()` v `handicap.ts`), popsané
 v [`games.md`](games.md#extra-body).
+
+`exclusiveBonusOutcome()` bydlí v `handicap.ts`, protože v netto kole
+potvrzuje **osobním parem** (volba `confirmByPersonalPar`). Ptá se na něj hra
+i `PlayScreen`, aby barva značky u jména a skutečně přidělené body nemohly
+tvrdit každá něco jiného.
 
 ## Násobení jamky
 
@@ -429,6 +436,8 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 | výchozí hodnoty a násobiče       | `src/types.ts` (`DEFAULT_GAME_OPTIONS`) |
 | přepočet bodů na peníze          | `src/money.ts`                          |
 | rozdělení ran a netto výsledky   | `src/handicap.ts`                       |
+| přidělení Longestu a Nearestu    | `src/handicap.ts`                       |
+| lepší míč a součet dvojice       | `src/games/shared.ts`                   |
 | model hřiště a jeho kontrola     | `src/courses/types.ts`                  |
 | zadání hřiště                    | `src/screens/CourseEditScreen.tsx`      |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |

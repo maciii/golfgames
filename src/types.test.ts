@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  DEFAULT_GAME_OPTIONS,
   bonusesAt,
   createRound,
-  exclusiveBonusOutcome,
   firstHoleNumber,
   formatHoleList,
   holeMultiplier,
@@ -167,87 +165,6 @@ describe('Výpis jamek', () => {
 
   it('prázdný seznam je prázdný řetězec', () => {
     expect(formatHoleList([])).toBe('')
-  })
-})
-
-/**
- * Komu na jamce připadne Longest / Nearest. Řídí barvu značky u jména při
- * zápisu; samotné body počítá hra (viz bestAggregate.test.ts).
- *
- * Jamka je par 4; Adam ji zahraje podle testu, ostatní na par.
- */
-describe('Přidělení Longest a Nearest', () => {
-  function roundWith(adamScore: number | null, confirm: boolean) {
-    return makeRound({
-      gameId: 'best-aggregate',
-      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
-      pars: [4],
-      scores: [[adamScore], [4], [4], [4]],
-      teams: [
-        [0, 1],
-        [2, 3],
-      ],
-      settings: {
-        options: {
-          ...DEFAULT_GAME_OPTIONS,
-          confirmLongest: confirm,
-          confirmNearest: confirm,
-        },
-      },
-    })
-  }
-
-  it('bez potvrzování zůstává bonus vždy vlastní dvojici', () => {
-    const round = roundWith(6, false)
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('own')
-  })
-
-  it('s potvrzováním zůstává při paru vlastní dvojici', () => {
-    const round = roundWith(4, true)
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('own')
-  })
-
-  it('s potvrzováním zůstává i při lepším výsledku', () => {
-    const round = roundWith(3, true)
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('own')
-  })
-
-  it('s potvrzováním propadá soupeřům při horším než par', () => {
-    const round = roundWith(5, true)
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('opponent')
-  })
-
-  it('dokud hráč jamku nezapsal, není rozhodnuto', () => {
-    const round = roundWith(null, true)
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('pending')
-  })
-
-  it('Longest a Nearest se řídí každý vlastním přepínačem', () => {
-    const round = makeRound({
-      gameId: 'best-aggregate',
-      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
-      pars: [4],
-      scores: [[5], [4], [4], [4]],
-      teams: [
-        [0, 1],
-        [2, 3],
-      ],
-      settings: {
-        options: {
-          ...DEFAULT_GAME_OPTIONS,
-          confirmLongest: true,
-          confirmNearest: false,
-        },
-      },
-    })
-
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('opponent')
-    expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('own')
   })
 })
 

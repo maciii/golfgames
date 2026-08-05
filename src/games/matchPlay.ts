@@ -1,5 +1,6 @@
 import type { PlayerId, Round } from '../types'
-import { isHoleStarted, scoreAt, teamName } from '../types'
+import { isHoleStarted, teamName } from '../types'
+import { netScoreAt } from '../handicap'
 import type {
   GameDefinition,
   HeaderSummary,
@@ -49,13 +50,16 @@ function matchSides(round: Round): Side[] {
 /**
  * Skóre strany na jamce: u dvojice lepší míč, u jednotlivce jeho rána.
  * Vrací null, dokud strana jamku nezapsala.
+ *
+ * V kole s HCP se počítá netto, tedy po odečtu ran přidělených podle stroke
+ * indexu jamky - jinak by zápas s vyrovnáním handicapů nedával smysl.
  */
 function sideScore(round: Round, side: Side, hole: number): number | null {
   if (!isHoleStarted(round, hole)) return null
 
   if (side.playerIds.length === 1) {
     const id = side.playerIds[0]
-    const score = id ? scoreAt(round, id, hole) : null
+    const score = id ? netScoreAt(round, id, hole) : null
     // Chybějící zápis na rozehrané jamce = jamku vzdal, soupeř ji bere.
     return score ?? CONCEDED
   }

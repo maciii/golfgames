@@ -204,6 +204,59 @@ describe('Best Aggregate - netto HCP', () => {
     expect(points[0]).toMatchObject({ best: 0, aggregate: 0 })
     expect(points[1]).toMatchObject({ best: 1, aggregate: 1 })
   })
+
+  /**
+   * Rozdané rány mění, kdo jamku vyhrál, ne to, jak se zahrála. Bez toho by
+   * hráč s tečkou na jamce dostal za bunker na par dva body místo jednoho -
+   * a se dvěma tečkami rovnou tři.
+   */
+  it('extra body se násobí hrubým výsledkem, ne netto', () => {
+    function roundWithHandicap(playingHandicap: number) {
+      const round = makeRound({
+        gameId: 'best-aggregate',
+        players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+        teams: [
+          [0, 1],
+          [2, 3],
+        ],
+        pars: [4],
+        // Adam hraje jamku na par, takže bunker platí v základní hodnotě.
+        scores: [[4], [5], [5], [5]],
+        settings: { options: BASE_OPTIONS },
+      })
+      round.netScoring = true
+      round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+      round.players[0]!.playingHandicap = playingHandicap
+      round.bonuses.p1 = [['bunker']]
+      return round
+    }
+
+    // Bunker má hodnotu 1 bodu a Adam jamku zahrál na hrubý par.
+    expect(holePoints(roundWithHandicap(0), 0)[0]?.extra).toBe(1)
+    expect(holePoints(roundWithHandicap(1), 0)[0]?.extra).toBe(1)
+    expect(holePoints(roundWithHandicap(2), 0)[0]?.extra).toBe(1)
+  })
+
+  it('hrubé birdie extra bod násobí i v netto kole', () => {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[3], [5], [5], [5]],
+      settings: { options: BASE_OPTIONS },
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 2
+    round.bonuses.p1 = [['bunker']]
+
+    // Hrubé birdie = násobič 2, i když netto je to eagle.
+    expect(holePoints(round, 0)[0]?.extra).toBe(2)
+  })
 })
 
 describe('Best Aggregate - celkové pořadí', () => {
@@ -682,6 +735,44 @@ describe('Best Aggregate - Longest a Nearest', () => {
 
     expect(moved.bonuses.p1?.[0]).toEqual([])
     expect(moved.bonuses.p3?.[0]).toEqual(['longest'])
+  })
+
+  /**
+   * Osobní par: Adam má na jamce ránu, takže bogey (6 na paru 5) je pro něj
+   * netto par. Se zapnutou volbou tím Longest potvrdí, s vypnutou bod
+   * propadá soupeřům - a značka u jména při zápisu tvrdí totéž.
+   */
+  it('v netto kole potvrzuje osobní par, když je volba zapnutá', () => {
+    const round = longestRound(6, true)
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 1
+
+    const [teamA, teamB] = holePoints(round, 0)
+    expect(teamA?.extra).toBe(1)
+    expect(teamB?.extra).toBe(0)
+  })
+
+  it('s vypnutou volbou rozhoduje i v netto kole hrubý par', () => {
+    const round = longestRound(6, true)
+    round.settings.options.confirmByPersonalPar = false
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 1
+
+    const [teamA, teamB] = holePoints(round, 0)
+    expect(teamA?.extra).toBe(0)
+    expect(teamB?.extra).toBe(1)
+  })
+
+  it('osobní par nenásobí hodnotu bonusu', () => {
+    // Adam s ranou zahraje 5 na par 5 - netto birdie, ale Longest je za 1 bod.
+    const round = longestRound(5, true)
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 1
+
+    expect(holePoints(round, 0)[0]?.extra).toBe(1)
   })
 })
 

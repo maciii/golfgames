@@ -19,6 +19,7 @@ Společné pro všechny hry:
 
 - [Vzdaná jamka vs. nehraná jamka](#vzdaná-jamka-vs-nehraná-jamka)
 - [Devítka z osmnáctky](#devítka-z-osmnáctky)
+- [Hra s HCP (netto)](#hra-s-hcp-netto)
 - [Předčasně ukončené kolo](#předčasně-ukončené-kolo)
 - [Extra body](#extra-body)
 - [Nastavení bodování hry](#nastavení-bodování-hry)
@@ -82,6 +83,36 @@ se do kola vezmou právě z vybraných jamek. Konkrétně:
 Devítijamkové hřiště žádný výběr nenabízí a bez zvoleného hřiště se jen jako
 dosud volí 9, nebo 18 jamek.
 
+## Hra s HCP (netto)
+
+Se zvoleným hřištěm jde zapnout **hru na rány s handicapem**. Hráč pak na
+jamce dostává rány podle svého hracího handicapu a stroke indexu jamky; při
+zápisu i ve scorekartě je to vidět jako tečky u jeho výsledku.
+
+Platí jedno pravidlo, ze kterého se odvozuje všechno ostatní: **rozdané rány
+mění, kdo jamku vyhrál, ne to, jak se zahrála.**
+
+| Co se počítá                                     | Z čeho     |
+| ------------------------------------------------ | ---------- |
+| Vítěz jamky ve Skins                             | netto      |
+| Vítěz jamky v Match play (i lepší míč four-ball) | netto      |
+| `BEST` a `Součet` v Best Aggregate               | netto      |
+| `Double Best`                                    | netto      |
+| Body za birdie a eagle v Best Aggregate          | netto      |
+| Stablefordovy body                               | netto      |
+| **Násobič extra bodů podle výsledku**            | **hrubý**  |
+| **Potvrzení Longestu a Nearestu**                | osobní par |
+| Součty ran ve výsledcích a ve scorekartě         | hrubý      |
+
+Extra body jsou tedy jediná část bodování, kterou handicap nezvedá. Bunker za
+1 bod je 1 bod bez ohledu na to, kolik teček hráč na jamce má; dva body dá až
+tehdy, když jamku zahrál na **hrubé** birdie. Bez toho by hráč s ranou na
+jamce dostal za stejný výkon dvojnásobek a s dvěma ranami trojnásobek.
+
+Výjimkou je potvrzování Longestu a Nearestu, které naopak stojí na osobním
+paru – jinak by slabší hráč bonus prakticky nikdy neuhrál. Podrobnosti jsou
+v kapitole [Potvrzování osobním parem](#potvrzování-osobním-parem).
+
 ## Předčasně ukončené kolo
 
 Kolo jde uložit i nedohrané – třeba když hru ukončí počasí. Slouží k tomu
@@ -139,6 +170,11 @@ Násobiče kromě paru jsou konfigurovatelné v nastavení bodování hry.
 Příklad: bunker za 1 bod zahraný na birdie dá v Best Aggregate dvojici
 2 body, ve Skins hráči 2 body; stejný bunker zahraný na bogey nedá nic.
 
+**Rozhoduje hrubý výsledek, i když se hraje netto.** Rozdané rány mění to, kdo
+jamku vyhrál, ne to, jak se zahrála – hráč s tečkou na jamce má za bunker na
+par jeden bod jako každý jiný, ne dva. Jediná výjimka je potvrzování Longestu
+a Nearestu, které o osobní par naopak stojí (viz níž).
+
 ### Longest a Nearest
 
 Tyhle dva bonusy drží na jamce vždy jen **jeden hráč** – když ho zaškrtne
@@ -153,6 +189,18 @@ Ve výchozím stavu se **potvrzují**: hráč musí jamku dohrát na par nebo l�
 V týmových hrách jinak bod propadá soupeřově dvojici. Ve Skins se při
 horším výsledku bonus nepočítá, protože tam není soupeřova dvojice, které by
 šel připsat. Potvrzování jde pro každý z nich zvlášť vypnout.
+
+#### Potvrzování osobním parem
+
+V kole s HCP se ve výchozím stavu potvrzuje **osobním parem** – parem jamky
+plus ranami, které na ní hráč podle svého handicapu dostává. Slabší hráč tak
+Longest uhraje bogeyem na jamce, kde má tečku, protože netto je to par.
+
+Kdyby se potvrzoval hrubý par, byla by hra s vyrovnáním handicapů proti
+slabším hráčům dvakrát: jednou na skóre a podruhé na bonusech, které by
+prakticky nikdy nepotvrdili. Volbu **Potvrzovat osobním PARem** jde v nastavení
+bodování hry vypnout a vrátit se ke hrubému paru. Na hrubé kolo volba nemá vliv
+– tam žádný osobní par neexistuje.
 
 Značka u jména napoví, jak to dopadne:
 
@@ -188,6 +236,7 @@ Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
 | Nenásobit extra body          | vypnuto     | dvojnásobná jamka ani double nenásobí extra body |
 | Potvrzovat Longest            | zapnuto     | při horším než par bod propadá soupeřům          |
 | Potvrzovat Nearest            | zapnuto     | při horším než par bod propadá soupeřům          |
+| Potvrzovat osobním PARem      | zapnuto     | v kole s HCP se potvrzuje par jamky včetně teček |
 | Double Best                   | 1 b.        | jen Best Aggregate; bod za oba lepší míče        |
 
 Nabídka voleb je **pro každou hru zvlášť**. U každé hry se otevírá ozubeným
@@ -329,10 +378,12 @@ Bodovaná hra dvou dvojic. Na každé jamce se dvojici připisují body:
 
 Vyhrává dvojice s nejvyšším součtem bodů.
 
-Při zapnutém netto se před výpočtem `BEST`, `Součtu`, `Double Best` i bonusů
-odečtou každému hráči rány podle jeho hracího HCP a stroke indexu jamky. To
-znamená, že pro `BEST` se porovnává nejlepší netto míč a pro `Součet` součet
-netto ran obou partnerů; hrubé rány se používají jen ve výchozím hrubém režimu.
+Při zapnutém netto se před výpočtem `BEST`, `Součtu`, `Double Best` i bodů za
+birdie a eagle odečtou každému hráči rány podle jeho hracího HCP a stroke
+indexu jamky. To znamená, že pro `BEST` se porovnává nejlepší netto míč a pro
+`Součet` součet netto ran obou partnerů; hrubé rány se používají jen ve
+výchozím hrubém režimu. **Extra body** se naopak násobí hrubým výsledkem –
+podrobně v kapitole [Hra s HCP](#hra-s-hcp-netto).
 
 **Lepší míč** dvojice je nejnižší zapsaná rána některého z partnerů.
 **Součet** je součet ran obou partnerů.
@@ -376,6 +427,9 @@ v jednom souboru:
 Každá jamka je jeden skin. Bere ho hráč, který ji zahraje nejnižším počtem
 ran. Když se o nejnižší skóre dělí víc hráčů, skin se nepřiděluje a přenáší
 se do další jamky – další rozhodnutá jamka pak vynese víc skinů najednou.
+
+V kole s HCP se porovnává **netto** skóre. Když všichni zahrají jamku na
+čtyři rány a jeden z nich na ní má tečku, skin bere on.
 
 Vyhrává hráč s nejvyšším celkovým skóre, tedy součtem skinů a přiznaných
 extra bodů.
@@ -438,6 +492,9 @@ jde o jednu nahoru; shodná jamka je dělená a stav nemění.
 
 Při čtyřech hráčích jde o **four-ball**: za dvojici hraje na každé jamce
 vždy její lepší míč.
+
+V kole s HCP se jamka rozhoduje **netto**, tedy po odečtu ran přidělených podle
+stroke indexu jamky – u four-ballu se netto počítá i lepší míč dvojice.
 
 Scorekarta označuje vyhranou jamku stejným žlutým rámečkem jako Skins. U
 four-ballu se označí buňky obou hráčů vítězné dvojice; dělené a po rozhodnutí

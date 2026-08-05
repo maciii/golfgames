@@ -82,6 +82,12 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   `isHoleStarted()`: když na jamce zapsal aspoň jeden hráč, jamka běží a komu
   zápis chybí, ten ji vzdal. Každá nová hra to musí ošetřit. Ve výpočtech se
   vzdaná hodnota reprezentuje jako `CONCEDED` (`Infinity`).
+- **Netto se promítá do vítěze jamky, ne do hodnoty extra bodů.** Kdo jamku
+  vyhrál (skin, `BEST`, součet, match play), se počítá z `netScoreAt()`.
+  Násobič extra bodu podle výsledku se ale bere z **hrubého** `diffToPar()` -
+  jinak by hráč s tečkou dostal za bunker na par dva body. Jediná výjimka je
+  potvrzení Longestu a Nearestu (`exclusiveBonusOutcome()` v `handicap.ts`),
+  které stojí na osobním paru.
 - **Číslo jamky není `hole + 1`.** Osmnáctku jde hrát jen na jednu devítku;
   kolo pak má `holeCount` 9, výřez parů a SI, a `startHole` 10 u druhé devítky.
   Číslo pro hráče dává výhradně `holeNumber(round, hole)` - v UI, ve výpisech

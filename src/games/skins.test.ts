@@ -175,6 +175,63 @@ describe('Skins - pořadí', () => {
   })
 })
 
+describe('Skins - netto HCP', () => {
+  /** Čtyři hráči zahrají jamku shodně; jen druhý na ní dostává ránu. */
+  function netRound(strokeIndex: number[], handicap: number) {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
+      pars: [4],
+      scores: [[4], [4], [4], [4]],
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex }
+    round.players[1]!.playingHandicap = handicap
+    return round
+  }
+
+  it('skin bere hráč, který má na jamce ránu k dobru', () => {
+    const results = skinResults(netRound([1], 1))
+
+    expect(results[0]).toEqual({ hole: 0, winnerId: 'p2', skins: 1, carry: 0 })
+  })
+
+  it('bez rány na téhle jamce zůstává shoda a skin se přenáší', () => {
+    // Handicap 1 při dvou jamkách padne na SI 1, druhá jamka tedy zůstává
+    // shodná - tady je jamka jediná, ale se SI 2 na ni rána nedosáhne.
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára', 'Cyril', 'Dana'],
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [4, 4],
+        [4, 4],
+        [4, 4],
+      ],
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1, 2] }
+    round.players[1]!.playingHandicap = 1
+
+    const results = skinResults(round)
+    expect(results[0]?.winnerId).toBe('p2')
+    expect(results[1]?.winnerId).toBe(null)
+  })
+
+  it('v hrubém kole se rány neodečítají a jamka je dělená', () => {
+    const round = netRound([1], 1)
+    round.netScoring = false
+
+    expect(skinResults(round)[0]).toEqual({
+      hole: 0,
+      winnerId: null,
+      skins: 0,
+      carry: 1,
+    })
+  })
+})
+
 describe('Skins - druhá devítka', () => {
   it('vypisuje vyhrané jamky pod čísly, která hráč vidí', () => {
     const round = makeRound({

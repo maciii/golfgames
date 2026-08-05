@@ -231,3 +231,57 @@ describe('Match play - four-ball dvojic', () => {
     expect(matchPlay.scoringOptions.resultMultipliers).toBe(false)
   })
 })
+
+describe('Match play - netto HCP', () => {
+  /** Dva hráči zahrají obě jamky shodně; Bára dostává ránu na SI 1. */
+  function netRound() {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [4, 4],
+      ],
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1, 2] }
+    round.players[1]!.playingHandicap = 1
+    return round
+  }
+
+  it('jamku bere hráč, který na ní má ránu k dobru', () => {
+    const state = matchState(netRound())
+
+    expect(state.won).toEqual([0, 1])
+    expect(state.halved).toBe(1)
+    expect(state.leaderIndex).toBe(1)
+  })
+
+  it('v hrubém kole jsou obě jamky dělené', () => {
+    const round = netRound()
+    round.netScoring = false
+
+    const state = matchState(round)
+    expect(state.won).toEqual([0, 0])
+    expect(state.halved).toBe(2)
+  })
+
+  it('u four-ballu se netto počítá i lepší míč dvojice', () => {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[4], [4], [4], [4]],
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[3]!.playingHandicap = 1
+
+    expect(matchState(round).won).toEqual([0, 1])
+  })
+})

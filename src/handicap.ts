@@ -1,5 +1,5 @@
-import type { PlayerId, Round } from './types'
-import { parAt, scoreAt } from './types'
+import type { BonusId, PlayerId, Round } from './types'
+import { diffToPar, parAt, scoreAt } from './types'
 
 /**
  * Handicapy a netto výpočty.
@@ -8,6 +8,10 @@ import { parAt, scoreAt } from './types'
  * je jen volají. Vzorce jsou z World Handicap System, který je veřejně
  * dokumentovaný; aplikace ale žádný oficiální handicap nevede ani nepočítá,
  * jen pracuje s indexem, který si hráč zadá sám.
+ *
+ * Patří sem i přidělení Longestu a Nearestu: o jejich potvrzení rozhoduje
+ * osobní par, tedy handicapový výpočet. Hry i obrazovky se ptají tady, aby
+ * značka u jména a skutečné body nemohly tvrdit každá něco jiného.
  */
 
 /** Slope neutrálního hřiště. Vzorec pro hrací handicap je k němu vztažený. */
@@ -176,6 +180,48 @@ export function netDiffToPar(
 ): number | null {
   const net = netScoreAt(round, playerId, hole)
   return net === null ? null : net - parAt(round, hole)
+}
+
+/**
+ * Rozdíl vůči paru, kterým se potvrzuje Longest a Nearest.
+ *
+ * V netto kole je to se zapnutou volbou osobní par (par jamky plus rány, které
+ * na ní hráč dostává); jinak hrubý par. Jinde se handicap do extra bodů
+ * nepromítá - hodnota bonusu se násobí podle **hrubého** výsledku, protože
+ * rozdané rány nemají s tím, jak se jamka zahrála, nic společného.
+ */
+export function confirmDiffToPar(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+): number | null {
+  return round.settings.options.confirmByPersonalPar && isNetRound(round)
+    ? netDiffToPar(round, playerId, hole)
+    : diffToPar(round, playerId, hole)
+}
+
+/**
+ * Komu na jamce připadne bonus, který drží jediný hráč (Longest, Nearest).
+ *
+ * Bez potvrzování zůstává vždy jeho straně. S potvrzováním rozhoduje výsledek:
+ * par a lepší bonus potvrdí, horší ho posílá soupeři. Dokud hráč jamku
+ * nezapsal, není rozhodnuto.
+ */
+export function exclusiveBonusOutcome(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+  bonusId: BonusId,
+): 'own' | 'opponent' | 'pending' {
+  const confirm =
+    bonusId === 'longest'
+      ? round.settings.options.confirmLongest
+      : round.settings.options.confirmNearest
+  if (!confirm) return 'own'
+
+  const diff = confirmDiffToPar(round, playerId, hole)
+  if (diff === null) return 'pending'
+  return diff <= 0 ? 'own' : 'opponent'
 }
 
 /** Stablefordovy body hráče na jamce; 0 za nezapsanou (vzdanou) jamku. */

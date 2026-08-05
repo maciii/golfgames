@@ -1,5 +1,6 @@
 import type { Round, Team } from '../types'
-import { isHoleStarted, scoreAt } from '../types'
+import { isHoleStarted } from '../types'
+import { netScoreAt } from '../handicap'
 import { t } from '../i18n'
 
 /**
@@ -9,13 +10,17 @@ import { t } from '../i18n'
  * proto tvářit jako "ještě nehráno". Vzdaná hodnota se reprezentuje jako
  * CONCEDED, což je nekonečno: v porovnáních prohraje s jakýmkoli skóre, ale
  * dvě vzdané hodnoty proti sobě vyjdou jako shoda.
+ *
+ * O tom, kdo jamku zahrál líp, rozhoduje **netto** skóre - tedy rány po odečtu
+ * handicapových ran. `netScoreAt()` u hrubého kola vrací zapsané rány beze
+ * změny, takže se to nikde nemusí větvit.
  */
 
 /** Vzdaná jamka - horší než jakýkoli zapsaný počet ran. */
 export const CONCEDED = Number.POSITIVE_INFINITY
 
 /**
- * Lepší míč dvojice na jamce = nejnižší zapsaná rána.
+ * Lepší míč dvojice na jamce = nejnižší netto rána.
  *
  * Stačí zápis jednoho z partnerů - kdo jamku vzdal, tým nebrzdí. Když jamku
  * vzdali oba, je lepší míč vzdaný.
@@ -24,9 +29,10 @@ export const CONCEDED = Number.POSITIVE_INFINITY
 export function teamBestBall(round: Round, team: Team, hole: number): number | null {
   if (!isHoleStarted(round, hole)) return null
 
-  const entered = team.playerIds
-    .map((id) => scoreAt(round, id, hole))
-    .filter((s): s is number => s !== null)
+  const entered = team.playerIds.flatMap((id) => {
+    const score = netScoreAt(round, id, hole)
+    return score === null ? [] : [score]
+  })
 
   return entered.length > 0 ? Math.min(...entered) : CONCEDED
 }
@@ -38,7 +44,7 @@ export interface AggregateResult {
 }
 
 /**
- * Součet ran dvojice na jamce.
+ * Součet netto ran dvojice na jamce.
  *
  * Kdo jamku vzdal, se do součtu nepočítá - sčítají se rány těch, kdo dohráli.
  * Vrací null, dokud se na jamce vůbec nehrálo.
@@ -50,9 +56,10 @@ export function teamAggregate(
 ): AggregateResult | null {
   if (!isHoleStarted(round, hole)) return null
 
-  const entered = team.playerIds
-    .map((id) => scoreAt(round, id, hole))
-    .filter((s): s is number => s !== null)
+  const entered = team.playerIds.flatMap((id) => {
+    const score = netScoreAt(round, id, hole)
+    return score === null ? [] : [score]
+  })
 
   return {
     played: entered.length,
