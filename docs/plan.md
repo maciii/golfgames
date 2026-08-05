@@ -9,7 +9,7 @@ Rozpracovaný záměr a to, co z něj zbývá. Hotové věci popisují ostatní 
 | ------------------------------------------- | ------------------------- |
 | **A** – model hřiště, handicapy, Stableford | ✅ hotovo (0.14.0)        |
 | **B** – katalog hřišť a jeho data           | ✅ hotovo (0.16.0)        |
-| **B2** – návrh hřiště podle polohy (GPS)    | ⏳ nezačato               |
+| **B2** – návrh hřiště podle polohy (GPS)    | ✅ hotovo (0.22.0)        |
 | **C** – příspěvek zpět do OpenGolfAPI       | 🟡 připraveno, neodesláno |
 
 Katalog běží samostatně na
@@ -35,12 +35,16 @@ a nevratné.
 
 ### 2. Návrh hřiště podle polohy (fáze B2)
 
-Rejstřík už nese `lat` a `lon` u 205 z 307 hřišť, takže chybí jen:
+Hotové části používají `lat` a `lon` z rejstříku a zahrnují:
 
-- obal nad `navigator.geolocation` – ptát se na polohu **až po klepnutí**, nikdy
-  při startu; odmítnutí vede na hledání podle jména, ne na chybu
-- řazení nabídky podle vzdálenosti (haversine)
-- volitelně předstažení dlaždice okolí, dokud je signál
+- dotaz na `navigator.geolocation` až po otevření výběru hřiště; odmítnutí
+  přepne na skupinové a abecední řazení
+- řazení nabídky podle vzdálenosti (haversine), přepínač na skupiny a abecedu
+- filtr zemí a oblíbená hřiště, která se řadí před stažené kopie
+
+Zbývá jen volitelné **předstažení scorekaret v okolí**, dokud je signál. Není
+nutné pro offline hraní: hřiště se ukládá při výběru a katalogová kopie se při
+dalším otevření pickeru sama aktualizuje.
 
 ### 3. Doplnit chybějící data
 

@@ -79,7 +79,6 @@ export const en: Record<MessageKey, Message> = {
   'play.previousHole': 'Previous hole',
   'play.nextHole': 'Next hole',
   'play.hole': 'Hole {number}',
-  'play.holeOf': 'of {count}',
   'play.par': 'Par',
   'play.noScore': 'no score yet',
   'play.total': '{strokes} strokes · {toPar}',
@@ -420,6 +419,16 @@ export const en: Record<MessageKey, Message> = {
   'scorecard.strokeIndex': 'Stroke index of the hole',
   'scorecard.strokeIndexShort': 'SI',
   'scorecard.title': 'Scorecard',
+  'scorecard.dotsCourse': 'Course',
+  'scorecard.dotsBestPlayer': 'Best player',
+  'scorecard.dotsCourseAria': {
+    one: '{name}: {count} stroke from the course handicap',
+    other: '{name}: {count} strokes from the course handicap',
+  },
+  'scorecard.dotsBestPlayerAria': {
+    one: '{name}: {count} stroke received from the best HCP',
+    other: '{name}: {count} strokes received from the best HCP',
+  },
 
   // Course picker
   'picker.title': 'Choose a course',
@@ -512,6 +521,15 @@ export const en: Record<MessageKey, Message> = {
   'match.down': '{count} DOWN',
   'match.detail': '{won} holes won · {halved} halved',
   'match.takesHole': 'Hole goes to',
+  'match.outOfPlayShort': 'Out of play',
+  'match.remainingShort': { one: '{count} hole left', other: '{count} holes left' },
+  'match.dormieShort': {
+    one: 'dormie · {count} hole left',
+    other: 'dormie · {count} holes left',
+  },
+  'match.resultShort': '{lead}&{remaining}',
+  'match.finalShort': 'final · {lead} UP',
+  'match.finishedShort': 'finished',
   'match.halved': 'halved',
   'match.takes': 'wins',
   'match.loses': 'loses',

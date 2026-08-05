@@ -3,6 +3,7 @@ import type { Round } from '../types'
 import { makeRound } from './fixtures'
 import { holePoints, stableford, totalPoints } from './stableford'
 import { setActiveLocale } from '../i18n'
+import { strokesReceived, strokesRelativeToBest } from '../handicap'
 
 /**
  * Stableford: body za jamku podle výsledku vůči paru.
@@ -158,7 +159,7 @@ describe('netto', () => {
     expect(totalPoints(round, 'p1')).toBe(totalPoints(round, 'p2'))
   })
 
-  it('ve scorekartě označí jen rány k dobru proti nejlepšímu HCP', () => {
+  it('spočítá rány k dobru proti nejlepšímu HCP', () => {
     const round = withNet(
       makeStableford([
         [5, 4, 6],
@@ -167,10 +168,10 @@ describe('netto', () => {
       { Anna: 2, Bob: 0 },
     )
 
-    expect(stableford.scorecardPlayerCell?.(round, 'p1', 0)?.suffix?.text).toBe('•')
-    expect(stableford.scorecardPlayerCell?.(round, 'p1', 1)).toEqual({})
-    expect(stableford.scorecardPlayerCell?.(round, 'p1', 2)?.suffix?.text).toBe('•')
-    expect(stableford.scorecardPlayerCell?.(round, 'p2', 0)).toEqual({})
+    expect(strokesRelativeToBest(round, 'p1', 0)).toBe(1)
+    expect(strokesRelativeToBest(round, 'p1', 1)).toBe(0)
+    expect(strokesRelativeToBest(round, 'p1', 2)).toBe(1)
+    expect(strokesRelativeToBest(round, 'p2', 0)).toBe(0)
   })
 
   it('zobrazí více teček, když rozdíl HCP přesáhne počet jamek', () => {
@@ -182,7 +183,20 @@ describe('netto', () => {
       { Anna: 6, Bob: 0 },
     )
 
-    expect(stableford.scorecardPlayerCell?.(round, 'p1', 0)?.suffix?.text).toBe('••')
+    expect(strokesRelativeToBest(round, 'p1', 0)).toBe(2)
+  })
+
+  it('přepne tečky z rozdílu hráčů na plný HCP hřiště', () => {
+    const round = withNet(
+      makeStableford([
+        [4, 4, 4],
+        [4, 4, 4],
+      ]),
+      { Anna: 6, Bob: 6 },
+    )
+
+    expect(strokesRelativeToBest(round, 'p1', 0)).toBe(0)
+    expect(strokesReceived(round, 'p1', 0)).toBe(2)
   })
 })
 

@@ -99,10 +99,34 @@ describe('Match play - souboj jednotlivců', () => {
 
     const header = matchPlay.headerSummary?.(afterDecision, 3)
     expect(header?.tone).toBe('outOfPlay')
-    expect(header?.note).toContain('Mimo hru')
+    expect(header?.note).toBe('Mimo hru')
     expect(matchPlay.holeSummary?.(afterDecision, 3)[0]?.entries[0]?.value).toContain(
       'Mimo hru',
     )
+  })
+
+  it('stav v hlavičce používá kompaktní barevné hodnoty stran', () => {
+    const header = matchPlay.headerSummary?.(round, 2)
+
+    expect(header?.note).toBe('2&1')
+    expect(header?.entries.map((entry) => [entry.value, entry.tone])).toEqual([
+      ['2 UP', 'positive'],
+      ['2 DOWN', 'negative'],
+    ])
+  })
+
+  it('ve třetím řádku ukáže dormie a počet zbývajících jamek', () => {
+    const dormie = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, null],
+        [5, null],
+      ],
+    })
+
+    expect(matchPlay.headerSummary?.(dormie, 0)?.note).toBe('dormie · zbývá 1 jamka')
   })
 })
 

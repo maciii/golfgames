@@ -374,15 +374,18 @@ tak nemůže sebrat víc než dva body.
 Při zapnutém netto se od hrubého skóre odečtou rány podle hracího handicapu a
 stroke indexu jamky. HCP index uloženého hráče se při výběru do Stablefordu
 předvyplní a nové platné indexy se zapamatují pro příště. Při porovnání hráčů
-ukazuje scorekarta tečky za rozdíl jejich hracího handicapu proti nejnižšímu
-HCP ve flightu; tečky bodování nijak nemění.
+ukazuje scorekarta tečky. Přepínač vedle názvu scorekarty volí mezi plným HCP
+hřiště a rozdílem hracích handicapů proti nejlepšímu hráči ve flightu; tečky
+bodování nijak nemění.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 
 - **Vzdaná jamka** má nula bodů.
 - **Dvojnásobná jamka** násobí získané body.
-- **Tečky HCP** se rozdají po jamkách od nejtěžší podle stroke indexu; hráč s
-  nejnižším hracím HCP žádnou nedostane.
+- **Tečky HCP vůči hřišti** se rozdají podle celého hracího handicapu po jamkách
+  od nejtěžší podle stroke indexu.
+- **Tečky HCP vůči nejlepšímu hráči** používají jen rozdíl handicapů; hráč s
+  nejnižším hracím HCP žádnou nedostane. Výchozí zobrazení zůstává toto.
 
 ---
 
@@ -411,6 +414,13 @@ Zápas je matematicky rozhodnutý, jakmile je náskok větší než počet
 zbývajících jamek. Pravidlo 3.2a Pravidel golfu pak výsledek stanoví už na
 této jamce; zbývající jamky lze v aplikaci zapsat jen jako informaci mimo
 hru a do výsledku zápasu se nezapočítají.
+
+V hlavičce zápisu se stav stran zobrazuje kompaktně barevnými hodnotami
+`UP` (zeleně) a `DOWN` (červeně); dlouhá věta o tom, kdo vede a kdo prohrává,
+se neopakuje. Třetí řádek ukazuje počet zbývajících jamek, `dormie`, výsledek
+ve tvaru `3&1` nebo krátké „mimo hru“. Číslo aktuální jamky je v kruhu obarveném podle paru: par 3
+červeně, par 4 zeleně, par 5 modře a par 6 černě. U kola s definovaným hřištěm
+se par v zápisu nemění ručně, přebírá se ze scorekarty hřiště.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 

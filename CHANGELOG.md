@@ -7,6 +7,31 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.24.0] – 2026-08-05
+
+### Změněno
+
+- **Kompaktní hlavička Match Play.** Stav se zobrazuje barevnými hodnotami
+  `UP` a `DOWN`; třetí řádek ukazuje zbývající jamky, `dormie` nebo výsledek
+  `3&1` místo dlouhé věty vedle čísla jamky.
+- **Barevné číslo jamky podle paru.** Par 3 je červený, par 4 zelený, par 5
+  modrý a par 6 černý; u definovaného hřiště jsou parové volby zamčené.
+- **Hlavička zápisu je stručnější.** Pod číslem jamky se už nezobrazuje
+  celkový počet jamek kola.
+
+## [0.23.0] – 2026-08-05
+
+### Přidáno
+
+- **Přepínač HCP teček ve scorekartě.** U každé netto hry lze vedle názvu
+  scorekarty zvolit tečky podle plného HCP hřiště nebo podle rozdílu vůči
+  nejlepšímu hráči.
+
+### Změněno
+
+- **Odpaliště jsou kompaktnější.** Zmenšila se jejich tlačítka a vzorníky,
+  velikost textu zůstala stejná.
+
 ## [0.22.2] – 2026-08-05
 
 ### Změněno

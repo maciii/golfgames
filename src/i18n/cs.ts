@@ -89,7 +89,6 @@ export const cs = {
   'play.previousHole': 'Předchozí jamka',
   'play.nextHole': 'Další jamka',
   'play.hole': 'Jamka {number}',
-  'play.holeOf': 'z {count}',
   'play.par': 'Par',
   'play.noScore': 'zatím bez zápisu',
   'play.total': '{strokes} ran · {toPar}',
@@ -441,6 +440,18 @@ export const cs = {
   'scorecard.strokeIndex': 'Stroke index jamky',
   'scorecard.strokeIndexShort': 'SI',
   'scorecard.title': 'Scorekarta',
+  'scorecard.dotsCourse': 'Hřiště',
+  'scorecard.dotsBestPlayer': 'Nejlepší hráč',
+  'scorecard.dotsCourseAria': {
+    one: '{name}: {count} rána podle HCP hřiště',
+    few: '{name}: {count} rány podle HCP hřiště',
+    other: '{name}: {count} ran podle HCP hřiště',
+  },
+  'scorecard.dotsBestPlayerAria': {
+    one: '{name}: {count} rána k dobru vůči nejlepšímu HCP',
+    few: '{name}: {count} rány k dobru vůči nejlepšímu HCP',
+    other: '{name}: {count} ran k dobru vůči nejlepšímu HCP',
+  },
 
   // Výběr hřiště
   'picker.title': 'Výběr hřiště',
@@ -537,6 +548,20 @@ export const cs = {
   'match.down': '{count} DOWN',
   'match.detail': '{won} vyhraných jamek · {halved} dělených',
   'match.takesHole': 'Jamku bere',
+  'match.outOfPlayShort': 'Mimo hru',
+  'match.remainingShort': {
+    one: 'zbývá {count} jamka',
+    few: 'zbývají {count} jamky',
+    other: 'zbývá {count} jamek',
+  },
+  'match.dormieShort': {
+    one: 'dormie · zbývá {count} jamka',
+    few: 'dormie · zbývají {count} jamky',
+    other: 'dormie · zbývá {count} jamek',
+  },
+  'match.resultShort': '{lead}&{remaining}',
+  'match.finalShort': 'konec · {lead} UP',
+  'match.finishedShort': 'konec',
   'match.halved': 'dělená',
   'match.takes': 'bere',
   'match.loses': 'ztrácí',

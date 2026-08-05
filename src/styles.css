@@ -163,6 +163,26 @@ button {
   color: var(--text-dim);
 }
 
+.scorecard-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.scorecard-control {
+  flex: 0 1 auto;
+  gap: 3px;
+  padding: 3px;
+}
+
+.scorecard-control .segment {
+  min-height: 34px;
+  padding: 0 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .hint {
   margin: 0;
   font-size: 13px;
@@ -380,16 +400,17 @@ button {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
   gap: 8px;
-  flex: 1 1 100%;
+  width: 100%;
+  flex: 0 1 auto;
 }
 
 .tee-option {
   --tee-color: var(--text-dim);
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: var(--tap);
-  padding: 8px 12px;
+  gap: 6px;
+  min-height: 44px;
+  padding: 5px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--bg-elevated);
@@ -409,9 +430,9 @@ button {
 }
 
 .tee-swatch {
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
   border: 1px solid color-mix(in srgb, var(--tee-color) 70%, white);
   border-radius: 50%;
   background: var(--tee-color);
@@ -586,13 +607,38 @@ button {
 }
 
 .hole-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text);
   font-size: 22px;
   font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 
-.hole-of {
-  font-size: 13px;
-  color: var(--text-dim);
+.hole-number.par-3 {
+  background: var(--score-birdie);
+  color: var(--score-birdie-ink);
+}
+
+.hole-number.par-4 {
+  background: var(--score-bogey);
+  color: var(--score-bogey-ink);
+}
+
+.hole-number.par-5 {
+  background: var(--score-par);
+  color: var(--score-par-ink);
+}
+
+.hole-number.par-6 {
+  border: 2px solid #f8fafc;
+  background: var(--score-triple);
+  color: var(--score-triple-ink);
 }
 
 .game-header-summary {
@@ -635,6 +681,18 @@ button {
 .game-header-entry.highlight strong,
 .game-header-summary.dormie .game-header-note {
   color: var(--score-eagle);
+}
+
+.game-header-entry.positive strong {
+  color: var(--accent);
+}
+
+.game-header-entry.negative strong {
+  color: var(--score-birdie);
+}
+
+.game-header-entry.neutral strong {
+  color: var(--text-dim);
 }
 
 .game-header-summary.decided .game-header-note {
@@ -1303,6 +1361,14 @@ button {
   font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.scorecard-hcp-dots {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1;
 }
 
 .scorecard td.skin-awarded {

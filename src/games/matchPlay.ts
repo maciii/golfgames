@@ -146,6 +146,20 @@ function sideValueLabel(state: MatchState, index: number): string {
     : t('match.down', { count: state.lead })
 }
 
+function compactHeaderNote(state: MatchState, outOfPlay: boolean): string {
+  if (outOfPlay) return t('match.outOfPlayShort')
+  if (state.decided) {
+    return state.remaining > 0
+      ? t('match.resultShort', { lead: state.lead, remaining: state.remaining })
+      : t('match.finalShort', { lead: state.lead })
+  }
+  if (state.remaining === 0) return t('match.finishedShort')
+  if (state.leaderIndex !== null && state.lead === state.remaining) {
+    return t('match.dormieShort', { count: state.remaining })
+  }
+  return t('match.remainingShort', { count: state.remaining })
+}
+
 export const matchPlay: GameDefinition = {
   id: 'match-play',
   playerCounts: [2, 4],
@@ -203,9 +217,16 @@ export const matchPlay: GameDefinition = {
       entries: matchSides(round).map((side, index) => ({
         label: side.name,
         value: sideValueLabel(state, index),
-        highlight: state.leaderIndex === index,
+        tone:
+          state.leaderIndex === null
+            ? 'neutral'
+            : state.leaderIndex === index
+              ? 'positive'
+              : 'negative',
       })),
-      note: outOfPlay ? t('match.outOfPlay') : state.label,
+      // Stav stran je v barevných UP/DOWN hodnotách; třetí řádek nese jen
+      // počet zbývajících jamek nebo krátkou informaci o dormie/rozhodnutí.
+      note: compactHeaderNote(state, outOfPlay),
       tone,
     }
   },

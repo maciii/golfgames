@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Player, Round, ScoreCategory } from '../types'
 import {
   parAt,
@@ -10,7 +10,12 @@ import {
 } from '../types'
 import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
 import { getGame } from '../games'
-import { isNetRound, roundStrokeIndex } from '../handicap'
+import {
+  isNetRound,
+  roundStrokeIndex,
+  strokesReceived,
+  strokesRelativeToBest,
+} from '../handicap'
 import { dynamicKey, useT } from '../i18n'
 
 /**
@@ -25,16 +30,28 @@ function ScoreCell({
   score,
   par,
   decoration,
+  hcpDots,
 }: {
   score: number | null
   par: number
   decoration?: ScorecardPlayerCell
+  hcpDots?: { text: string; ariaLabel: string }
 }) {
   return (
     <span className="scorecard-player-cell">
       <span className={`mark ${score === null ? 'empty' : scoreCategory(score, par)}`}>
         {score ?? '–'}
       </span>
+      {hcpDots && (
+        <span
+          className="scorecard-hcp-dots"
+          role="img"
+          aria-label={hcpDots.ariaLabel}
+          title={hcpDots.ariaLabel}
+        >
+          {hcpDots.text}
+        </span>
+      )}
       {decoration?.suffix && (
         <span
           className="scorecard-extra-suffix"
@@ -113,6 +130,8 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const currentHoleRef = useRef<HTMLTableRowElement>(null)
   const game = getGame(round.gameId)
+  const showHcpDots = isNetRound(round)
+  const [hcpDotsMode, setHcpDotsMode] = useState<'course' | 'best-player'>('best-player')
   const extras = game.scorecardColumns?.(round) ?? []
   const columns = buildColumns(round, extras)
   const playerTotals = new Map<string, ScorecardPlayerTotal>()
@@ -148,6 +167,10 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   const ungrouped = columns.length - groupedSpan
 
   useEffect(() => {
+    setHcpDotsMode('best-player')
+  }, [round.id, showHcpDots])
+
+  useEffect(() => {
     if (mode !== 'live') return
 
     const wrap = wrapRef.current
@@ -164,7 +187,29 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
     <section
       className={`section scorecard-section${mode === 'live' ? ' scorecard-live' : ''}`}
     >
-      {mode === 'results' && <h2 className="section-title">{t('scorecard.title')}</h2>}
+      {mode === 'results' && (
+        <div className="scorecard-title-row">
+          <h2 className="section-title">{t('scorecard.title')}</h2>
+          {showHcpDots && (
+            <div className="segmented scorecard-control">
+              {[
+                { id: 'course', label: t('scorecard.dotsCourse') },
+                { id: 'best-player', label: t('scorecard.dotsBestPlayer') },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`segment${option.id === hcpDotsMode ? ' selected' : ''}`}
+                  onClick={() => setHcpDotsMode(option.id as 'course' | 'best-player')}
+                  aria-pressed={option.id === hcpDotsMode}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div ref={wrapRef} className="scorecard-wrap">
         <table className="scorecard">
           <thead>
@@ -239,6 +284,31 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                       column.player.id,
                       hole,
                     )
+                    const dotCount =
+                      showHcpDots && hcpDotsMode === 'course'
+                        ? strokesReceived(round, column.player.id, hole)
+                        : showHcpDots
+                          ? strokesRelativeToBest(round, column.player.id, hole)
+                          : 0
+                    const visibleDots = Math.max(0, dotCount)
+                    const player = round.players.find(
+                      (entry) => entry.id === column.player.id,
+                    )
+                    const hcpDots =
+                      visibleDots > 0
+                        ? {
+                            text: '•'.repeat(visibleDots),
+                            ariaLabel: t(
+                              hcpDotsMode === 'course'
+                                ? 'scorecard.dotsCourseAria'
+                                : 'scorecard.dotsBestPlayerAria',
+                              {
+                                name: player?.name ?? column.player.id,
+                                count: visibleDots,
+                              },
+                            ),
+                          }
+                        : undefined
                     return (
                       <td
                         key={column.player.id}
@@ -252,6 +322,7 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                           score={scoreAt(round, column.player.id, hole)}
                           par={parAt(round, hole)}
                           decoration={decoration}
+                          hcpDots={hcpDots}
                         />
                       </td>
                     )

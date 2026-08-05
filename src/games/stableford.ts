@@ -1,17 +1,11 @@
 import type { PlayerId, Round } from '../types'
 import { holeMultiplier, isHoleStarted, strokeTotal } from '../types'
-import {
-  holeStablefordPoints,
-  isNetRound,
-  strokesReceived,
-  strokesRelativeToBest,
-} from '../handicap'
+import { holeStablefordPoints, isNetRound, strokesReceived } from '../handicap'
 import type {
   GameDefinition,
   HeaderSummary,
   HoleSummary,
   ScorecardColumn,
-  ScorecardPlayerCell,
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
@@ -111,26 +105,6 @@ export const stableford: GameDefinition = {
         isHoleStarted(r, hole) ? `${holePoints(r, player.id, hole)}` : '',
       total: (r) => `${totalPoints(r, player.id)}`,
     }))
-  },
-
-  scorecardPlayerCell(
-    round: Round,
-    playerId: PlayerId,
-    hole: number,
-  ): ScorecardPlayerCell {
-    const relativeStrokes = strokesRelativeToBest(round, playerId, hole)
-    if (relativeStrokes === 0) return {}
-
-    const player = round.players.find((entry) => entry.id === playerId)
-    return {
-      suffix: {
-        text: '•'.repeat(relativeStrokes),
-        ariaLabel: t('stableford.relativeStrokes', {
-          name: player?.name ?? playerId,
-          count: relativeStrokes,
-        }),
-      },
-    }
   },
 
   headerSummary(round: Round): HeaderSummary {

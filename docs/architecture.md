@@ -308,7 +308,7 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 | `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                              |
 | `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                            |
 | `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                  |
-| `Scorecard.tsx`          | tabulka se značkami skóre a vlastními sloupci hry                                                |
+| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami a vlastními sloupci hry; u netto her přepínač reference HCP     |
 | `ArchiveScreen.tsx`      | seznam odehraných kol                                                                            |
 | `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                         |
 | `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                               |

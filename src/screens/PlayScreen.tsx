@@ -25,7 +25,7 @@ import BonusSheet from './BonusSheet'
 import Scorecard from './Scorecard'
 import { useT } from '../i18n'
 
-const PAR_OPTIONS = [3, 4, 5]
+const PAR_OPTIONS = [3, 4, 5, 6]
 
 /** Jak dlouho se drží číslo, než se zápis smaže. */
 const LONG_PRESS_MS = 500
@@ -298,9 +298,11 @@ export default function PlayScreen({
           </button>
           <div className="hole-center">
             <div className="hole-title">
-              <span className="hole-number">{t('play.hole', { number: hole + 1 })}</span>
-              <span className="hole-of">
-                {t('play.holeOf', { count: round.holeCount })}
+              <span
+                className={`hole-number par-${par}`}
+                aria-label={t('play.hole', { number: hole + 1 })}
+              >
+                {hole + 1}
               </span>
             </div>
             {headerSummary && (
@@ -309,7 +311,9 @@ export default function PlayScreen({
                   {headerSummary.entries.map((entry, index) => (
                     <span
                       key={`${entry.label}-${index}`}
-                      className={`game-header-entry${entry.highlight ? ' highlight' : ''}`}
+                      className={`game-header-entry${entry.highlight ? ' highlight' : ''}${
+                        entry.tone ? ` ${entry.tone}` : ''
+                      }`}
                     >
                       <span>{entry.label}</span>
                       <strong>{entry.value}</strong>
@@ -345,6 +349,7 @@ export default function PlayScreen({
                 className={`segment${value === par ? ' selected' : ''}`}
                 onClick={() => onSetPar(hole, value)}
                 aria-pressed={value === par}
+                disabled={round.course !== undefined}
               >
                 {value}
               </button>

@@ -22,7 +22,7 @@ import { useT } from '../i18n'
  * číslem, by tiše rozbil rozdělení ran.
  */
 
-const PAR_OPTIONS = [3, 4, 5]
+const PAR_OPTIONS = [3, 4, 5, 6]
 const HOLE_OPTIONS = [9, 18]
 
 /** Rozepsaná norma odpaliště tak, jak ji uživatel právě píše. */

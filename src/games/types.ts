@@ -69,7 +69,12 @@ export interface GameScoringOptions {
 
 /** Průběžné skóre, které hra zobrazí vedle hlavičky aktuální jamky. */
 export interface HeaderSummary {
-  entries: { label: string; value: string; highlight?: boolean }[]
+  entries: {
+    label: string
+    value: string
+    highlight?: boolean
+    tone?: 'positive' | 'negative' | 'neutral'
+  }[]
   note?: string
   tone?: 'normal' | 'dormie' | 'decided' | 'outOfPlay'
 }
