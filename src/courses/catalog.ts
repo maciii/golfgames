@@ -14,11 +14,17 @@ import { isValidCourse, normalizeCourse } from './types'
  */
 
 /**
- * Adresa katalogu. Výchozí je stejná doména jako aplikace; jakmile poběží
- * samostatný projekt golfgames-courses, přepne se sem jeho adresa přes
- * proměnnou prostředí a nic dalšího se měnit nemusí.
+ * Adresa katalogu.
+ *
+ * Výchozí je katalog projektu, takže fork má hřiště k dispozici bez jediného
+ * nastavení - stejně jako je aplikace bez konfigurace Firebase plně funkční,
+ * jen bez účtu. Vlastní katalog se podstrčí přes VITE_COURSES_URL.
  */
-const BASE = (import.meta.env.VITE_COURSES_URL ?? `${import.meta.env.BASE_URL}courses/`)
+const DEFAULT_BASE = 'https://maciii.github.io/golfgames-courses/'
+
+// Schválně `||`, ne `??`: nenastavená repository variable se do buildu propíše
+// jako prázdný řetězec, ne jako undefined, a ten by adresu utnul na kořen.
+const BASE = (import.meta.env.VITE_COURSES_URL || DEFAULT_BASE)
   .toString()
   .replace(/\/?$/, '/')
 

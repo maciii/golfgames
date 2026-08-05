@@ -7,6 +7,24 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.16.1] – 2026-08-05
+
+### Opraveno
+
+- **Obnovení stránky u dohraného kola už neskočí zpátky do zapisování skóre.**
+  Obrazovka se nikam neukládá a po refreshi se odvozuje ze stavu kola, jenže
+  se odvozovala jen při návratu z podobrazovky, ne při startu – dohrané kolo
+  tak skončilo na první jamce a vypadalo to jako rozjetá nová hra.
+
+### Změněno
+
+- Bez `VITE_COURSES_URL` se čte **publikovaný katalog projektu**, ne adresa na
+  doméně aplikace. Fork tak má hřiště k dispozici bez jediného nastavení –
+  stejné pravidlo jako u chybějící konfigurace Firebase. Proměnná zůstává pro
+  případ, že má aplikace číst jiný katalog.
+- GitHub akce na aktuální majory (`checkout` a `setup-node` v7,
+  `upload-pages-artifact` a `deploy-pages` v5); ty předchozí cílily na Node 20.
+
 ## [0.16.0] – 2026-08-05
 
 ### Změněno

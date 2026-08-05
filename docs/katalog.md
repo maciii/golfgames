@@ -15,10 +15,12 @@ opravují a nasazují tam, ne tady.
 https://maciii.github.io/golfgames-courses/
 ```
 
-Adresu určuje proměnná `VITE_COURSES_URL`; v nasazení ji drží repository
-variable stejného jména. Aplikace tedy **žádná hřiště sama nestaví ani
-neservíruje** — bez té proměnné se výběr hřiště obejde bez serveru, hledá
-v tom, co je v zařízení, a ruční zadání funguje vždycky.
+Tahle adresa je v aplikaci **výchozí**, takže fork má hřiště k dispozici a nemusí
+nastavovat nic — stejné pravidlo jako u Firebase, kde chybějící konfigurace
+neshodí aplikaci, jen v ní nebude účet. Přesměrovat katalog jinam (vlastní fork
+dat, lokální kopie při vývoji) umí `VITE_COURSES_URL`; v nasazení ji drží
+repository variable stejného jména. Aplikace tedy **žádná hřiště sama nestaví
+ani neservíruje**.
 
 [`data/hriste.json`](../data/hriste.json) v tomhle repozitáři zůstává jako
 sada k ručnímu importu ze zálohy a jako výchozí bod, ze kterého katalog vznikl.

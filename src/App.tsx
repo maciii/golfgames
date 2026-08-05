@@ -35,6 +35,17 @@ type View =
   | 'coursePicker'
 
 /**
+ * Kam obrazovka patří podle stavu kola.
+ *
+ * Platí to na dvou místech - při startu aplikace a při návratu z podobrazovky -
+ * a obě musí odpovídat, jinak refresh přistane jinde, než kde uživatel byl.
+ */
+function viewForRound(round: Round | null): View {
+  if (!round) return 'setup'
+  return round.finishedAt ? 'results' : 'play'
+}
+
+/**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
  *
  * Navigace je záměrně plochá - aplikace se ovládá jednou rukou na hřišti,
@@ -44,7 +55,10 @@ function AppShell() {
   const { noteRoundChange, dataVersion } = useAccount()
   // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
-  const [view, setView] = useState<View>('play')
+  // Obrazovka se neukládá, takže se po refreshi odvodí z kola. Bez toho by
+  // dohrané kolo skončilo zpátky v zapisování skóre na první jamce, což vypadá
+  // jako rozjetá nová hra.
+  const [view, setView] = useState<View>(() => viewForRound(round))
   const [archive, setArchive] = useState<Round[]>(() => loadArchive())
   const [openArchiveId, setOpenArchiveId] = useState<string | null>(null)
   // Hra, jejíž bodování se právě nastavuje.
@@ -147,10 +161,7 @@ function AppShell() {
   }, [])
 
   /** Kam se vrátit z podobrazovky: do rozehrané hry, výsledků, nebo na úvod. */
-  const mainView = useCallback(
-    (): View => (round ? (round.finishedAt ? 'results' : 'play') : 'setup'),
-    [round],
-  )
+  const mainView = useCallback((): View => viewForRound(round), [round])
 
   const leaveArchive = useCallback(() => {
     setOpenArchiveId(null)
