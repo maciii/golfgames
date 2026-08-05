@@ -35,6 +35,9 @@ Proti dodanému souboru jsou tři změny, všechny doložitelné z dat samotnýc
   původními hodnotami by hráči s indexem 18 vyšel hrací handicap 73 ran.
 - `lozorno`, odpaliště Orange: **CR 0** znamená neznámou hodnotu, ne nulovou
   obtížnost — pole je odstraněné, aby se handicap nedopočítával z nesmyslu.
+- Karlštejn měl id `karstejn` (překlep, chybějící „l"). Opraveno na `karlstejn`
+  **před založením katalogu** — id se váže na hřiště uložená v telefonech, takže
+  pozdější přejmenování by z jednoho hřiště udělalo dvě.
 
 ## Co zůstalo a proč
 

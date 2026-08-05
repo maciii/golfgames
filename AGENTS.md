@@ -25,6 +25,8 @@ otázek už má odpověď:
 | [`docs/decisions.md`](docs/decisions.md)       | **proč** je to takhle a co by změnu ospravedlnilo         |
 | [`docs/deployment.md`](docs/deployment.md)     | GitHub Pages, vlastní doména, časté problémy              |
 | [`docs/sync.md`](docs/sync.md)                 | účet, synchronizace, nastavení Firebase                   |
+| [`docs/katalog.md`](docs/katalog.md)           | katalog hřišť, jeho adresa a chování v aplikaci           |
+| [`docs/plan.md`](docs/plan.md)                 | **co zbývá udělat** a rozhodnutí, na kterých to stojí     |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura, konvence, verzování                   |
 | [`CHANGELOG.md`](CHANGELOG.md)                 | historie věcných změn                                     |
 

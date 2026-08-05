@@ -5142,7 +5142,7 @@
         "attribution": "Golfshot scorecard"
       },
       {
-        "id": "karstejn",
+        "id": "karlstejn",
         "name": "Karlštejn",
         "club": "Český Golfový Klub",
         "country": "CZ",
@@ -5186,7 +5186,8 @@
         "lat": 49.919444,
         "lon": 14.164444,
         "source": "cgf-scorecard",
-        "attribution": "Ceska golfova federace current scorecard"
+        "attribution": "Ceska golfova federace current scorecard",
+        "updatedAt": "2026-08-05T10:44:58.695Z"
       },
       {
         "id": "kaya-palazzo-golf-course",

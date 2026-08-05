@@ -114,6 +114,8 @@ z konzole Firebase (postup v [`docs/sync.md`](docs/sync.md)).
 | [`docs/decisions.md`](docs/decisions.md)       | proč je to takhle – rozhodnutí a jejich důvody          |
 | [`docs/deployment.md`](docs/deployment.md)     | nasazení, vlastní doména, časté problémy                |
 | [`docs/sync.md`](docs/sync.md)                 | účet, synchronizace a nastavení Firebase                |
+| [`docs/katalog.md`](docs/katalog.md)           | katalog hřišť, jeho adresa a chování v aplikaci         |
+| [`docs/plan.md`](docs/plan.md)                 | co zbývá udělat a rozhodnutí, na kterých to stojí       |
 | [`docs/import-hrist.md`](docs/import-hrist.md) | hromadné nahrání vlastní databáze hřišť                 |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md)           | příkazy, struktura projektu, konvence                   |
 | [`AGENTS.md`](AGENTS.md)                       | pokyny pro AI asistenty a rychlý úvod pro nové vývojáře |
