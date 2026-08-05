@@ -37,9 +37,11 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Skins s potvrzením parem** – volitelná varianta vyžaduje, aby vítěz jamky
   zahrál na další jamce alespoň par; čekající výhra se zobrazí jako „Rezervuje:
   hráč“ a při bogey se vrátí do banku
-- **Longest a Nearest s potvrzením** – v týmových hrách při horším výsledku bod
-  propadá soupeřům, ve Skins se bonus nezapočítá; v kole s HCP se Longest řídí
-  osobním parem a Nearest hrubým parem
+- **Volitelné potvrzení Longestu a Nearestu** – každý bonus má vlastní
+  přepínač. Když je potvrzení zapnuté, v týmových hrách při horším výsledku
+  bod propadá soupeřům a ve Skins se bonus nezapočítá; v kole s HCP se
+  potvrzení Longestu řídí osobním parem a Nearest hrubým parem. Po vypnutí se
+  bonus přizná bez podmínky potvrzení.
 - **Průběžné výsledky** – pořadí se počítá i uprostřed kola
 - **Průběžné skóre v hlavičce** – každá hra ukazuje svůj stav u aktuální jamky;
   Match play navíc hlásí náskok, dormie, zbývající jamky a jamky mimo hru po

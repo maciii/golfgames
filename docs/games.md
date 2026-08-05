@@ -187,10 +187,11 @@ jamky dodatečně opraví, zapsaný bonus se **smaže** – jinak by se počíta
 jamce, kde ho vůbec nejde zvolit. Zpětná oprava paru ho neobnoví, na správné
 jamce se zaškrtne znovu.
 
-Ve výchozím stavu se **potvrzují**: hráč musí jamku dohrát na par nebo líp.
-V týmových hrách jinak bod propadá soupeřově dvojici. Ve Skins se při
-horším výsledku bonus nepočítá, protože tam není soupeřova dvojice, které by
-šel připsat. Potvrzování jde pro každý z nich zvlášť vypnout.
+Potvrzení je **volitelné a pro každý bonus samostatné**; ve výchozím nastavení
+je zapnuté. Když je zapnuté, hráč musí jamku dohrát na par nebo líp. V týmových
+hrách jinak bod propadá soupeřově dvojici. Ve Skins se při horším výsledku bonus
+nepočítá, protože tam není soupeřova dvojice, které by šel připsat. Po vypnutí
+konkrétního přepínače se bonus přizná bez podmínky potvrzení parem.
 
 #### Potvrzování osobním parem
 
@@ -217,8 +218,9 @@ Značka u jména napoví, jak to dopadne:
 | červená      | bod propadá soupeřům                  |
 | tlumená      | hráč jamku ještě nezapsal, není jasno |
 
-Na rozdíl od ostatních bonusů se jejich hodnota **nenásobí** podle výsledku –
-o přiznání rozhoduje právě potvrzovací pravidlo.
+Na rozdíl od ostatních bonusů se jejich hodnota **nenásobí** podle výsledku.
+Když je potvrzování zapnuté, o přiznání rozhoduje potvrzovací pravidlo; při
+vypnutém potvrzování bonus zůstává vlastní straně nebo hráči bez této podmínky.
 
 ### Dvojnásobná sázka
 

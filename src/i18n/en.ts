@@ -369,10 +369,9 @@ export const en: Record<MessageKey, Message> = {
 
   // --- games --------------------------------------------------------------
   'games.best-aggregate.name': 'Best Aggregate',
-  'games.best-aggregate.tagline':
-    'Two pairs, points for best ball, aggregate and birdies',
+  'games.best-aggregate.tagline': 'Two pairs, points for results and optional bonuses',
   'games.best-aggregate.rules':
-    'Always four players in two pairs. On every hole a pair scores 1 point for the lower best ball, 1 point for the lower aggregate of both partners, 1 point for each birdie and 3 points for each eagle. The pair with the most points wins.',
+    'Always four players in two pairs. On every hole the better ball and the aggregate of both partners are compared. Additional points and multipliers follow the game settings. The pair with the most points wins.',
   'games.left-right.name': 'Left-Right',
   'games.left-right.tagline':
     '(Edges-Centers) · pairs from the first shots, new pairs on every hole',
@@ -395,7 +394,7 @@ export const en: Record<MessageKey, Message> = {
   'best.points': 'Points',
   'best.headerNote': 'Current score',
   'best.pointsDescription':
-    'Per hole: 1 point for the best ball, 1 for the lower aggregate, 1 for a birdie, 3 for an eagle.',
+    'Per hole: points for the best ball, lower aggregate and other bonuses according to the game settings.',
   'best.best': 'Best',
   'best.aggregate': 'Aggregate',
   'best.holePoints': 'Points',

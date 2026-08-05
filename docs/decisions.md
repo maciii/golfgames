@@ -226,10 +226,11 @@ Pravidlo násobení platí pro týmového i hráčského příjemce.
 
 ## 10. Potvrzování Longest a Nearest
 
-**Rozhodnutí.** Ve výchozím stavu zapnuté: hráč, který Longest nebo Nearest
-zapsal, musí jamku dohrát na **par nebo líp**. V týmové hře horší výsledek
-posílá bod soupeřově dvojici; ve Skins se bonus při horším výsledku
-nezapočítá.
+**Rozhodnutí.** Potvrzování je volitelné samostatně pro Longest i Nearest a ve
+výchozím stavu je zapnuté. Když je zapnuté, hráč, který bonus zapsal, musí jamku
+dohrát na **par nebo líp**. V týmové hře horší výsledek posílá bod soupeřově
+dvojici; ve Skins se bonus při horším výsledku nezapočítá. Po vypnutí
+příslušného přepínače se bonus přizná bez této podmínky.
 
 **Proč.** Tak se to hraje – nejdelší odpal nebo nejbližší rána, po které
 následuje zkažená jamka, se nepočítá jako zásluha.

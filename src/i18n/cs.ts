@@ -388,9 +388,9 @@ export const cs = {
 
   // --- hry ----------------------------------------------------------------
   'games.best-aggregate.name': 'Best + Součet',
-  'games.best-aggregate.tagline': 'Dvě dvojice, body za lepší míč, součet a birdie',
+  'games.best-aggregate.tagline': 'Dvě dvojice, body za výsledek a volitelné bonusy',
   'games.best-aggregate.rules':
-    'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice 1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, 1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice s nejvyšším počtem bodů.',
+    'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce se porovnává lepší míč a součet obou partnerů. Další body a jejich násobení se řídí nastavením hry. Vyhrává dvojice s nejvyšším počtem bodů.',
   'games.left-right.name': 'Levá-Pravá',
   'games.left-right.tagline':
     '(Kraje-Středy) · dvojice podle prvních ran, nová dvojice na každé jamce',
@@ -413,7 +413,7 @@ export const cs = {
   'best.points': 'Body',
   'best.headerNote': 'Průběžné skóre',
   'best.pointsDescription':
-    'Za jamku: 1 bod za lepší míč, 1 za nižší součet, 1 za birdie, 3 za eagle.',
+    'Za jamku: body za lepší míč, nižší součet a další bonusy podle nastavení hry.',
   'best.best': 'Best',
   'best.aggregate': 'Součet',
   'best.holePoints': 'Body',

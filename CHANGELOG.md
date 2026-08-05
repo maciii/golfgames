@@ -7,6 +7,13 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.30.2] – 2026-08-06
+
+### Opraveno
+
+- **Popisy Best + Součet.** Text v aplikaci už neuvádí pevné body za birdie a
+  eagle; další body a násobení správně odkazují na nastavení hry.
+
 ## [0.30.1] – 2026-08-05
 
 ### Opraveno
