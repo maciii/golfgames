@@ -1616,3 +1616,18 @@ button {
   font-size: 13px;
   color: var(--text-dim);
 }
+
+/* Odznak u hřiště, které je zatím jen v katalogu a stáhne se až klepnutím. */
+.course-item-tag {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.course-item:disabled {
+  opacity: 0.6;
+}

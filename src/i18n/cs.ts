@@ -437,11 +437,18 @@ export const cs = {
 
   // Výběr hřiště
   'picker.title': 'Výběr hřiště',
-  'picker.count': {
-    one: '{count} uložené hřiště',
-    few: '{count} uložená hřiště',
-    other: '{count} uložených hřišť',
-  },
+  'picker.count': '{stored} v telefonu, {total} k dispozici',
+  'picker.loading': 'Načítám katalog hřišť…',
+  'picker.inCatalog': 'v katalogu',
+  'picker.downloading': 'stahuji…',
+  'picker.rated': 's normou',
+  'picker.notRated': 'bez normy',
+  'picker.errorOffline':
+    'Katalog se nepodařilo načíst, nejspíš chybí připojení. Hřiště uložená v telefonu fungují dál.',
+  'picker.errorMissing':
+    'Katalog na své adrese neodpovídá. Hřiště uložená v telefonu fungují dál.',
+  'picker.errorBroken':
+    'Katalog vrátil něco, čemu aplikace nerozumí. Hřiště uložená v telefonu fungují dál.',
   'picker.search': 'Hledat podle názvu nebo klubu',
   'picker.noCourseMeta': 'Pary se nastavují při hře, handicapy se nepočítají.',
   'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },

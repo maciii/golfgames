@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.15.0] – 2026-08-05
+
+### Přidáno
+
+- **Katalog hřišť.** Výběr hřiště hledá zároveň v tom, co je v telefonu,
+  i v katalogu na serveru; klepnutím se scorekarta stáhne a uloží natrvalo.
+  Import hřišť ze souboru tím přestal být potřeba.
+- Katalog se **nestahuje při startu** – rejstřík (41 kB) se načte teprve při
+  otevření výběru hřiště a není v předcache service workeru.
+- Když katalog nejde načíst, výběr funguje dál nad hřišti v telefonu a řekne
+  proč: zvlášť chybějící připojení, neodpovídající adresa a nesrozumitelný
+  obsah.
+- [`catalog/`](catalog/) – obsah samostatného repozitáře `golfgames-courses`
+  (build, kontrola dat, workflow), popis je v [`docs/katalog.md`](docs/katalog.md).
+
+### Změněno
+
+- Adresu katalogu určuje `VITE_COURSES_URL`. Bez ní se čte z domény aplikace,
+  kam se katalog generuje při buildu z `data/hriste.json` – přechod na
+  samostatné Pages je pak jedna proměnná.
+
 ## [0.14.2] – 2026-08-05
 
 ### Přidáno

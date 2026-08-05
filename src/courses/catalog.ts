@@ -1,0 +1,107 @@
+import type { Course } from './types'
+import { isValidCourse, normalizeCourse } from './types'
+
+/**
+ * Katalog hřišť.
+ *
+ * Databáze hřišť žije na serveru a do telefonu se nikdy nestahuje celá -
+ * stáhne se rejstřík (jméno, poloha, počet jamek) a scorekarta až u hřiště,
+ * které si někdo vybral. Vybrané hřiště se pak uloží natrvalo, takže rozehrané
+ * kolo na síti nikdy nezávisí.
+ *
+ * Stejně jako u Firebase platí: **žádný dotaz, dokud ho uživatel nevyvolá.**
+ * Modul se ani nenačte, dokud se neotevře výběr hřiště.
+ */
+
+/**
+ * Adresa katalogu. Výchozí je stejná doména jako aplikace; jakmile poběží
+ * samostatný projekt golfgames-courses, přepne se sem jeho adresa přes
+ * proměnnou prostředí a nic dalšího se měnit nemusí.
+ */
+const BASE = (import.meta.env.VITE_COURSES_URL ?? `${import.meta.env.BASE_URL}courses/`)
+  .toString()
+  .replace(/\/?$/, '/')
+
+/** Položka rejstříku - jen to, podle čeho se hřiště hledá a vybírá. */
+export interface CatalogEntry {
+  id: string
+  name: string
+  club?: string
+  country?: string
+  lat?: number
+  lon?: number
+  holeCount: number
+  /** Kolik má hřiště odpališť. */
+  tees: number
+  /** Má aspoň jedno odpaliště normu? Bez ní se handicap nedopočítá z indexu. */
+  rated: boolean
+}
+
+/** Rejstřík se drží v paměti, ať se při každém hledání netahá znovu. */
+let cached: CatalogEntry[] | null = null
+
+export class CatalogError extends Error {
+  constructor(readonly reason: 'offline' | 'missing' | 'broken') {
+    super(reason)
+  }
+}
+
+function isEntry(value: unknown): value is CatalogEntry {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as Partial<CatalogEntry>
+  return typeof entry.id === 'string' && typeof entry.name === 'string'
+}
+
+/**
+ * Stáhne rejstřík hřišť.
+ *
+ * Chyby se rozlišují, protože každá znamená něco jiného: bez signálu se dá
+ * hrát dál, chybějící katalog je chyba nasazení a poškozený obsah znamená, že
+ * na adrese je něco jiného než katalog.
+ */
+export async function fetchIndex(): Promise<CatalogEntry[]> {
+  if (cached) return cached
+
+  let response: Response
+  try {
+    response = await fetch(`${BASE}index.json`, { cache: 'no-cache' })
+  } catch {
+    throw new CatalogError('offline')
+  }
+  if (!response.ok) throw new CatalogError('missing')
+
+  let data: unknown
+  try {
+    data = await response.json()
+  } catch {
+    throw new CatalogError('broken')
+  }
+  if (!Array.isArray(data)) throw new CatalogError('broken')
+
+  cached = data.filter(isEntry)
+  return cached
+}
+
+/** Stáhne scorekartu jednoho hřiště. */
+export async function fetchCourse(id: string): Promise<Course> {
+  let response: Response
+  try {
+    response = await fetch(`${BASE}course/${encodeURIComponent(id)}.json`, {
+      cache: 'no-cache',
+    })
+  } catch {
+    throw new CatalogError('offline')
+  }
+  if (!response.ok) throw new CatalogError('missing')
+
+  const data: unknown = await response.json().catch(() => null)
+  // Hřiště z katalogu prochází stejnou kontrolou jako hřiště ze zálohy -
+  // poškozený záznam se nesmí dostat do výpočtů.
+  if (!isValidCourse(data)) throw new CatalogError('broken')
+  return normalizeCourse(data)
+}
+
+/** Adresa katalogu pro diagnostiku v UI. */
+export function catalogBase(): string {
+  return BASE
+}

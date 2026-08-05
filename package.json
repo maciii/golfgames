@@ -1,12 +1,12 @@
 {
   "name": "golfgames",
-  "version": "0.14.2",
+  "version": "0.15.1",
   "description": "Zápis golfového skóre po jamkách pro 2-4 hráče a vyhodnocení různých typů golfových her",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/bump-version.mjs",
+    "prebuild": "node scripts/bump-version.mjs && node scripts/build-catalog.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -17,6 +17,7 @@
     "check": "npm run typecheck && npm run test && npm run format:check",
     "icons": "node scripts/gen-icons.mjs",
     "check:courses": "node scripts/check-courses.mjs data/hriste.json",
+    "catalog": "node scripts/build-catalog.mjs",
     "bump:minor": "node scripts/bump-version.mjs minor",
     "bump:major": "node scripts/bump-version.mjs major"
   },

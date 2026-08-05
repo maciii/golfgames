@@ -65,7 +65,7 @@ export default defineConfig({
         // přihlášení a nemá důvod stahovat SDK, které nikdy nepoužije;
         // přihlášenému se načte ze sítě v okamžiku, kdy ho potřebuje - a to
         // stejně jde jen online.
-        globIgnores: ['**/firebase*.js'],
+        globIgnores: ['**/firebase*.js', 'courses/**'],
         // Celá aplikace je offline-first: bez signálu na hřišti musí jít
         // zapisovat skóre.
         navigateFallback: `${base}index.html`,

@@ -417,7 +417,18 @@ export const en: Record<MessageKey, Message> = {
 
   // Course picker
   'picker.title': 'Choose a course',
-  'picker.count': { one: '{count} saved course', other: '{count} saved courses' },
+  'picker.count': '{stored} on this phone, {total} available',
+  'picker.loading': 'Loading the course catalogue…',
+  'picker.inCatalog': 'in catalogue',
+  'picker.downloading': 'downloading…',
+  'picker.rated': 'rated',
+  'picker.notRated': 'not rated',
+  'picker.errorOffline':
+    'The catalogue could not be loaded, most likely no connection. Courses saved on this phone still work.',
+  'picker.errorMissing':
+    'The catalogue is not responding at its address. Courses saved on this phone still work.',
+  'picker.errorBroken':
+    'The catalogue returned something the app does not understand. Courses saved on this phone still work.',
   'picker.search': 'Search by name or club',
   'picker.noCourseMeta': 'Pars are set while playing, handicaps are not used.',
   'picker.holes': { one: '{count} hole', other: '{count} holes' },
