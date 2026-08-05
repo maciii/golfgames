@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.16.0] – 2026-08-05
+
+### Změněno
+
+- **Katalog hřišť se odstěhoval do vlastního repozitáře**
+  [`maciii/golfgames-courses`](https://github.com/maciii/golfgames-courses)
+  a publikuje se z vlastních GitHub Pages. Aplikace na něj míří přes
+  `VITE_COURSES_URL` a data už sama nestaví – oprava stroke indexu tím přestala
+  být důvodem k nasazení aplikace.
+
+### Odebráno
+
+- `scripts/build-catalog.mjs` a krok v `prebuild`, které katalog generovaly do
+  `public/courses/`. Byly dočasné, než katalog dostane vlastní adresu.
+- `npm run catalog` – patří k odstraněnému skriptu.
+- Složka `catalog/` s obsahem nového repozitáře; teď žije tam.
+
+Bez `VITE_COURSES_URL` se výběr hřiště obejde bez serveru – hledá v hřištích
+uložených v zařízení a ruční zadání funguje dál. [`data/hriste.json`](data/hriste.json)
+v repozitáři zůstává jako sada k ručnímu importu ze zálohy.
+
 ## [0.15.0] – 2026-08-05
 
 ### Přidáno

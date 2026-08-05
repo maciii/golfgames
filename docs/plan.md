@@ -5,34 +5,22 @@ Rozpracovaný záměr a to, co z něj zbývá. Hotové věci popisují ostatní 
 
 ## Kde to stojí
 
-| Fáze                                        | Stav                                  |
-| ------------------------------------------- | ------------------------------------- |
-| **A** – model hřiště, handicapy, Stableford | ✅ hotovo (0.14.0)                    |
-| **B** – katalog hřišť a jeho data           | 🟡 běží z domény aplikace, repo chybí |
-| **B2** – návrh hřiště podle polohy (GPS)    | ⏳ nezačato                           |
-| **C** – příspěvek zpět do OpenGolfAPI       | 🟡 připraveno, neodesláno             |
+| Fáze                                        | Stav                      |
+| ------------------------------------------- | ------------------------- |
+| **A** – model hřiště, handicapy, Stableford | ✅ hotovo (0.14.0)        |
+| **B** – katalog hřišť a jeho data           | ✅ hotovo (0.16.0)        |
+| **B2** – návrh hřiště podle polohy (GPS)    | ⏳ nezačato               |
+| **C** – příspěvek zpět do OpenGolfAPI       | 🟡 připraveno, neodesláno |
+
+Katalog běží samostatně na
+[`maciii/golfgames-courses`](https://github.com/maciii/golfgames-courses),
+publikuje se na <https://maciii.github.io/golfgames-courses/> a aplikace na něj
+míří přes repository variable `VITE_COURSES_URL`. Podrobnosti v
+[`katalog.md`](katalog.md).
 
 ## Co zbývá udělat
 
-### 1. Založit repozitář katalogu
-
-Obsah je hotový ve složce [`../catalog/`](../catalog/) – build, kontrola dat,
-workflow pro Pages i README. Postup je v [`katalog.md`](katalog.md).
-
-Odsud to nešlo: GitHub App použitá v cloudovém prostředí nemá oprávnění
-zakládat repozitáře (403 na `POST /user/repos`). Z lokálního prostředí
-s `gh auth login` to je jeden příkaz.
-
-Po založení:
-
-1. `node scripts/split.mjs ../golfgames/data/hriste.json` – vyrobí `courses/`
-2. Settings → Pages → Source: **GitHub Actions**
-3. V repozitáři aplikace nastavit proměnnou
-   `VITE_COURSES_URL=https://maciii.github.io/golfgames-courses/`
-4. Až katalog poběží samostatně, vyhodit generování při buildu aplikace
-   (`scripts/build-catalog.mjs` a krok v `prebuild`)
-
-### 2. Odeslat příspěvek do OpenGolfAPI
+### 1. Odeslat příspěvek do OpenGolfAPI
 
 305 hřišť je připravených v [`../contrib/`](../contrib/). Odsud to nešlo –
 `api.opengolfapi.org` i `courses.opengolfapi.org` jsou blokované proxy (403).
@@ -45,7 +33,7 @@ V `contrib/README.md` je poznámka o tom, že sada obsahuje všech 107 českých
 hřišť opsaných ze scorekaret – rozhodnutí o zveřejnění pod ODbL je vědomé
 a nevratné.
 
-### 3. Návrh hřiště podle polohy (fáze B2)
+### 2. Návrh hřiště podle polohy (fáze B2)
 
 Rejstřík už nese `lat` a `lon` u 205 z 307 hřišť, takže chybí jen:
 
@@ -54,10 +42,10 @@ Rejstřík už nese `lat` a `lon` u 205 z 307 hřišť, takže chybí jen:
 - řazení nabídky podle vzdálenosti (haversine)
 - volitelně předstažení dlaždice okolí, dokud je signál
 
-### 4. Doplnit chybějící data
+### 3. Doplnit chybějící data
 
-Kontrola (`npm run check:courses`) hlásí sedm podezření, která stojí za doplnění
-až budou po ruce scorekarty:
+Kontrola hlásí sedm podezření, která stojí za doplnění až budou po ruce
+scorekarty. Opravují se **v repozitáři katalogu** (`npm run validate`), ne tady:
 
 - `east` a `karolinka-golf-park` nemají stroke index
 - `lhotka`, `lozorno` a `zlonin` nemají u odpališť slope

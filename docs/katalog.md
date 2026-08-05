@@ -6,23 +6,23 @@ natrvalo, takže rozehrané kolo na síti nikdy nezávisí.
 
 ## Kde katalog běží
 
-Adresu určuje proměnná `VITE_COURSES_URL`. Bez ní se katalog čte ze **stejné
-domény jako aplikace** (`/courses/`), kam ho při buildu vygeneruje
-`scripts/build-catalog.mjs` z [`data/hriste.json`](../data/hriste.json).
-
-Cílový stav je **samostatný projekt** `golfgames-courses` s vlastními GitHub
-Pages — data se mění po měsících, aplikace po dnech, takže nemá smysl kvůli
-opravě jednoho stroke indexu nasazovat aplikaci. Přepnutí je jedna proměnná:
+Katalog je **samostatný projekt** [`maciii/golfgames-courses`](https://github.com/maciii/golfgames-courses)
+s vlastními GitHub Pages — data se mění po měsících, aplikace po dnech, takže
+oprava jednoho stroke indexu nemá vyžadovat nasazení aplikace. Hřiště se
+opravují a nasazují tam, ne tady.
 
 ```
-VITE_COURSES_URL=https://maciii.github.io/golfgames-courses/
+https://maciii.github.io/golfgames-courses/
 ```
 
-Obsah toho repozitáře je připravený ve složce [`../catalog/`](../catalog/):
-build, kontrola dat, workflow i README. Zbývá repozitář založit (to je jediný
-krok, který nejde udělat odsud — GitHub App na zakládání repozitářů nemá
-oprávnění), pustit `node scripts/split.mjs ../golfgames/data/hriste.json`
-a zapnout Pages.
+Adresu určuje proměnná `VITE_COURSES_URL`; v nasazení ji drží repository
+variable stejného jména. Aplikace tedy **žádná hřiště sama nestaví ani
+neservíruje** — bez té proměnné se výběr hřiště obejde bez serveru, hledá
+v tom, co je v zařízení, a ruční zadání funguje vždycky.
+
+[`data/hriste.json`](../data/hriste.json) v tomhle repozitáři zůstává jako
+sada k ručnímu importu ze zálohy a jako výchozí bod, ze kterého katalog vznikl.
+**Zdrojem pravdy už není** — ten je `courses/` v katalogu.
 
 ## Tvar katalogu
 
@@ -41,8 +41,9 @@ geohashe.
 - **Nic se nestahuje, dokud uživatel neotevře výběr hřiště.** Stejné pravidlo
   jako u Firebase — kdo hřiště nepotřebuje, nestáhne ani bajt navíc.
 - Rejstřík se drží v paměti, takže se při hledání netahá znovu.
-- Katalog **není v předcache** service workeru (`workbox.globIgnores`), aby si
-  ho nestahoval každý, kdo aplikaci otevře.
+- Katalog **není v předcache** service workeru — leží na cizí doméně, takže se
+  do `globPatterns` ani nemůže dostat a nestahuje si ho každý, kdo aplikaci
+  otevře.
 - Když katalog nejde načíst, obrazovka **funguje dál nad hřišti v telefonu**
   a řekne proč: jiná hláška pro chybějící připojení, jinou pro neodpovídající
   adresu a jinou pro obsah, kterému aplikace nerozumí. Ruční zadání hřiště
@@ -52,9 +53,11 @@ geohashe.
 
 ## Údržba dat
 
-Hřiště se přidávají a opravují **ručně** úpravou souboru v `courses/`.
-Kontrola (`npm run validate` v katalogu, `npm run check:courses` v aplikaci)
-odděluje chyby, které by rozbily výpočty, od podezření k ověření.
+Hřiště se přidávají a opravují **ručně** úpravou souboru v `courses/`
+v repozitáři katalogu. Kontrola (`npm run validate`) odděluje chyby, které by
+rozbily výpočty, od podezření k ověření a běží v CI před buildem, takže se vadné
+hřiště nedostane ven. `npm run check:courses` v aplikaci dělá totéž nad
+`data/hriste.json`.
 
 Historii normování drží git: každá změna CR nebo SR je commit s datem
 a zdůvodněním, takže `git log -p courses/<id>.json` je normovací historie
