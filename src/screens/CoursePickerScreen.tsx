@@ -54,6 +54,15 @@ interface Row {
   distanceKm?: number
 }
 
+/**
+ * Kam vede odkaz na zdroj dat.
+ *
+ * Ne přímo na `catalogBase()`, což je adresa souborů - člověku je k ničemu
+ * stránka se surovým JSON. Odkaz míří na projekt, kde je licence i postup,
+ * jak hřiště opravit.
+ */
+const CATALOG_HOME = 'https://github.com/maciii/golfgames-courses'
+
 const CATALOG_ERROR: Record<CatalogError['reason'], MessageKey> = {
   offline: 'picker.errorOffline',
   missing: 'picker.errorMissing',
@@ -406,6 +415,14 @@ export default function CoursePickerScreen({
         <button type="button" className="secondary-button" onClick={onNewCourse}>
           {t('setup.newCourse')}
         </button>
+        {/* Katalog je pod ODbL a ta vyžaduje uvést zdroj tam, kde se data
+            používají - nestačí ho mít v README katalogu. */}
+        <p className="hint catalog-credit">
+          {t('picker.credit')}{' '}
+          <a href={CATALOG_HOME} target="_blank" rel="noreferrer noopener">
+            {t('picker.creditLink')}
+          </a>
+        </p>
       </footer>
     </div>
   )

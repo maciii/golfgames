@@ -3,16 +3,17 @@
 Rozpracovaný záměr a to, co z něj zbývá. Hotové věci popisují ostatní dokumenty
 (`architecture.md`, `katalog.md`, `games.md`); tenhle soubor je o směru.
 
-Stav při poslední revizi: verze **0.24.0**, 228 testů prochází.
+Stav při poslední revizi: verze **0.25.0**, 232 testů prochází. Plán je tím
+prakticky vyčerpaný – zbývá jediná položka a je to práce s daty.
 
 ## Kde to stojí
 
-| Fáze                                        | Stav                      |
-| ------------------------------------------- | ------------------------- |
-| **A** – model hřiště, handicapy, Stableford | ✅ hotovo (0.14.0)        |
-| **B** – katalog hřišť a jeho data           | ✅ hotovo (0.16.0)        |
-| **B2** – návrh hřiště podle polohy (GPS)    | ✅ hotovo (0.22.0)        |
-| **C** – příspěvek zpět do OpenGolfAPI       | 🟡 připraveno, neodesláno |
+| Fáze                                        | Stav               |
+| ------------------------------------------- | ------------------ |
+| **A** – model hřiště, handicapy, Stableford | ✅ hotovo (0.14.0) |
+| **B** – katalog hřišť a jeho data           | ✅ hotovo (0.16.0) |
+| **B2** – návrh hřiště podle polohy (GPS)    | ✅ hotovo (0.22.0) |
+| **C** – atribuce ODbL v aplikaci            | ✅ hotovo (0.25.0) |
 
 Katalog běží samostatně na
 [`maciii/golfgames-courses`](https://github.com/maciii/golfgames-courses),
@@ -22,73 +23,34 @@ míří přes repository variable `VITE_COURSES_URL`. Podrobnosti v
 
 ## Co zbývá udělat
 
-### 1. Atribuce ODbL v aplikaci
+### Doplnit chybějící data
 
-**Nesplněná povinnost licence, ne kosmetika.** Katalog je pod ODbL, která
-vyžaduje uvést zdroj u míst, kde se data používají. Aplikace dnes atribuci
-neukazuje nikde: `Course.attribution` je v modelu i v datech, ale žádná
-obrazovka ho nevykresluje a v `src/i18n/` není jediný klíč o licenci.
-
-Stačí málo – zdroj u detailu hřiště nebo v patičce výběru hřiště plus věta
-o licenci katalogu. Dokud to tam není, porušujeme podmínku, na které stojí
-i celý plán přispívat data zpátky.
-
-### 2. Rozhodnout, co s `data/hriste.json`
-
-Od chvíle, kdy se katalog odstěhoval do
-[vlastního repozitáře](https://github.com/maciii/golfgames-courses), existuje
-**stejná sada hřišť na dvou místech**. Nic je nedrží v souladu: oprava stroke
-indexu v katalogu se do `data/hriste.json` nepromítne a `npm run check:courses`
-kontroluje tu zastaralou kopii.
-
-Dvě rozumné cesty:
-
-- **Smazat** `data/hriste.json`, `scripts/check-courses.mjs`, `npm run check:courses`
-  a [`import-hrist.md`](import-hrist.md). Zdrojem pravdy je katalog, ruční
-  zadání hřiště zůstává pojistkou pro místa bez signálu.
-- **Nechat jako zmrazený seed** a do `data/README.md` napsat, že se
-  neaktualizuje a slouží jen k prvotnímu naplnění nového katalogu.
-
-První varianta je čistší; druhá dává smysl, jen pokud se počítá se zakládáním
-dalších katalogů. Zatím to není rozhodnuté, a proto to tady stojí.
-
-### 3. Odeslat příspěvek do OpenGolfAPI
-
-305 hřišť je připravených v [`../contrib/`](../contrib/). Odsud to nešlo –
-`api.opengolfapi.org` i `courses.opengolfapi.org` jsou blokované proxy (403).
-
-**Před odesláním balík vygenerovat znovu z katalogu**, ne z `contrib/`. Ten
-vznikl z `data/hriste.json` ještě před osamostatněním katalogu, takže neobsahuje
-pozdější opravy.
-
-Dál **ověřit názvy polí** proti `_template.json` v jejich repozitáři
-`open-course-data`; náš tvar je zvolený jako snadno převeditelný, ne jako přesná
-shoda. Doporučená cesta je pull request, protože je ověřitelná a nechá stopu.
-
-V `contrib/README.md` je poznámka o tom, že sada obsahuje všech 107 českých
-hřišť opsaných ze scorekaret – rozhodnutí o zveřejnění pod ODbL je vědomé
-a nevratné.
-
-### 4. Návrh hřiště podle polohy (fáze B2)
-
-Hotové části používají `lat` a `lon` z rejstříku a zahrnují:
-
-- dotaz na `navigator.geolocation` až po otevření výběru hřiště; odmítnutí
-  přepne na skupinové a abecední řazení
-- řazení nabídky podle vzdálenosti (haversine), přepínač na skupiny a abecedu
-- filtr zemí a oblíbená hřiště, která se řadí před stažené kopie
-
-Zbývá jen volitelné **předstažení scorekaret v okolí**, dokud je signál. Není
-nutné pro offline hraní: hřiště se ukládá při výběru a katalogová kopie se při
-dalším otevření pickeru sama aktualizuje.
-
-### 5. Doplnit chybějící data
-
-Kontrola hlásí sedm podezření, která stojí za doplnění až budou po ruce
-scorekarty. Opravují se **v repozitáři katalogu** (`npm run validate`), ne tady:
+Jediná otevřená položka, a je to práce s daty, ne s kódem. Kontrola katalogu
+(`npm run validate` v repozitáři katalogu) hlásí sedm podezření, která stojí za
+doplnění, až budou po ruce scorekarty. Opravují se **v katalogu**, ne tady:
 
 - `east` a `karolinka-golf-park` nemají stroke index
 - `lhotka`, `lozorno` a `zlonin` nemají u odpališť slope
+
+Aplikace si s tím poradí – bez stroke indexu rozdá rány podle pořadí jamek
+a bez slope se handicap zadá rovnou v ranách. Jen to není přesné.
+
+## Co se rozhodlo nedělat
+
+Body, které v plánu byly a vypadly. Zapsané proto, aby se za půl roku
+neotevíraly znovu od nuly:
+
+- **Předstažení scorekaret v okolí.** Hřiště se vybírá před kolem, kdy signál
+  obvykle je – v klubovně nebo cestou. Složitost navíc (kdy stáhnout, jak velké
+  okolí, kdy zahodit) za tím užitkem zaostávala.
+- **Příspěvek dat do OpenGolfAPI.** Data zůstávají v našem katalogu. Odpadá tím
+  i úvaha o zveřejnění 107 českých hřišť opsaných ze scorekaret pod ODbL, která
+  by byla nevratná. Připravený balík se z repozitáře odstranil; kdyby se
+  rozhodnutí někdy otočilo, je v historii gitu a stejně by se musel vygenerovat
+  znovu z katalogu.
+- **Druhá kopie dat v repozitáři aplikace.** `data/hriste.json`, kontrolní
+  skript i návod k importu ze souboru se odstranily. Katalog je jediný zdroj
+  pravdy; ruční zadání hřiště zůstává pojistkou pro místa bez signálu.
 
 ## Rozhodnutí, na kterých to stojí
 
@@ -102,8 +64,9 @@ scorekarty. Opravují se **v repozitáři katalogu** (`npm run validate`), ne ta
 4. **Aplikace čte živá data**, ne pinnutou verzi. Riziko je malé, protože kolo
    si hřiště kopíruje při založení, takže špatný záznam nemůže přepočítat
    archiv – nejhůř se nabídne špatný údaj, který jde přepsat.
-5. **Schéma vychází z `open-course-data`** OpenGolfAPI, aby byl příspěvek zpět
-   kopie souboru, ne překlad.
+5. **Schéma vychází z `open-course-data`** OpenGolfAPI. Přispívat data zpět se
+   nakonec nerozhodlo, ale zavedené schéma nemá důvod se měnit a nechává dveře
+   otevřené.
 6. **Data se udržují ručně.** Import ze zdrojů by měl generovat návrhy změn
    k odsouhlasení, ne tichý přepis – ručně ověřený údaj nesmí automatika
    přebít.

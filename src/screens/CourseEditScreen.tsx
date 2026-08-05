@@ -227,6 +227,13 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
             ))}
           </div>
           <p className="hint">{t('course.parTotal', { count: coursePar(draft) })}</p>
+          {/* Odkud údaje pocházejí. U katalogových hřišť to vyžaduje ODbL,
+              u vlastních je to poznámka, odkud se scorekarta opisovala. */}
+          {draft.attribution && (
+            <p className="hint">
+              {t('course.attribution', { source: draft.attribution })}
+            </p>
+          )}
         </section>
 
         <section className="section">

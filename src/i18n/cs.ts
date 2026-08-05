@@ -481,6 +481,8 @@ export const cs = {
   'picker.addFavorite': 'Přidat hřiště {name} mezi oblíbená',
   'picker.removeFavorite': 'Odebrat hřiště {name} z oblíbených',
   'picker.noCourseMeta': 'Pary se nastavují při hře, handicapy se nepočítají.',
+  'picker.credit': 'Hřiště z otevřeného katalogu Golf Games, licence ODbL.',
+  'picker.creditLink': 'Zdroj a opravy',
   'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },
   'picker.tees': {
     one: '{count} odpaliště',
@@ -496,6 +498,7 @@ export const cs = {
   'course.namePlaceholder': 'Např. Karlštejn',
   'course.nameRequired': 'Hřiště potřebuje název.',
   'course.parTotal': 'Par hřiště: {count}',
+  'course.attribution': 'Zdroj údajů: {source}',
   'course.holes': 'Jamky',
   'course.holesHint':
     'U každé jamky nastav par a její obtížnost. Stroke index se posouvá tlačítky, aby zůstal pořadím bez duplicit.',

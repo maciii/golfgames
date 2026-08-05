@@ -458,6 +458,8 @@ export const en: Record<MessageKey, Message> = {
   'picker.addFavorite': 'Add {name} to favorites',
   'picker.removeFavorite': 'Remove {name} from favorites',
   'picker.noCourseMeta': 'Pars are set while playing, handicaps are not used.',
+  'picker.credit': 'Courses from the open Golf Games catalogue, ODbL licensed.',
+  'picker.creditLink': 'Source and corrections',
   'picker.holes': { one: '{count} hole', other: '{count} holes' },
   'picker.tees': { one: '{count} tee', other: '{count} tees' },
   'picker.noTees': 'no tees',
@@ -469,6 +471,7 @@ export const en: Record<MessageKey, Message> = {
   'course.namePlaceholder': 'e.g. St Andrews',
   'course.nameRequired': 'The course needs a name.',
   'course.parTotal': 'Course par: {count}',
+  'course.attribution': 'Data source: {source}',
   'course.holes': 'Holes',
   'course.holesHint':
     'Set the par and difficulty of each hole. The stroke index is moved with the buttons so it stays a ranking without duplicates.',

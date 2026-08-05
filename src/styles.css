@@ -1974,3 +1974,13 @@ div.course-item {
 .course-item:disabled {
   opacity: 0.6;
 }
+
+/* Uvedení zdroje dat katalogu; ODbL ho vyžaduje tam, kde se data používají. */
+.catalog-credit {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.catalog-credit a {
+  color: var(--accent);
+}

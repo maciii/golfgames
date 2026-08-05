@@ -22,9 +22,10 @@ dat, lokální kopie při vývoji) umí `VITE_COURSES_URL`; v nasazení ji drž�
 repository variable stejného jména. Aplikace tedy **žádná hřiště sama nestaví
 ani neservíruje**.
 
-[`data/hriste.json`](../data/hriste.json) v tomhle repozitáři zůstává jako
-sada k ručnímu importu ze zálohy a jako výchozí bod, ze kterého katalog vznikl.
-**Zdrojem pravdy už není** — ten je `courses/` v katalogu.
+**Jediným zdrojem pravdy je `courses/` v katalogu.** Kopie sady, ze které
+katalog vznikl, se z tohohle repozitáře odstranila – druhé místo se stejnými
+daty se nemělo jak držet v souladu a kontrola nad ním by tvrdila výsledek
+o zastaralém stavu. Historie je v gitu, kdyby se někdy hodila.
 
 ## Tvar katalogu
 
@@ -90,8 +91,7 @@ výběru potřeba kopii obnovit.
 Hřiště se přidávají a opravují **ručně** úpravou souboru v `courses/`
 v repozitáři katalogu. Kontrola (`npm run validate`) odděluje chyby, které by
 rozbily výpočty, od podezření k ověření a běží v CI před buildem, takže se vadné
-hřiště nedostane ven. `npm run check:courses` v aplikaci dělá totéž nad
-`data/hriste.json`.
+hřiště nedostane ven.
 
 Historii normování drží git: každá změna CR nebo SR je commit s datem
 a zdůvodněním, takže `git log -p courses/<id>.json` je normovací historie

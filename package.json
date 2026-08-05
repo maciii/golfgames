@@ -16,7 +16,6 @@
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run test && npm run format:check",
     "icons": "node scripts/gen-icons.mjs",
-    "check:courses": "node scripts/check-courses.mjs data/hriste.json",
     "bump:minor": "node scripts/bump-version.mjs minor",
     "bump:major": "node scripts/bump-version.mjs major"
   },

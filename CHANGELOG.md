@@ -19,6 +19,25 @@ jen verze s věcnou změnou.
 
 ## [0.25.0] – 2026-08-05
 
+### Přidáno
+
+- **Uvedení zdroje dat.** Výběr hřiště má v patičce větu o tom, že hřiště
+  pocházejí z otevřeného katalogu Golf Games pod licencí ODbL, a odkaz na
+  projekt, kde jdou opravit. U hřiště se zobrazuje jeho `attribution`, pokud
+  ho má. ODbL vyžaduje uvést zdroj tam, kde se data používají – mít ho jen
+  v README katalogu nestačilo.
+
+### Odebráno
+
+- `data/hriste.json`, `scripts/check-courses.mjs`, `npm run check:courses`
+  a `docs/import-hrist.md`. Od osamostatnění katalogu to byla druhá kopie téže
+  sady, kterou nic nedrželo v souladu – kontrola tvrdila výsledek o zastaralých
+  datech. Zdrojem pravdy je katalog, ruční zadání hřiště zůstává pojistkou pro
+  místa bez signálu.
+- `contrib/` s balíkem pro OpenGolfAPI. Přispívat data zpět se nakonec
+  nerozhodlo; balík byl navíc z doby před osamostatněním katalogu, takže by se
+  stejně musel vygenerovat znovu.
+
 ### Opraveno
 
 - **Netto Best Aggregate.** Při zapnutém HCP se pro `BEST`, `Součet`,
