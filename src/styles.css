@@ -417,6 +417,20 @@ button {
   background: var(--tee-color);
 }
 
+.tee-option-label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tee-option-distance {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
 .tee-option-black {
   --tee-color: #111827;
   --tee-contrast: #f8fafc;

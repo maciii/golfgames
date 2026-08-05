@@ -7,6 +7,13 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.22.2] – 2026-08-05
+
+### Změněno
+
+- **Délka odpaliště ve výběru.** Pod názvem odpaliště se nově zobrazuje délka
+  v metrech malým textem, pokud ji katalog nebo vlastní hřiště obsahuje.
+
 ## [0.22.1] – 2026-08-05
 
 ### Opraveno

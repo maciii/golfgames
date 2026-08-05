@@ -16,7 +16,14 @@ import type { CreateRoundOptions, Currency, RoundCourse, RoundSettings } from '.
 import { DEFAULT_POINT_VALUE } from '../types'
 import { APP_VERSION } from '../version'
 import { useAccount } from '../sync/AccountContext'
-import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, localizedTeeName, useLocale } from '../i18n'
+import {
+  LOCALES,
+  LOCALE_FLAG,
+  LOCALE_LABEL,
+  localizedTeeName,
+  localeTag,
+  useLocale,
+} from '../i18n'
 import type { MessageKey } from '../i18n'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
@@ -616,7 +623,17 @@ export default function SetupScreen({
                       aria-pressed={selected}
                     >
                       <span className="tee-swatch" aria-hidden="true" />
-                      <span>{localizedTeeName(option.id, option.name)}</span>
+                      <span className="tee-option-label">
+                        <span>{localizedTeeName(option.id, option.name)}</span>
+                        {option.distance !== undefined && (
+                          <span className="tee-option-distance">
+                            {new Intl.NumberFormat(localeTag(), {
+                              maximumFractionDigits: 0,
+                            }).format(option.distance)}{' '}
+                            m
+                          </span>
+                        )}
+                      </span>
                     </button>
                   )
                 })}
