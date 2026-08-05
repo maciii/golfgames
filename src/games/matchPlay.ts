@@ -4,6 +4,7 @@ import type {
   GameDefinition,
   HeaderSummary,
   HoleSummary,
+  ScorecardPlayerCell,
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
@@ -160,6 +161,20 @@ function compactHeaderNote(state: MatchState, outOfPlay: boolean): string {
   return t('match.remainingShort', { count: state.remaining })
 }
 
+/** Vítězná strana jamky; dělené a po rozhodnutí neplatné jamky vrací null. */
+function matchHoleWinner(round: Round, hole: number): 0 | 1 | null {
+  const state = matchState(round)
+  if (state.decisionHole !== null && hole > state.decisionHole) return null
+
+  const [sideA, sideB] = matchSides(round)
+  if (!sideA || !sideB) return null
+
+  const scoreA = sideScore(round, sideA, hole)
+  const scoreB = sideScore(round, sideB, hole)
+  if (scoreA === null || scoreB === null || scoreA === scoreB) return null
+  return scoreA < scoreB ? 0 : 1
+}
+
 export const matchPlay: GameDefinition = {
   id: 'match-play',
   playerCounts: [2, 4],
@@ -229,6 +244,23 @@ export const matchPlay: GameDefinition = {
       note: compactHeaderNote(state, outOfPlay),
       tone,
     }
+  },
+
+  scorecardPlayerCell(
+    round: Round,
+    playerId: PlayerId,
+    hole: number,
+  ): ScorecardPlayerCell {
+    const winner = matchHoleWinner(round, hole)
+    if (winner === null) return {}
+
+    const side = matchSides(round)[winner]
+    if (!side || !side.playerIds.includes(playerId)) return {}
+
+    const player = round.players.find((entry) => entry.id === playerId)
+    return player
+      ? { skin: { ariaLabel: t('match.scorecardWonHole', { name: player.name }) } }
+      : {}
   },
 
   holeSummary(round: Round, hole: number): HoleSummary[] {

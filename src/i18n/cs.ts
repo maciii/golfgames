@@ -548,6 +548,7 @@ export const cs = {
   'match.down': '{count} DOWN',
   'match.detail': '{won} vyhraných jamek · {halved} dělených',
   'match.takesHole': 'Jamku bere',
+  'match.scorecardWonHole': '{name}: vyhraná jamka',
   'match.outOfPlayShort': 'Mimo hru',
   'match.remainingShort': {
     one: 'zbývá {count} jamka',

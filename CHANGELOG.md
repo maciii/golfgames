@@ -7,6 +7,14 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.25.0] – 2026-08-05
+
+### Opraveno
+
+- **Netto Best Aggregate.** Při zapnutém HCP se pro `BEST`, `Součet`,
+  `Double Best` i birdie/eagle body odečítají rány každého hráče podle jeho
+  hracího handicapu a stroke indexu jamky.
+
 ## [0.24.0] – 2026-08-05
 
 ### Změněno
@@ -14,6 +22,10 @@ jen verze s věcnou změnou.
 - **Kompaktní hlavička Match Play.** Stav se zobrazuje barevnými hodnotami
   `UP` a `DOWN`; třetí řádek ukazuje zbývající jamky, `dormie` nebo výsledek
   `3&1` místo dlouhé věty vedle čísla jamky.
+- **Vyhrané jamky Match Play ve scorekartě.** Vítězné buňky se označují
+  stejně jako vyhrané skiny; u four-ballu se zvýrazní oba hráči vítězné dvojice.
+- **Netto Best Aggregate.** Při zapnutém HCP se pro `BEST`, `Součet`, `Double
+Best` i bonusové výsledky odečítají rány podle HCP hráčů a stroke indexu.
 - **Barevné číslo jamky podle paru.** Par 3 je červený, par 4 zelený, par 5
   modrý a par 6 černý; u definovaného hřiště jsou parové volby zamčené.
 - **Hlavička zápisu je stručnější.** Pod číslem jamky se už nezobrazuje

@@ -2,11 +2,9 @@ import type { Round, Team } from '../types'
 import {
   bonusMultiplier,
   bonusesAt,
-  diffToPar,
   getBonus,
   holeMultiplier,
   isHoleStarted,
-  scoreAt,
   teamName,
   teamPlayers,
 } from '../types'
@@ -19,14 +17,14 @@ import type {
 } from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
+import { netDiffToPar, netScoreAt } from '../handicap'
+import type { AggregateResult } from './shared'
 import {
   CONCEDED,
   aggregateWins,
   formatAggregate,
   formatSideScore,
   lowerWins,
-  teamAggregate,
-  teamBestBall,
   teamStrokeTotal,
 } from './shared'
 
@@ -82,6 +80,37 @@ const EMPTY_POINTS: TeamHolePoints = {
   total: 0,
 }
 
+/** Lepší míč pro Best Aggregate, po odečtu ran podle HCP v netto kole. */
+function scoringBestBall(round: Round, team: Team, hole: number): number | null {
+  if (!isHoleStarted(round, hole)) return null
+
+  const entered = team.playerIds.flatMap((id) => {
+    const score = netScoreAt(round, id, hole)
+    return score === null ? [] : [score]
+  })
+
+  return entered.length > 0 ? Math.min(...entered) : CONCEDED
+}
+
+/** Součet dvojice pro Best Aggregate, po odečtu HCP ran každého hráče. */
+function scoringAggregate(
+  round: Round,
+  team: Team,
+  hole: number,
+): AggregateResult | null {
+  if (!isHoleStarted(round, hole)) return null
+
+  const entered = team.playerIds.flatMap((id) => {
+    const score = netScoreAt(round, id, hole)
+    return score === null ? [] : [score]
+  })
+
+  return {
+    played: entered.length,
+    strokes: entered.reduce((sum, score) => sum + score, 0),
+  }
+}
+
 /**
  * Extra body dvojice na jamce.
  *
@@ -94,7 +123,7 @@ function extraPoints(round: Round, team: Team, hole: number): number {
   let total = 0
 
   for (const player of teamPlayers(round, team)) {
-    const diff = diffToPar(round, player.id, hole)
+    const diff = netDiffToPar(round, player.id, hole)
     if (diff === null) continue
     const multiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
     if (multiplier === 0) continue
@@ -146,7 +175,7 @@ function longestNearestPoints(round: Round, hole: number): [number, number] {
       continue
     }
 
-    const diff = diffToPar(round, holder.id, hole)
+    const diff = netDiffToPar(round, holder.id, hole)
     // Dokud hráč jamku nezapsal, není co potvrzovat.
     if (diff === null) continue
     // Par a lepší bonus potvrdí, horší výsledek ho posílá soupeři.
@@ -167,7 +196,7 @@ function doubleBestWinner(round: Round, hole: number): 0 | 1 | null {
   if (!teamA || !teamB || !isHoleStarted(round, hole)) return null
 
   const scores = (team: Team) =>
-    team.playerIds.map((id) => scoreAt(round, id, hole) ?? CONCEDED)
+    team.playerIds.map((id) => netScoreAt(round, id, hole) ?? CONCEDED)
   const a = scores(teamA)
   const b = scores(teamB)
   if (a.length === 0 || b.length === 0) return null
@@ -181,7 +210,7 @@ function doubleBestWinner(round: Round, hole: number): 0 | 1 | null {
 function bonusPoints(round: Round, team: Team, hole: number): number {
   let bonus = 0
   for (const player of teamPlayers(round, team)) {
-    const diff = diffToPar(round, player.id, hole)
+    const diff = netDiffToPar(round, player.id, hole)
     if (diff === null) continue
     if (diff <= -2) bonus += POINTS.eagle
     else if (diff === -1) bonus += POINTS.birdie
@@ -198,12 +227,12 @@ export function holePoints(round: Round, hole: number): TeamHolePoints[] {
   if (!teamA || !teamB) return round.teams.map(() => ({ ...EMPTY_POINTS }))
 
   const bestWinner = lowerWins(
-    teamBestBall(round, teamA, hole),
-    teamBestBall(round, teamB, hole),
+    scoringBestBall(round, teamA, hole),
+    scoringBestBall(round, teamB, hole),
   )
   const aggWinner = aggregateWins(
-    teamAggregate(round, teamA, hole),
-    teamAggregate(round, teamB, hole),
+    scoringAggregate(round, teamA, hole),
+    scoringAggregate(round, teamB, hole),
   )
   const dbWinner =
     round.settings.options.doubleBest > 0 ? doubleBestWinner(round, hole) : null
@@ -258,7 +287,7 @@ export function totalPoints(round: Round): TeamHolePoints[] {
 function settledHoles(round: Round, team: Team): number {
   let count = 0
   for (let hole = 0; hole < round.holeCount; hole++) {
-    if (teamBestBall(round, team, hole) !== null) count += 1
+    if (scoringBestBall(round, team, hole) !== null) count += 1
   }
   return count
 }
@@ -359,11 +388,14 @@ export const bestAggregate: GameDefinition = {
     const bestWinner =
       teamA &&
       teamB &&
-      lowerWins(teamBestBall(round, teamA, hole), teamBestBall(round, teamB, hole))
+      lowerWins(scoringBestBall(round, teamA, hole), scoringBestBall(round, teamB, hole))
     const aggWinner =
       teamA &&
       teamB &&
-      aggregateWins(teamAggregate(round, teamA, hole), teamAggregate(round, teamB, hole))
+      aggregateWins(
+        scoringAggregate(round, teamA, hole),
+        scoringAggregate(round, teamB, hole),
+      )
     const totals = round.teams.map((_, i) => points[i]?.total ?? 0)
     const bestTotal = Math.max(...totals, 0)
     // Vítěze jamky zvýrazníme jen když opravdu vede, ne při shodě.
@@ -375,12 +407,12 @@ export const bestAggregate: GameDefinition = {
       entries: [
         {
           label: t('best.best'),
-          value: formatSideScore(teamBestBall(round, team, hole)),
+          value: formatSideScore(scoringBestBall(round, team, hole)),
           highlight: bestWinner === index,
         },
         {
           label: t('best.aggregate'),
-          value: formatAggregate(teamAggregate(round, team, hole)),
+          value: formatAggregate(scoringAggregate(round, team, hole)),
           highlight: aggWinner === index,
         },
         { label: t('best.holePoints'), value: `${points[index]?.total ?? 0}` },

@@ -115,6 +115,28 @@ describe('Match play - souboj jednotlivců', () => {
     ])
   })
 
+  it('označí vyhranou jamku ve scorekartě', () => {
+    expect(matchPlay.scorecardPlayerCell?.(round, 'p1', 0)?.skin).toBeDefined()
+    expect(matchPlay.scorecardPlayerCell?.(round, 'p2', 0)?.skin).toBeUndefined()
+    expect(matchPlay.scorecardPlayerCell?.(round, 'p1', 1)?.skin).toBeUndefined()
+  })
+
+  it('u four-ballu označí oba hráče vítězné dvojice', () => {
+    const fourBall = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[4], [6], [5], [5]],
+    })
+
+    expect(matchPlay.scorecardPlayerCell?.(fourBall, 'p1', 0)?.skin).toBeDefined()
+    expect(matchPlay.scorecardPlayerCell?.(fourBall, 'p2', 0)?.skin).toBeDefined()
+    expect(matchPlay.scorecardPlayerCell?.(fourBall, 'p3', 0)?.skin).toBeUndefined()
+  })
   it('ve třetím řádku ukáže dormie a počet zbývajících jamek', () => {
     const dormie = makeRound({
       gameId: 'match-play',

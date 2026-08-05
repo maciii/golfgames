@@ -295,6 +295,11 @@ Bodovaná hra dvou dvojic. Na každé jamce se dvojici připisují body:
 
 Vyhrává dvojice s nejvyšším součtem bodů.
 
+Při zapnutém netto se před výpočtem `BEST`, `Součtu`, `Double Best` i bonusů
+odečtou každému hráči rány podle jeho hracího HCP a stroke indexu jamky. To
+znamená, že pro `BEST` se porovnává nejlepší netto míč a pro `Součet` součet
+netto ran obou partnerů; hrubé rány se používají jen ve výchozím hrubém režimu.
+
 **Lepší míč** dvojice je nejnižší zapsaná rána některého z partnerů.
 **Součet** je součet ran obou partnerů.
 
@@ -399,6 +404,10 @@ jde o jednu nahoru; shodná jamka je dělená a stav nemění.
 
 Při čtyřech hráčích jde o **four-ball**: za dvojici hraje na každé jamce
 vždy její lepší míč.
+
+Scorekarta označuje vyhranou jamku stejným žlutým rámečkem jako Skins. U
+four-ballu se označí buňky obou hráčů vítězné dvojice; dělené a po rozhodnutí
+neplatné jamky se neoznačují.
 
 Stav se zobrazuje golfovým názvoslovím:
 

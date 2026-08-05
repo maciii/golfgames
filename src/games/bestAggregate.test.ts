@@ -163,6 +163,49 @@ describe('Best Aggregate - vzdané jamky', () => {
   })
 })
 
+describe('Best Aggregate - netto HCP', () => {
+  it('odečte HCP rány před porovnáním Best i Součtu', () => {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      // Hrubě vyhrává dvojice B: 4 je méně než 5 a 8 méně než 10.
+      scores: [[5], [5], [4], [4]],
+      settings: { options: BASE_OPTIONS },
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 3
+    round.players[1]!.playingHandicap = 3
+    round.players[2]!.playingHandicap = 0
+    round.players[3]!.playingHandicap = 0
+
+    const points = holePoints(round, 0)
+    // Po odečtu tří ran má A 2/2: Best 2, Součet 4 a dva eagle bonusy.
+    expect(points[0]).toMatchObject({ best: 1, aggregate: 1, bonus: 6, total: 8 })
+    expect(points[1]).toMatchObject({ best: 0, aggregate: 0 })
+    expect(bestAggregate.holeSummary?.(round, 0)[0]?.entries).toEqual([
+      { label: 'Best', value: '2', highlight: true },
+      { label: 'Součet', value: '4', highlight: true },
+      { label: 'Body', value: '8' },
+    ])
+  })
+
+  it('v hrubém kole ponechá Best i Součet beze změny', () => {
+    const round = sampleRound()
+    round.players[0]!.playingHandicap = 10
+    round.netScoring = false
+
+    const points = holePoints(round, 0)
+    expect(points[0]).toMatchObject({ best: 0, aggregate: 0 })
+    expect(points[1]).toMatchObject({ best: 1, aggregate: 1 })
+  })
+})
+
 describe('Best Aggregate - celkové pořadí', () => {
   it('sečte body přes celé kolo', () => {
     const [teamA, teamB] = totalPoints(sampleRound())

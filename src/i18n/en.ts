@@ -521,6 +521,7 @@ export const en: Record<MessageKey, Message> = {
   'match.down': '{count} DOWN',
   'match.detail': '{won} holes won · {halved} halved',
   'match.takesHole': 'Hole goes to',
+  'match.scorecardWonHole': '{name}: hole won',
   'match.outOfPlayShort': 'Out of play',
   'match.remainingShort': { one: '{count} hole left', other: '{count} holes left' },
   'match.dormieShort': {
