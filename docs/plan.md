@@ -3,6 +3,8 @@
 Rozpracovaný záměr a to, co z něj zbývá. Hotové věci popisují ostatní dokumenty
 (`architecture.md`, `katalog.md`, `games.md`); tenhle soubor je o směru.
 
+Stav při poslední revizi: verze **0.24.0**, 228 testů prochází.
+
 ## Kde to stojí
 
 | Fáze                                        | Stav                      |
@@ -20,12 +22,46 @@ míří přes repository variable `VITE_COURSES_URL`. Podrobnosti v
 
 ## Co zbývá udělat
 
-### 1. Odeslat příspěvek do OpenGolfAPI
+### 1. Atribuce ODbL v aplikaci
+
+**Nesplněná povinnost licence, ne kosmetika.** Katalog je pod ODbL, která
+vyžaduje uvést zdroj u míst, kde se data používají. Aplikace dnes atribuci
+neukazuje nikde: `Course.attribution` je v modelu i v datech, ale žádná
+obrazovka ho nevykresluje a v `src/i18n/` není jediný klíč o licenci.
+
+Stačí málo – zdroj u detailu hřiště nebo v patičce výběru hřiště plus věta
+o licenci katalogu. Dokud to tam není, porušujeme podmínku, na které stojí
+i celý plán přispívat data zpátky.
+
+### 2. Rozhodnout, co s `data/hriste.json`
+
+Od chvíle, kdy se katalog odstěhoval do
+[vlastního repozitáře](https://github.com/maciii/golfgames-courses), existuje
+**stejná sada hřišť na dvou místech**. Nic je nedrží v souladu: oprava stroke
+indexu v katalogu se do `data/hriste.json` nepromítne a `npm run check:courses`
+kontroluje tu zastaralou kopii.
+
+Dvě rozumné cesty:
+
+- **Smazat** `data/hriste.json`, `scripts/check-courses.mjs`, `npm run check:courses`
+  a [`import-hrist.md`](import-hrist.md). Zdrojem pravdy je katalog, ruční
+  zadání hřiště zůstává pojistkou pro místa bez signálu.
+- **Nechat jako zmrazený seed** a do `data/README.md` napsat, že se
+  neaktualizuje a slouží jen k prvotnímu naplnění nového katalogu.
+
+První varianta je čistší; druhá dává smysl, jen pokud se počítá se zakládáním
+dalších katalogů. Zatím to není rozhodnuté, a proto to tady stojí.
+
+### 3. Odeslat příspěvek do OpenGolfAPI
 
 305 hřišť je připravených v [`../contrib/`](../contrib/). Odsud to nešlo –
 `api.opengolfapi.org` i `courses.opengolfapi.org` jsou blokované proxy (403).
 
-Před odesláním **ověřit názvy polí** proti `_template.json` v jejich repozitáři
+**Před odesláním balík vygenerovat znovu z katalogu**, ne z `contrib/`. Ten
+vznikl z `data/hriste.json` ještě před osamostatněním katalogu, takže neobsahuje
+pozdější opravy.
+
+Dál **ověřit názvy polí** proti `_template.json` v jejich repozitáři
 `open-course-data`; náš tvar je zvolený jako snadno převeditelný, ne jako přesná
 shoda. Doporučená cesta je pull request, protože je ověřitelná a nechá stopu.
 
@@ -33,7 +69,7 @@ V `contrib/README.md` je poznámka o tom, že sada obsahuje všech 107 českých
 hřišť opsaných ze scorekaret – rozhodnutí o zveřejnění pod ODbL je vědomé
 a nevratné.
 
-### 2. Návrh hřiště podle polohy (fáze B2)
+### 4. Návrh hřiště podle polohy (fáze B2)
 
 Hotové části používají `lat` a `lon` z rejstříku a zahrnují:
 
@@ -46,7 +82,7 @@ Zbývá jen volitelné **předstažení scorekaret v okolí**, dokud je signál.
 nutné pro offline hraní: hřiště se ukládá při výběru a katalogová kopie se při
 dalším otevření pickeru sama aktualizuje.
 
-### 3. Doplnit chybějící data
+### 5. Doplnit chybějící data
 
 Kontrola hlásí sedm podezření, která stojí za doplnění až budou po ruce
 scorekarty. Opravují se **v repozitáři katalogu** (`npm run validate`), ne tady:
@@ -71,6 +107,12 @@ scorekarty. Opravují se **v repozitáři katalogu** (`npm run validate`), ne ta
 6. **Data se udržují ručně.** Import ze zdrojů by měl generovat návrhy změn
    k odsouhlasení, ne tichý přepis – ručně ověřený údaj nesmí automatika
    přebít.
+7. **Bez `VITE_COURSES_URL` se čte publikovaný katalog projektu**, ne prázdno.
+   Fork tak má hřiště bez jediného nastavení – stejné pravidlo jako u chybějící
+   konfigurace Firebase.
+8. **Úprava katalogového hřiště vytvoří soukromý klon.** Původní kopie zůstane,
+   takže ji další aktualizace katalogu může dál obnovovat, a vlastní zásah se
+   nikdy nepřepíše.
 
 ## Co se zjistilo o zdrojích dat
 
