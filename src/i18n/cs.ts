@@ -451,6 +451,7 @@ export const cs = {
   'skins.scorecardTotal': '{name}: {skins} skinů +{extra} extra bodů = {total} celkem',
   'skins.headerNote': 'Skiny + extra body',
   'skins.atStake': 'V sázce',
+  'skins.reservedBy': 'Rezervuje',
   'skins.takes': 'Bere',
 
   // Stableford

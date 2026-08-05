@@ -520,6 +520,10 @@ takže ho může získat vítěz další rozhodnuté jamky. Dokud následující
 zápis, zůstává výhra nepotvrzená. Poslední jamka se potvrzuje automaticky,
 protože už nemá další jamku, na které by šla ověřit.
 
+V průběžném zápisu se čekající stav zobrazí vedle banku jako **Rezervuje:
+hráč**. Po zapsání paru nebo lepšího výsledku se skin převede do jeho skóre;
+po bogey nebo horším se vrátí do banku.
+
 ---
 
 ## Stableford

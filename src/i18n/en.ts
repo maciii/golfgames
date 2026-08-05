@@ -431,6 +431,7 @@ export const en: Record<MessageKey, Message> = {
   'skins.scorecardTotal': '{name}: {skins} skins +{extra} extra points = {total} total',
   'skins.headerNote': 'Skins + extra points',
   'skins.atStake': 'At stake',
+  'skins.reservedBy': 'Reserved by',
   'skins.takes': 'Takes',
 
   // Stableford

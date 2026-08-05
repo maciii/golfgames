@@ -46,6 +46,8 @@ export interface SkinResult {
   hole: number
   /** Vítěz jamky, nebo null při shodě či nedohrané jamce. */
   winnerId: PlayerId | null
+  /** Hráč, jehož výhra čeká na potvrzení parem další jamky. */
+  reservedId?: PlayerId
   /** Kolik skinů se na jamce rozdělilo (včetně přenesených). */
   skins: number
   /** Kolik skinů se po jamce přenáší dál. */
@@ -170,10 +172,14 @@ export function skinResults(round: Round): SkinResult[] {
           previous.winnerId = pending.winnerId
           previous.skins = pending.skins
           previous.carry = 0
+          delete previous.reservedId
         }
       } else {
         carry += pending.skins
-        if (previous) previous.carry = carry
+        if (previous) {
+          previous.carry = carry
+          delete previous.reservedId
+        }
       }
       pending = null
     }
@@ -208,7 +214,13 @@ export function skinResults(round: Round): SkinResult[] {
       carry = 0
       if (round.settings.options.confirmSkinsByPar && hole < round.holeCount - 1) {
         pending = { hole, winnerId: leaders[0].id, skins }
-        results.push({ hole, winnerId: null, skins: 0, carry: skins })
+        results.push({
+          hole,
+          winnerId: null,
+          reservedId: leaders[0].id,
+          skins: 0,
+          carry: skins,
+        })
       } else {
         results.push({ hole, winnerId: leaders[0].id, skins, carry })
       }
@@ -360,7 +372,13 @@ export const skins: GameDefinition = {
 
   holeSummary(round: Round, hole: number): HoleSummary[] {
     const carry = carryInto(round, hole)
-    const result = skinResults(round)[hole]
+    const results = skinResults(round)
+    const result = results[hole]
+    const previous = hole > 0 ? results[hole - 1] : undefined
+    const reservedId =
+      result?.reservedId ??
+      (previous?.winnerId === null ? previous.reservedId : undefined)
+    const reservedName = reservedId ? playerName(round, reservedId) : undefined
     const value =
       result?.winnerId != null
         ? `${playerName(round, result.winnerId)} (${result.skins})`
@@ -371,6 +389,9 @@ export const skins: GameDefinition = {
         id: '_game',
         entries: [
           { label: t('skins.atStake'), value: `${carry + holeMultiplier(round, hole)}` },
+          ...(reservedName
+            ? [{ label: t('skins.reservedBy'), value: reservedName }]
+            : []),
           { label: t('skins.takes'), value },
         ],
       },

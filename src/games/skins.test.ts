@@ -107,6 +107,27 @@ describe('Skins - rozdělení jamek', () => {
     ])
   })
 
+  it('ukáže hráče, který má skin dočasně rezervovaný', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [3, null],
+        [4, null],
+      ],
+      settings: {
+        options: { ...DEFAULT_GAME_OPTIONS, confirmSkinsByPar: true },
+      },
+    })
+
+    expect(skins.holeSummary?.(round, 1)[0]?.entries).toEqual([
+      { label: 'V sázce', value: '2' },
+      { label: 'Rezervuje', value: 'Adam' },
+      { label: 'Bere', value: '–' },
+    ])
+  })
+
   it('nepotvrzený skin vrátí do banku a další vítěz ho získá', () => {
     const round = makeRound({
       gameId: 'skins',

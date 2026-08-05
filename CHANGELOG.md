@@ -7,6 +7,13 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.29.6] – 2026-08-05
+
+### Změněno
+
+- **Viditelná rezervace skinu.** Při zapnutém potvrzení parem se u banku
+  zobrazuje hráč, jehož výhra čeká na potvrzení na další jamce.
+
 ## [0.29.5] – 2026-08-05
 
 ### Změněno
