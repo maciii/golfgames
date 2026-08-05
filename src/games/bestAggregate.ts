@@ -31,7 +31,7 @@ import {
 } from './shared'
 
 /**
- * Best Aggregate - bodovaná hra dvou dvojic (vždy 4 hráči).
+ * Best + Součet - bodovaná hra dvou dvojic (vždy 4 hráči).
  *
  * Na každé jamce se dvojici připisují body:
  *

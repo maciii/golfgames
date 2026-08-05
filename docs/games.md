@@ -25,7 +25,7 @@ Společné pro všechny hry:
 - [Nastavení bodování hry](#nastavení-bodování-hry)
 - [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
 - [Značky výsledku na jamce](#značky-výsledku-na-jamce)
-- [Best Aggregate](#best-aggregate) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
+- [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
 - [Přidání další hry](#přidání-další-hry)
 
 ## Vzdaná jamka vs. nehraná jamka
@@ -40,7 +40,7 @@ jestli na jamce zapsal **aspoň jeden** hráč:
 
 Vzdaná jamka se tedy počítá, a to v neprospěch toho, kdo ji nedohrál:
 
-- **Best Aggregate** – do součtu dvojice se počítají rány těch, kdo dohráli,
+- **Best + Součet** – do součtu dvojice se počítají rány těch, kdo dohráli,
   ale přednost má dvojice s **víc dohranými míči**; při stejném počtu rozhoduje
   nižší součet. Škrtnutím špatného míče si tak dvojice nepomůže. **Lepší míč**
   jí zůstává, dokud ho drží aspoň jeden z partnerů; když vzdali oba, ztrácí
@@ -96,9 +96,9 @@ mění, kdo jamku vyhrál, ne to, jak se zahrála.**
 | ------------------------------------------------ | ---------- |
 | Vítěz jamky ve Skins                             | netto      |
 | Vítěz jamky v Match play (i lepší míč four-ball) | netto      |
-| `BEST` a `Součet` v Best Aggregate               | netto      |
+| `BEST` a `Součet` v Best + Součet                | netto      |
 | `Double Best`                                    | netto      |
-| Body za birdie a eagle v Best Aggregate          | netto      |
+| Body za birdie a eagle v Best + Součet           | netto      |
 | Stablefordovy body                               | netto      |
 | **Násobič extra bodů podle výsledku**            | **hrubý**  |
 | **Potvrzení Longestu**                           | osobní par |
@@ -169,7 +169,7 @@ extra bod vůbec nepřizná:
 
 Násobiče kromě paru jsou konfigurovatelné v nastavení bodování hry.
 
-Příklad: bunker za 1 bod zahraný na birdie dá v Best Aggregate dvojici
+Příklad: bunker za 1 bod zahraný na birdie dá v Best + Součet dvojici
 2 body, ve Skins hráči 2 body; stejný bunker zahraný na bogey nedá nic.
 
 **Rozhoduje hrubý výsledek, i když se hraje netto.** Rozdané rány mění to, kdo
@@ -232,7 +232,7 @@ zbytek jamky násobí.
 ## Nastavení bodování hry
 
 Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
-**zvlášť pro každou hru** – Best Aggregate a Skins si je nepřepisují navzájem.
+**zvlášť pro každou hru** – Best + Součet a Skins si je nepřepisují navzájem.
 
 | Volba                          | Výchozí     | Popis                                               |
 | ------------------------------ | ----------- | --------------------------------------------------- |
@@ -245,10 +245,10 @@ Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
 | Potvrzovat Nearest             | zapnuto     | při horším než par bod propadá soupeřům             |
 | Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest hrubě       |
 | Potvrzení parem                | vypnuto     | jen Skins; vítěz potvrdí výhru parem na další jamce |
-| Double Best                    | 1 b.        | jen Best Aggregate; bod za oba lepší míče           |
+| Double Best                    | 1 b.        | jen Best + Součet; bod za oba lepší míče            |
 
 Nabídka voleb je **pro každou hru zvlášť**. U každé hry se otevírá ozubeným
-tlačítkem přímo u její karty. Best Aggregate má týmové bonusy a Double Best,
+tlačítkem přímo u její karty. Best + Součet má týmové bonusy a Double Best,
 Skins má hráčské bonusy a vlastní extra skóre, Match play další extra volby
 nemá. Nastavení jedné hry proto nezobrazuje ani nemění volby jiné hry.
 
@@ -269,7 +269,7 @@ dalšího kola, ale **každé kolo si nese vlastní kopii**.
 Volba **9. a 18. jamka za dvojnásobek** je v nastavení bodování hry (ve
 výchozím stavu zapnutá); u devítijamkového kola se týká poslední jamky, ať se
 hraje devítka první (jamka 9), nebo druhá (jamka 18).
-Násobí **celý zisk z jamky**, tedy u Best Aggregate včetně bonusů za birdie
+Násobí **celý zisk z jamky**, tedy u Best + Součet včetně bonusů za birdie
 a eagle, u Skins hodnotu skinu i extra body v sázce. Match play volbu nenabízí – počítá se
 na jamky a dvojnásobná jamka by rozbila stav zápasu i notaci `3&2`.
 
@@ -279,7 +279,7 @@ Výpočet je v [`src/money.ts`](../src/money.ts) a pokrytý testy. Vstupem je
 první výsledková tabulka hry, takže funguje stejně pro body, skiny i vyhrané
 jamky. Liší se podle toho, jestli se hraje ve dvojicích.
 
-#### Dvojice (Best Aggregate, four-ball match play)
+#### Dvojice (Best + Součet, four-ball match play)
 
 Spočítá se rozdíl bodů obou dvojic a přepočte se na peníze. Takhle
 spočítanou částku pak platí **každý hráč prohrávající dvojice zvlášť** svému
@@ -358,7 +358,7 @@ Barvy jsou v `src/styles.css` jako proměnné `--score-*`, klasifikace
 v `scoreCategory()` v [`src/types.ts`](../src/types.ts).
 
 Hra může do scorekarty přidat vlastní sloupce (`scorecardColumns`) nebo
-dekoraci hráčova výsledku (`scorecardPlayerCell`). Best Aggregate takhle
+dekoraci hráčova výsledku (`scorecardPlayerCell`). Best + Součet takhle
 ukazuje body dvojice na každé jamce; Skins označuje vítěze skinu podbarvením
 a rámečkem celé buňky a extra body zapisuje jako `+N` za výsledkem. Ve
 spodním řádku pod součtem ran scorekarta Skins zobrazuje `B` v češtině a `P`
@@ -370,7 +370,7 @@ dvojice aktuální jamky.
 
 ---
 
-## Best Aggregate
+## Best + Součet
 
 **Hráči:** vždy 4, rozdělení do dvou dvojic
 **Soubor:** [`src/games/bestAggregate.ts`](../src/games/bestAggregate.ts)
@@ -435,7 +435,7 @@ v jednom souboru:
 **Soubor:** [`src/games/leftRight.ts`](../src/games/leftRight.ts)
 
 Levá-Pravá, které se také říká **Kraje-Středy**, používá stejné bodování jako
-Best Aggregate, ale dvojice nejsou pevné pro celé kolo. Před každou jamkou se
+Best + Součet, ale dvojice nejsou pevné pro celé kolo. Před každou jamkou se
 vybere jedna ze tří možných dvojic podle toho, kam hráči zahráli první ránu z
 odpaliště: vlevo nebo vpravo. Na každé straně jsou právě dva hráči; teprve
 potom aplikace povolí zápis skóre.
@@ -460,9 +460,9 @@ první dvojice jsou buňky se skóre na každé jamce označené barevným ráme
 rámeček se proto přesouvá podle zvoleného složení dvojic.
 
 V kole s HCP se `BEST`, `Součet`, `Double Best` i birdie/eagle vyhodnocují
-stejně jako u Best Aggregate z netto ran. Násobič běžných extra bodů se bere z
+stejně jako u Best + Součet z netto ran. Násobič běžných extra bodů se bere z
 hrubého výsledku; Longest a Nearest se potvrzují podle stejného pravidla jako
-u Best Aggregate.
+u Best + Součet.
 
 ### Rozhodnutí tam, kde pravidla mlčí
 

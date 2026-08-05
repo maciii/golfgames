@@ -12,7 +12,7 @@ podle prvních ran, potom zapsat skóre a připsat body jednotlivě.
 
 - [x] Přidat per-jamkové přiřazení stran do serializovatelného kola
 - [x] Přidat obecný hook setupu jamky a zablokovat skóre do jeho dokončení
-- [x] Implementovat bodování Levá-Pravá znovupoužitím pravidel Best Aggregate
+- [x] Implementovat bodování Levá-Pravá znovupoužitím pravidel Best + Součet
 - [x] Přidat testy dynamických dvojic a individuálních součtů
 - [x] Doplnit překlady, dokumentaci a changelog
 - [x] Spustit kompletní kontrolu a produkční build

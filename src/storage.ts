@@ -211,7 +211,7 @@ export function saveSettings(settings: RoundSettings): void {
 }
 
 /**
- * Volby bodování se pamatují zvlášť pro každou hru - Best Aggregate a Skins
+ * Volby bodování se pamatují zvlášť pro každou hru - Best + Součet a Skins
  * mají jiné extra body a nemá smysl je přepisovat jedno druhým.
  */
 export function loadGameOptions(gameId: string): GameOptions {

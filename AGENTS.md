@@ -7,7 +7,7 @@ poprvé. Čti ho celý, než začneš měnit kód.
 ## Co to je
 
 PWA pro zápis golfového skóre po jamkách pro 1–4 hráče podle zvolené hry a vyhodnocení různých
-golfových her (Best Aggregate, Skins, Match play) včetně peněžního vyrovnání
+golfových her (Best + Součet, Skins, Match play) včetně peněžního vyrovnání
 sázky. React 19 + TypeScript 7 + Vite 8, hostovaná zdarma na GitHub Pages.
 Vlastní backend nemá – data drží `localStorage` a jedinou serverovou částí je
 **nepovinná** záloha do Firestore po přihlášení účtem Google. Uživatelské

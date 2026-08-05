@@ -7,7 +7,7 @@ import { localeTag, t } from './i18n'
  *
  * Rozlišují se dva způsoby podle toho, jestli se hraje ve dvojicích:
  *
- * **Dvojice** (Best Aggregate, four-ball match play) - spočítá se rozdíl bodů
+ * **Dvojice** (Best + Součet, four-ball match play) - spočítá se rozdíl bodů
  * obou dvojic a ten se přepočte na peníze. Takhle spočítanou částku pak platí
  * *každý* hráč prohrávající dvojice svému protějšku ve vítězné dvojici. Při
  * rozdílu 7 bodů a desetikoruně za bod tedy platí první hráč 70 Kč prvnímu

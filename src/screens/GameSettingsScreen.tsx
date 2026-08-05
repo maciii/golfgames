@@ -73,7 +73,7 @@ function NumberControl({
 /**
  * Nastavení bodování konkrétní hry: hodnoty extra bodů a volby navíc.
  *
- * Každá hra má vlastní uložené nastavení, takže Best Aggregate a Skins si
+ * Každá hra má vlastní uložené nastavení, takže Best + Součet a Skins si
  * nepřepisují hodnoty navzájem.
  */
 export default function GameSettingsScreen({ gameId, onBack }: Props) {

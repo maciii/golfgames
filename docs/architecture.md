@@ -14,7 +14,7 @@ Doplňující čtení:
 ## Co to je
 
 PWA pro zápis golfového skóre po jamkách pro 2–4 hráče a vyhodnocení různých
-typů golfových her (Best Aggregate, Levá-Pravá, Skins, Match play) včetně peněžního
+typů golfových her (Best + Součet, Levá-Pravá, Skins, Match play) včetně peněžního
 vyrovnání sázky.
 
 Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:
@@ -214,7 +214,7 @@ složení dvojic.
 
 ## Extra body (bonusy)
 
-Model je v `types.ts`, vyhodnocení v konkrétní hře. Best Aggregate používá
+Model je v `types.ts`, vyhodnocení v konkrétní hře. Best + Součet používá
 týmové bonusy, Skins hráčské bonusy a Match play extra body nepoužívá.
 
 - `BONUSES` je seznam definic (`BonusDefinition`): `double`, `longest`,
@@ -455,7 +455,7 @@ dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měř
 
 | Chci změnit…                     | Soubor                                  |
 | -------------------------------- | --------------------------------------- |
-| bodování Best Aggregate          | `src/games/bestAggregate.ts`            |
+| bodování Best + Součet           | `src/games/bestAggregate.ts`            |
 | chování vzdané jamky             | `src/games/shared.ts` + konkrétní hra   |
 | seznam extra bodů, jejich značky | `src/types.ts` (`BONUSES`)              |
 | výchozí hodnoty a násobiče       | `src/types.ts` (`DEFAULT_GAME_OPTIONS`) |

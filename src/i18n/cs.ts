@@ -378,7 +378,7 @@ export const cs = {
   'tier.condor.note': 'čtyři a víc ran pod par',
 
   // --- hry ----------------------------------------------------------------
-  'games.best-aggregate.name': 'Best Aggregate',
+  'games.best-aggregate.name': 'Best + Součet',
   'games.best-aggregate.tagline': 'Dvě dvojice, body za lepší míč, součet a birdie',
   'games.best-aggregate.rules':
     'Hrají vždy čtyři hráči ve dvou dvojicích. Na každé jamce získá dvojice 1 bod za nižší lepší míč, 1 bod za nižší součet obou partnerů, 1 bod za každé birdie a 3 body za každý eagle. Vyhrává dvojice s nejvyšším počtem bodů.',
@@ -386,7 +386,7 @@ export const cs = {
   'games.left-right.tagline':
     '(Kraje-Středy) · dvojice podle prvních ran, nová dvojice na každé jamce',
   'games.left-right.rules':
-    'Hrají vždy čtyři hráči. Před každou jamkou se podle prvních ran určí dvě dvojice. Bodování je stejné jako u Best Aggregate, ale body se zapisují každému hráči zvlášť podle dvojice, ve které na dané jamce hraje.',
+    'Hrají vždy čtyři hráči. Před každou jamkou se podle prvních ran určí dvě dvojice. Bodování je stejné jako u Best + Součet, ale body se zapisují každému hráči zvlášť podle dvojice, ve které na dané jamce hraje.',
   'games.skins.name': 'Skins',
   'games.skins.tagline': 'Každá jamka je skin, shoda ho přenáší dál',
   'games.skins.rules':
@@ -400,7 +400,7 @@ export const cs = {
   'games.stableford.rules':
     'Hraje se za jednotlivce, 1 až 4 hráči. Za jamku se počítají body podle výsledku vůči paru: par 2 body, birdie 3, eagle 4, bogey 1, dvojbogey a horší nic. Se zapnutým netto se výsledek počítá po odečtení ran, které hráč na jamce dostává podle jejího stroke indexu. Vyhrává hráč s nejvíc body.',
 
-  // Best Aggregate
+  // Best + Součet
   'best.points': 'Body',
   'best.headerNote': 'Průběžné skóre',
   'best.pointsDescription':

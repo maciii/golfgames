@@ -11,12 +11,12 @@ zůstávají v telefonu, dokud se sám nepřihlásíš kvůli záloze do cloudu.
 
 ## Hry
 
-| Hra                | Hráči              | Princip                                         |
-| ------------------ | ------------------ | ----------------------------------------------- |
-| **Best Aggregate** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
-| **Skins**          | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
-| **Match play**     | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
-| **Stableford**     | 1–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
+| Hra               | Hráči              | Princip                                         |
+| ----------------- | ------------------ | ----------------------------------------------- |
+| **Best + Součet** | 4 (dvě dvojice)    | Body za lepší míč, nižší součet, birdie a eagle |
+| **Skins**         | 2–4 jednotlivci    | Skiny a extra body pro každého hráče            |
+| **Match play**    | 2 nebo 4 (dvojice) | Zápas na jamky, ne na rány                      |
+| **Stableford**    | 1–4 jednotlivci    | Body za jamku, hrubě i netto s handicapem       |
 
 Přesné vyhodnocení včetně okrajových situací popisuje
 [`docs/games.md`](docs/games.md).

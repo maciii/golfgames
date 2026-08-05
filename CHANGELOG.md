@@ -7,6 +7,14 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.29.7] – 2026-08-05
+
+### Změněno
+
+- **Přejmenování hry v češtině.** Best Aggregate se v českém rozhraní a
+  dokumentaci nyní zobrazuje jako **Best + Součet**. Anglický název zůstává
+  Best Aggregate.
+
 ## [0.29.6] – 2026-08-05
 
 ### Změněno
@@ -53,7 +61,7 @@ jen verze s věcnou změnou.
   s hotovými kombinacemi hráčů; celé složení dvojice se vybere jedním klepnutím.
 - **Název varianty.** Levá-Pravá se v nabídce i dokumentaci označuje také jako
   Kraje-Středy.
-- **Opravený komentář bodování.** Popis Best Aggregate už neslibuje osobní par
+- **Opravený komentář bodování.** Popis Best + Součet už neslibuje osobní par
   pro Nearest, který se potvrzuje hrubě.
 
 ## [0.29.0] – 2026-08-05
@@ -69,7 +77,7 @@ jen verze s věcnou změnou.
 
 ### Přidáno
 
-- **Levá-Pravá.** Nová hra pro čtyři hráče používá pravidla Best Aggregate,
+- **Levá-Pravá.** Nová hra pro čtyři hráče používá pravidla Best + Součet,
   ale dvojice se určují z prvních ran na každé jamce zvlášť. Body se připisují
   oběma členům aktuální dvojice a ve výsledcích se vedou jednotlivě.
 - **Setup jamky před zápisem.** Herní pravidla mohou dodat obecný výběr, který
@@ -151,7 +159,7 @@ spočítají podle opravených pravidel.
 
 ### Opraveno
 
-- **Netto Best Aggregate.** Při zapnutém HCP se pro `BEST`, `Součet`,
+- **Netto Best + Součet.** Při zapnutém HCP se pro `BEST`, `Součet`,
   `Double Best` i birdie/eagle body odečítají rány každého hráče podle jeho
   hracího handicapu a stroke indexu jamky.
 
@@ -164,7 +172,7 @@ spočítají podle opravených pravidel.
   `3&1` místo dlouhé věty vedle čísla jamky.
 - **Vyhrané jamky Match Play ve scorekartě.** Vítězné buňky se označují
   stejně jako vyhrané skiny; u four-ballu se zvýrazní oba hráči vítězné dvojice.
-- **Netto Best Aggregate.** Při zapnutém HCP se pro `BEST`, `Součet`, `Double
+- **Netto Best + Součet.** Při zapnutém HCP se pro `BEST`, `Součet`, `Double
 Best` i bonusové výsledky odečítají rány podle HCP hráčů a stroke indexu.
 - **Barevné číslo jamky podle paru.** Par 3 je červený, par 4 zelený, par 5
   modrý a par 6 černý; u definovaného hřiště jsou parové volby zamčené.
@@ -680,7 +688,7 @@ v repozitáři zůstává jako sada k ručnímu importu ze zálohy.
 ### Změněno
 
 - **Chybějící zápis na rozehrané jamce se počítá jako vzdaná jamka.** Dřív se
-  taková jamka přeskakovala. Nově dvojice v Best Aggregate přichází o součet
+  taková jamka přeskakovala. Nově dvojice v Best + Součet přichází o součet
   (bere ho soupeř), ve Skins se vzdaný hráč o skin ucházet nemůže a v Match
   play jamku prohrává. Lepší míč dvojici zůstává, dokud ho drží aspoň jeden
   z partnerů.
@@ -763,11 +771,11 @@ v repozitáři zůstává jako sada k ručnímu importu ze zálohy.
 
 ### Změněno
 
-- **Best Aggregate se počítá bodově, ne na rány.** Dvojice získává 1 bod za
+- **Best + Součet se počítá bodově, ne na rány.** Dvojice získává 1 bod za
   lepší míč, 1 bod za nižší součet, 1 bod za birdie a 3 body za eagle;
   vyhrává nejvyšší počet bodů. Původní vyhodnocení podle součtu ran bylo
   chybné.
-- Best Aggregate je nově vždy pro 4 hráče (dřív šlo hrát i ve dvou).
+- Best + Součet je nově vždy pro 4 hráče (dřív šlo hrát i ve dvou).
 - Eagle se ve scorecardu odlišuje vlastní barvou.
 
 ### Vývojářské

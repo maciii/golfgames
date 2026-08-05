@@ -185,7 +185,7 @@ describe('Levá-Pravá - body', () => {
     expect(totalPlayerPoints(round, 'p4')).toBe(3)
   })
 
-  it('použije pro dynamické dvojice stejné netto výpočty jako Best Aggregate', () => {
+  it('použije pro dynamické dvojice stejné netto výpočty jako Best + Součet', () => {
     const round = pairedRound([[5], [5], [4], [4]])
     round.netScoring = true
     round.course = { name: 'Testovací hřiště', strokeIndex: [1] }

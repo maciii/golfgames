@@ -51,7 +51,7 @@ function sampleRound() {
   })
 }
 
-describe('Best Aggregate - body za jamku', () => {
+describe('Best + Součet - body za jamku', () => {
   it('dá bod za lepší míč, za nižší součet a bonus za birdie', () => {
     const [teamA, teamB] = holePoints(sampleRound(), 0)
 
@@ -113,7 +113,7 @@ describe('Best Aggregate - body za jamku', () => {
   })
 })
 
-describe('Best Aggregate - vzdané jamky', () => {
+describe('Best + Součet - vzdané jamky', () => {
   /** Rozehraná jamka bez zápisu = hráč ji vzdal, ne že se na ni nedošlo. */
   function concessionRound(scores: (number | null)[][]) {
     return makeRound({
@@ -163,7 +163,7 @@ describe('Best Aggregate - vzdané jamky', () => {
   })
 })
 
-describe('Best Aggregate - netto HCP', () => {
+describe('Best + Součet - netto HCP', () => {
   it('odečte HCP rány před porovnáním Best i Součtu', () => {
     const round = makeRound({
       gameId: 'best-aggregate',
@@ -259,7 +259,7 @@ describe('Best Aggregate - netto HCP', () => {
   })
 })
 
-describe('Best Aggregate - celkové pořadí', () => {
+describe('Best + Součet - celkové pořadí', () => {
   it('sečte body přes celé kolo', () => {
     const [teamA, teamB] = totalPoints(sampleRound())
 
@@ -294,7 +294,7 @@ describe('Best Aggregate - celkové pořadí', () => {
   })
 })
 
-describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
+describe('Best + Součet - dvojnásobná devátá a osmnáctá', () => {
   /** Devítijamkové kolo, kde se hraje jen poslední jamka: A 3/4, B 5/5. */
   function closingHoleRound(doubleClosingHoles: boolean) {
     const empty = [null, null, null, null, null, null, null, null]
@@ -349,7 +349,7 @@ describe('Best Aggregate - dvojnásobná devátá a osmnáctá', () => {
   })
 })
 
-describe('Best Aggregate - sloupce ve scorekartě', () => {
+describe('Best + Součet - sloupce ve scorekartě', () => {
   it('přidá sloupec bodů za každou dvojici, hned za jejího druhého hráče', () => {
     const round = sampleRound()
     const columns = bestAggregate.scorecardColumns?.(round) ?? []
@@ -400,7 +400,7 @@ describe('Best Aggregate - sloupce ve scorekartě', () => {
   })
 })
 
-describe('Best Aggregate - Double Best', () => {
+describe('Best + Součet - Double Best', () => {
   /** A zahrála 3/4, B 5/6 - oba míče A jsou lepší než oba míče B. */
   function round(doubleBest: number) {
     return makeRound({
@@ -465,7 +465,7 @@ describe('Best Aggregate - Double Best', () => {
   })
 })
 
-describe('Best Aggregate - extra body', () => {
+describe('Best + Součet - extra body', () => {
   /** Kolo, kde si Adam na jamce zapíše zadané extra body. */
   function withBonuses(
     adamBonuses: BonusId[],
@@ -544,7 +544,7 @@ describe('Best Aggregate - extra body', () => {
   })
 })
 
-describe('Best Aggregate - double a násobiče', () => {
+describe('Best + Součet - double a násobiče', () => {
   function withDouble(options = BASE_OPTIONS, doubleClosingHoles = false) {
     const holes = doubleClosingHoles ? 9 : 1
     const pad = Array<number | null>(holes - 1).fill(null)
@@ -602,7 +602,7 @@ describe('Best Aggregate - double a násobiče', () => {
   })
 })
 
-describe('Best Aggregate - nastavení se drží u kola', () => {
+describe('Best + Součet - nastavení se drží u kola', () => {
   /** Kolo s vlastní konfigurací a zapsaným extra bodem. */
   function configuredRound() {
     const options = {
@@ -657,7 +657,7 @@ describe('Best Aggregate - nastavení se drží u kola', () => {
   })
 })
 
-describe('Best Aggregate - Longest a Nearest', () => {
+describe('Best + Součet - Longest a Nearest', () => {
   /**
    * Pětiparová jamka: Longest má Adam (dvojice A). Soupeři hrají 6,
    * takže o bod za Best a součet nejde.
@@ -794,7 +794,7 @@ describe('Best Aggregate - Longest a Nearest', () => {
   })
 })
 
-describe('Best Aggregate - násobení doublů', () => {
+describe('Best + Součet - násobení doublů', () => {
   /** Jamka, kde double zapíše `calls` hráčů; dvojice A bere Best i součet. */
   function doubles(calls: number, doubleClosingHoles = false) {
     const holes = doubleClosingHoles ? 9 : 1
@@ -845,7 +845,7 @@ describe('Best Aggregate - násobení doublů', () => {
   })
 })
 
-describe('Best Aggregate - násobiče za výsledek', () => {
+describe('Best + Součet - násobiče za výsledek', () => {
   /** Adam má bunker za 1 bod a zahraje zadané skóre na par 5. */
   function withResult(score: number, resultMultipliers = DEFAULT_RESULT_MULTIPLIERS) {
     const round = makeRound({

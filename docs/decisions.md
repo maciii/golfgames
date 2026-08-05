@@ -133,7 +133,7 @@ a znamenala by změnu `Round` (a tím pádem `npm run bump:major`).
 
 ---
 
-## 4. Best Aggregate se počítá bodově, ne na rány
+## 4. Best + Součet se počítá bodově, ne na rány
 
 **Kontext.** První verze sčítala rány dvojic. To bylo špatně.
 
@@ -156,7 +156,7 @@ nedohrál.
 hráč (`isHoleStarted()`). Nikdo nezapsal → jamka se nehrála a nepočítá se.
 Někdo zapsal → jamka běží a komu chybí zápis, ten ji vzdal.
 
-**Důsledky podle her.** Best Aggregate: dvojice přichází o součet (bere ho
+**Důsledky podle her.** Best + Součet: dvojice přichází o součet (bere ho
 soupeř), lepší míč jí zůstává, dokud ho drží aspoň jeden partner. Skins: vzdaný
 hráč se o skin ucházet nemůže. Match play: vzdanou jamku prohrává.
 
@@ -262,7 +262,7 @@ nechává extra body v základní hodnotě, i když se zbytek jamky násobí.
 závěrečné jamky se ukládají **per hra** (`golfgames.gameOptions.v1`). Měna
 a hodnota bodu se ukládají jako naposledy použité nastavení kola.
 
-**Proč.** Best Aggregate a Skins mají jiné extra body a nemá smysl si je
+**Proč.** Best + Součet a Skins mají jiné extra body a nemá smysl si je
 přepisovat navzájem. Sázka se naopak mění spíš podle party než podle hry.
 
 **Klíčový důsledek.** Kolo si při založení dělá **hlubokou kopii** nastavení.
@@ -460,7 +460,7 @@ neměly by nenápadně měnit už zavedené bodování.
 
 Věci, o kterých padlo rozhodnutí je odložit:
 
-- **Extra body v dalších hrách.** Best Aggregate a Skins je vyhodnocují,
+- **Extra body v dalších hrách.** Best + Součet a Skins je vyhodnocují,
   Match play je záměrně nepoužívá. Nová hra musí rozsah deklarovat přes
   `GameDefinition.scoringOptions`.
 - **Sdílená kola mezi hráči.** Synchronizace dnes zálohuje data jednoho účtu.

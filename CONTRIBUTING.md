@@ -69,7 +69,7 @@ src/
   games/              pravidla jednotlivých her
     types.ts          rozhraní GameDefinition + řazení pořadí
     shared.ts         výpočty sdílené víc hrami (lepší míč, součet dvojice)
-    bestAggregate.ts  Best Aggregate
+    bestAggregate.ts  Best + Součet
     skins.ts          Skins
     matchPlay.ts      Match play
     fixtures.ts       pomocník pro testy
