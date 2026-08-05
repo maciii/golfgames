@@ -22,21 +22,6 @@ jen verze s věcnou změnou.
   normy odpaliště; ručně zadaný počet ran zůstává, jak ho hráč napsal.
 - **Dvojnásobná závěrečná jamka** padne u první devítky na jamku 9 a u druhé
   na jamku 18, tedy vždy na poslední hranou.
-
-## [0.25.1] – 2026-08-05
-
-### Opraveno
-
-- **HCP se ukládá pro všechny hry.** HCP indexy zadané při založení kola se
-  ukládají do seznamu hráčů a znovu se předvyplní i u Match Play, Skins a Best
-  Aggregate.
-- **Archiv ukazuje režim HCP.** Přehled kol nově uvádí, zda se hrálo `s HCP`
-  (netto), nebo `bez HCP` (hrubě).
-
-## [0.25.0] – 2026-08-05
-
-### Přidáno
-
 - **Uvedení zdroje dat.** Výběr hřiště má v patičce větu o tom, že hřiště
   pocházejí z otevřeného katalogu Golf Games pod licencí ODbL, a odkaz na
   projekt, kde jdou opravit. U hřiště se zobrazuje jeho `attribution`, pokud
@@ -53,6 +38,18 @@ jen verze s věcnou změnou.
 - `contrib/` s balíkem pro OpenGolfAPI. Přispívat data zpět se nakonec
   nerozhodlo; balík byl navíc z doby před osamostatněním katalogu, takže by se
   stejně musel vygenerovat znovu.
+
+## [0.25.1] – 2026-08-05
+
+### Opraveno
+
+- **HCP se ukládá pro všechny hry.** HCP indexy zadané při založení kola se
+  ukládají do seznamu hráčů a znovu se předvyplní i u Match Play, Skins a Best
+  Aggregate.
+- **Archiv ukazuje režim HCP.** Přehled kol nově uvádí, zda se hrálo `s HCP`
+  (netto), nebo `bez HCP` (hrubě).
+
+## [0.25.0] – 2026-08-05
 
 ### Opraveno
 
