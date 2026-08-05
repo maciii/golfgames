@@ -4,13 +4,17 @@ import {
   bonusesAt,
   createRound,
   exclusiveBonusOutcome,
+  firstHoleNumber,
   formatHoleList,
+  holeMultiplier,
+  holeNumber,
   isHoleStarted,
   parAt,
   roundCompleteness,
   setHolePar,
   toggleBonus,
 } from './types'
+import { normalizeRound } from './storage'
 import { makeRound } from './games/fixtures'
 
 describe('Rozehraná jamka', () => {
@@ -77,6 +81,74 @@ describe('HCP v kole', () => {
         playingHandicap: 9,
       }),
     ])
+  })
+})
+
+/**
+ * Devítka hraná ze zadní půlky osmnáctky.
+ *
+ * V datech je to obyčejné devítijamkové kolo (indexy 0-8), jen si pamatuje, že
+ * začíná desítkou. Čísla jamek se proto musí posunout všude, kde je hráč vidí,
+ * a dvojnásobná závěrečná jamka musí padnout na osmnáctku.
+ */
+describe('Kolo hrané na druhou devítku', () => {
+  function backNine(scores: (number | null)[][]) {
+    return makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4, 4, 4, 4, 4, 4, 4, 4],
+      scores,
+      startHole: 10,
+    })
+  }
+
+  const full = backNine([
+    [4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [5, 5, 5, 5, 5, 5, 5, 5, 5],
+  ])
+
+  it('čísluje jamky od desítky', () => {
+    expect(firstHoleNumber(full)).toBe(10)
+    expect(holeNumber(full, 0)).toBe(10)
+    expect(holeNumber(full, 8)).toBe(18)
+  })
+
+  it('kolo od jedničky si číslo první jamky nenese', () => {
+    const front = createRound({ gameId: 'skins', playerNames: ['Adam'], holeCount: 9 })
+
+    expect(front.startHole).toBeUndefined()
+    expect(holeNumber(front, 8)).toBe(9)
+  })
+
+  it('chybějící zápisy hlásí pod skutečnými čísly jamek', () => {
+    const partial = backNine([
+      [4, 4, null, null],
+      [5, null, null, null],
+    ])
+
+    expect(roundCompleteness(partial)).toEqual({
+      conceded: [11],
+      unplayed: [12, 13, 14, 15, 16, 17, 18],
+      complete: false,
+    })
+  })
+
+  it('dvojnásobná závěrečná jamka padne na osmnáctku', () => {
+    expect(holeMultiplier(full, 8)).toBe(2)
+    expect(holeMultiplier(full, 7)).toBe(1)
+    expect(holeMultiplier(full, 0)).toBe(1)
+  })
+
+  it('poškozené číslo první jamky se při načtení zahodí', () => {
+    const broken = normalizeRound({ ...full, startHole: 0 })
+    const nonsense = normalizeRound({ ...full, startHole: 4.5 })
+
+    expect(firstHoleNumber(broken)).toBe(1)
+    expect(nonsense.startHole).toBeUndefined()
+  })
+
+  it('platné číslo první jamky načtení přežije', () => {
+    expect(normalizeRound(full).startHole).toBe(10)
   })
 })
 

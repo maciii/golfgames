@@ -212,7 +212,11 @@ export const DEFAULT_SETTINGS: RoundSettings = {
   options: DEFAULT_GAME_OPTIONS,
 }
 
-/** Jamky, které se při zapnuté volbě počítají dvojnásobně (1-based). */
+/**
+ * Jamky, které se při zapnuté volbě počítají dvojnásobně. Porovnává se s
+ * číslem jamky (`holeNumber()`), ne s indexem - u zadní devítky je poslední
+ * jamka osmnáctka.
+ */
 export const DOUBLE_HOLES = [9, 18]
 
 /**
@@ -232,7 +236,10 @@ export interface RoundCourse {
   courseRating?: number
   /** Slope Rating zvoleného odpaliště. */
   slopeRating?: number
-  /** Součet parů odpaliště - vstupuje do vzorce pro hrací handicap. */
+  /**
+   * Součet parů odpaliště - vstupuje do vzorce pro hrací handicap. U kola
+   * hraného jen na jednu devítku je to par těch jamek, na které se hrálo.
+   */
   par?: number
   /** Stroke index jamek (1 = nejtěžší), délka === holeCount. */
   strokeIndex: number[]
@@ -272,6 +279,16 @@ export interface Round {
   course?: RoundCourse
   /** Hraje se na rány s handicapem? Bez hodnoty se počítá hrubé skóre. */
   netScoring?: boolean
+  /**
+   * Číslo první hrané jamky (1-based); chybí u kola hraného od jedničky.
+   *
+   * Osmnáctijamkové hřiště se běžně hraje jen na jednu devítku. Zadní devítka
+   * má proto `holeCount` 9, ale jamky se číslují 10-18. `pars` i
+   * `course.strokeIndex` jsou výřezem hřiště, takže indexy jamek zůstávají
+   * 0-based od nuly jako u každého jiného kola a číslo pro hráče dopočítá
+   * `holeNumber()`.
+   */
+  startHole?: number
 }
 
 export const DEFAULT_PAR = 4
@@ -295,6 +312,8 @@ export interface CreateRoundOptions {
   /** Hrací handicapy v ranách ve stejném pořadí jako `playerNames`. */
   playingHandicaps?: (number | undefined)[]
   netScoring?: boolean
+  /** Číslo první hrané jamky; 10 u zadní devítky osmnáctijamkového hřiště. */
+  startHole?: number
 }
 
 export function createRound({
@@ -308,6 +327,7 @@ export function createRound({
   handicapIndexes,
   playingHandicaps,
   netScoring,
+  startHole,
 }: CreateRoundOptions): Round {
   const players: Player[] = playerNames.map((name, i) => ({
     id: `p${i + 1}`,
@@ -362,6 +382,9 @@ export function createRound({
     // v katalogu nesmí sáhnout na kolo, které se s ním už odehrálo.
     ...(course ? { course: { ...course, strokeIndex: [...course.strokeIndex] } } : {}),
     ...(netScoring ? { netScoring: true } : {}),
+    // Kolo od jedničky si číslo první jamky nenese - je to výchozí stav
+    // a starší uložená kola ho taky nemají.
+    ...(startHole !== undefined && startHole > 1 ? { startHole } : {}),
   }
 }
 
@@ -388,13 +411,38 @@ export function roundTimestamp(round: Round): number {
 }
 
 /**
+ * Číslo první hrané jamky.
+ *
+ * Kolo bez údaje (a kolo s poškozenou hodnotou) začíná jedničkou, takže se na
+ * tuhle funkci dá spolehnout i u dat z cizího zdroje.
+ */
+export function firstHoleNumber(round: Round): number {
+  const start = round.startHole ?? 1
+  return Number.isInteger(start) && start > 0 ? start : 1
+}
+
+/**
+ * Číslo jamky, jak se ukazuje hráči.
+ *
+ * Devítka hraná ze zadní půlky osmnáctky má indexy 0-8 jako každé jiné
+ * devítijamkové kolo, ale čísla jamek 10-18.
+ */
+export function holeNumber(round: Round, hole: number): number {
+  return firstHoleNumber(round) + hole
+}
+
+/**
  * Kolikrát se jamka počítá. Devátá a osmnáctá mohou být za dvojnásobek -
- * u devítijamkového kola tak dvojnásobí poslední jamku. Zvolený extra bod
- * "double" násobí navíc, takže dvojnásobná jamka s doublem je za čtyřnásobek.
+ * u devítijamkového kola tak dvojnásobí poslední jamku, ať se hraje první
+ * devítka (jamka 9), nebo druhá (jamka 18). Zvolený extra bod "double" násobí
+ * navíc, takže dvojnásobná jamka s doublem je za čtyřnásobek.
  */
 export function holeMultiplier(round: Round, hole: number): number {
   const closing =
-    round.settings.options.doubleClosingHoles && DOUBLE_HOLES.includes(hole + 1) ? 2 : 1
+    round.settings.options.doubleClosingHoles &&
+    DOUBLE_HOLES.includes(holeNumber(round, hole))
+      ? 2
+      : 1
   return closing * doubleCallMultiplier(round, hole)
 }
 
@@ -599,9 +647,9 @@ export function isHoleComplete(round: Round, hole: number): boolean {
 }
 
 export interface RoundCompleteness {
-  /** Jamky (1-based), kde se hrálo, ale někomu chybí zápis - vzdané. */
+  /** Čísla jamek, kde se hrálo, ale někomu chybí zápis - vzdané. */
   conceded: number[]
-  /** Jamky (1-based), na které se vůbec nedošlo. */
+  /** Čísla jamek, na které se vůbec nedošlo. */
   unplayed: number[]
   complete: boolean
 }
@@ -612,8 +660,8 @@ export function roundCompleteness(round: Round): RoundCompleteness {
   const unplayed: number[] = []
 
   for (let hole = 0; hole < round.holeCount; hole++) {
-    if (!isHoleStarted(round, hole)) unplayed.push(hole + 1)
-    else if (!isHoleComplete(round, hole)) conceded.push(hole + 1)
+    if (!isHoleStarted(round, hole)) unplayed.push(holeNumber(round, hole))
+    else if (!isHoleComplete(round, hole)) conceded.push(holeNumber(round, hole))
   }
 
   return {

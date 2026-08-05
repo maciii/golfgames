@@ -3,6 +3,7 @@ import {
   DEFAULT_GAME_OPTIONS,
   DEFAULT_RESULT_MULTIPLIERS,
   DEFAULT_SETTINGS,
+  firstHoleNumber,
 } from './types'
 import type { Course } from './courses/types'
 import { isValidCourse, normalizeCourse } from './courses/types'
@@ -95,9 +96,14 @@ export function normalizeRound(round: Round): Round {
         }
       : undefined
 
+  // Číslo první jamky posouvá číslování i dvojnásobné jamky, takže poškozená
+  // hodnota se zahodí; kolo od jedničky si údaj nenese vůbec.
+  const startHole = firstHoleNumber(round)
+
   return {
     ...round,
     ...(course ? { course } : {}),
+    startHole: startHole > 1 ? startHole : undefined,
     // Kola z verzí před synchronizací čas změny nemají; datum ukončení
     // (u nedohraných založení) je nejlepší dostupný odhad.
     updatedAt: round.updatedAt ?? round.finishedAt ?? round.createdAt,

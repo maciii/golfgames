@@ -1,5 +1,5 @@
 import type { BonusId, Round } from '../types'
-import { availableBonuses } from '../types'
+import { availableBonuses, holeNumber } from '../types'
 import { getGame } from '../games'
 import { dynamicKey, useT } from '../i18n'
 
@@ -42,7 +42,10 @@ export default function BonusSheet({
         <header className="sheet-header">
           <h2>{t('bonus.sheetTitle')}</h2>
           <p className="subtitle">
-            {t('bonus.sheetSubtitle', { name: playerName, hole: hole + 1 })}
+            {t('bonus.sheetSubtitle', {
+              name: playerName,
+              hole: holeNumber(round, hole),
+            })}
           </p>
         </header>
 

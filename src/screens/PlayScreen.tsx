@@ -8,6 +8,7 @@ import {
   getBonus,
   playerBonusPoints,
   formatToPar,
+  holeNumber,
   holesPlayed,
   isHoleComplete,
   parAt,
@@ -301,9 +302,9 @@ export default function PlayScreen({
             <div className="hole-title">
               <span
                 className={`hole-number par-${par}`}
-                aria-label={t('play.hole', { number: hole + 1 })}
+                aria-label={t('play.hole', { number: holeNumber(round, hole) })}
               >
-                {hole + 1}
+                {holeNumber(round, hole)}
               </span>
             </div>
             {headerSummary && (

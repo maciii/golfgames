@@ -11,11 +11,14 @@ Společné pro všechny hry:
 - Par každé jamky se nastavuje při hře (3, 4 nebo 5), výchozí je 4.
 - Průběžné pořadí se počítá jen z jamek, které už mají zápis, takže tabulka
   dává smysl i uprostřed kola.
-- Kolo lze hrát na 9 nebo 18 jamek.
+- Kolo lze hrát na 9 nebo 18 jamek. U osmnáctijamkového hřiště se navíc
+  vybírá, jestli se hraje celé kolo, první devítka (1–9), nebo druhá (10–18) –
+  viz [Devítka z osmnáctky](#devítka-z-osmnáctky).
 
 ## Obsah
 
 - [Vzdaná jamka vs. nehraná jamka](#vzdaná-jamka-vs-nehraná-jamka)
+- [Devítka z osmnáctky](#devítka-z-osmnáctky)
 - [Předčasně ukončené kolo](#předčasně-ukončené-kolo)
 - [Extra body](#extra-body)
 - [Nastavení bodování hry](#nastavení-bodování-hry)
@@ -48,6 +51,36 @@ Vzdaná jamka se tedy počítá, a to v neprospěch toho, kdo ji nedohrál:
 - **Match play** – kdo jamku vzdal, ji prohrává.
 
 Při zápisu je vzdaný výsledek označený slovem „vzdáno“.
+
+## Devítka z osmnáctky
+
+Osmnáctijamkové hřiště se často hraje jen na půl kola. V zadání kola se proto
+u takového hřiště místo počtu jamek vybírá rozsah:
+
+| Volba        | Jamky | Poznámka                                      |
+| ------------ | ----- | --------------------------------------------- |
+| **18 jamek** | 1–18  | výchozí, celé kolo                            |
+| **1–9**      | 1–9   | první devítka                                 |
+| **10–18**    | 10–18 | druhá devítka; jamky se číslují dál od desíti |
+
+Volba není jen kosmetická – každá devítka má vlastní pary a stroke indexy, a ty
+se do kola vezmou právě z vybraných jamek. Konkrétně:
+
+- **Čísla jamek** při zápisu, ve scorekartě, ve výběru extra bodů, ve výpisu
+  vyhraných jamek u Skins i v hlášce o chybějících zápisech odpovídají hřišti,
+  takže druhá devítka běží od 10 do 18.
+- **Pary a stroke indexy** jsou výřezem hřiště. Stroke indexy se pro rozdělení
+  ran přepočítají na pořadí 1–9 uvnitř hrané devítky – jinak by hráč
+  s handicapem 5 dostal rány jen na jamkách s SI 1, 3 a 5.
+- **Hrací handicap** se počítá z poloviny normy odpaliště, protože devítkové CR
+  a SR katalog nevede. Zadává-li se handicap rovnou v ranách, bere se tak, jak
+  je napsaný – to už je hrací handicap pro tohle kolo.
+- **Dvojnásobná závěrečná jamka** (je-li volba zapnutá) padne u první devítky na
+  jamku 9 a u druhé na jamku 18, tedy v obou případech na poslední hranou.
+- **V archivu** je u druhé devítky vidět rozsah, například „9 jamek (10–18)“.
+
+Devítijamkové hřiště žádný výběr nenabízí a bez zvoleného hřiště se jen jako
+dosud volí 9, nebo 18 jamek.
 
 ## Předčasně ukončené kolo
 
@@ -177,7 +210,8 @@ dalšího kola, ale **každé kolo si nese vlastní kopii**.
 | Hodnota bodu | 10 Kč / 1 € | libovolné číslo, i desetinné (0,5 €) |
 
 Volba **9. a 18. jamka za dvojnásobek** je v nastavení bodování hry (ve
-výchozím stavu zapnutá); u devítijamkového kola se týká poslední jamky.
+výchozím stavu zapnutá); u devítijamkového kola se týká poslední jamky, ať se
+hraje devítka první (jamka 9), nebo druhá (jamka 18).
 Násobí **celý zisk z jamky**, tedy u Best Aggregate včetně bonusů za birdie
 a eagle, u Skins hodnotu skinu i extra body v sázce. Match play volbu nenabízí – počítá se
 na jamky a dvojnásobná jamka by rozbila stav zápasu i notaci `3&2`.

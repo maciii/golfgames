@@ -40,6 +40,11 @@ export const en: Record<MessageKey, Message> = {
   'setup.holeCount': 'Number of holes',
   'setup.holeCountHint': 'You set the par of each hole while playing.',
   'setup.holeCountFromCourse': 'The selected course sets the number of holes.',
+  'setup.holesAll': '18 holes',
+  'setup.holesFront': '1–9',
+  'setup.holesBack': '10–18',
+  'setup.holeRangeHint':
+    'An 18-hole course can be played in full, or as just the front or back nine. Pars, stroke indexes and handicaps come from the holes you pick.',
 
   // Courses and handicaps
   'setup.course': 'Course',

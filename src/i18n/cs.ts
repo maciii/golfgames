@@ -46,6 +46,11 @@ export const cs = {
   'setup.holeCount': 'Počet jamek',
   'setup.holeCountHint': 'Par každé jamky nastavíš přímo při hře.',
   'setup.holeCountFromCourse': 'Počet jamek určuje zvolené hřiště.',
+  'setup.holesAll': '18 jamek',
+  'setup.holesFront': '1–9',
+  'setup.holesBack': '10–18',
+  'setup.holeRangeHint':
+    'Osmnáctku jde hrát celou, nebo jen na první či druhou devítku. Pary, stroke indexy i handicapy se vezmou z vybraných jamek.',
 
   // Hřiště a handicapy
   'setup.course': 'Hřiště',

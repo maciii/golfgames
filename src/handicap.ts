@@ -18,14 +18,23 @@ export const NEUTRAL_SLOPE = 113
  *
  * Druhý člen dorovnává absolutní obtížnost: na hřišti, kde je CR vyšší než par,
  * dostane hráč rány navíc, i kdyby byl slope neutrální.
+ *
+ * `share` je podíl hřiště, který se hraje - devítka z osmnáctijamkového hřiště
+ * je 0.5. WHS počítá devítkový handicap z poloviny indexu a devítkové normy;
+ * když je po ruce jen osmnáctijamkové CR, SR a par (a to je náš případ, protože
+ * devítková norma se do katalogu nezadává), vyjde totéž jako polovina celého
+ * výsledku - jen se zaokrouhluje až nakonec, ne dvakrát.
  */
 export function courseHandicap(
   handicapIndex: number,
   slopeRating: number,
   courseRating: number,
   par: number,
+  share = 1,
 ): number {
-  return Math.round(handicapIndex * (slopeRating / NEUTRAL_SLOPE) + (courseRating - par))
+  return Math.round(
+    (handicapIndex * (slopeRating / NEUTRAL_SLOPE) + (courseRating - par)) * share,
+  )
 }
 
 /**

@@ -7,6 +7,22 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.26.0] – 2026-08-05
+
+### Přidáno
+
+- **Devítka z osmnáctijamkového hřiště.** U hřiště s 18 jamkami se v zadání
+  kola vybírá, jestli se hraje celé kolo, první devítka (1–9), nebo druhá
+  (10–18). Kolo si vezme pary a stroke indexy právě z vybraných jamek.
+- **Číslování jamek podle hřiště.** Druhá devítka se čísluje 10–18 při zápisu
+  skóre, ve scorekartě, ve výběru extra bodů, ve výpisu vyhraných jamek
+  u Skins i v hlášce o chybějících zápisech. V archivu je u takového kola
+  vidět rozsah, například „9 jamek (10–18)“.
+- **Handicap na půlku kola.** Hrací handicap se u devítky počítá z poloviny
+  normy odpaliště; ručně zadaný počet ran zůstává, jak ho hráč napsal.
+- **Dvojnásobná závěrečná jamka** padne u první devítky na jamku 9 a u druhé
+  na jamku 18, tedy vždy na poslední hranou.
+
 ## [0.25.1] – 2026-08-05
 
 ### Opraveno

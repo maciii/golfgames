@@ -87,12 +87,33 @@ interface Round {
   updatedAt?: string // ISO; poslední skutečná změna dat, řídí synchronizaci
   course?: RoundCourse // hřiště, se kterým se hrálo - taky vlastní kopie
   netScoring?: boolean // hraje se na rány s handicapem?
+  startHole?: number // číslo první hrané jamky; chybí u kola od jedničky
 }
 ```
 
 `updatedAt` zvedá výhradně `touchRound()` při změně dat (skóre, par, bonus,
 nastavení), ne při listování jamkami. Stará kola z verzí před synchronizací ho
 nemají a `normalizeRound()` jim ho doplní jako `finishedAt ?? createdAt`.
+
+### Devítka z osmnáctijamkového hřiště
+
+Osmnáctka se běžně hraje jen na jednu devítku, a to buď na první (jamky 1–9),
+nebo na druhou (10–18). Kolo si v takovém případě **vezme jen výřez hřiště**:
+`holeCount` je 9, `pars` a `course.strokeIndex` obsahují právě těch devět
+jamek a `startHole` říká, kterou jamkou kolo začíná (`10` u druhé devítky,
+u první nic).
+
+Model tím zůstává stejný jako u kteréhokoli devítijamkového kola – indexy jamek
+jsou dál 0-based od nuly a nikde se nepočítá s dírami. Jediné, co se posouvá, je
+**číslo jamky pro hráče**: dopočítá ho `holeNumber(round, hole)`
+(`firstHoleNumber()` přitom poškozenou hodnotu spolkne a vrátí 1). Tohle číslo
+používá zápis skóre, scorekarta, výběr extra bodů, výpis vyhraných jamek
+u Skins, hlášení chybějících zápisů i pravidlo o dvojnásobné závěrečné jamce.
+
+Hrací handicap se u půlky kola počítá z **poloviny** normy odpaliště
+(`courseHandicap(..., share)`), protože devítkové CR a SR se do katalogu
+nezadávají. Ručně zadaný počet ran se nepůlí – to už je hrací handicap pro
+tohle kolo.
 
 ### Invarianty, které je potřeba držet
 
@@ -107,9 +128,11 @@ nemají a `normalizeRound()` jim ho doplní jako `finishedAt ?? createdAt`.
    přenormování hřiště nepřepočítá archivní kola. Nikdy nedávejte do kola
    referenci na sdílený objekt.
 3. **`pars` má vždy délku `holeCount`** a hodnoty 3/4/5 (výchozí 4).
-4. **Indexy jamek jsou v kódu 0-based, v UI 1-based.** Převádí se výhradně na
-   hranici UI (`Jamka {hole + 1}`); výjimka je `RoundCompleteness`, které vrací
-   rovnou 1-based čísla, protože slouží jen pro text hlášky.
+4. **Indexy jamek jsou v kódu 0-based, číslo jamky pro hráče dává
+   `holeNumber()`.** Nikdy ne `hole + 1` – u devítky hrané ze zadní půlky
+   osmnáctky je index 0 jamka číslo 10. Převádí se výhradně na hranici UI;
+   výjimka je `RoundCompleteness`, které vrací rovnou čísla jamek, protože
+   slouží jen pro text hlášky.
 5. **`teams[i].playerIds` má stabilní pořadí.** Peněžní vyrovnání dvojic páruje
    protějšky podle indexu (první platí prvnímu), takže přeházení pořadí změní,
    kdo komu platí.
@@ -198,6 +221,8 @@ v [`games.md`](games.md#extra-body).
 Dvě nezávislé věci se násobí mezi sebou (`holeMultiplier()`):
 
 1. **Dvojnásobná 9. a 18. jamka** – volba `doubleClosingHoles` v nastavení hry.
+   Porovnává se **číslo jamky**, ne index, takže devítka hraná jako 10–18 má
+   dvojnásobnou osmnáctku.
 2. **Zvolená dvojnásobná sázka** – volba `double`, každý zápis násobí zvlášť
    (`doubleCallMultiplier()` = `2 ** početZápisů`).
 
@@ -303,7 +328,7 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 
 | Soubor                   | Co dělá                                                                                          |
 | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek; vstup do nastavení hry                                  |
+| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek (u osmnáctky i která devítka); vstup do nastavení hry    |
 | `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta |
 | `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                              |
 | `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                            |
@@ -383,7 +408,7 @@ vidět hned.
 - `src/games/*.test.ts` – pravidla her
 - `src/money.test.ts` – peněžní vyrovnání
 - `src/types.test.ts` – model kola: vzdané vs. nehrané jamky, výpis jamek,
-  přidělení Longestu a Nearestu
+  přidělení Longestu a Nearestu, číslování jamek u půlky kola
 - `src/backup.test.ts` – slučování archivů a kontrola souboru se zálohou
 - `src/sync/merge.test.ts` – slučování při synchronizaci (bez Firebase)
 - `src/sync/document.test.ts` – tvar dokumentu pro Firestore

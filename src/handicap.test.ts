@@ -41,6 +41,17 @@ describe('courseHandicap', () => {
   it('plusový hráč dostává záporný handicap', () => {
     expect(courseHandicap(-2.4, 113, 72, 72)).toBe(-2)
   })
+
+  it('na půlce kola dává polovinu ran', () => {
+    // 18.4 × 132/113 = 21.49; půlka je 10.74 -> 11, ne polovina z 21.
+    expect(courseHandicap(18.4, 132, 72, 72, 0.5)).toBe(11)
+    expect(courseHandicap(18.4, 113, 72, 72, 0.5)).toBe(9)
+  })
+
+  it('rozdíl CR a paru se na půlce kola dělí taky', () => {
+    // (10 + 2.5) / 2 = 6.25 -> 6
+    expect(courseHandicap(10, 113, 74.5, 72, 0.5)).toBe(6)
+  })
 })
 
 describe('strokesForHole', () => {
@@ -185,5 +196,30 @@ describe('výpočty nad kolem', () => {
     const round = netRound(2, [5, 4, 6])
     round.netScoring = false
     expect(strokesRelativeToBest(round, 'p1', 0)).toBe(0)
+  })
+
+  it('devítka z osmnáctky rozdává rány podle pořadí uvnitř své půlky', () => {
+    // Zadní devítka hřiště se sudými SI: samotné hodnoty 2-18 by hráči
+    // s handicapem 5 daly rány jen na třech jamkách místo na pěti.
+    const round = makeRound({
+      gameId: 'stableford',
+      players: ['A', 'B'],
+      pars: [4, 4, 4, 4, 4, 4, 4, 4, 4],
+      scores: [
+        [4, 4, 4, 4, 4, 4, 4, 4, 4],
+        [4, 4, 4, 4, 4, 4, 4, 4, 4],
+      ],
+      startHole: 10,
+    })
+    round.netScoring = true
+    round.course = { name: 'Test', strokeIndex: [2, 4, 6, 8, 10, 12, 14, 16, 18] }
+    const first = round.players[0]
+    if (first) first.playingHandicap = 5
+
+    const given = Array.from({ length: 9 }, (_, hole) =>
+      strokesReceived(round, 'p1', hole),
+    )
+
+    expect(given).toEqual([1, 1, 1, 1, 1, 0, 0, 0, 0])
   })
 })

@@ -1,5 +1,5 @@
 import type { Round } from '../types'
-import { formatRoundDate, roundCompleteness } from '../types'
+import { firstHoleNumber, formatRoundDate, holeNumber, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { APP_VERSION } from '../version'
 import { t as translate, useT } from '../i18n'
@@ -29,9 +29,17 @@ function winnerLine(round: Round): string {
 function playedHolesLabel(round: Round): string {
   const played = roundCompleteness(round).unplayed.length
   const done = round.holeCount - played
-  return played === 0
-    ? translate('archive.holes', { count: round.holeCount })
-    : translate('archive.holesPartial', { done, total: round.holeCount })
+  const label =
+    played === 0
+      ? translate('archive.holes', { count: round.holeCount })
+      : translate('archive.holesPartial', { done, total: round.holeCount })
+
+  // U kola hraného ze zadní devítky by samotný počet jamek nerozlišil, která
+  // půlka hřiště to byla.
+  if (firstHoleNumber(round) === 1) return label
+  const first = holeNumber(round, 0)
+  const last = holeNumber(round, round.holeCount - 1)
+  return `${label} (${first}–${last})`
 }
 
 function handicapModeLabel(round: Round): string {

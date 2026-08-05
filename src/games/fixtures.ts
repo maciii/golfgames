@@ -17,14 +17,17 @@ export function makeRound(options: {
   teams?: number[][]
   /** Nastavení sázky; chybějící pole se doplní výchozími. */
   settings?: Partial<RoundSettings>
+  /** Číslo první jamky; 10 u kola hraného na zadní devítku. */
+  startHole?: number
 }): Round {
-  const { gameId, players, pars, scores, teams, settings } = options
+  const { gameId, players, pars, scores, teams, settings, startHole } = options
   const round = createRound({
     gameId,
     playerNames: players,
     holeCount: pars.length,
     teamIndices: teams,
     settings: { ...DEFAULT_SETTINGS, ...settings },
+    ...(startHole !== undefined ? { startHole } : {}),
   })
 
   round.pars = [...pars]

@@ -175,6 +175,30 @@ describe('Skins - pořadí', () => {
   })
 })
 
+describe('Skins - druhá devítka', () => {
+  it('vypisuje vyhrané jamky pod čísly, která hráč vidí', () => {
+    const round = makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [3, 4],
+        [4, 3],
+      ],
+      startHole: 10,
+    })
+
+    const rows = skins.computeStandings(round)[0]?.rows ?? []
+
+    expect(rows.find((row) => row.name === 'Adam')?.detail).toContain(
+      '1 vyhraných jamek: 10',
+    )
+    expect(rows.find((row) => row.name === 'Bára')?.detail).toContain(
+      '1 vyhraných jamek: 11',
+    )
+  })
+})
+
 describe('Skins - extra body', () => {
   it('přičte extra body ke skóre hráče a zobrazí je ve scorekartě', () => {
     const round = makeRound({

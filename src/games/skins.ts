@@ -6,6 +6,7 @@ import {
   exclusiveBonusOutcome,
   getBonus,
   holeMultiplier,
+  holeNumber,
   holesPlayed,
   isHoleStarted,
   playerName,
@@ -216,7 +217,7 @@ export const skins: GameDefinition = {
           won.length > 0
             ? t('skins.wonHoles', {
                 count: won.length,
-                holes: won.map((r) => r.hole + 1).join(', '),
+                holes: won.map((r) => holeNumber(round, r.hole)).join(', '),
               })
             : null,
         ]

@@ -82,6 +82,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   `isHoleStarted()`: když na jamce zapsal aspoň jeden hráč, jamka běží a komu
   zápis chybí, ten ji vzdal. Každá nová hra to musí ošetřit. Ve výpočtech se
   vzdaná hodnota reprezentuje jako `CONCEDED` (`Infinity`).
+- **Číslo jamky není `hole + 1`.** Osmnáctku jde hrát jen na jednu devítku;
+  kolo pak má `holeCount` 9, výřez parů a SI, a `startHole` 10 u druhé devítky.
+  Číslo pro hráče dává výhradně `holeNumber(round, hole)` - v UI, ve výpisech
+  jamek i v pravidle o dvojnásobné 9. a 18. jamce.
 - **`noUncheckedIndexedAccess` je zapnuté.** Indexování pole vrací
   `T | undefined`, proto je v kódu tolik `?? fallback`. Neobcházej to
   přetypováním; TypeScript 7 navíc odmítne type predicate, který je širší než

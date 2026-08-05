@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Player, Round, ScoreCategory } from '../types'
 import {
+  holeNumber,
   parAt,
   scoreAt,
   scoreCategory,
@@ -272,7 +273,7 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                     : undefined
                 }
               >
-                <th scope="row">{hole + 1}</th>
+                <th scope="row">{holeNumber(round, hole)}</th>
                 <td className="par-cell">{parAt(round, hole)}</td>
                 {showStrokeIndex && (
                   <td className="par-cell si-cell">{strokeIndex[hole] ?? hole + 1}</td>
