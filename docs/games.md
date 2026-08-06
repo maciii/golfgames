@@ -601,6 +601,10 @@ hry. Druhá se nabízí až se zapnutou první.
 - **Extra body hra nezná.** Tabulka sama odměňuje lepší výsledek na jamce
   a bonusy by ji jen rozmazaly.
 
+Při zápisu skóre je u jména každého hráče vidět, kolik bodů mu právě zapisovaná
+jamka vynesla; vítěz jamky je zvýrazněný. Celkový stav všech tří hráčů je nad
+tím v hlavičce jamky.
+
 > **Pozor na sázku.** Body tu rostou mnohem rychleji než u ostatních her –
 > rozdíl 20 bodů je při desetikoruně za bod 200 Kč. Hodnotu bodu se vyplatí
 > nastavit odpovídajícím dílem níž.

@@ -194,6 +194,13 @@ export default function PlayScreen({
       return [{ key: id, text: bonus.mark, tone }]
     })
 
+    /**
+     * Co hráči vynesla právě zapisovaná jamka. U her jednotlivců to jinak není
+     * kde vidět - týmové hry mají shrnutí v hlavičce dvojice, tady patří
+     * rovnou k jménu. Celkový stav je nad tím v hlavičce jamky.
+     */
+    const holeGain = summaries.find((s) => s.id === player.id)
+
     return (
       <li key={player.id} className="player-row">
         <div className="player-info">
@@ -202,6 +209,16 @@ export default function PlayScreen({
             {marks.map((mark) => (
               <span key={mark.key} className={`player-mark ${mark.tone}`}>
                 {mark.text}
+              </span>
+            ))}
+            {holeGain?.entries.map((entry) => (
+              <span
+                key={entry.label}
+                className={`player-mark gain${entry.highlight ? ' best' : ''}`}
+                title={entry.label}
+                aria-label={`${entry.label}: ${entry.value}`}
+              >
+                {entry.value}
               </span>
             ))}
             {/* Rány, které hráč na téhle jamce dostává. Bez toho není poznat,

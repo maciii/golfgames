@@ -293,6 +293,28 @@ describe('Dots - kolo a výsledky', () => {
     expect(column?.total(r)).toBe('12')
   })
 
+  /**
+   * Body na jamce se ukazují u jména hráče při zápisu, takže musí přijít
+   * s vlastním popiskem (jméno by v odznaku u jména bylo k ničemu) a vítěz
+   * jamky musí být poznat.
+   */
+  it('shrnutí jamky nese body u každého hráče a značí vítěze', () => {
+    const summaries = dots.holeSummary?.(round([3, 4, 5]), 0) ?? []
+
+    expect(summaries.map((s) => s.id)).toEqual(['p1', 'p2', 'p3'])
+    expect(summaries[0]?.entries).toEqual([
+      { label: 'Body za jamku', value: '5', highlight: true },
+    ])
+    expect(summaries[1]?.entries[0]).toMatchObject({ value: '3', highlight: false })
+  })
+
+  it('na jamce bez zápisu nemá shrnutí co zvýraznit', () => {
+    const summaries = dots.holeSummary?.(round([null, null, null]), 0) ?? []
+
+    expect(summaries[0]?.entries[0]).toMatchObject({ value: '–', highlight: false })
+    expect(summaries.every((s) => s.winner === false)).toBe(true)
+  })
+
   it('hraje se ve třech a bez dvojic', () => {
     expect(dots.playerCounts).toEqual([3])
     expect(dots.usesTeams(3)).toBe(false)

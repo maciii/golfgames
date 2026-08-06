@@ -1967,6 +1967,22 @@ button {
   color: var(--score-birdie);
 }
 
+/**
+ * Body, které hráči vynesla právě zapisovaná jamka (Dots, Stableford).
+ *
+ * Tlumené, dokud nejde o nejlepší výsledek na jamce - jinak by u tříčlenné
+ * hry svítily tři štítky vedle sebe a nebylo by poznat, kdo jamku bere.
+ */
+.player-mark.gain {
+  background: var(--bg-input);
+  color: var(--text-dim);
+}
+
+.player-mark.gain.best {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
 /* Tečky u jména hlásí rány, které hráč na jamce dostává (netto hra). */
 .player-mark.strokes {
   background: transparent;

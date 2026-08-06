@@ -22,6 +22,7 @@ export const cs = {
   'common.player': 'Hráč {number}',
   'common.strokes': '{count} ran',
   'common.points': '{count} b.',
+  'common.holePoints': 'Body za jamku',
   'common.dash': '–',
 
   // --- úvodní obrazovka ---------------------------------------------------

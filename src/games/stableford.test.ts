@@ -240,3 +240,25 @@ describe('výsledková tabulka', () => {
     expect(rows[1]?.holesPlayed).toBe(0)
   })
 })
+
+describe('shrnutí jamky', () => {
+  /**
+   * Body se ukazují u jména hráče při zápisu. Rány, které tam hráč dostává,
+   * jsou vedle jména jako tečky, takže druhý štítek s toutéž informací by byl
+   * jen zmatek navíc.
+   */
+  it('nese body za jamku a neopakuje rozdané rány', () => {
+    const round = withNet(
+      makeStableford([
+        [4, 3, 5],
+        [4, 3, 5],
+      ]),
+      { Anna: 2 },
+    )
+    const summaries = stableford.holeSummary?.(round, 0) ?? []
+
+    expect(summaries[0]?.entries).toEqual([
+      { label: 'Body za jamku', value: '3', highlight: true },
+    ])
+  })
+})

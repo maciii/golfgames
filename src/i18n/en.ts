@@ -16,6 +16,7 @@ export const en: Record<MessageKey, Message> = {
   'common.player': 'Player {number}',
   'common.strokes': '{count} strokes',
   'common.points': '{count} pts',
+  'common.holePoints': 'Points for the hole',
   'common.dash': '–',
 
   // --- setup --------------------------------------------------------------

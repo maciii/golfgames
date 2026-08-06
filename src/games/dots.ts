@@ -268,7 +268,7 @@ export const dots: GameDefinition = {
         winner: started && value > 0 && value === best,
         entries: [
           {
-            label: player.name,
+            label: t('common.holePoints'),
             value: started ? `${value}` : t('common.dash'),
             highlight: started && value > 0 && value === best,
           },

@@ -19,6 +19,15 @@ jen verze s věcnou změnou.
 - **Dvě volitelné nadstavby Dots** (obě výchozí vypnuté): výhra jamky o dvě
   a víc ran bere všechny body jamky, a zahraná na birdie a lepší je
   zdvojnásobí – tedy 9/18, resp. 6/12 bodů.
+- **Body za jamku u jména hráče.** Při zápisu skóre je vedle jména vidět, kolik
+  bodů hráči právě zapisovaná jamka vynesla; vítěz jamky je zvýrazněný. Celkový
+  stav zůstává nad tím v hlavičce jamky. Platí pro Dots i Stableford – u her
+  jednotlivců to dosud nebylo kde vidět.
+
+### Změněno
+
+- **Stableford u jména neopakuje rozdané rány.** Byly tam dvakrát: jako tečky
+  i jako štítek. Zůstávají tečky.
 
 ## [0.32.0] – 2026-08-06
 

@@ -1,6 +1,6 @@
 import type { PlayerId, Round } from '../types'
 import { holeMultiplier, isHoleStarted, strokeTotal } from '../types'
-import { holeStablefordPoints, isNetRound, strokesReceived } from '../handicap'
+import { holeStablefordPoints, isNetRound } from '../handicap'
 import type {
   GameDefinition,
   HeaderSummary,
@@ -124,22 +124,18 @@ export const stableford: GameDefinition = {
 
     return round.players.map((player) => {
       const points = holePoints(round, player.id, hole)
-      const received = strokesReceived(round, player.id, hole)
 
       return {
         id: player.id,
         winner: isHoleStarted(round, hole) && points > 0 && points === best,
+        // Rány, které hráč na jamce dostává, se u jména ukazují jako tečky
+        // (viz PlayScreen), takže sem druhý štítek s toutéž informací nepatří.
         entries: [
           {
-            label: player.name,
+            label: t('common.holePoints'),
             value: isHoleStarted(round, hole) ? `${points}` : t('common.dash'),
             highlight: points === best && points > 0,
           },
-          // Kolik ran hráč na jamce dostává - bez toho není poznat, proč má za
-          // stejný počet ran jiný počet bodů než soupeř.
-          ...(received !== 0
-            ? [{ label: t('stableford.received'), value: `${received}` }]
-            : []),
         ],
       }
     })
