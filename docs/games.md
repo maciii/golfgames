@@ -5,7 +5,7 @@ implementovaná v samostatném souboru v `src/games/` a pokrytá testy vedle ně
 
 Společné pro všechny hry:
 
-- Zapisuje se **hrubé skóre** (počet ran). Se zvoleným hřištěm lze zapnout
+- Zapisuje se **brutto skóre** (počet ran). Se zvoleným hřištěm lze zapnout
   netto: hráči pak dostávají rány podle svého hracího handicapu a stroke indexu
   jamky.
 - Par každé jamky se nastavuje při hře (3, 4 nebo 5), výchozí je 4.
@@ -100,19 +100,19 @@ mění, kdo jamku vyhrál, ne to, jak se zahrála.**
 | `Double Best`                                    | netto      |
 | Body za birdie a eagle v Best + Součet           | netto      |
 | Stablefordovy body                               | netto      |
-| **Násobič extra bodů podle výsledku**            | **hrubý**  |
+| **Násobič extra bodů podle výsledku**            | **brutto** |
 | **Potvrzení Longestu**                           | osobní par |
-| **Potvrzení Nearestu**                           | **hrubý**  |
-| Součty ran ve výsledcích a ve scorekartě         | hrubý      |
+| **Potvrzení Nearestu**                           | **brutto** |
+| Součty ran ve výsledcích a ve scorekartě         | brutto     |
 
 Extra body jsou tedy jediná část bodování, kterou handicap nezvedá. Bunker za
 1 bod je 1 bod bez ohledu na to, kolik teček hráč na jamce má; dva body dá až
-tehdy, když jamku zahrál na **hrubé** birdie. Bez toho by hráč s ranou na
+tehdy, když jamku zahrál na **brutto** birdie. Bez toho by hráč s ranou na
 jamce dostal za stejný výkon dvojnásobek a s dvěma ranami trojnásobek.
 
 Jedinou výjimkou je potvrzování **Longestu**, které naopak stojí na osobním
 paru – jinak by slabší hráč bonus na dlouhé pětiparové jamce prakticky nikdy
-neuhrál. Nearest se potvrzuje hrubým parem. Podrobnosti jsou v kapitole
+neuhrál. Nearest se potvrzuje brutto parem. Podrobnosti jsou v kapitole
 [Potvrzování osobním parem](#potvrzování-osobním-parem).
 
 ## Předčasně ukončené kolo
@@ -172,7 +172,7 @@ Násobiče kromě paru jsou konfigurovatelné v nastavení bodování hry.
 Příklad: bunker za 1 bod zahraný na birdie dá v Best + Součet dvojici
 2 body, ve Skins hráči 2 body; stejný bunker zahraný na bogey nedá nic.
 
-**Rozhoduje hrubý výsledek, i když se hraje netto.** Rozdané rány mění to, kdo
+**Rozhoduje brutto výsledek, i když se hraje netto.** Rozdané rány mění to, kdo
 jamku vyhrál, ne to, jak se zahrála – hráč s tečkou na jamce má za bunker na
 par jeden bod jako každý jiný, ne dva. Jediná výjimka je potvrzování Longestu,
 které o osobní par naopak stojí (viz níž).
@@ -200,13 +200,13 @@ konkrétního přepínače se bonus přizná bez podmínky potvrzení parem.
 handicapu dostává. Slabší hráč tak Longest uhraje bogeyem na jamce, kde má
 tečku, protože netto je to par.
 
-Kdyby se potvrzoval hrubý par, byla by hra s vyrovnáním handicapů proti
+Kdyby se potvrzoval brutto par, byla by hra s vyrovnáním handicapů proti
 slabším hráčům dvakrát: jednou na skóre a podruhé na bonusu, který by na dlouhé
 pětiparové jamce prakticky nikdy nepotvrdili. Volbu **Potvrzovat Longest
-osobním PARem** jde v nastavení bodování hry vypnout a vrátit se ke hrubému
-paru. Na hrubé kolo volba nemá vliv – tam žádný osobní par neexistuje.
+osobním PARem** jde v nastavení bodování hry vypnout a vrátit se k brutto
+paru. Na brutto kolo volba nemá vliv – tam žádný osobní par neexistuje.
 
-**Nearest se potvrzuje vždycky hrubým parem**, ať je volba zapnutá, nebo ne. Je
+**Nearest se potvrzuje vždycky brutto parem**, ať je volba zapnutá, nebo ne. Je
 to rána na tříparovou jamku, kde délka hřiště slabšího hráče netrestá, takže
 handicap na ni nepatří.
 
@@ -245,7 +245,7 @@ Obrazovka **Nastavení bodování hry** (odkaz pod výběrem hry) drží volby
 | Nenásobit extra body           | vypnuto     | dvojnásobná jamka ani double nenásobí extra body    |
 | Potvrzovat Longest             | zapnuto     | při horším než par bod propadá soupeřům             |
 | Potvrzovat Nearest             | zapnuto     | při horším než par bod propadá soupeřům             |
-| Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest hrubě       |
+| Potvrzovat Longest osob. PARem | zapnuto     | jen Longest a jen v kole s HCP; Nearest brutto      |
 | Potvrzení parem                | vypnuto     | jen Skins; vítěz potvrdí výhru parem na další jamce |
 | Double Best                    | 1 b.        | jen Best + Součet; bod za oba lepší míče            |
 
@@ -393,8 +393,8 @@ Vyhrává dvojice s nejvyšším součtem bodů.
 Při zapnutém netto se před výpočtem `BEST`, `Součtu`, `Double Best` i bodů za
 birdie a eagle odečtou každému hráči rány podle jeho hracího HCP a stroke
 indexu jamky. To znamená, že pro `BEST` se porovnává nejlepší netto míč a pro
-`Součet` součet netto ran obou partnerů; hrubé rány se používají jen ve
-výchozím hrubém režimu. **Extra body** se naopak násobí hrubým výsledkem –
+`Součet` součet netto ran obou partnerů; brutto rány se používají jen ve
+výchozím brutto režimu. **Extra body** se naopak násobí brutto výsledkem –
 podrobně v kapitole [Hra s HCP](#hra-s-hcp-netto).
 
 **Lepší míč** dvojice je nejnižší zapsaná rána některého z partnerů.
@@ -463,7 +463,7 @@ rámeček se proto přesouvá podle zvoleného složení dvojic.
 
 V kole s HCP se `BEST`, `Součet`, `Double Best` i birdie/eagle vyhodnocují
 stejně jako u Best + Součet z netto ran. Násobič běžných extra bodů se bere z
-hrubého výsledku; Longest a Nearest se potvrzují podle stejného pravidla jako
+brutto výsledku; Longest a Nearest se potvrzují podle stejného pravidla jako
 u Best + Součet.
 
 ### Rozhodnutí tam, kde pravidla mlčí
@@ -516,7 +516,7 @@ započítají hráči, nebo se při horším než par nezapočítají.
 ### Potvrzení parem
 
 Volitelná varianta **Potvrzení parem** vyžaduje, aby hráč, který vyhrál jamku,
-zahrál na následující jamce alespoň hrubý par. Teprve potom se jeho výhra
+zahrál na následující jamce alespoň brutto par. Teprve potom se jeho výhra
 započítá. Pokud zahraje bogey nebo hůř, skin se nepotvrdí a vrátí se do banku,
 takže ho může získat vítěz další rozhodnuté jamky. Dokud následující jamka nemá
 zápis, zůstává výhra nepotvrzená. Poslední jamka se potvrzuje automaticky,
@@ -537,7 +537,7 @@ Za výsledek vůči paru dostane hráč par 2 body, birdie 3, eagle 4, bogey 1 a
 dvojbogey nebo horší 0 bodů. Vyhrává nejvyšší součet bodů; jedna zkažená jamka
 tak nemůže sebrat víc než dva body.
 
-Při zapnutém netto se od hrubého skóre odečtou rány podle hracího handicapu a
+Při zapnutém netto se od brutto skóre odečtou rány podle hracího handicapu a
 stroke indexu jamky. HCP index uloženého hráče se při výběru do Stablefordu
 předvyplní a nové platné indexy se zapamatují pro příště. Při porovnání hráčů
 ukazuje scorekarta tečky. Přepínač vedle názvu scorekarty volí mezi plným HCP

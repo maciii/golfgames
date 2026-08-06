@@ -258,7 +258,7 @@ describe('Match play - netto HCP', () => {
     expect(state.leaderIndex).toBe(1)
   })
 
-  it('v hrubém kole jsou obě jamky dělené', () => {
+  it('v brutto kole jsou obě jamky dělené', () => {
     const round = netRound()
     round.netScoring = false
 

@@ -89,7 +89,7 @@ const EMPTY_POINTS: TeamHolePoints = {
  * eagle a lepší třikrát. Bogey a horší extra bod neuhraje. Bonus se počítá
  * celé dvojici, i když ho zahrál jen jeden z partnerů.
  *
- * Násobí se **hrubý** výsledek, i když se kolo hraje netto. Rozdané rány mění
+ * Násobí se **brutto** výsledek, i když se kolo hraje netto. Rozdané rány mění
  * to, kdo jamku vyhrál, ne to, jak se zahrála - jinak by hráč s ranou na jamce
  * dostal za bunker na par dva body místo jednoho. Jediná výjimka je potvrzení
  * Longestu, který může v netto kole stát na osobním paru.

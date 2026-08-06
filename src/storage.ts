@@ -84,7 +84,7 @@ export function normalizeRound(round: Round): Round {
   const settings = { ...DEFAULT_SETTINGS, ...(round.settings ?? {}) }
 
   // Hřiště s nesedícím stroke indexem by rozdalo rány mimo pole jamek, takže
-  // se radši zahodí celý údaj - kolo se pak počítá hrubě jako dřív.
+  // se radši zahodí celý údaj - kolo se pak počítá brutto jako dřív.
   const course =
     round.course && Array.isArray(round.course.strokeIndex)
       ? {

@@ -145,7 +145,7 @@ describe('netto', () => {
 
     // Anna: 5-1=4 par (2 b.), 4 bez rány bogey (1 b.), 6-1=5 par (2 b.)
     expect(totalPoints(round, 'p1')).toBe(5)
-    // Bob hraje hrubě: bogey, bogey, bogey.
+    // Bob hraje brutto: bogey, bogey, bogey.
     expect(totalPoints(round, 'p2')).toBe(3)
   })
 

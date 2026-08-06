@@ -360,7 +360,7 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
               </label>
             )}
 
-            {/* Nabízí se, i když se zrovna hraje hrubě - nastavení hry se
+            {/* Nabízí se, i když se zrovna hraje brutto - nastavení hry se
                 otevírá dřív, než je jasné, jestli se zapne netto. */}
             {confirmsExclusive && (
               <label className="switch">

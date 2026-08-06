@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.32.0] – 2026-08-06
+
+### Změněno
+
+- **Brutto zůstává brutto.** Zavedený golfový pojem se v českých textech
+  nepřekládá – místo „hrubě“ a „hrubý par“ je všude `brutto`, symetricky
+  k `netto`, které se nepřekládalo nikdy. Anglické texty dál používají `gross`
+  a `net`. Změna se týká i dokumentace a komentářů, aby projekt mluvil jedním
+  slovníkem.
+
 ## [0.31.0] – 2026-08-06
 
 ### Přidáno

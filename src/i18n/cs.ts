@@ -187,7 +187,7 @@ export const cs = {
   'gameSettings.confirmPlayerNote': 'při horším než par se bonus nepočítá',
   'gameSettings.confirmByPersonalPar': 'Potvrzovat Longest osobním PARem',
   'gameSettings.confirmByPersonalParNote':
-    'v kole s HCP se Longest potvrzuje parem jamky včetně ran, které na ní hráč dostává; Nearest se potvrzuje vždy hrubým parem a hrubého kola se volba netýká',
+    'v kole s HCP se Longest potvrzuje parem jamky včetně ran, které na ní hráč dostává; Nearest se potvrzuje vždy brutto parem a brutto kola se volba netýká',
   'gameSettings.confirmSkinsByPar': 'Potvrzení parem',
   'gameSettings.confirmSkinsByParNote':
     'Vítěz jamky musí na následující jamce zahrát alespoň par, jinak se skin přenese do banku.',
@@ -468,7 +468,7 @@ export const cs = {
   'stableford.description': 'Par 2 body, birdie 3, eagle 4, bogey 1, horší nic.',
   'stableford.netDescription':
     'Netto: rány se odečítají podle stroke indexu jamky. Par 2 body, birdie 3, eagle 4, bogey 1, horší nic.',
-  'stableford.grossDetail': 'hrubě',
+  'stableford.grossDetail': 'brutto',
   'stableford.netDetail': 'netto, HCP {handicap}',
   'stableford.column': 'B',
   'stableford.received': 'Rány',

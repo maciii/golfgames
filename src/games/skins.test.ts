@@ -325,7 +325,7 @@ describe('Skins - netto HCP', () => {
     expect(results[1]?.winnerId).toBe(null)
   })
 
-  it('v hrubém kole se rány neodečítají a jamka je dělená', () => {
+  it('v brutto kole se rány neodečítají a jamka je dělená', () => {
     const round = netRound([1], 1)
     round.netScoring = false
 

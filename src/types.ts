@@ -180,13 +180,13 @@ export interface GameOptions {
    * V netto kole se **Longest** potvrzuje osobním parem - parem jamky plus
    * ranami, které na ní hráč podle handicapu dostává.
    *
-   * Bez toho by potvrzování bralo hrubý par a slabší hráč by bonus na dlouhé
+   * Bez toho by potvrzování bralo brutto par a slabší hráč by bonus na dlouhé
    * pětiparové jamce prakticky nikdy neuhrál, i když ji netto zahrál dobře.
-   * Nearest se tímhle neřídí - ten se potvrzuje vždycky hrubým parem. Na hrubé
+   * Nearest se tímhle neřídí - ten se potvrzuje vždycky brutto parem. Na brutto
    * kolo volba nemá vliv, tam žádný osobní par neexistuje.
    */
   confirmByPersonalPar: boolean
-  /** Vítěz skinu musí na následující jamce zahrát alespoň hrubý par. */
+  /** Vítěz skinu musí na následující jamce zahrát alespoň brutto par. */
   confirmSkinsByPar: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */
   resultMultipliers: Record<ResultTier, number>
@@ -297,7 +297,7 @@ export interface Round {
   settings: RoundSettings
   /** Hřiště, na kterém se hraje; chybí u kola založeného bez výběru hřiště. */
   course?: RoundCourse
-  /** Hraje se na rány s handicapem? Bez hodnoty se počítá hrubé skóre. */
+  /** Hraje se na rány s handicapem? Bez hodnoty se počítá brutto skóre. */
   netScoring?: boolean
   /** Strany prvních ran, podle kterých se u dynamických her skládají dvojice. */
   holePairings?: HolePairings

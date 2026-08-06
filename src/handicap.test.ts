@@ -154,7 +154,7 @@ describe('výpočty nad kolem', () => {
     return round
   }
 
-  it('u hrubého kola se rány neodečítají, i když je handicap zadaný', () => {
+  it('u brutto kola se rány neodečítají, i když je handicap zadaný', () => {
     const round = netRound(3, [5, 4, 6])
     round.netScoring = false
     expect(strokesReceived(round, 'p1', 0)).toBe(0)
@@ -181,7 +181,7 @@ describe('výpočty nad kolem', () => {
     expect(netDiffToPar(round, 'p1', 0)).toBeNull()
   })
 
-  it('hráč bez zadaného handicapu hraje hrubě i v netto kole', () => {
+  it('hráč bez zadaného handicapu hraje brutto i v netto kole', () => {
     const round = netRound(2, [5, 4, 6])
     expect(strokesReceived(round, 'p2', 0)).toBe(0)
   })
@@ -195,7 +195,7 @@ describe('výpočty nad kolem', () => {
     expect(strokesRelativeToBest(round, 'p2', 0)).toBe(0)
   })
 
-  it('relativní rány u hrubého kola nezobrazuje', () => {
+  it('relativní rány u brutto kola nezobrazuje', () => {
     const round = netRound(2, [5, 4, 6])
     round.netScoring = false
     expect(strokesRelativeToBest(round, 'p1', 0)).toBe(0)
@@ -341,7 +341,7 @@ describe('Potvrzování osobním parem', () => {
     expect(exclusiveBonusOutcome(netRoundWith(true), 'p1', 0, 'longest')).toBe('own')
   })
 
-  it('s vypnutou volbou rozhoduje hrubý par a bod propadá soupeřům', () => {
+  it('s vypnutou volbou rozhoduje brutto par a bod propadá soupeřům', () => {
     expect(exclusiveBonusOutcome(netRoundWith(false), 'p1', 0, 'longest')).toBe(
       'opponent',
     )
@@ -354,7 +354,7 @@ describe('Potvrzování osobním parem', () => {
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('opponent')
   })
 
-  it('na hrubém kole volba nic nemění', () => {
+  it('na brutto kole volba nic nemění', () => {
     const round = netRoundWith(true)
     round.netScoring = false
 
@@ -363,7 +363,7 @@ describe('Potvrzování osobním parem', () => {
 
   /**
    * Nearest se hraje na tříparovou jamku, kde délka hřiště slabšího hráče
-   * netrestá - proto se potvrzuje vždycky hrubým parem, i když má hráč na
+   * netrestá - proto se potvrzuje vždycky brutto parem, i když má hráč na
    * jamce ránu a Longest by za stejných okolností prošel.
    */
   it('Nearest se osobním parem neřídí ani se zapnutou volbou', () => {
@@ -373,7 +373,7 @@ describe('Potvrzování osobním parem', () => {
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'longest')).toBe('own')
   })
 
-  it('Nearest zahraný na hrubý par platí dál', () => {
+  it('Nearest zahraný na brutto par platí dál', () => {
     const round = netRoundWith(true)
     round.scores.p1 = [4]
 

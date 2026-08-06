@@ -116,14 +116,14 @@ export function roundStrokeIndex(round: Round): number[] {
   return normalizeStrokeIndex(round.course?.strokeIndex ?? [], round.holeCount)
 }
 
-/** Hrací handicap hráče; bez zadané hodnoty nula, tedy hraje hrubě. */
+/** Hrací handicap hráče; bez zadané hodnoty nula, tedy hraje brutto. */
 export function playingHandicap(round: Round, playerId: PlayerId): number {
   const player = round.players.find((p) => p.id === playerId)
   return player?.playingHandicap ?? 0
 }
 
 /**
- * Rány, které hráč dostává na jamce. U hrubého kola vždy nula, aby se netto
+ * Rány, které hráč dostává na jamce. U brutto kola vždy nula, aby se netto
  * logika nemusela obcházet podmínkami na každém volajícím místě.
  */
 export function strokesReceived(round: Round, playerId: PlayerId, hole: number): number {
@@ -159,7 +159,7 @@ export function strokesRelativeToBest(
 /**
  * Netto rány hráče na jamce; null, dokud jamku nezapsal.
  *
- * U hrubého kola vrací zapsané skóre beze změny - hry proto můžou volat tuhle
+ * U brutto kola vrací zapsané skóre beze změny - hry proto můžou volat tuhle
  * funkci vždycky a nemusí řešit, jestli se hraje netto.
  */
 export function netScoreAt(
@@ -187,11 +187,11 @@ export function netDiffToPar(
  *
  * Osobním parem (par jamky plus rány, které na ní hráč dostává) se v netto kole
  * potvrzuje **jen Longest**, a jen se zapnutou volbou. Nearest se potvrzuje
- * vždycky hrubým parem: je to rána na tříparovou jamku, kde délka hřiště
+ * vždycky brutto parem: je to rána na tříparovou jamku, kde délka hřiště
  * slabšího hráče netrestá, takže na ni handicap nepatří.
  *
  * Jinde se handicap do extra bodů nepromítá vůbec - hodnota bonusu se násobí
- * podle **hrubého** výsledku, protože rozdané rány nemají s tím, jak se jamka
+ * podle **brutto** výsledku, protože rozdané rány nemají s tím, jak se jamka
  * zahrála, nic společného.
  */
 export function confirmDiffToPar(

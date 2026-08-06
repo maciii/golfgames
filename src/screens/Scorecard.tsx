@@ -146,7 +146,7 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   )
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
 
-  // Stroke index se ukazuje jen u netto kola - u hrubého je to sloupec navíc
+  // Stroke index se ukazuje jen u netto kola - u brutto je to sloupec navíc
   // s číslem, které na nic nemá vliv, a mřížka je na telefonu úzká.
   const showStrokeIndex = isNetRound(round)
   const strokeIndex = roundStrokeIndex(round)

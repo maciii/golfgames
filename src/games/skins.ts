@@ -38,7 +38,7 @@ import { t } from '../i18n'
  *     ten jamku vzdal a o skin se ucházet nemůže.
  *   - Skiny přenesené z poslední jamky propadají.
  *   - V kole s HCP rozhoduje o skinu netto skóre; extra body se naproti tomu
- *     počítají z hrubého výsledku (viz `skinExtraPoints`).
+ *     počítají z brutto výsledku (viz `skinExtraPoints`).
  */
 
 /** Výsledek jedné jamky. */
@@ -201,7 +201,7 @@ export function skinResults(round: Round): SkinResult[] {
 
     // Kdo jamku vzdal, o skin se ucházet nemůže. Porovnává se netto skóre,
     // takže v kole s HCP bere skin hráč, který jamku zahrál líp po odečtu ran
-    // - při shodě hrubých ran rozhodne tečka na jamce.
+    // - při shodě brutto ran rozhodne tečka na jamce.
     const holeScores: { id: PlayerId; score: number }[] = round.players.map((p) => ({
       id: p.id,
       score: netScoreAt(round, p.id, hole) ?? CONCEDED,

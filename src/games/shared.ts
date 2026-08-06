@@ -12,7 +12,7 @@ import { t } from '../i18n'
  * dvě vzdané hodnoty proti sobě vyjdou jako shoda.
  *
  * O tom, kdo jamku zahrál líp, rozhoduje **netto** skóre - tedy rány po odečtu
- * handicapových ran. `netScoreAt()` u hrubého kola vrací zapsané rány beze
+ * handicapových ran. `netScoreAt()` u brutto kola vrací zapsané rány beze
  * změny, takže se to nikde nemusí větvit.
  */
 

@@ -173,7 +173,7 @@ describe('Best + Součet - netto HCP', () => {
         [2, 3],
       ],
       pars: [4],
-      // Hrubě vyhrává dvojice B: 4 je méně než 5 a 8 méně než 10.
+      // Brutto vyhrává dvojice B: 4 je méně než 5 a 8 méně než 10.
       scores: [[5], [5], [4], [4]],
       settings: { options: BASE_OPTIONS },
     })
@@ -195,7 +195,7 @@ describe('Best + Součet - netto HCP', () => {
     ])
   })
 
-  it('v hrubém kole ponechá Best i Součet beze změny', () => {
+  it('v brutto kole ponechá Best i Součet beze změny', () => {
     const round = sampleRound()
     round.players[0]!.playingHandicap = 10
     round.netScoring = false
@@ -210,7 +210,7 @@ describe('Best + Součet - netto HCP', () => {
    * hráč s tečkou na jamce dostal za bunker na par dva body místo jednoho -
    * a se dvěma tečkami rovnou tři.
    */
-  it('extra body se násobí hrubým výsledkem, ne netto', () => {
+  it('extra body se násobí brutto výsledkem, ne netto', () => {
     function roundWithHandicap(playingHandicap: number) {
       const round = makeRound({
         gameId: 'best-aggregate',
@@ -231,13 +231,13 @@ describe('Best + Součet - netto HCP', () => {
       return round
     }
 
-    // Bunker má hodnotu 1 bodu a Adam jamku zahrál na hrubý par.
+    // Bunker má hodnotu 1 bodu a Adam jamku zahrál na brutto par.
     expect(holePoints(roundWithHandicap(0), 0)[0]?.extra).toBe(1)
     expect(holePoints(roundWithHandicap(1), 0)[0]?.extra).toBe(1)
     expect(holePoints(roundWithHandicap(2), 0)[0]?.extra).toBe(1)
   })
 
-  it('hrubé birdie extra bod násobí i v netto kole', () => {
+  it('brutto birdie extra bod násobí i v netto kole', () => {
     const round = makeRound({
       gameId: 'best-aggregate',
       players: ['Adam', 'Alena', 'Bára', 'Bořek'],
@@ -254,7 +254,7 @@ describe('Best + Součet - netto HCP', () => {
     round.players[0]!.playingHandicap = 2
     round.bonuses.p1 = [['bunker']]
 
-    // Hrubé birdie = násobič 2, i když netto je to eagle.
+    // Brutto birdie = násobič 2, i když netto je to eagle.
     expect(holePoints(round, 0)[0]?.extra).toBe(2)
   })
 })
@@ -753,7 +753,7 @@ describe('Best + Součet - Longest a Nearest', () => {
     expect(teamB?.extra).toBe(0)
   })
 
-  it('s vypnutou volbou rozhoduje i v netto kole hrubý par', () => {
+  it('s vypnutou volbou rozhoduje i v netto kole brutto par', () => {
     const round = longestRound(6, true)
     round.settings.options.confirmByPersonalPar = false
     round.netScoring = true
@@ -768,7 +768,7 @@ describe('Best + Součet - Longest a Nearest', () => {
   /**
    * Stejná situace jako u Longestu výš, jen na tříparové jamce s Nearestem:
    * Adam má na jamce ránu a zahraje bogey, které je netto parem. Longest by
-   * tím prošel, Nearest ne - ten se potvrzuje vždycky hrubým parem.
+   * tím prošel, Nearest ne - ten se potvrzuje vždycky brutto parem.
    */
   it('Nearest se osobním parem neřídí', () => {
     const round = longestRound(4, true)

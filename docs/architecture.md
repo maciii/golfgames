@@ -233,7 +233,7 @@ hodnota `0` znamená vypnuto a bonus se pak vůbec nenabídne
 
 Násobení podle výsledku řeší `bonusMultiplier(diff, resultMultipliers)`:
 par ×1, birdie/eagle/albatros/condor podle nastavení (výchozí 2/3/10/1000),
-bogey a horší = 0. Do `diff` patří **hrubý** výsledek i v netto kole – handicap
+bogey a horší = 0. Do `diff` patří **brutto** výsledek i v netto kole – handicap
 mění, kdo jamku vyhrál, ne to, jak se zahrála. Longest a Nearest se
 **nenásobí** – o jejich přiznání rozhoduje potvrzovací pravidlo
 (`exclusiveBonusOutcome()` v `handicap.ts`), popsané
@@ -241,12 +241,12 @@ v [`games.md`](games.md#extra-body).
 
 `exclusiveBonusOutcome()` bydlí v `handicap.ts`, protože v netto kole potvrzuje
 **Longest** osobním parem (volba `confirmByPersonalPar`); Nearest se potvrzuje
-vždycky hrubým parem. Ptá se na něj hra i `PlayScreen`, aby barva značky
+vždycky brutto parem. Ptá se na něj hra i `PlayScreen`, aby barva značky
 u jména a skutečně přidělené body nemohly tvrdit každá něco jiného.
 
 Skins mají vlastní volbu `confirmSkinsByPar`, která se ukládá spolu s ostatními
 volbami hry. Při zapnutí se výhra skinu drží do další jamky a potvrzuje se
-hrubým parem vítěze; při neúspěchu se částka vrátí do banku.
+brutto parem vítěze; při neúspěchu se částka vrátí do banku.
 
 ## Násobení jamky
 
