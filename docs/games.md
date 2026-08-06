@@ -25,7 +25,7 @@ Společné pro všechny hry:
 - [Nastavení bodování hry](#nastavení-bodování-hry)
 - [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
 - [Značky výsledku na jamce](#značky-výsledku-na-jamce)
-- [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Match play](#match-play)
+- [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Dots](#dots-nine-dot--six-dot) · [Match play](#match-play)
 - [Přidání další hry](#přidání-další-hry)
 
 ## Vzdaná jamka vs. nehraná jamka
@@ -552,6 +552,58 @@ bodování nijak nemění.
   od nejtěžší podle stroke indexu.
 - **Tečky HCP vůči nejlepšímu hráči** používají jen rozdíl handicapů; hráč s
   nejnižším hracím HCP žádnou nedostane. Výchozí zobrazení zůstává toto.
+
+---
+
+## Dots (Nine Dot / Six Dot)
+
+**Hráči:** vždy 3, každý sám za sebe
+**Soubor:** [`src/games/dots.ts`](../src/games/dots.ts)
+
+Na každé jamce je v sázce pevný počet bodů a rozdělí se mezi tři hráče podle
+pořadí. Hra má dvě varianty, které se liší jen tabulkou; přepínají se
+v nastavení bodování hry.
+
+| Výsledek jamky        | Nine Dot (9 b.) | Six Dot (6 b.) |
+| --------------------- | --------------- | -------------- |
+| Tři různé výsledky    | 5-3-1           | 4-2-0          |
+| Dva nejlepší remizují | 4-4-1           | 3-3-0          |
+| Dva nejhorší remizují | 5-2-2           | 4-1-1          |
+| Remíza všech tří      | 3-3-3           | 2-2-2          |
+
+Součet na jamce je vždy stejný (9, resp. 6), takže za osmnáct jamek se rozdá
+162, resp. 108 bodů. Kdyby všichni tři hráli naprosto stejně, skončí každý na
+54, resp. 36 bodech.
+
+V anglických zdrojích se Nine Dot jmenuje **Nines** nebo **5-3-1**, Six Dot
+**Split Sixes** (taky „English" nebo „6-point").
+
+### Volitelné nadstavby
+
+Obě jsou ve výchozím stavu **vypnuté** – jsou to domácí pravidla, ne základ
+hry. Druhá se nabízí až se zapnutou první.
+
+| Volba                            | Co dělá                                             |
+| -------------------------------- | --------------------------------------------------- |
+| Výhra o 2 rány bere všechny body | Jediný vítěz s náskokem ≥ 2 rány bere 9, resp. 6 b. |
+| Birdie to zdvojnásobí            | Taková výhra na birdie a lepší bere 18, resp. 12 b. |
+
+### Rozhodnutí tam, kde pravidla mlčí
+
+- **Netto.** O pořadí na jamce rozhoduje netto skóre jako u ostatních her; tím
+  pádem se z netto počítá i náskok dvou ran a birdie k němu.
+- **Vzdaná jamka** je nejhorší možný výsledek, takže kdo vzdal, skončí
+  poslední. Když vzdají dva, dělí se o poslední místo (5-2-2, resp. 4-1-1).
+- **Smetení potřebuje zapsaný druhý výsledek.** Když zbylí dva jamku vzdali,
+  nikdo neví, o kolik se vyhrálo, a devět bodů v sázce nemá stát na čísle,
+  které nikdo nezapsal. Vítěz pak bere běžných 5, resp. 4 body.
+- **Dvojnásobná jamka** násobí body všech hráčů včetně smetení.
+- **Extra body hra nezná.** Tabulka sama odměňuje lepší výsledek na jamce
+  a bonusy by ji jen rozmazaly.
+
+> **Pozor na sázku.** Body tu rostou mnohem rychleji než u ostatních her –
+> rozdíl 20 bodů je při desetikoruně za bod 200 Kč. Hodnotu bodu se vyplatí
+> nastavit odpovídajícím dílem níž.
 
 ---
 

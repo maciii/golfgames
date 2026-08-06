@@ -164,6 +164,14 @@ export function bonusMultiplier(
   return multipliers.condor
 }
 
+/**
+ * Varianta bodové hry Dots: devět, nebo šest bodů na jamce.
+ *
+ * Obě se liší jen tabulkou bodů, takže jsou to volby jedné hry (viz
+ * `src/games/dots.ts`).
+ */
+export type DotVariant = 'nine' | 'six'
+
 /** Volby bodování konkrétní hry. */
 export interface GameOptions {
   /** Hodnota jednotlivých extra bodů; 0 znamená vypnuto. */
@@ -186,6 +194,12 @@ export interface GameOptions {
    * kolo volba nemá vliv, tam žádný osobní par neexistuje.
    */
   confirmByPersonalPar: boolean
+  /** Která tabulka bodů se u hry Dots hraje. */
+  dotVariant: DotVariant
+  /** Výhra jamky o dvě a víc ran bere všechny body jamky. */
+  sweepOnTwoStrokes: boolean
+  /** Výhra o dvě rány s birdie a lepším bere dvojnásobek bodů jamky. */
+  doubleSweepOnBirdie: boolean
   /** Vítěz skinu musí na následující jamce zahrát alespoň brutto par. */
   confirmSkinsByPar: boolean
   /** Kolikrát se extra bod násobí podle výsledku na jamce. */
@@ -204,6 +218,10 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   confirmLongest: true,
   confirmNearest: true,
   confirmByPersonalPar: true,
+  dotVariant: 'nine',
+  // Obě nadstavby jsou volitelné pravidlo, ne základ hry - proto vypnuté.
+  sweepOnTwoStrokes: false,
+  doubleSweepOnBirdie: false,
   confirmSkinsByPar: false,
   resultMultipliers: DEFAULT_RESULT_MULTIPLIERS,
   doubleClosingHoles: true,

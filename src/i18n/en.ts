@@ -178,6 +178,17 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.confirmSkinsByPar': 'Confirm with par',
   'gameSettings.confirmSkinsByParNote':
     'The hole winner must make at least par on the next hole or the skin carries into the pot.',
+  'gameSettings.dotVariant': 'Variant',
+  'gameSettings.dotVariantNine': 'Nine Dot · 9 pts',
+  'gameSettings.dotVariantSix': 'Six Dot · 6 pts',
+  'gameSettings.dotVariantNote':
+    'Nine Dot splits 9 points (5-3-1), Six Dot splits 6 points (4-2-0). The round carries its variant, so changing it later does not rescore finished rounds.',
+  'gameSettings.sweepOnTwoStrokes': 'Winning by 2 takes all {count} points',
+  'gameSettings.sweepOnTwoStrokesNote':
+    'Win the hole by two or more strokes and you take every point on it. The margin is measured against a recorded second score.',
+  'gameSettings.doubleSweepOnBirdie': 'A birdie doubles it to {count}',
+  'gameSettings.doubleSweepOnBirdieNote':
+    'Winning by two with a birdie or better doubles the points. Only offered with the option above turned on.',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'An extra point when both partners played better than both opponents.',
@@ -389,6 +400,10 @@ export const en: Record<MessageKey, Message> = {
   'games.stableford.tagline': 'Points per hole, one bad hole cannot ruin the round',
   'games.stableford.rules':
     'Played by individuals, 1 to 4 players. Each hole scores points against par: par 2 points, birdie 3, eagle 4, bogey 1, double bogey or worse nothing. With net scoring on, the result counts after deducting the strokes a player receives on the hole according to its stroke index. The player with the most points wins.',
+  'games.dots.name': 'Dots',
+  'games.dots.tagline': 'Nine Dot or Six Dot · points by rank on the hole, three players',
+  'games.dots.rules':
+    'A game for three players. Every hole puts a fixed number of points at stake and splits them by rank. Nine Dot awards 9 points: 5-3-1, 4-4-1 when the two best tie, 5-2-2 when the two worst tie and 3-3-3 when all three tie. Six Dot awards 6 points: 4-2-0, 3-3-0, 4-1-1 and 2-2-2. The variant and both extra rules are set in the scoring settings.',
 
   // Best Aggregate
   'best.points': 'Points',
@@ -457,6 +472,15 @@ export const en: Record<MessageKey, Message> = {
   },
   'stableford.headerNote': 'Points per hole: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Net points based on the stroke index of the hole.',
+
+  // Dots (Nine Dot / Six Dot)
+  'dot.nineName': 'Nine Dot',
+  'dot.sixName': 'Six Dot',
+  'dot.title': 'Points',
+  'dot.description': '{variant}: every hole splits {count} points between three players.',
+  'dot.headerNote': '{variant} · {count} points per hole',
+  'dot.column': 'P',
+  'dot.columnAria': '{name}: points for the hole',
 
   // Course editor
   'scorecard.strokeIndex': 'Stroke index of the hole',

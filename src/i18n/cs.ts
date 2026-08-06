@@ -191,6 +191,17 @@ export const cs = {
   'gameSettings.confirmSkinsByPar': 'Potvrzení parem',
   'gameSettings.confirmSkinsByParNote':
     'Vítěz jamky musí na následující jamce zahrát alespoň par, jinak se skin přenese do banku.',
+  'gameSettings.dotVariant': 'Varianta',
+  'gameSettings.dotVariantNine': 'Nine Dot · 9 b.',
+  'gameSettings.dotVariantSix': 'Six Dot · 6 b.',
+  'gameSettings.dotVariantNote':
+    'Nine Dot dělí 9 bodů (5-3-1), Six Dot 6 bodů (4-2-0). Kolo si zvolenou variantu nese s sebou, takže pozdější změna nepřepočítá odehraná kola.',
+  'gameSettings.sweepOnTwoStrokes': 'Výhra o 2 rány bere všech {count} bodů',
+  'gameSettings.sweepOnTwoStrokesNote':
+    'Kdo vyhraje jamku o dvě a víc ran, bere všechny body jamky a na ostatní nezbude nic. Náskok se počítá proti zapsanému druhému výsledku.',
+  'gameSettings.doubleSweepOnBirdie': 'Birdie k tomu zdvojnásobí na {count}',
+  'gameSettings.doubleSweepOnBirdieNote':
+    'Výhra o dvě rány zahraná na birdie a lepší bere dvojnásobek. Nabízí se jen se zapnutou volbou výš.',
   'gameSettings.doubleBest': 'Double Best',
   'gameSettings.doubleBestNote':
     'Bod navíc, když oba partneři zahráli líp než oba soupeři.',
@@ -408,6 +419,10 @@ export const cs = {
   'games.stableford.tagline': 'Body za jamku, zkažená jamka kolo nezničí',
   'games.stableford.rules':
     'Hraje se za jednotlivce, 1 až 4 hráči. Za jamku se počítají body podle výsledku vůči paru: par 2 body, birdie 3, eagle 4, bogey 1, dvojbogey a horší nic. Se zapnutým netto se výsledek počítá po odečtení ran, které hráč na jamce dostává podle jejího stroke indexu. Vyhrává hráč s nejvíc body.',
+  'games.dots.name': 'Dots',
+  'games.dots.tagline': 'Nine Dot nebo Six Dot · body za pořadí na jamce, tři hráči',
+  'games.dots.rules':
+    'Hra pro tři hráče. Na každé jamce je v sázce pevný počet bodů a rozdělí se podle pořadí. Nine Dot (Devítka) rozdává 9 bodů: 5-3-1, při shodě dvou nejlepších 4-4-1, při shodě dvou nejhorších 5-2-2 a při remíze všech 3-3-3. Six Dot (Šestka) rozdává 6 bodů: 4-2-0, 3-3-0, 4-1-1 a 2-2-2. Variantu i obě nadstavby zapneš v nastavení bodování hry.',
 
   // Best + Součet
   'best.points': 'Body',
@@ -479,6 +494,15 @@ export const cs = {
   },
   'stableford.headerNote': 'Body za jamku: par 2, birdie 3, eagle 4, bogey 1.',
   'stableford.headerNetNote': 'Netto body podle stroke indexu jamky.',
+
+  // Dots (Nine Dot / Six Dot)
+  'dot.nineName': 'Nine Dot',
+  'dot.sixName': 'Six Dot',
+  'dot.title': 'Body',
+  'dot.description': '{variant}: na každé jamce se mezi tři hráče dělí {count} bodů.',
+  'dot.headerNote': '{variant} · {count} bodů na jamce',
+  'dot.column': 'B',
+  'dot.columnAria': '{name}: body za jamku',
 
   // Zadání hřiště
   'scorecard.strokeIndex': 'Stroke index jamky',

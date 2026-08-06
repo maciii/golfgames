@@ -14,7 +14,7 @@ Doplňující čtení:
 ## Co to je
 
 PWA pro zápis golfového skóre po jamkách pro 1–4 hráče a vyhodnocení různých
-typů golfových her (Best + Součet, Levá-Pravá, Skins, Stableford, Match play) včetně peněžního
+typů golfových her (Best + Součet, Levá-Pravá, Skins, Stableford, Dots, Match play) včetně peněžního
 vyrovnání sázky.
 
 Klíčové vlastnosti prostředí, které tvarují všechna rozhodnutí:

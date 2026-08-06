@@ -44,6 +44,9 @@ function makeBaseOptions() {
     confirmNearest: false,
     confirmByPersonalPar: true,
     confirmSkinsByPar: false,
+    dotVariant: 'nine' as const,
+    sweepOnTwoStrokes: false,
+    doubleSweepOnBirdie: false,
     resultMultipliers: { birdie: 2, eagle: 3, albatross: 10, condor: 1000 },
     doubleClosingHoles: false,
   }

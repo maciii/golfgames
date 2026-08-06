@@ -1,7 +1,8 @@
 import { Fragment, useState } from 'react'
-import type { BonusId, GameOptions, ResultTier } from '../types'
+import type { BonusId, DotVariant, GameOptions, ResultTier } from '../types'
 import { BONUSES, RESULT_TIERS } from '../types'
 import { getGame } from '../games'
+import { NINE_DOT, SIX_DOT } from '../games/dots'
 import { loadGameOptions, saveGameOptions } from '../storage'
 import { APP_VERSION } from '../version'
 import { dynamicKey, useT } from '../i18n'
@@ -10,6 +11,17 @@ import type { MessageKey } from '../i18n'
 interface Props {
   gameId: string
   onBack: () => void
+}
+
+/** Varianty hry Dots; liší se jen tabulkou bodů (viz src/games/dots.ts). */
+const DOT_VARIANTS: { id: DotVariant; key: MessageKey }[] = [
+  { id: 'nine', key: 'gameSettings.dotVariantNine' },
+  { id: 'six', key: 'gameSettings.dotVariantSix' },
+]
+
+/** Kolik bodů je na jamce v sázce - dosazuje se do popisků obou nadstaveb. */
+function dotPointsPerHole(variant: DotVariant): number {
+  return (variant === 'six' ? SIX_DOT : NINE_DOT).perHole
 }
 
 interface NumberControlProps {
@@ -156,9 +168,13 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
     game.supportsDoubleHoles ||
     scoring.noDoubleBonuses ||
     confirmsExclusive ||
-    scoring.confirmSkinsByPar === true
+    scoring.confirmSkinsByPar === true ||
+    scoring.sweepOnTwoStrokes === true
   const hasScoringOptions =
-    pointBonuses.length > 0 || scoring.resultMultipliers || hasOtherOptions
+    pointBonuses.length > 0 ||
+    scoring.resultMultipliers ||
+    scoring.dotVariant === true ||
+    hasOtherOptions
   const confirmNote =
     scoring.bonusScope === 'team'
       ? t('gameSettings.confirmNote')
@@ -172,12 +188,33 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
       </header>
 
       <main className="content">
-        {hasScoringOptions && (
+        {/* Úvod mluví o hodnotách extra bodů, takže u hry bez nich nedává smysl. */}
+        {pointBonuses.length > 0 && (
           <p className="hint">
             {scoring.bonusScope === 'team'
               ? t('gameSettings.introTeam')
               : t('gameSettings.introPlayer')}
           </p>
+        )}
+
+        {scoring.dotVariant && (
+          <section className="section">
+            <h2 className="section-title">{t('gameSettings.dotVariant')}</h2>
+            <div className="segmented">
+              {DOT_VARIANTS.map((variant) => (
+                <button
+                  key={variant.id}
+                  type="button"
+                  className={`segment${options.dotVariant === variant.id ? ' selected' : ''}`}
+                  onClick={() => update({ ...options, dotVariant: variant.id })}
+                  aria-pressed={options.dotVariant === variant.id}
+                >
+                  {t(variant.key)}
+                </button>
+              ))}
+            </div>
+            <p className="hint">{t('gameSettings.dotVariantNote')}</p>
+          </section>
         )}
 
         {pointBonuses.length > 0 && (
@@ -390,6 +427,48 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 <span>
                   {t('gameSettings.confirmSkinsByPar')}
                   <em> {t('gameSettings.confirmSkinsByParNote')}</em>
+                </span>
+              </label>
+            )}
+
+            {scoring.sweepOnTwoStrokes && (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={options.sweepOnTwoStrokes}
+                  onChange={(e) =>
+                    update({
+                      ...options,
+                      sweepOnTwoStrokes: e.target.checked,
+                      // Zdvojnásobení nemá bez čeho zdvojnásobit; vypnutím
+                      // hlavní volby se proto vypíná i nadstavba nad ní.
+                      ...(e.target.checked ? {} : { doubleSweepOnBirdie: false }),
+                    })
+                  }
+                />
+                <span>
+                  {t('gameSettings.sweepOnTwoStrokes', {
+                    count: dotPointsPerHole(options.dotVariant),
+                  })}
+                  <em> {t('gameSettings.sweepOnTwoStrokesNote')}</em>
+                </span>
+              </label>
+            )}
+
+            {scoring.doubleSweepOnBirdie && options.sweepOnTwoStrokes && (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={options.doubleSweepOnBirdie}
+                  onChange={(e) =>
+                    update({ ...options, doubleSweepOnBirdie: e.target.checked })
+                  }
+                />
+                <span>
+                  {t('gameSettings.doubleSweepOnBirdie', {
+                    count: dotPointsPerHole(options.dotVariant) * 2,
+                  })}
+                  <em> {t('gameSettings.doubleSweepOnBirdieNote')}</em>
                 </span>
               </label>
             )}

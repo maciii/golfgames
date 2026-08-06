@@ -109,6 +109,12 @@ export interface GameScoringOptions {
   confirmNearest: boolean
   /** Skins může vyžadovat potvrzení výhry parem na další jamce. */
   confirmSkinsByPar?: boolean
+  /** Hra se hraje ve variantách s různou tabulkou bodů (Dots). */
+  dotVariant?: boolean
+  /** Hra zná výhru o dvě rány, která bere všechny body jamky. */
+  sweepOnTwoStrokes?: boolean
+  /** Hra zná zdvojnásobení takové výhry za birdie a lepší. */
+  doubleSweepOnBirdie?: boolean
   /** Komu připadne běžný bonus: celé dvojici, nebo jednotlivci. */
   bonusScope: 'team' | 'player'
 }

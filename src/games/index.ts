@@ -4,6 +4,7 @@ import { skins } from './skins'
 import { matchPlay } from './matchPlay'
 import { stableford } from './stableford'
 import { leftRight } from './leftRight'
+import { dots } from './dots'
 
 /**
  * Registr her.
@@ -20,6 +21,7 @@ export const GAMES: GameDefinition[] = [
   skins,
   matchPlay,
   stableford,
+  dots,
 ]
 
 export const DEFAULT_GAME_ID = bestAggregate.id

@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.33.0] – 2026-08-06
+
+### Přidáno
+
+- **Dots – nová hra pro tři hráče.** Na každé jamce se mezi tři hráče dělí
+  pevný počet bodů podle pořadí. Dvě varianty se přepínají v nastavení
+  bodování: **Nine Dot** dělí 9 bodů (5-3-1, při shodách 4-4-1 / 5-2-2 /
+  3-3-3) a **Six Dot** 6 bodů (4-2-0, 3-3-0, 4-1-1, 2-2-2). O pořadí na jamce
+  rozhoduje netto skóre, body jsou vidět ve scorekartě i v hlavičce zápisu.
+- **Dvě volitelné nadstavby Dots** (obě výchozí vypnuté): výhra jamky o dvě
+  a víc ran bere všechny body jamky, a zahraná na birdie a lepší je
+  zdvojnásobí – tedy 9/18, resp. 6/12 bodů.
+
 ## [0.32.0] – 2026-08-06
 
 ### Změněno
