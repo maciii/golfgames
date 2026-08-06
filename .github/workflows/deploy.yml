@@ -88,19 +88,15 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # Pojistka proti zaseknutému běhu; vlastní čekání řídí `timeout` níž.
-    timeout-minutes: 35
+    # Pojistka proti zaseknutému běhu. Delší čekání na Pages tím ale nezařídíš:
+    # `actions/deploy-pages` má vlastní strop 600 000 ms (10 minut) a vyšší
+    # hodnotu vstupu `timeout` beze slova ořízne zpátky na maximum. Když
+    # nasazení uvízne ve stavu `deployment_in_progress`, je to na straně služby
+    # a z workflow se to vyčkat nedá.
+    timeout-minutes: 20
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-        with:
-          # Kolik milisekund se čeká, než Pages nasazení dokončí.
-          #
-          # Výchozích 10 minut nestačilo: nasazení se rozběhlo, ale zůstalo ve
-          # stavu `deployment_in_progress` a action ho vlastním timeoutem sama
-          # zrušila. Job `timeout-minutes` na tohle nepomůže - odstřeluje se
-          # action, ne job.
-          timeout: 1800000
