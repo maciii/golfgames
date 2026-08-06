@@ -1,0 +1,104 @@
+import { expect, type Page } from '@playwright/test'
+
+/**
+ * Pomocníci pro testy rozvržení.
+ *
+ * Měří se vlastnosti, které platí na každém displeji a v každém prohlížeči -
+ * ne konkrétní pixely. Screenshotové porovnání by mezi Chromiem, WebKitem
+ * a Geckem hlásilo rozdíly v antialiasingu a testy by musel někdo pořád
+ * přepisovat.
+ */
+
+/** Nejmenší rozumný dotykový cíl. WCAG 2.2 chce 24 px, Apple i Google 44. */
+export const MIN_TAP_SIZE = 44
+
+/**
+ * Stránka se nesmí posouvat do stran.
+ *
+ * Vodorovný posuv znamená, že něco přeteklo z displeje - na telefonu je to
+ * nejčastější a nejotravnější chyba rozvržení. Jeden pixel tolerance kryje
+ * zaokrouhlení při neceločíselném device pixel ratio.
+ */
+export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }))
+
+  expect(
+    scrollWidth,
+    `stránka přetéká o ${scrollWidth - clientWidth} px do šířky`,
+  ).toBeLessThanOrEqual(clientWidth + 1)
+}
+
+/**
+ * Žádný viditelný prvek nesmí trčet za pravý okraj.
+ *
+ * Doplňuje kontrolu posuvu: prvek může přetéct i tam, kde stránku neposune
+ * (třeba uvnitř kontejneru s `overflow: hidden`), a stejně bude uříznutý.
+ * Prvky s vlastním vodorovným posuvem se přeskakují - u scorekarty je to záměr.
+ */
+export async function expectNothingClipped(page: Page): Promise<void> {
+  const offenders = await page.evaluate(() => {
+    const limit = document.documentElement.clientWidth
+    const found: string[] = []
+
+    for (const element of document.querySelectorAll<HTMLElement>('body *')) {
+      const style = getComputedStyle(element)
+      if (style.display === 'none' || style.visibility === 'hidden') continue
+      // Vlastní posuv uvnitř prvku je legitimní řešení širokého obsahu.
+      if (style.overflowX === 'auto' || style.overflowX === 'scroll') continue
+      if (element.closest('.scorecard-wrap')) continue
+
+      const box = element.getBoundingClientRect()
+      if (box.width === 0 || box.height === 0) continue
+      if (box.right > limit + 1) {
+        const name = element.className || element.tagName.toLowerCase()
+        found.push(`${name} (right ${Math.round(box.right)} > ${limit})`)
+      }
+    }
+
+    return [...new Set(found)].slice(0, 10)
+  })
+
+  expect(offenders, `prvky přetékají za pravý okraj:\n${offenders.join('\n')}`).toEqual(
+    [],
+  )
+}
+
+/** Prvek je vidět celý ve výřezu a dá se na něj klepnout prstem. */
+export async function expectTappable(page: Page, selector: string): Promise<void> {
+  const element = page.locator(selector).first()
+  await expect(element).toBeVisible()
+
+  const box = await element.boundingBox()
+  expect(box, `${selector} nemá rozměry`).not.toBeNull()
+  expect(
+    box!.height,
+    `${selector} je nižší než ${MIN_TAP_SIZE} px`,
+  ).toBeGreaterThanOrEqual(MIN_TAP_SIZE - 1)
+
+  const viewport = page.viewportSize()
+  if (viewport) {
+    expect(box!.x, `${selector} začíná mimo displej`).toBeGreaterThanOrEqual(-1)
+    expect(box!.x + box!.width, `${selector} končí mimo displej`).toBeLessThanOrEqual(
+      viewport.width + 1,
+    )
+  }
+}
+
+/**
+ * Založí kolo s výchozím nastavením a počká na obrazovku zápisu skóre.
+ *
+ * Na telefonu na šířku převezme zápis živá scorekarta, takže se čeká na jednu
+ * ze dvou možných obrazovek.
+ */
+export async function startRound(page: Page): Promise<void> {
+  await page.locator('.app-footer .primary-button').click()
+  await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
+}
+
+/** Hraje se zápis skóre na šířku jako scorekarta? */
+export async function isLandscapeScorecard(page: Page): Promise<boolean> {
+  return page.locator('.landscape-scorecard').isVisible()
+}

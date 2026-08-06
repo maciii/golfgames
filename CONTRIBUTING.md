@@ -14,17 +14,20 @@ Než se pustíš do netriviální změny, projdi [`docs/architecture.md`](docs/a
 
 ## Skripty
 
-| Příkaz               | Co dělá                                                |
-| -------------------- | ------------------------------------------------------ |
-| `npm run dev`        | vývojový server s hot reloadem                         |
-| `npm run build`      | zvedne patch verzi, zkontroluje typy a postaví `dist/` |
-| `npm run preview`    | náhled produkčního buildu                              |
-| `npm run test`       | testy pravidel her                                     |
-| `npm run test:watch` | testy v watch režimu                                   |
-| `npm run typecheck`  | jen kontrola typů                                      |
-| `npm run format`     | přeformátuje zdrojáky Prettierem                       |
-| `npm run check`      | typy + testy + kontrola formátování (co běží v CI)     |
-| `npm run icons`      | přegeneruje PWA ikony do `public/`                     |
+| Příkaz                     | Co dělá                                                |
+| -------------------------- | ------------------------------------------------------ |
+| `npm run dev`              | vývojový server s hot reloadem                         |
+| `npm run build`            | zvedne patch verzi, zkontroluje typy a postaví `dist/` |
+| `npm run preview`          | náhled produkčního buildu                              |
+| `npm run test`             | testy pravidel her                                     |
+| `npm run test:watch`       | testy v watch režimu                                   |
+| `npm run test:e2e`         | testy rozvržení ve všech prohlížečích a displejích     |
+| `npm run test:e2e:phone`   | totéž jen v telefonních profilech (rychlejší)          |
+| `npm run test:e2e:install` | stáhne prohlížeče pro Playwright (jednorázově)         |
+| `npm run typecheck`        | jen kontrola typů                                      |
+| `npm run format`           | přeformátuje zdrojáky Prettierem                       |
+| `npm run check`            | typy + testy + kontrola formátování (co běží v CI)     |
+| `npm run icons`            | přegeneruje PWA ikony do `public/`                     |
 
 Build bez zvednutí verze (třeba jen na ověření): `npx vite build`.
 
@@ -160,3 +163,25 @@ nadstavbami (Double Best, dvojnásobné jamky), aby měřily to, co tvrdí.
 
 Každý test popisuje modelovou situaci v komentáři nad fixturou, ať je
 z výsledku poznat, co se vlastně počítalo.
+
+### Rozvržení (Playwright)
+
+Vedle výpočtů se testuje jediná věc na rozhraní: **jestli se vejde do displeje
+a jde ovládat prstem**. Komponenty se dál netestují.
+
+- `e2e/responsive.spec.ts` – nic nepřetéká, ovládání má dotykovou velikost,
+  scorekarta se posouvá uvnitř svého rámu, patička zůstává na dohled
+- `e2e/helpers.ts` – měřicí pomocníci a založení kola
+
+Profily jsou v `playwright.config.ts`: pět telefonních (iOS Safari, Android
+Chrome, Firefox, iPhone SE, telefon na šířku), tablet a tři desktopové
+prohlížeče. **Telefon je hlavní profil** – `npm run test:e2e:phone` je to, co
+musí projít vždycky; větší displeje jsou kontrola navíc.
+
+Neporovnávají se screenshoty. Mezi Chromiem, WebKitem a Geckem se liší
+antialiasing i metriky písma, takže baseline by se přepisovala pořád; místo
+toho se měří chování a obrázek se jen přiloží k reportu. Testy taky nepatří do
+`npm run check` (a tím do CI) – vyžadují stažené prohlížeče, což je stovky
+megabajtů na každý běh. Pouštějí se lokálně před vydáním změn v rozvržení.
+
+Prohlížeče se stáhnou jednou: `npm run test:e2e:install`.

@@ -453,6 +453,21 @@ Fixtura `makeRound({ gameId, players, pars, scores, settings })`
 pravidel používají `BASE_OPTIONS`, kde jsou volitelné nadstavby (Double Best,
 dvojnásobné jamky) vypnuté – jinak by test tvrdil něco jiného, než měří.
 
+### Rozvržení v Playwrightu
+
+Jediná výjimka z pravidla „netestujeme React“ je **rozvržení**, protože se
+nedá spočítat – musí ho změřit prohlížeč. `e2e/responsive.spec.ts` ověřuje, že
+nic nepřetéká z displeje, ovládání má dotykovou velikost, scorekarta se
+posouvá uvnitř svého rámu a patička zůstává na dohled. Vzhled se neporovnává.
+
+Profily (`playwright.config.ts`) pokrývají tři vykreslovací jádra: WebKit
+(Safari na iOS i macOS), Chromium (Chrome na Androidu, Windows i Linuxu)
+a Gecko. Skutečné operační systémy Playwright nespouští, takže systémové
+chování – sdílení, instalace na plochu, klávesnice – tímhle pokryté není.
+
+Běží mimo `npm run check` a mimo CI: potřebují stažené prohlížeče. Podrobnosti
+v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
+
 ## Kde co hledat
 
 | Chci změnit…                     | Soubor                                  |

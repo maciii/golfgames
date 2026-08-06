@@ -56,6 +56,10 @@ npm run check    # typy + testy + formát – tohle musí projít před commitem
 - Mobilní viewport nastav ještě před první akcí v aplikaci a zachovej ho i při
   pořizování screenshotů. Čistě výpočetní Vitest testy viewport nemají a toto
   pravidlo se na ně nevztahuje.
+- Hotová sada je v `e2e/` (`npm run test:e2e:phone` pro telefonní profily,
+  `npm run test:e2e` pro celou matici včetně tabletu a desktopu). Telefonní
+  profily jsou ty, které musí projít; větší displeje jsou kontrola navíc.
+  Prohlížeče se stahují jednorázově přes `npm run test:e2e:install`.
 
 ## Nepřekročitelná pravidla
 

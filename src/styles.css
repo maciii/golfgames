@@ -2144,3 +2144,196 @@ div.course-item {
 .catalog-credit a {
   color: var(--accent);
 }
+
+/* --- responzivita -------------------------------------------------------- */
+
+/**
+ * Aplikace je stavěná na telefon a tím zůstává. Tenhle blok jen zajišťuje, aby
+ * vypadala záměrně i mimo něj: na úzkém telefonu se nic neuřízne a na širokém
+ * displeji se rozhraní neroztáhne přes celou obrazovku, kde by tlačítka byla
+ * metr od sebe a řádky nečitelně dlouhé.
+ *
+ * Pravidlo je jednoduché: mění se šířka sloupce a hustota mřížek, ne velikost
+ * dotykových cílů. `--tap` zůstává 48 px všude, protože na hřišti se appka
+ * ovládá palcem v rukavici i na tabletu.
+ */
+
+:root {
+  /* Šířka, za kterou už řádek textu není pohodlný a ovládání se rozjíždí. */
+  --app-max-width: 560px;
+  --screen-padding: 20px;
+}
+
+/**
+ * Přetečení do stran je vždy chyba: appka nemá mít vodorovný posuv. Široký
+ * obsah (scorekarta) se posouvá uvnitř svého rámu, ne celou stránkou.
+ *
+ * Schválně se to neřeší `overflow-x: hidden` na `body` - to by přetečení jen
+ * schovalo, rozbilo lepivou patičku a připravilo e2e test o jedinou věc, kterou
+ * umí spolehlivě změřit.
+ */
+.screen {
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin-inline: auto;
+}
+
+/* Živá scorekarta na telefonu na šířku se naopak roztáhne, jak jen může -
+   je to jediná obrazovka, která o šířku displeje opravdu stojí. */
+.landscape-scorecard {
+  width: 100%;
+}
+
+.content {
+  padding: var(--screen-padding);
+}
+
+.app-header,
+.app-footer {
+  padding-inline: var(--screen-padding);
+}
+
+/* Dlouhé jméno hráče nebo hřiště nesmí roztlačit řádek do šířky. Flex položky
+   se bez `min-width: 0` odmítají zmenšit pod obsah. */
+.player-info,
+.player-name,
+.standing-name,
+.settlement-name,
+.game-header-entry,
+.course-item,
+.archive-open {
+  min-width: 0;
+}
+
+.player-name,
+.standing-name,
+.settlement-name {
+  overflow-wrap: anywhere;
+}
+
+/* Sheet s extra body kopíruje šířku sloupce, ať na širokém displeji nevisí
+   přes celou spodní hranu. */
+.sheet-backdrop {
+  justify-content: center;
+}
+
+.sheet {
+  max-width: var(--app-max-width);
+}
+
+/* --- úzký telefon (iPhone SE, starší Androidy) --------------------------- */
+
+@media (max-width: 360px) {
+  :root {
+    --screen-padding: 14px;
+  }
+
+  .app-header h1 {
+    font-size: 20px;
+  }
+
+  /* Jazyky a ozubené kolo se na 320 px nevejdou vedle nadpisu v plné velikosti. */
+  .language-button {
+    width: 34px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .hole-number {
+    font-size: 40px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    font-size: 16px;
+  }
+
+  /* Segmenty se raději zalomí, než aby text zmizel pod okrajem. */
+  .segment {
+    padding-inline: 6px;
+    font-size: 14px;
+  }
+}
+
+/* --- velký telefon a tablet na výšku ------------------------------------- */
+
+@media (min-width: 600px) {
+  :root {
+    --app-max-width: 620px;
+    --screen-padding: 28px;
+  }
+
+  /* Jména hráčů a odpaliště se vejdou vedle sebe; místo se využije do šířky
+     místo aby se sloupec protahoval do délky. */
+  .name-list,
+  .tee-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+
+  .game-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+
+  /* Karta hry a její ozubené kolo musí zůstat na jednom řádku i v mřížce. */
+  .game-choice {
+    height: 100%;
+  }
+}
+
+/* --- tablet na šířku a desktop ------------------------------------------- */
+
+@media (min-width: 900px) {
+  :root {
+    --app-max-width: 720px;
+  }
+
+  /* Sloupec s appkou je vidět jako celek: rám ho oddělí od prázdné plochy. */
+  .screen {
+    border-inline: 1px solid var(--line);
+  }
+
+  /* Myš má jemnější cíl než palec, ale tlačítka zůstávají velká - appka se
+     na desktopu jen prohlíží, hraje se na telefonu. */
+  .link-button:hover,
+  .game-card:hover,
+  .segment:hover,
+  .course-item:hover {
+    background: var(--bg-input);
+  }
+
+  .link-button:hover {
+    background: none;
+    text-decoration: underline;
+  }
+}
+
+/* --- nízký displej na šířku ---------------------------------------------- */
+
+/**
+ * Na telefonu na šířku přebírá zápis skóre živá scorekarta (viz PlayScreen),
+ * ale ostatní obrazovky zůstávají a mají svisle míň místa než obvykle.
+ */
+@media (orientation: landscape) and (max-height: 520px) {
+  .app-header {
+    padding-block: 10px 8px;
+  }
+
+  .content {
+    gap: 16px;
+    padding-block: 14px;
+  }
+
+  .app-footer {
+    padding-block: 8px;
+  }
+
+  /* Panel s extra body se na nízkém displeji nesmí roztáhnout přes celou výšku
+     a schovat tlačítko Hotovo pod okraj. */
+  .sheet {
+    max-height: 94dvh;
+  }
+}

@@ -7,6 +7,22 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.31.0] – 2026-08-06
+
+### Přidáno
+
+- **Responzivní rozvržení pro všechny displeje.** Aplikace zůstává stavěná na
+  telefon, ale na širokém displeji se drží v centrovaném sloupci místo aby se
+  roztáhla přes celou obrazovku. Na tabletu se jména hráčů, odpaliště a karty
+  her skládají do mřížky, na úzkém telefonu (320 px) se zmenšují odsazení
+  a přepínač jazyka. Nízký displej na šířku má stlačené odsazení, aby se
+  ovládání vešlo na výšku.
+- **Testy rozvržení v Playwrightu.** `e2e/responsive.spec.ts` ověřuje ve
+  WebKitu, Chromiu i Gecku a v devíti profilech od iPhonu SE po desktop, že nic
+  nepřetéká z displeje, ovládání má dotykovou velikost, scorekarta se posouvá
+  uvnitř svého rámu a patička zůstává na dohled. Spouští se
+  `npm run test:e2e`, mimo CI.
+
 ## [0.30.2] – 2026-08-06
 
 ### Opraveno

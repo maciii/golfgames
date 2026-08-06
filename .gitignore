@@ -5,3 +5,9 @@ dev-dist/
 .env
 .DS_Store
 .vite/
+
+# Playwright: reporty, stopy a screenshoty z e2e testů
+test-results/
+playwright-report/
+blob-report/
+.playwright/
