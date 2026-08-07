@@ -753,8 +753,10 @@ export default function SetupScreen({
           )}
 
           <p className="hint">
+            {/* Počet jamek je počet hraných, ne celého resortu - z 27 jamek se
+                jich do kola dostane osmnáct. */}
             {course
-              ? t('setup.courseHint', { count: course.holeCount })
+              ? t('setup.courseHint', { count: playedHoles })
               : t('setup.noCourseHint')}
           </p>
         </section>
