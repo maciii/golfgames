@@ -33,6 +33,48 @@ export interface CourseTee {
   par?: number
   /** Délka v metrech. */
   distance?: number
+  /**
+   * Kolika jamek se norma týká; bez hodnoty celého hřiště.
+   *
+   * Devítky mívají v klubové scorekartě podepsanou osmnáctijamkovou normu
+   * a resort s 27 jamkami normuje osmnáctku ze dvou zvolených devítek. Bez
+   * tohohle údaje by se `CR - par` vztáhlo na jiný počet jamek, než se hraje,
+   * a hrací handicap by vyšel skoro dvojnásobný.
+   */
+  holeCount?: number
+}
+
+/**
+ * Devítka (obecně smyčka) uvnitř hřiště.
+ *
+ * Resort s 27 jamkami nemá tři hřiště, ale jedno hřiště o třech smyčkách,
+ * ze kterých se osmnáctka teprve skládá - a záleží na pořadí, protože každá
+ * kombinace má vlastní normu (Panorama Kácov: Forest & River je jiné hřiště
+ * než River & Forest). Smyčky jdou po sobě tak, jak jsou uložené jamky:
+ * první smyčka začíná jamkou 1, druhá tam, kde první skončila.
+ */
+export interface CourseLoop {
+  /** Stabilní id v rámci hřiště, např. 'forest'. */
+  id: string
+  name: string
+  /** Kolik jamek smyčka má. */
+  holeCount: number
+  /**
+   * Číslo, kterým se první jamka smyčky ukazuje hráči, když se hraje sama.
+   *
+   * Na resortu s víc devítkami má každá smyčka jamky 1-9, proto je výchozí
+   * hodnota 1. Půlka jedné osmnáctky je jiný případ: zadní devítka má jamky
+   * 10-18, a tam se hodnota vyplní.
+   */
+  startHole?: number
+  /**
+   * Normy odpališť pro tuhle smyčku samotnou (devítkové CR a SR).
+   *
+   * Odpaliště se páruje podle `id` s odpalištěm hřiště. Když smyčky normu
+   * mají, spočítá se norma kombinace z nich; jinak se použije norma hřiště
+   * přepočtená podílem hraných jamek.
+   */
+  tees?: CourseTee[]
 }
 
 export interface Course {
@@ -50,6 +92,11 @@ export interface Course {
   /** Stroke index jamek (1 = nejtěžší), délka === holeCount. */
   strokeIndex: number[]
   tees: CourseTee[]
+  /**
+   * Smyčky hřiště, ze kterých se kolo skládá; bez nich se hraje celé hřiště
+   * (u osmnáctky případně jedna z jejích půlek).
+   */
+  loops?: CourseLoop[]
   source: CourseSource
   /** Prezentační původ uložené kopie; starší data ho nemají a doplní se. */
   origin?: CourseOrigin
@@ -90,12 +137,43 @@ export function isValidCourse(course: unknown): course is Course {
     if (c.strokeIndex.length !== 0 && c.strokeIndex.length !== c.holeCount) return false
   }
 
+  if (c.loops !== undefined && !Array.isArray(c.loops)) return false
+
   return c.tees === undefined || Array.isArray(c.tees)
+}
+
+/**
+ * Smyčky hřiště, ale jen když dávají dohromady celé hřiště.
+ *
+ * Neúplný nebo přesahující seznam by ukrojil jamky mimo pole parů, takže se
+ * zahodí celý a hřiště se hraje jako jeden celek - stejný přístup jako u SI,
+ * který nesedí délkou. Vrací `undefined`, když hřiště smyčky nemá.
+ */
+function validLoops(course: Course): CourseLoop[] | undefined {
+  if (!Array.isArray(course.loops) || course.loops.length === 0) return undefined
+
+  const ids = new Set<string>()
+  let holes = 0
+  for (const loop of course.loops) {
+    if (!loop || typeof loop.id !== 'string' || !loop.id) return undefined
+    if (ids.has(loop.id)) return undefined
+    ids.add(loop.id)
+    if (!Number.isInteger(loop.holeCount) || loop.holeCount <= 0) return undefined
+    holes += loop.holeCount
+  }
+  if (holes !== course.holeCount) return undefined
+
+  return course.loops.map((loop) => ({
+    ...loop,
+    name: typeof loop.name === 'string' && loop.name ? loop.name : loop.id,
+    ...(loop.tees ? { tees: loop.tees.map((tee) => ({ ...tee })) } : {}),
+  }))
 }
 
 /** Doplní pole, která v uloženém nebo naimportovaném hřišti chybí. */
 export function normalizeCourse(course: Course): Course {
   const source = course.source ?? 'manual'
+  const loops = validLoops(course)
   const origin =
     course.origin === 'catalog' || course.origin === 'private'
       ? course.origin
@@ -111,6 +189,7 @@ export function normalizeCourse(course: Course): Course {
         ? [...course.strokeIndex]
         : defaultStrokeIndex(course.holeCount),
     tees: Array.isArray(course.tees) ? course.tees.map((tee) => ({ ...tee })) : [],
+    ...(loops ? { loops } : { loops: undefined }),
     source,
     origin,
   }

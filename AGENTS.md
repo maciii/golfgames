@@ -102,10 +102,17 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   jinak by hráč s tečkou dostal za bunker na par dva body. Jediná výjimka je
   potvrzení **Longestu** (`exclusiveBonusOutcome()` v `handicap.ts`), které
   stojí na osobním paru; Nearest se potvrzuje vždycky brutto.
-- **Číslo jamky není `hole + 1`.** Osmnáctku jde hrát jen na jednu devítku;
-  kolo pak má `holeCount` 9, výřez parů a SI, a `startHole` 10 u druhé devítky.
-  Číslo pro hráče dává výhradně `holeNumber(round, hole)` - v UI, ve výpisech
-  jamek i v pravidle o dvojnásobné 9. a 18. jamce.
+- **Číslo jamky není `hole + 1`.** Kolo se nehraje vždycky na celé hřiště:
+  osmnáctku jde hrát jen na jednu devítku a resort s 27 jamkami osmnáctku
+  teprve skládá ze dvou svých devítek. Kolo pak má `holeCount` hraných jamek,
+  výřez parů a SI a `startHole` podle hrané části. Číslo pro hráče dává
+  výhradně `holeNumber(round, hole)` - v UI, ve výpisech jamek i v pravidle
+  o dvojnásobné 9. a 18. jamce.
+- **Výřez hřiště počítá jen `src/courses/layout.ts`.** Obrazovky si pary,
+  stroke index ani normu odpaliště pro hranou část neodvozují samy - jinak by
+  výběr jamek a hrací handicap tvrdily každý něco jiného. Na pořadí devítek
+  záleží (Forest + River je jiná osmnáctka než River + Forest) a stroke index
+  se mezi nimi prostřídá.
 - **`noUncheckedIndexedAccess` je zapnuté.** Indexování pole vrací
   `T | undefined`, proto je v kódu tolik `?? fallback`. Neobcházej to
   přetypováním; TypeScript 7 navíc odmítne type predicate, který je širší než

@@ -52,6 +52,15 @@ export const cs = {
   'setup.holesBack': '10–18',
   'setup.holeRangeHint':
     'Osmnáctku jde hrát celou, nebo jen na první či druhou devítku. Pary, stroke indexy i handicapy se vezmou z vybraných jamek.',
+  'setup.loops': 'Části hřiště',
+  'setup.loopOrder': 'v pořadí {order}',
+  'setup.loopSelection': {
+    one: 'Hraje se {loops} – {count} jamka',
+    few: 'Hraje se {loops} – {count} jamky',
+    other: 'Hraje se {loops} – {count} jamek',
+  },
+  'setup.loopsHint':
+    'Hřiště má víc devítek a záleží na tom, které a v jakém pořadí se hrají – každá kombinace má vlastní pary, stroke indexy i normu. Klepnutím devítku přidáš, dalším klepnutím na poslední ji odebereš. Devítka, která se do osmnácti jamek už nevejde, začne výběr znovu.',
 
   // Hřiště a handicapy
   'setup.course': 'Hřiště',
@@ -551,6 +560,11 @@ export const cs = {
   'picker.credit': 'Hřiště z otevřeného katalogu Golf Games, licence ODbL.',
   'picker.creditLink': 'Zdroj a opravy',
   'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },
+  'picker.loops': {
+    one: '{count} devítka',
+    few: '{count} devítky',
+    other: '{count} devítek',
+  },
   'picker.tees': {
     one: '{count} odpaliště',
     few: '{count} odpaliště',
@@ -569,6 +583,9 @@ export const cs = {
   'course.holes': 'Jamky',
   'course.holesHint':
     'U každé jamky nastav par a její obtížnost. Stroke index se posouvá tlačítky, aby zůstal pořadím bez duplicit.',
+  'course.loopName': 'Název {number}. devítky',
+  'course.loopsHint':
+    'Hřiště s víc než osmnácti jamkami se dělí na devítky. Kolo se z nich pak skládá při zakládání hry a záleží na pořadí.',
   'course.parForHole': 'Par {par} na jamce {hole}',
   'course.siShort': 'SI {si}',
   'course.harder': 'Jamka {hole} je těžší',

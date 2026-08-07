@@ -202,6 +202,9 @@ export default function CoursePickerScreen({
         course.club && course.club !== course.name ? course.club : null,
         course.country,
         t('picker.holes', { count: course.holeCount }),
+        course.loops && course.loops.length > 0
+          ? t('picker.loops', { count: course.loops.length })
+          : null,
         course.tees.length > 0
           ? t('picker.tees', { count: course.tees.length })
           : t('picker.noTees'),
@@ -224,6 +227,7 @@ export default function CoursePickerScreen({
           entry.club,
           entry.country,
           t('picker.holes', { count: entry.holeCount }),
+          entry.loops ? t('picker.loops', { count: entry.loops }) : null,
           entry.rated ? t('picker.rated') : t('picker.notRated'),
         ]
           .filter(Boolean)

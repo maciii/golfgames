@@ -37,6 +37,11 @@ export interface CatalogEntry {
   lat?: number
   lon?: number
   holeCount: number
+  /**
+   * Na kolik devítek se hřiště dělí; chybí u hřiště, které se hraje vcelku.
+   * Rejstřík to nese proto, aby bylo poznat resort ještě před stažením.
+   */
+  loops?: number
   /** Kolik má hřiště odpališť. */
   tees: number
   /** Má aspoň jedno odpaliště normu? Bez ní se handicap nedopočítá z indexu. */

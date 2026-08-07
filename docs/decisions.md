@@ -457,10 +457,40 @@ neměly by nenápadně měnit už zavedené bodování.
 
 ---
 
+## 25. Resort je víc hřišť, hřiště je víc devítek
+
+**Rozhodnutí.** Dvě hřiště jednoho areálu jsou v katalogu **dva záznamy**
+(Čeladná Old a New). Devítky jednoho hřiště jsou `loops` uvnitř jednoho
+záznamu a kolo se z nich při zakládání **skládá v pořadí**, protože Forest +
+River je jiná osmnáctka než River + Forest. Skládat se musí jen hřiště nad
+osmnáct jamek; kratší se dá hrát celé a devítky jsou u něj volba navíc.
+Poskládané kolo má nejvýš osmnáct jamek.
+
+**Proč.** Hřiště se v areálu vybírá jménem („hrajeme New Course"), takže patří
+do nabídky jako samostatná položka. Devítka se ale sama nevybírá, ta se páruje —
+a klub každou dvojici normuje zvlášť. Tři devítky by jako devět záznamů
+kombinací nabídku zaplevelily a stejná data by v ní ležela devětkrát; jako tři
+smyčky se skládají přesně tak, jak se hrají.
+
+**Důsledky.** Norma kombinace se počítá z devítkových norem (CR se sčítá, SR
+průměruje podle jamek). Proti tabulce klubu to může minout o jednotku slope,
+protože se zaokrouhluje z už zaokrouhlených čísel — na hracím handicapu je to
+desetina rány, a proti tomu stojí, že katalog nemusí držet devět skoro
+shodných scorekaret na jeden resort. Stroke index se mezi devítkami prostřídá
+(první lichý, druhý sudý), jinak by hráč dostal všechny rány na první devítce.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
 
+- **Kolo delší než osmnáct jamek.** Resort s 27 jamkami by šlo odehrát celý,
+  ale hry počítají s dvojnásobnou devátou a osmnáctou jamkou a peníze s jedním
+  kolem. Skládání je proto zastropované na osmnáctce.
+- **Devítka hraná dvakrát.** ČGF normuje i „Forest & Forest" a devítková
+  hřiště mívají osmnáctijamkovou normu na dvě kola. Aplikace to umí, když
+  hřiště devítky deklaruje; u obyčejné devítky se zatím hraje devět jamek.
 - **Extra body v dalších hrách.** Best + Součet a Skins je vyhodnocují,
   Match play je záměrně nepoužívá. Nová hra musí rozsah deklarovat přes
   `GameDefinition.scoringOptions`.

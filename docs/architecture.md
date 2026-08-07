@@ -97,25 +97,48 @@ interface Round {
 nastavení), ne při listování jamkami. Stará kola z verzí před synchronizací ho
 nemají a `normalizeRound()` jim ho doplní jako `finishedAt ?? createdAt`.
 
-### Devítka z osmnáctijamkového hřiště
+### Výřez hřiště: devítky, kombinace a krátká hřiště
 
-Osmnáctka se běžně hraje jen na jednu devítku, a to buď na první (jamky 1–9),
-nebo na druhou (10–18). Kolo si v takovém případě **vezme jen výřez hřiště**:
-`holeCount` je 9, `pars` a `course.strokeIndex` obsahují právě těch devět
-jamek a `startHole` říká, kterou jamkou kolo začíná (`10` u druhé devítky,
-u první nic).
+Kolo se nehraje vždycky na celé hřiště a hřiště nemá vždycky devět nebo
+osmnáct jamek. Osmnáctka se běžně hraje jen na jednu devítku (jamky 1–9, nebo
+10–18), resort s 27 jamkami žádnou „celou" podobu nemá a osmnáctka na něm
+teprve vzniká výběrem dvou devítek **v pořadí**, a existují hřiště o šesti nebo
+dvanácti jamkách. Katalogové hřiště proto může mít `loops` – pojmenované
+devítky, které jdou po sobě tak, jak jsou uložené jamky.
 
-Model tím zůstává stejný jako u kteréhokoli devítijamkového kola – indexy jamek
-jsou dál 0-based od nuly a nikde se nepočítá s dírami. Jediné, co se posouvá, je
-**číslo jamky pro hráče**: dopočítá ho `holeNumber(round, hole)`
-(`firstHoleNumber()` přitom poškozenou hodnotu spolkne a vrátí 1). Tohle číslo
-používá zápis skóre, scorekarta, výběr extra bodů, výpis vyhraných jamek
-u Skins, hlášení chybějících zápisů i pravidlo o dvojnásobné závěrečné jamce.
+Co se z hřiště a zvolených devítek stane, počítá **jediné místo**,
+`src/courses/layout.ts`; obrazovky si nic neodvozují samy:
 
-Hrací handicap se u půlky kola počítá z **poloviny** normy odpaliště
-(`courseHandicap(..., share)`), protože devítkové CR a SR se do katalogu
-nezadávají. Ručně zadaný počet ran se nepůlí – to už je hrací handicap pro
-tohle kolo.
+- `playableLoops()` – části, ze kterých jde kolo poskládat. Hřiště bez `loops`
+  jsou u osmnáctky dvě půlky (`front`, `back`), jinak nic.
+- `requiresLoopSelection()` – skládat se musí jen hřiště **nad osmnáct jamek**;
+  kratší se dá hrát celé a devítky jsou u něj volba navíc.
+- `resolveLayout()` – pary, stroke index, číslo první jamky a par výřezu.
+- `layoutTee()` – norma odpaliště pro hraný výřez.
+
+Kolo pak vypadá jako každé jiné: `holeCount` je počet hraných jamek, `pars`
+a `course.strokeIndex` jsou výřezem hřiště, indexy jamek zůstávají 0-based od
+nuly a nikde se nepočítá s dírami. Posouvá se jediné – **číslo jamky pro
+hráče**, které dopočítá `holeNumber(round, hole)` (`firstHoleNumber()` přitom
+poškozenou hodnotu spolkne a vrátí 1). Samostatně hraná devítka si číslování
+nese z hřiště (zadní devítka osmnáctky je 10–18, devítka resortu 1–9), složené
+kolo se čísluje od jedničky. `course.layoutName` navíc drží, jak se hraná část
+jmenuje („Forest + River“).
+
+**Stroke index složené osmnáctky se prostřídá.** Každá devítka má vlastní SI
+1–9; kdyby se jen slepily, dostal by hráč s devíti ranami všechny na první
+devítce. `resolveLayout()` proto v každé devítce jamky seřadí podle obtížnosti
+a čísla mezi devítky prostřídá (první lichá, druhá sudá) – přesně jak to dělají
+klubové scorekarty kombinací.
+
+**Norma se vztahuje k hraným jamkám.** Když mají devítky vlastní (devítkovou)
+normu, složí se z nich norma kombinace: CR se sčítá, SR se průměruje podle
+počtu jamek – na Kácově z Forest 38,0/149 a River 35,9/129 vyjde 73,9/139,
+což je přesně to, co normovací tabulka ČGF uvádí. Bez devítkových norem se
+použije norma hřiště zkrácená podílem hraných jamek
+(`courseHandicap(..., share)`); `tee.holeCount` přitom říká, kolika jamek se
+norma týká, takže devítka s podepsanou osmnáctijamkovou normou vyjde správně.
+Ručně zadaný počet ran se nekrátí – to už je hrací handicap pro tohle kolo.
 
 ### Invarianty, které je potřeba držet
 
@@ -358,18 +381,18 @@ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen 
 
 ## Obrazovky
 
-| Soubor                   | Co dělá                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, počet jamek (u osmnáctky i která devítka); vstup do nastavení hry            |
-| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta         |
-| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                      |
-| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                                    |
-| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                          |
-| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami, dekoracemi a vlastními sloupci hry; u netto her přepínač reference HCP |
-| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                                    |
-| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                                 |
-| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                       |
-| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                  |
+| Soubor                   | Co dělá                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, hraný výřez hřiště (půlka osmnáctky, devítky resortu v pořadí); vstup do nastavení hry |
+| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta                   |
+| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                                |
+| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                                              |
+| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                                    |
+| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami, dekoracemi a vlastními sloupci hry; u netto her přepínač reference HCP           |
+| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                                              |
+| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                                           |
+| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                                 |
+| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                            |
 
 ### Ovládání zápisu skóre
 
@@ -482,6 +505,7 @@ v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
 | přidělení Longestu a Nearestu    | `src/handicap.ts`                       |
 | lepší míč a součet dvojice       | `src/games/shared.ts`                   |
 | model hřiště a jeho kontrola     | `src/courses/types.ts`                  |
+| výřez hřiště a norma pro něj     | `src/courses/layout.ts`                 |
 | zadání hřiště                    | `src/screens/CourseEditScreen.tsx`      |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
 | co se ukládá do telefonu         | `src/storage.ts`                        |

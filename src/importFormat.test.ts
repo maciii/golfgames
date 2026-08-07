@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parseBackup } from './backup'
 import { normalizeStrokeIndex, strokesForHole } from './handicap'
+import { layoutTee, requiresLoopSelection, resolveLayout } from './courses/layout'
+import { normalizeCourse } from './courses/types'
 
 /**
  * Kontrola vzoru pro hromadný import hřišť.
@@ -20,15 +22,47 @@ describe('vzor pro import hřišť', () => {
     expect(result.ok).toBe(true)
   })
 
-  it('načte obě hřiště i s odpališti', () => {
+  it('načte všechna hřiště i s odpališti', () => {
     const result = parseBackup(sample)
     if (!result.ok) throw new Error('vzor neprošel kontrolou')
 
     const courses = result.backup.data.courses
-    expect(courses).toHaveLength(2)
+    expect(courses).toHaveLength(3)
     expect(courses[0]?.name).toBe('Karlštejn')
     expect(courses[0]?.tees).toHaveLength(2)
     expect(courses[0]?.tees[0]?.slopeRating).toBe(132)
+  })
+
+  it('resort ve vzoru se dá poskládat z devítek', () => {
+    const result = parseBackup(sample)
+    if (!result.ok) throw new Error('vzor neprošel kontrolou')
+
+    const resort = result.backup.data.courses.find((c) => c.holeCount === 27)
+    if (!resort) throw new Error('ve vzoru chybí hřiště s devítkami')
+
+    // Devítky musí pokrýt celé hřiště, jinak by je normalizace zahodila.
+    const course = normalizeCourse(resort)
+    expect(course.loops).toHaveLength(3)
+    expect(requiresLoopSelection(course)).toBe(true)
+
+    // Kombinace se skládá z devítkových norem: CR se sčítá, SR průměruje.
+    const layout = resolveLayout(course, ['forest', 'river'])
+    const tee = layoutTee(course, layout, 'yellow')
+    expect(layout.holeCount).toBe(18)
+    expect(tee?.courseRating).toBe(71)
+    expect(tee?.slopeRating).toBe(129)
+    expect(tee?.share).toBe(1)
+  })
+
+  it('devítka s vlastní normou se nekrátí, s osmnáctijamkovou ano', () => {
+    const result = parseBackup(sample)
+    if (!result.ok) throw new Error('vzor neprošel kontrolou')
+
+    const nine = result.backup.data.courses.find((c) => c.holeCount === 9)
+    if (!nine) throw new Error('ve vzoru chybí devítijamkové hřiště')
+
+    const course = normalizeCourse(nine)
+    expect(layoutTee(course, resolveLayout(course), 'yellow')?.share).toBe(1)
   })
 
   it('pary i stroke index sedí délkou na počet jamek', () => {

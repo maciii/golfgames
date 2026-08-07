@@ -268,6 +268,11 @@ export interface RoundCourse {
   /** Id v katalogu; ručně zadané hřiště ho mít nemusí. */
   id?: string
   name: string
+  /**
+   * Hraná část hřiště, jak se jmenuje na resortu („Forest + River", „10–18").
+   * Chybí u kola na celé hřiště - tam by nic nedodala.
+   */
+  layoutName?: string
   teeId?: string
   teeName?: string
   /** Course Rating zvoleného odpaliště. */

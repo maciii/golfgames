@@ -24,6 +24,8 @@ v [`docs/decisions.md`](../docs/decisions.md).
   individuálním hrám hráči, který ho uhrál.
 - **Uživatelské texty patří do `src/i18n/`, ne do komponent.** Kód
   a identifikátory zůstávají anglicky.
+- Hraný výřez hřiště (půlka osmnáctky, devítky resortu v pořadí) i norma
+  odpaliště pro něj se počítají **jen** v `src/courses/layout.ts`.
 - Komentáře vysvětlují **proč**, ne co.
 
 ## Testování UI

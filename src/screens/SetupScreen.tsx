@@ -10,7 +10,17 @@ import {
   saveSettings,
 } from '../storage'
 import type { Course } from '../courses/types'
-import { coursePar, findTee } from '../courses/types'
+import { findTee } from '../courses/types'
+import type { PlayableLoop } from '../courses/layout'
+import {
+  MAX_LAYOUT_HOLES,
+  defaultLoopSelection,
+  layoutTee,
+  playableLoops,
+  requiresLoopSelection,
+  resolveLayout,
+  selectionHoleCount,
+} from '../courses/layout'
 import { courseHandicap } from '../handicap'
 import type { CreateRoundOptions, Currency, RoundCourse, RoundSettings } from '../types'
 import { DEFAULT_POINT_VALUE } from '../types'
@@ -31,26 +41,20 @@ const CURRENCIES: Currency[] = ['CZK', 'EUR']
 const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
 
 const MAX_PLAYERS = 4
-const HOLE_OPTIONS = [9, 18]
 
 /**
- * Které jamky osmnáctijamkového hřiště se hrají.
- *
- * Devítka se běžně hraje jako první, nebo druhá půlka kola - a na tom záleží,
- * protože každá půlka má vlastní pary i stroke indexy a jamky se číslují dál
- * (10-18).
+ * Počty jamek pro kolo bez hřiště. Šestka i dvanáctka existují - krátká
+ * hřiště se staví právě takhle.
  */
-export type HoleRange = 'full' | 'front' | 'back'
+const HOLE_OPTIONS = [6, 9, 12, 18]
 
-const HOLE_RANGES: { id: HoleRange; key: MessageKey }[] = [
-  { id: 'full', key: 'setup.holesAll' },
-  { id: 'front', key: 'setup.holesFront' },
-  { id: 'back', key: 'setup.holesBack' },
-]
-
-/** Kolikátou jamkou hřiště zvolená půlka začíná. */
-function rangeStartHole(range: HoleRange): number {
-  return range === 'back' ? 10 : 1
+/**
+ * Půlky osmnáctky se v nabídce jmenují podle překladů, ne podle hřiště -
+ * `playableLoops()` je proto vrací bez jména (viz `PlayableLoop.synthetic`).
+ */
+const SYNTHETIC_LOOP_LABEL: Record<string, MessageKey> = {
+  front: 'setup.holesFront',
+  back: 'setup.holesBack',
 }
 
 const TEE_COLOR_IDS = new Set([
@@ -111,7 +115,8 @@ export interface SetupDraft {
   playerCount: number
   names: string[]
   holeCount: number
-  holeRange: HoleRange
+  /** Smyčky hřiště v pořadí hry; prázdné znamená celé hřiště. */
+  loopIds: string[]
   pairing: number
   settings: RoundSettings
   pointValueText: string
@@ -164,13 +169,12 @@ export default function SetupScreen({
   const [names, setNames] = useState<string[]>(
     () => initialDraft?.names.slice() ?? Array(MAX_PLAYERS).fill(''),
   )
-  const [holeCount, setHoleCount] = useState(
-    () =>
-      loadCourses().find((c) => c.id === selectedCourseId)?.holeCount ??
-      initialDraft?.holeCount ??
-      18,
+  // Počet jamek se vybírá jen u kola bez hřiště; se hřištěm ho určuje zvolený
+  // výřez (viz `playedHoles`).
+  const [holeCount, setHoleCount] = useState(() => initialDraft?.holeCount ?? 18)
+  const [loopIds, setLoopIds] = useState<string[]>(
+    () => initialDraft?.loopIds.slice() ?? [],
   )
-  const [holeRange, setHoleRange] = useState<HoleRange>(initialDraft?.holeRange ?? 'full')
   const [pairing, setPairing] = useState(initialDraft?.pairing ?? 0)
   const [roster, setRoster] = useState<RosterEntry[]>(() => loadRoster())
   const [rosterEditing, setRosterEditing] = useState(false)
@@ -215,7 +219,7 @@ export default function SetupScreen({
       playerCount,
       names: [...names],
       holeCount,
-      holeRange,
+      loopIds: [...loopIds],
       pairing,
       settings,
       pointValueText,
@@ -229,7 +233,7 @@ export default function SetupScreen({
     playerCount,
     names,
     holeCount,
-    holeRange,
+    loopIds,
     pairing,
     settings,
     pointValueText,
@@ -244,16 +248,23 @@ export default function SetupScreen({
   const tee = course ? findTee(course, teeId) : undefined
   const canUseNet = course !== undefined
 
-  // Půlku kola má smysl nabízet jen tam, kde je z čeho vybírat: devítijamkové
-  // hřiště žádnou druhou devítku nemá a bez hřiště nejsou pary ani SI, které
-  // by se daly rozdělit.
-  const canSplitCourse = course !== undefined && course.holeCount === 18
-  const range: HoleRange = canSplitCourse ? holeRange : 'full'
-  const startHole = rangeStartHole(range)
+  /**
+   * Části hřiště, ze kterých jde kolo poskládat: pojmenované devítky resortu,
+   * nebo dvě půlky osmnáctky. Kratší hřiště se hraje celé.
+   */
+  const loops: PlayableLoop[] = course ? playableLoops(course) : []
+  /** Resort bez „celé" podoby si vždycky vybírá devítky, osmnáctka nemusí. */
+  const requiresLoops = course !== undefined && requiresLoopSelection(course)
+  const selection =
+    course && requiresLoops && selectionHoleCount(course, loopIds) === 0
+      ? defaultLoopSelection(course)
+      : loopIds
+  const layout = course ? resolveLayout(course, selection) : undefined
+  const startHole = layout?.startHole ?? 1
   /** Počet jamek, na které se opravdu hraje. */
-  const playedHoles = course ? (range === 'full' ? course.holeCount : 9) : holeCount
-  /** Jamky hřiště, které do kola patří: [od, do). */
-  const holeSlice: [number, number] = [startHole - 1, startHole - 1 + playedHoles]
+  const playedHoles = layout?.holeCount ?? holeCount
+  /** Norma zvoleného odpaliště přepočtená na hrané jamky. */
+  const playedTee = course && layout ? layoutTee(course, layout, teeId) : undefined
 
   const game = getGame(gameId)
   const usesTeams = game.usesTeams(playerCount)
@@ -261,6 +272,40 @@ export default function SetupScreen({
   const showInstall = !isStandalone && (canInstall || isIOS || isMobile)
   const displayName = (index: number) =>
     names[index]?.trim() || t('common.player', { number: index + 1 })
+
+  /** Půlky osmnáctky hřiště nepojmenovává, popisek je z překladů. */
+  function loopLabel(loop: PlayableLoop): string {
+    const key = SYNTHETIC_LOOP_LABEL[loop.id]
+    return loop.name || (key ? t(key) : loop.id)
+  }
+
+  /** Jméno hraného výřezu pro kolo: „Forest + River"; celé hřiště ho nemá. */
+  const layoutName =
+    selection.length > 0
+      ? selection
+          .flatMap((id) => {
+            const loop = loops.find((candidate) => candidate.id === id)
+            return loop ? [loopLabel(loop)] : []
+          })
+          .join(' + ')
+      : undefined
+
+  /**
+   * Přidá smyčku do kola.
+   *
+   * Skládá se po pořadí, protože na něm záleží - kombinace devítek má vlastní
+   * normu i vlastní pořadí jamek. Další klepnutí na poslední smyčku ji zase
+   * odebere a klepnutí, kterým by kolo přerostlo osmnáctku, začne nový výběr.
+   */
+  function addLoop(loop: PlayableLoop) {
+    if (!course) return
+    if (selection.length > 1 && selection[selection.length - 1] === loop.id) {
+      setLoopIds(selection.slice(0, -1))
+      return
+    }
+    const next = [...selection, loop.id]
+    setLoopIds(selectionHoleCount(course, next) <= MAX_LAYOUT_HOLES ? next : [loop.id])
+  }
 
   async function installApp() {
     const result = await install()
@@ -343,8 +388,10 @@ export default function SetupScreen({
   /**
    * Hrací handicap hráče v ranách.
    *
-   * V režimu indexu se počítá podle WHS z normy odpaliště, u půlky kola z její
-   * poloviny. Když odpaliště normu nemá (typicky ručně zadané hřiště), bere se
+   * V režimu indexu se počítá podle WHS z normy hraného výřezu - devítka
+   * z osmnáctijamkové normy bere polovinu, kombinace devítek s vlastními
+   * normami celek. Když odpaliště normu nemá (typicky ručně zadané hřiště),
+   * bere se
    * index rovnou jako počet ran - jinak by netto na takovém hřišti nešlo hrát
    * vůbec. Zadaný počet ran zůstává, jak ho hráč napsal: je to rovnou hrací
    * handicap pro tohle kolo, ne index k přepočtu.
@@ -354,13 +401,13 @@ export default function SetupScreen({
     if (value === undefined) return undefined
     if (handicapMode === 'strokes') return Math.round(value)
 
-    if (course && tee?.courseRating !== undefined && tee?.slopeRating !== undefined) {
+    if (playedTee?.courseRating !== undefined && playedTee.slopeRating !== undefined) {
       return courseHandicap(
         value,
-        tee.slopeRating,
-        tee.courseRating,
-        tee.par ?? coursePar(course),
-        range === 'full' ? 1 : 0.5,
+        playedTee.slopeRating,
+        playedTee.courseRating,
+        playedTee.par,
+        playedTee.share,
       )
     }
     return Math.round(value)
@@ -388,13 +435,13 @@ export default function SetupScreen({
     }
     saveSettings(effective)
 
-    // Půlka kola si bere jen svůj výřez parů a stroke indexů. Kolo pak vypadá
-    // jako každé jiné devítijamkové - jen si pamatuje, kterou jamkou začíná.
-    const holePars = course ? course.pars.slice(...holeSlice) : []
+    // Kolo si bere jen výřez parů a stroke indexů zvolených smyček. Vypadá pak
+    // jako každé jiné kolo - jen si pamatuje, kterou jamkou začíná.
+    const holePars = layout ? [...layout.pars] : []
+    // Par kola je par normy jen tehdy, když norma sedí na hrané jamky; jinak
+    // (devítka z osmnáctijamkové normy) se sečtou pary hraných jamek.
     const roundPar =
-      range === 'full'
-        ? (tee?.par ?? (course ? coursePar(course) : 0))
-        : holePars.reduce((sum, par) => sum + par, 0)
+      playedTee && playedTee.share === 1 ? playedTee.par : (layout?.par ?? 0)
 
     // Kolo dostane vlastní kopii hřiště; katalog se pak může měnit, aniž by to
     // přepočítalo odehraná kola.
@@ -402,20 +449,21 @@ export default function SetupScreen({
       ? {
           id: course.id,
           name: course.name,
-          ...(tee
+          ...(layoutName ? { layoutName } : {}),
+          ...(playedTee
             ? {
-                teeId: tee.id,
-                teeName: tee.name,
-                ...(tee.courseRating !== undefined
-                  ? { courseRating: tee.courseRating }
+                teeId: playedTee.id,
+                teeName: playedTee.name,
+                ...(playedTee.courseRating !== undefined
+                  ? { courseRating: playedTee.courseRating }
                   : {}),
-                ...(tee.slopeRating !== undefined
-                  ? { slopeRating: tee.slopeRating }
+                ...(playedTee.slopeRating !== undefined
+                  ? { slopeRating: playedTee.slopeRating }
                   : {}),
               }
             : {}),
           par: roundPar,
-          strokeIndex: course.strokeIndex.slice(...holeSlice),
+          strokeIndex: layout ? [...layout.strokeIndex] : [],
         }
       : undefined
 
@@ -645,7 +693,11 @@ export default function SetupScreen({
           {/* Se třemi stovkami naimportovaných hřišť se v rozbalovací nabídce
               nedá nic najít, takže výběr má vlastní obrazovku s hledáním. */}
           <button type="button" className="secondary-button" onClick={onPickCourse}>
-            {course ? course.name : t('setup.chooseCourse')}
+            {course
+              ? layoutName
+                ? `${course.name} · ${layoutName}`
+                : course.name
+              : t('setup.chooseCourse')}
           </button>
 
           <div className="link-row">
@@ -669,6 +721,8 @@ export default function SetupScreen({
               <div className="tee-options" role="radiogroup" aria-label={t('setup.tee')}>
                 {course.tees.map((option) => {
                   const selected = tee?.id === option.id
+                  // Délka i norma patří k hraným jamkám, ne k celému resortu.
+                  const played = layout ? layoutTee(course, layout, option.id) : undefined
                   return (
                     <button
                       key={option.id}
@@ -682,11 +736,11 @@ export default function SetupScreen({
                       <span className="tee-swatch" aria-hidden="true" />
                       <span className="tee-option-label">
                         <span>{localizedTeeName(option.id, option.name)}</span>
-                        {option.distance !== undefined && (
+                        {played?.distance !== undefined && (
                           <span className="tee-option-distance">
                             {new Intl.NumberFormat(localeTag(), {
                               maximumFractionDigits: 0,
-                            }).format(option.distance)}{' '}
+                            }).format(played.distance)}{' '}
                             m
                           </span>
                         )}
@@ -766,11 +820,11 @@ export default function SetupScreen({
                 </div>
 
                 <p className="hint">
-                  {handicapMode === 'index' && tee?.slopeRating !== undefined
+                  {handicapMode === 'index' && playedTee?.slopeRating !== undefined
                     ? t('setup.handicapHintRated', {
-                        tee: localizedTeeName(tee.id, tee.name),
-                        cr: tee.courseRating ?? 0,
-                        sr: tee.slopeRating,
+                        tee: localizedTeeName(playedTee.id, playedTee.name),
+                        cr: playedTee.courseRating ?? 0,
+                        sr: playedTee.slopeRating,
                       })
                     : t('setup.handicapHintPlain')}
                 </p>
@@ -781,47 +835,84 @@ export default function SetupScreen({
 
         <section className="section">
           <h2 className="section-title">{t('setup.holeCount')}</h2>
-          {/* U osmnáctijamkového hřiště se nevybírá počet jamek, ale která
-              část kola se hraje - pary i stroke indexy se pak berou z ní. */}
-          {canSplitCourse ? (
-            <div className="segmented">
-              {HOLE_RANGES.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`segment${option.id === range ? ' selected' : ''}`}
-                  onClick={() => setHoleRange(option.id)}
-                  aria-pressed={option.id === range}
-                >
-                  {t(option.key)}
-                </button>
-              ))}
-            </div>
+          {/* Se zvoleným hřištěm se nevybírá počet jamek, ale která jeho část
+              se hraje - pary i stroke indexy se pak berou z ní. */}
+          {course && requiresLoops ? (
+            <>
+              <div className="loop-options" role="group" aria-label={t('setup.loops')}>
+                {loops.map((loop) => {
+                  const order = selection.flatMap((id, index) =>
+                    id === loop.id ? [index + 1] : [],
+                  )
+                  return (
+                    <button
+                      key={loop.id}
+                      type="button"
+                      className={`loop-option${order.length > 0 ? ' selected' : ''}`}
+                      onClick={() => addLoop(loop)}
+                      aria-pressed={order.length > 0}
+                    >
+                      <span className="loop-option-name">{loopLabel(loop)}</span>
+                      <span className="loop-option-meta">
+                        {order.length > 0
+                          ? t('setup.loopOrder', { order: order.join(', ') })
+                          : t('picker.holes', { count: loop.holeCount })}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="hint">
+                {t('setup.loopSelection', {
+                  loops: layoutName ?? '',
+                  count: playedHoles,
+                })}
+              </p>
+              <p className="hint">{t('setup.loopsHint')}</p>
+            </>
+          ) : course && loops.length > 0 ? (
+            <>
+              <div className="segmented">
+                {[[] as string[], ...loops.map((loop) => [loop.id])].map((option) => {
+                  const selected = option.join() === selection.join()
+                  const loop = loops.find((candidate) => candidate.id === option[0])
+                  return (
+                    <button
+                      key={option.join() || 'full'}
+                      type="button"
+                      className={`segment${selected ? ' selected' : ''}`}
+                      onClick={() => setLoopIds(option)}
+                      aria-pressed={selected}
+                    >
+                      {loop ? loopLabel(loop) : t('setup.holesAll')}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="hint">{t('setup.holeRangeHint')}</p>
+            </>
+          ) : course ? (
+            <p className="hint">
+              {t('setup.holeCountFromCourse')} {t('picker.holes', { count: playedHoles })}
+            </p>
           ) : (
-            <div className="segmented">
-              {HOLE_OPTIONS.map((count) => (
-                <button
-                  key={count}
-                  type="button"
-                  className={`segment${count === playedHoles ? ' selected' : ''}`}
-                  onClick={() => setHoleCount(count)}
-                  aria-pressed={count === playedHoles}
-                  // Se zvoleným hřištěm určuje počet jamek ono - jiný by
-                  // znamenal pary a stroke indexy mimo rozsah.
-                  disabled={course !== undefined}
-                >
-                  {count}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="segmented">
+                {HOLE_OPTIONS.map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    className={`segment${count === playedHoles ? ' selected' : ''}`}
+                    onClick={() => setHoleCount(count)}
+                    aria-pressed={count === playedHoles}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
+              <p className="hint">{t('setup.holeCountHint')}</p>
+            </>
           )}
-          <p className="hint">
-            {canSplitCourse
-              ? t('setup.holeRangeHint')
-              : course
-                ? t('setup.holeCountFromCourse')
-                : t('setup.holeCountHint')}
-          </p>
         </section>
 
         <div className="link-row">

@@ -7,6 +7,37 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.34.0] – 2026-08-06
+
+### Přidáno
+
+- **Resorty s víc hřišti a víc devítkami.** Areál, který má dvě osmnáctky, je
+  v katalogu dvěma hřišti (Čeladná Old Course a New Course), a hřiště s víc
+  než osmnácti jamkami nese pojmenované devítky. Kolo se z nich při zakládání
+  **skládá v pořadí, ve kterém se hrají** — Forest + River je jiná osmnáctka
+  než River + Forest, s jinými pary, jiným stroke indexem i jinou normou.
+  Vybraná část se ukáže u hřiště („Kácov · Forest + River“) a uloží se ke kolu.
+- **Devítkové normy odpališť.** Norma kombinace se skládá z norem devítek: CR
+  se sčítá, SR průměruje podle počtu jamek. Na Kácově tak z Forest 38,0/149
+  a River 35,9/129 vyjde 73,9/139, jak to má normovací tabulka ČGF.
+- **Hřiště o jiném počtu jamek než 9 a 18.** Kolo bez hřiště jde založit na 6,
+  9, 12 nebo 18 jamek a v zadání hřiště jdou zadat i 27 a 36 jamek; hřiště nad
+  osmnáct jamek se rozdělí na pojmenované devítky, které se dají přejmenovat.
+- Ve výběru hřiště je u resortu vidět, na kolik devítek se dělí.
+
+### Opraveno
+
+- **Norma odpaliště se vztahuje k hraným jamkám.** Nové pole `holeCount`
+  u odpaliště říká, kolika jamek se norma týká, takže devítka s podepsanou
+  osmnáctijamkovou normou už nedá zhruba dvojnásobný hrací handicap.
+- **Stroke index složené osmnáctky se mezi devítkami prostřídá** (první lichý,
+  druhý sudý). Slepené devítky s vlastním SI 1–9 by daly hráči všechny rány na
+  první devítce.
+- Katalog hřišť opravil resorty, které v něm byly jedním hřištěm: Kácov,
+  Karlštejn, Brno Kaskáda, Darovanský dvůr a Ropice mají 27 jamek ve třech
+  devítkách, Čeladná a Konopiště se rozpadly na svá hřiště a stejně tak
+  zahraniční resorty (Emirates, Belek, Vale de Lobo, PGA Catalunya a další).
+
 ## [0.33.0] – 2026-08-06
 
 ### Přidáno

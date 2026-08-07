@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Course, CourseTee } from '../courses/types'
+import type { Course, CourseLoop, CourseTee } from '../courses/types'
 import {
   copyAsPrivateCourse,
   coursePar,
@@ -23,7 +23,40 @@ import { useT } from '../i18n'
  */
 
 const PAR_OPTIONS = [3, 4, 5, 6]
-const HOLE_OPTIONS = [9, 18]
+
+/**
+ * Počty jamek, které jde zadat.
+ *
+ * Nejsou to jen devítka a osmnáctka: krátká hřiště mívají šest nebo dvanáct
+ * jamek a resort s víc devítkami se zadává jako jedno hřiště o 27 jamkách,
+ * které se rozpadá na pojmenované devítky.
+ */
+const HOLE_OPTIONS = [6, 9, 12, 18, 27, 36]
+
+/** Od kolika jamek se hřiště dělí na devítky. */
+const LOOP_SIZE = 9
+
+/**
+ * Devítky pro zadaný počet jamek.
+ *
+ * Rozdělují se jen hřiště nad osmnáct jamek: osmnáctka svoje půlky
+ * nepotřebuje pojmenovat (výběr přední a zadní devítky umí aplikace sama)
+ * a kratší hřiště se hraje celé. Jména se pak dají přepsat.
+ */
+function defaultLoops(holeCount: number, previous: CourseLoop[] = []): CourseLoop[] {
+  if (holeCount <= 18 || holeCount % LOOP_SIZE !== 0) return []
+
+  return Array.from({ length: holeCount / LOOP_SIZE }, (_, index) => {
+    const id = String.fromCharCode(97 + index)
+    const kept = previous[index]
+    return {
+      id: kept?.id ?? id,
+      name: kept?.name ?? id.toUpperCase(),
+      holeCount: LOOP_SIZE,
+      ...(kept?.tees ? { tees: kept.tees } : {}),
+    }
+  })
+}
 
 /** Rozepsaná norma odpaliště tak, jak ji uživatel právě píše. */
 interface RatingText {
@@ -65,14 +98,47 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
   )
 
   function setHoleCount(holeCount: number) {
+    setDraft((prev) => {
+      const loops = defaultLoops(holeCount, prev.loops)
+      return {
+        ...prev,
+        holeCount,
+        pars: Array.from({ length: holeCount }, (_, i) => prev.pars[i] ?? 4),
+        // Zkrácené nebo prodloužené hřiště by mělo děravý SI, takže se přečísluje.
+        strokeIndex: defaultStrokeIndex(holeCount),
+        ...(loops.length > 0 ? { loops } : { loops: undefined }),
+      }
+    })
+  }
+
+  function renameLoop(index: number, name: string) {
     setDraft((prev) => ({
       ...prev,
-      holeCount,
-      pars: Array.from({ length: holeCount }, (_, i) => prev.pars[i] ?? 4),
-      // Zkrácené nebo prodloužené hřiště by mělo děravý SI, takže se přečísluje.
-      strokeIndex: defaultStrokeIndex(holeCount),
+      ...(prev.loops
+        ? { loops: prev.loops.map((loop, i) => (i === index ? { ...loop, name } : loop)) }
+        : {}),
     }))
   }
+
+  /** První jamka smyčky v číslování hřiště - kvůli popiskům v seznamu jamek. */
+  function loopStart(index: number): number {
+    return (draft.loops ?? [])
+      .slice(0, index)
+      .reduce((sum, loop) => sum + loop.holeCount, 0)
+  }
+
+  /**
+   * Jamky rozdělené do smyček; hřiště bez smyček má jedinou skupinu.
+   *
+   * Na resortu se jamky každé devítky číslují od jedničky, ne průběžně přes
+   * celé hřiště - tak je má i klubová scorekarta.
+   */
+  const holeGroups = (draft.loops ?? []).map((loop, index) => ({
+    loop,
+    index,
+    start: loopStart(index),
+    holeCount: loop.holeCount,
+  }))
 
   function setPar(hole: number, par: number) {
     setDraft((prev) => {
@@ -240,50 +306,88 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
           <h2 className="section-title">{t('course.holes')}</h2>
           <p className="hint">{t('course.holesHint')}</p>
 
-          <div className="course-hole-list">
-            {Array.from({ length: draft.holeCount }, (_, hole) => (
-              <div key={hole} className="course-hole-row">
-                <span className="course-hole-number">{hole + 1}</span>
+          {holeGroups.length > 0 && <p className="hint">{t('course.loopsHint')}</p>}
 
-                <div className="segmented compact">
-                  {PAR_OPTIONS.map((par) => (
-                    <button
-                      key={par}
-                      type="button"
-                      className={`segment${draft.pars[hole] === par ? ' selected' : ''}`}
-                      onClick={() => setPar(hole, par)}
-                      aria-label={t('course.parForHole', { hole: hole + 1, par })}
-                      aria-pressed={draft.pars[hole] === par}
-                    >
-                      {par}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="course-si">
-                  <button
-                    type="button"
-                    className="value-step"
-                    onClick={() => moveStrokeIndex(hole, -1)}
-                    aria-label={t('course.harder', { hole: hole + 1 })}
-                  >
-                    −
-                  </button>
-                  <span className="course-si-value">
-                    {t('course.siShort', { si: draft.strokeIndex[hole] ?? hole + 1 })}
+          {(holeGroups.length > 0
+            ? holeGroups
+            : [{ loop: undefined, index: 0, start: 0, holeCount: draft.holeCount }]
+          ).map((group) => (
+            <div key={group.loop?.id ?? 'all'} className="course-loop">
+              {group.loop && (
+                <label className="field">
+                  <span className="field-label">
+                    {t('course.loopName', { number: group.index + 1 })}
                   </span>
-                  <button
-                    type="button"
-                    className="value-step"
-                    onClick={() => moveStrokeIndex(hole, 1)}
-                    aria-label={t('course.easier', { hole: hole + 1 })}
-                  >
-                    +
-                  </button>
-                </div>
+                  <span className="field-input">
+                    <input
+                      className="name-input"
+                      type="text"
+                      autoComplete="off"
+                      value={group.loop.name}
+                      onChange={(e) => renameLoop(group.index, e.target.value)}
+                      aria-label={t('course.loopName', { number: group.index + 1 })}
+                    />
+                  </span>
+                </label>
+              )}
+
+              <div className="course-hole-list">
+                {Array.from({ length: group.holeCount }, (_, offset) => {
+                  const hole = group.start + offset
+                  const number = group.loop ? offset + 1 : hole + 1
+                  // Na resortu je „C1" srozumitelnější než průběžná devatenáctka.
+                  const label = group.loop ? `${group.loop.name}${number}` : `${number}`
+
+                  return (
+                    <div key={hole} className="course-hole-row">
+                      <span className="course-hole-number">{number}</span>
+
+                      <div className="segmented compact">
+                        {PAR_OPTIONS.map((par) => (
+                          <button
+                            key={par}
+                            type="button"
+                            className={`segment${
+                              draft.pars[hole] === par ? ' selected' : ''
+                            }`}
+                            onClick={() => setPar(hole, par)}
+                            aria-label={t('course.parForHole', { hole: label, par })}
+                            aria-pressed={draft.pars[hole] === par}
+                          >
+                            {par}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="course-si">
+                        <button
+                          type="button"
+                          className="value-step"
+                          onClick={() => moveStrokeIndex(hole, -1)}
+                          aria-label={t('course.harder', { hole: label })}
+                        >
+                          −
+                        </button>
+                        <span className="course-si-value">
+                          {t('course.siShort', {
+                            si: draft.strokeIndex[hole] ?? hole + 1,
+                          })}
+                        </span>
+                        <button
+                          type="button"
+                          className="value-step"
+                          onClick={() => moveStrokeIndex(hole, 1)}
+                          aria-label={t('course.easier', { hole: label })}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </section>
 
         <section className="section">

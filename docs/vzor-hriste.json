@@ -49,10 +49,78 @@
             "name": "Žlutá",
             "courseRating": 35.6,
             "slopeRating": 124,
-            "par": 36
+            "par": 36,
+            "holeCount": 9
           }
         ],
         "source": "manual"
+      },
+      {
+        "id": "golfshot:kacov",
+        "name": "Panorama Golf Resort - Kácov",
+        "country": "CZ",
+        "holeCount": 27,
+        "pars": [
+          4, 4, 4, 3, 4, 4, 3, 5, 5, 4, 4, 3, 4, 5, 5, 4, 3, 4, 4, 4, 5, 3, 4, 3, 4, 5, 4
+        ],
+        "strokeIndex": [
+          5, 9, 2, 4, 7, 3, 8, 1, 6, 7, 2, 9, 3, 1, 6, 8, 4, 5, 6, 8, 1, 7, 4, 3, 2, 5, 9
+        ],
+        "tees": [
+          {
+            "id": "yellow",
+            "name": "Žlutá"
+          }
+        ],
+        "loops": [
+          {
+            "id": "forest",
+            "name": "Forest",
+            "holeCount": 9,
+            "tees": [
+              {
+                "id": "yellow",
+                "name": "Žlutá",
+                "courseRating": 36.3,
+                "slopeRating": 136,
+                "par": 36,
+                "distance": 2831
+              }
+            ]
+          },
+          {
+            "id": "river",
+            "name": "River",
+            "holeCount": 9,
+            "tees": [
+              {
+                "id": "yellow",
+                "name": "Žlutá",
+                "courseRating": 34.7,
+                "slopeRating": 122,
+                "par": 36,
+                "distance": 2610
+              }
+            ]
+          },
+          {
+            "id": "meadows",
+            "name": "Meadows",
+            "holeCount": 9,
+            "tees": [
+              {
+                "id": "yellow",
+                "name": "Žlutá",
+                "courseRating": 36.6,
+                "slopeRating": 138,
+                "par": 36,
+                "distance": 2947
+              }
+            ]
+          }
+        ],
+        "source": "manual",
+        "attribution": "Normovací tabulka ČGF"
       }
     ]
   }

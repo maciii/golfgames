@@ -30,12 +30,12 @@ o zastaralém stavu. Historie je v gitu, kdyby se někdy hodila.
 ## Tvar katalogu
 
 ```
-index.json          rejstřík: id, název, klub, země, poloha, počet jamek, normy
-course/<id>.json    celá scorekarta jednoho hřiště
+index.json          rejstřík: id, název, klub, země, poloha, počet jamek, devítky, normy
+course/<id>.json    celá scorekarta jednoho hřiště včetně devítek
 meta.json           datum sestavení, počet hřišť
 ```
 
-Rejstřík má při dnešních 307 hřištích 41 kB. Dělení podle polohy by byla
+Rejstřík má při dnešních 350 hřištích 49 kB. Dělení podle polohy by byla
 složitost bez užitku; až katalog vyroste na tisíce hřišť, rozdělí se podle
 geohashe.
 
@@ -72,6 +72,31 @@ geohashe.
 - Úprava staženého katalogového hřiště nikdy nepřepíše originál. Editor uloží
   nový soukromý `local:` klon; původní katalogové hřiště zůstane v telefonu i
   v centrální nabídce.
+
+### Resorty a devítky
+
+Areál nemusí být jedno hřiště. Čeladná má dvě osmnáctky (Old a New), Kácov tři
+devítky (Forest, River, Meadows) a vedle mistrovského hřiště bývá ještě
+akademie o šesti jamkách. Katalog to drží dvěma způsoby:
+
+- **Dvě hřiště v areálu jsou dva záznamy** se stejným klubem a názvem
+  „areál – hřiště“ (`celadna-old-course`, `celadna-new-course`). V nabídce se
+  proto dají vybrat zvlášť a každé má vlastní normu.
+- **Devítky jednoho hřiště jsou `loops`** – pojmenované úseky, které jdou po
+  sobě tak, jak jsou uložené jamky. Hřiště nad osmnáct jamek se z nich při
+  zakládání kola teprve **skládá, a to v pořadí**: Forest + River je jiná
+  osmnáctka než River + Forest, s jinými pary, jiným stroke indexem i jinou
+  normou. Osmnáctka svoje půlky mít pojmenované může, ale hraje se dál celá.
+
+Devítky nesou vlastní (devítkové) normy odpališť; normu kombinace z nich
+aplikace složí – CR sečte, SR zprůměruje podle počtu jamek. Proti tabulce klubu
+to může minout o jednotku slope, protože se zaokrouhluje z už zaokrouhlených
+čísel; na hracím handicapu je to desetina rány. U hřiště, které vlastní devítky
+normované nemá, se použije norma hřiště zkrácená podílem hraných jamek
+a `tee.holeCount` říká, kolika jamek se norma týká.
+
+Kolo delší než osmnáct jamek se neskládá – hry počítají s dvojnásobnou devátou
+a osmnáctou jamkou.
 
 ### Názvy odpališť
 

@@ -46,6 +46,14 @@ export const en: Record<MessageKey, Message> = {
   'setup.holesBack': '10–18',
   'setup.holeRangeHint':
     'An 18-hole course can be played in full, or as just the front or back nine. Pars, stroke indexes and handicaps come from the holes you pick.',
+  'setup.loops': 'Course loops',
+  'setup.loopOrder': 'played {order}',
+  'setup.loopSelection': {
+    one: 'Playing {loops} – {count} hole',
+    other: 'Playing {loops} – {count} holes',
+  },
+  'setup.loopsHint':
+    'This course has more than one nine, and which ones you play — and in what order — matters: every combination has its own pars, stroke indexes and rating. Tap a nine to add it, tap the last one again to drop it. A nine that no longer fits into eighteen holes starts a new selection.',
 
   // Courses and handicaps
   'setup.course': 'Course',
@@ -527,6 +535,7 @@ export const en: Record<MessageKey, Message> = {
   'picker.credit': 'Courses from the open Golf Games catalogue, ODbL licensed.',
   'picker.creditLink': 'Source and corrections',
   'picker.holes': { one: '{count} hole', other: '{count} holes' },
+  'picker.loops': { one: '{count} nine', other: '{count} nines' },
   'picker.tees': { one: '{count} tee', other: '{count} tees' },
   'picker.noTees': 'no tees',
   'picker.nothingFound': 'Nothing found. Try another name, or add the course manually.',
@@ -541,6 +550,9 @@ export const en: Record<MessageKey, Message> = {
   'course.holes': 'Holes',
   'course.holesHint':
     'Set the par and difficulty of each hole. The stroke index is moved with the buttons so it stays a ranking without duplicates.',
+  'course.loopName': 'Name of nine {number}',
+  'course.loopsHint':
+    'A course with more than eighteen holes is split into nines. A round is then built from them when you set up a game, and the order matters.',
   'course.parForHole': 'Par {par} on hole {hole}',
   'course.siShort': 'SI {si}',
   'course.harder': 'Hole {hole} is harder',
