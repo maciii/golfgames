@@ -388,13 +388,13 @@ export default function SetupScreen({
   /**
    * Hrací handicap hráče v ranách.
    *
-   * V režimu indexu se počítá podle WHS z normy hraného výřezu - devítka
-   * z osmnáctijamkové normy bere polovinu, kombinace devítek s vlastními
-   * normami celek. Když odpaliště normu nemá (typicky ručně zadané hřiště),
-   * bere se
-   * index rovnou jako počet ran - jinak by netto na takovém hřišti nešlo hrát
-   * vůbec. Zadaný počet ran zůstává, jak ho hráč napsal: je to rovnou hrací
-   * handicap pro tohle kolo, ne index k přepočtu.
+   * V režimu indexu se počítá podle WHS z normy hraného výřezu. Kolik jamek se
+   * hraje a kolika jamek se norma týká jsou dva různé údaje, proto jdou do
+   * výpočtu oba: index se krátí hranými jamkami vždycky, `CR − par` jen když je
+   * norma osmnáctijamková. Když odpaliště normu nemá (typicky ručně zadané
+   * hřiště), bere se index rovnou jako počet ran - jinak by netto na takovém
+   * hřišti nešlo hrát vůbec. Zadaný počet ran zůstává, jak ho hráč napsal: je
+   * to rovnou hrací handicap pro tohle kolo, ne index k přepočtu.
    */
   function playingHandicapFor(index: number): number | undefined {
     const value = handicapValue(index)
@@ -407,7 +407,8 @@ export default function SetupScreen({
         playedTee.slopeRating,
         playedTee.courseRating,
         playedTee.par,
-        playedTee.share,
+        playedHoles,
+        playedTee.ratedHoles,
       )
     }
     return Math.round(value)
@@ -441,7 +442,9 @@ export default function SetupScreen({
     // Par kola je par normy jen tehdy, když norma sedí na hrané jamky; jinak
     // (devítka z osmnáctijamkové normy) se sečtou pary hraných jamek.
     const roundPar =
-      playedTee && playedTee.share === 1 ? playedTee.par : (layout?.par ?? 0)
+      playedTee && playedTee.ratedHoles === playedHoles
+        ? playedTee.par
+        : (layout?.par ?? 0)
 
     // Kolo dostane vlastní kopii hřiště; katalog se pak může měnit, aniž by to
     // přepočítalo odehraná kola.

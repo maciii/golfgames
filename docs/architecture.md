@@ -135,10 +135,17 @@ klubové scorekarty kombinací.
 normu, složí se z nich norma kombinace: CR se sčítá, SR se průměruje podle
 počtu jamek – na Kácově z Forest 38,0/149 a River 35,9/129 vyjde 73,9/139,
 což je přesně to, co normovací tabulka ČGF uvádí. Bez devítkových norem se
-použije norma hřiště zkrácená podílem hraných jamek
-(`courseHandicap(..., share)`); `tee.holeCount` přitom říká, kolika jamek se
-norma týká, takže devítka s podepsanou osmnáctijamkovou normou vyjde správně.
-Ručně zadaný počet ran se nekrátí – to už je hrací handicap pro tohle kolo.
+použije norma hřiště; `tee.holeCount` říká, kolika jamek se týká, a `layoutTee()`
+to předá dál jako `ratedHoles`.
+
+**Hrané jamky a normované jamky nejsou totéž.** `courseHandicap()` proto bere
+oba údaje a každý člen vzorce krátí jiným: index vždycky podílem hraných jamek
+proti osmnáctce (WHS počítá devítkový handicap z poloviny indexu), `CR − par`
+jen tehdy, když norma pokrývá víc jamek, než se hraje. Devítka s podepsanou
+osmnáctijamkovou normou se tak krátí celá, devítka s vlastní devítkovou normou
+jen v indexu. Jeden společný podíl na oba členy tuhle druhou situaci nepokryje
+a dá skoro dvojnásobek ran. Ručně zadaný počet ran se nekrátí – to už je hrací
+handicap pro tohle kolo.
 
 ### Invarianty, které je potřeba držet
 

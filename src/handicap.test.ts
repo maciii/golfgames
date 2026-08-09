@@ -45,15 +45,32 @@ describe('courseHandicap', () => {
     expect(courseHandicap(-2.4, 113, 72, 72)).toBe(-2)
   })
 
-  it('na půlce kola dává polovinu ran', () => {
+  it('devítka z osmnáctijamkové normy dává polovinu ran', () => {
     // 18.4 × 132/113 = 21.49; půlka je 10.74 -> 11, ne polovina z 21.
-    expect(courseHandicap(18.4, 132, 72, 72, 0.5)).toBe(11)
-    expect(courseHandicap(18.4, 113, 72, 72, 0.5)).toBe(9)
+    expect(courseHandicap(18.4, 132, 72, 72, 9, 18)).toBe(11)
+    expect(courseHandicap(18.4, 113, 72, 72, 9, 18)).toBe(9)
   })
 
-  it('rozdíl CR a paru se na půlce kola dělí taky', () => {
+  it('rozdíl CR a paru se u osmnáctijamkové normy dělí taky', () => {
     // (10 + 2.5) / 2 = 6.25 -> 6
-    expect(courseHandicap(10, 113, 74.5, 72, 0.5)).toBe(6)
+    expect(courseHandicap(10, 113, 74.5, 72, 9, 18)).toBe(6)
+  })
+
+  it('devítka s vlastní devítkovou normou nedává dvojnásobek ran', () => {
+    // Kácov, devítka Forest z černých: CR 38,0 / SR 149 / par 36. Norma sedí
+    // na hrané jamky, takže se nekrátí - ale index ano, jinak by z indexu 18
+    // vyšlo 26 ran místo čtrnácti.
+    // 18/2 × 149/113 + (38 − 36) = 11.87 + 2 = 13.87 -> 14
+    expect(courseHandicap(18, 149, 38, 36, 9, 9)).toBe(14)
+
+    // Složená osmnáctka Forest & River (73,9 / 139) dá dvojnásobek devítky.
+    expect(courseHandicap(18, 139, 73.9, 72, 18, 18)).toBe(24)
+  })
+
+  it('bez počtu jamek počítá plnou osmnáctku', () => {
+    expect(courseHandicap(18, 139, 73.9, 72)).toBe(
+      courseHandicap(18, 139, 73.9, 72, 18, 18),
+    )
   })
 })
 

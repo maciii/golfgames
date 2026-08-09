@@ -18,26 +18,46 @@ import { diffToPar, parAt, scoreAt } from './types'
 export const NEUTRAL_SLOPE = 113
 
 /**
+ * Jamky plného kola. Index je vztažený k osmnáctce, takže kratší kolo z něj
+ * bere odpovídající podíl.
+ *
+ * Vlastní konstanta, ne `MAX_LAYOUT_HOLES` z `src/courses/layout.ts` - ten
+ * modul sahá sem, a opačný import by udělal kruh.
+ */
+const FULL_ROUND_HOLES = 18
+
+/**
  * Hrací handicap = index × (SR / 113) + (CR − par).
  *
  * Druhý člen dorovnává absolutní obtížnost: na hřišti, kde je CR vyšší než par,
  * dostane hráč rány navíc, i kdyby byl slope neutrální.
  *
- * `share` je podíl hřiště, který se hraje - devítka z osmnáctijamkového hřiště
- * je 0.5. WHS počítá devítkový handicap z poloviny indexu a devítkové normy;
- * když je po ruce jen osmnáctijamkové CR, SR a par (a to je náš případ, protože
- * devítková norma se do katalogu nezadává), vyjde totéž jako polovina celého
- * výsledku - jen se zaokrouhluje až nakonec, ne dvakrát.
+ * Kratší kolo než osmnáctka krátí každý člen jinak. WHS počítá devítkový
+ * handicap z poloviny indexu, ale s celou devítkovou normou - index se proto
+ * krátí počtem hraných jamek proti osmnáctce a `CR − par` až tím, kolika jamek
+ * se norma týká. Devítka s vlastní devítkovou normou se v druhém členu nekrátí,
+ * devítka s podepsanou osmnáctijamkovou normou na půl.
+ *
+ * Jeden společný podíl na oba členy nestačí a je to past, ne detail: devítka
+ * s vlastní normou má normu i hrané jamky v souladu, takže by se nekrátilo nic
+ * a plný index proti devítkové normě dá skoro dvojnásobek ran. Na Kácově to
+ * z devítky Forest dělalo 26 ran místo čtrnácti.
  */
 export function courseHandicap(
   handicapIndex: number,
   slopeRating: number,
   courseRating: number,
   par: number,
-  share = 1,
+  /** Kolik jamek se hraje. */
+  holeCount = FULL_ROUND_HOLES,
+  /** Kolika jamek se norma týká; bez hodnoty sedí přesně na hrané jamky. */
+  ratedHoles = holeCount,
 ): number {
+  const indexShare = holeCount / FULL_ROUND_HOLES
+  const ratingShare = ratedHoles > 0 ? holeCount / ratedHoles : 1
   return Math.round(
-    (handicapIndex * (slopeRating / NEUTRAL_SLOPE) + (courseRating - par)) * share,
+    handicapIndex * indexShare * (slopeRating / NEUTRAL_SLOPE) +
+      (courseRating - par) * ratingShare,
   )
 }
 

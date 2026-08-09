@@ -51,7 +51,7 @@ describe('vzor pro import hřišť', () => {
     expect(layout.holeCount).toBe(18)
     expect(tee?.courseRating).toBe(71)
     expect(tee?.slopeRating).toBe(129)
-    expect(tee?.share).toBe(1)
+    expect(tee?.ratedHoles).toBe(18)
   })
 
   it('devítka s vlastní normou se nekrátí, s osmnáctijamkovou ano', () => {
@@ -62,7 +62,7 @@ describe('vzor pro import hřišť', () => {
     if (!nine) throw new Error('ve vzoru chybí devítijamkové hřiště')
 
     const course = normalizeCourse(nine)
-    expect(layoutTee(course, resolveLayout(course), 'yellow')?.share).toBe(1)
+    expect(layoutTee(course, resolveLayout(course), 'yellow')?.ratedHoles).toBe(9)
   })
 
   it('pary i stroke index sedí délkou na počet jamek', () => {

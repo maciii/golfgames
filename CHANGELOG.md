@@ -7,6 +7,22 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.35.0] – 2026-08-09
+
+### Opraveno
+
+- **Samostatná devítka na resortu dávala skoro dvojnásobek ran.** Hrací
+  handicap krátil index i rozdíl `CR − par` jedním společným podílem. To sedí
+  na devítku hranou z osmnáctijamkové normy, ale ne na devítku, která má
+  vlastní devítkovou normu — tam podíl vyšel 1, index se nezkrátil vůbec
+  a proti devítkové normě dal skoro dvojnásobek. Na Kácově vycházelo z devítky
+  Forest a indexu 18 celkem 26 ran místo čtrnácti. `courseHandicap()` teď bere
+  hrané jamky a normované jamky zvlášť: index krátí vždycky podílem hraných
+  jamek proti osmnáctce, `CR − par` jen tehdy, když norma pokrývá víc jamek,
+  než se hraje. Týkalo se to osmi hřišť v katalogu, mimo jiné obou devítek
+  Čeladné, Karlštejna, Kaskády a Ropice. Odehraná kola se nepřepočítají —
+  hrací handicap si kolo ukládá při založení.
+
 ## [0.34.0] – 2026-08-06
 
 ### Přidáno

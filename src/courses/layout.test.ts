@@ -221,7 +221,7 @@ describe('norma odpaliště pro výřez', () => {
     expect(tee?.courseRating).toBe(73.9)
     expect(tee?.slopeRating).toBe(139)
     expect(tee?.par).toBe(72)
-    expect(tee?.share).toBe(1)
+    expect(tee?.ratedHoles).toBe(18)
   })
 
   it('samostatná devítka resortu má vlastní devítkovou normu', () => {
@@ -230,7 +230,8 @@ describe('norma odpaliště pro výřez', () => {
 
     expect(tee?.courseRating).toBe(38.2)
     expect(tee?.slopeRating).toBe(153)
-    expect(tee?.share).toBe(1)
+    // Norma sedí na hrané jamky, takže se člen CR − par nekrátí.
+    expect(tee?.ratedHoles).toBe(9)
   })
 
   it('bez devítkových norem se norma hřiště krátí podílem hraných jamek', () => {
@@ -239,7 +240,7 @@ describe('norma odpaliště pro výřez', () => {
 
     expect(tee?.courseRating).toBe(71.2)
     expect(tee?.par).toBe(72)
-    expect(tee?.share).toBe(0.5)
+    expect(tee?.ratedHoles).toBe(18)
   })
 
   it('devítka s podepsanou osmnáctijamkovou normou se počítá jako půlka', () => {
@@ -263,6 +264,6 @@ describe('norma odpaliště pro výřez', () => {
     })
 
     const tee = layoutTee(nine, resolveLayout(nine), 'yellow')
-    expect(tee?.share).toBe(0.5)
+    expect(tee?.ratedHoles).toBe(18)
   })
 })

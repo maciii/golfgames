@@ -193,10 +193,14 @@ export interface LayoutTee {
   /** Par, ke kterému se norma vztahuje. */
   par: number
   /**
-   * Podíl normy, který se hraje. Devítka hraná z osmnáctijamkové normy je
-   * 0.5; norma sedící přesně na hrané jamky je 1.
+   * Kolika jamek se norma týká.
+   *
+   * Devítka hraná z osmnáctijamkové normy má 18, norma sedící přesně na hrané
+   * jamky (devítka s vlastní devítkovou normou, složená osmnáctka) tolik, kolik
+   * se hraje. Handicap z toho krátí jen člen `CR − par`; index se krátí vždycky
+   * podle hraných jamek - viz `courseHandicap()`.
    */
-  share: number
+  ratedHoles: number
   distance?: number
 }
 
@@ -257,7 +261,7 @@ export function layoutTee(
           sum + (own.par ?? sumPars(course, loop.start, loop.holeCount)),
         0,
       ),
-      share: 1,
+      ratedHoles: holes,
       ...(distances.length === rated.length
         ? { distance: distances.reduce((sum, value) => sum + value, 0) }
         : {}),
@@ -272,7 +276,7 @@ export function layoutTee(
     ...(tee.courseRating !== undefined ? { courseRating: tee.courseRating } : {}),
     ...(tee.slopeRating !== undefined ? { slopeRating: tee.slopeRating } : {}),
     par: tee.par ?? coursePar(course),
-    share: ratedHoles > 0 ? layout.holeCount / ratedHoles : 1,
+    ratedHoles,
     ...(tee.distance !== undefined ? { distance: tee.distance } : {}),
   }
 }
