@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type { Course } from '../courses/types'
 import { layoutTee } from '../courses/layout'
 import { localeTag, localizedTeeName, useT } from '../i18n'
-import { BackIcon } from './icons'
+import { BackIcon, ChevronDownIcon } from './icons'
+import PickSheet from './PickSheet'
 import { loopLabel, resolveCourseSetup, toggleLoop } from './setupCourse'
 
 /** Počty jamek pro kolo bez hřiště. Šestka i dvanáctka existují - krátká hřiště se staví právě takhle. */
@@ -46,6 +48,8 @@ export default function SetupTeeScreen({
   onNext,
 }: Props) {
   const t = useT()
+  const [teeSheetOpen, setTeeSheetOpen] = useState(false)
+  const [secondNineSheetOpen, setSecondNineSheetOpen] = useState(false)
   const setup = resolveCourseSetup(
     courses,
     courseId,
@@ -70,6 +74,31 @@ export default function SetupTeeScreen({
     layoutName,
     playedHoles,
   } = setup
+
+  // Délka i norma patří k hraným jamkám, ne k celému resortu.
+  const teeSheetOptions = course
+    ? teeOptions.map((option) => {
+        const played = layout ? layoutTee(course, layout, option.id) : undefined
+        const distance =
+          played?.distance !== undefined
+            ? ` · ${new Intl.NumberFormat(localeTag(), {
+                maximumFractionDigits: 0,
+              }).format(played.distance)} m`
+            : ''
+        return {
+          id: option.id,
+          label: `${localizedTeeName(option.id, option.name)}${distance}`,
+        }
+      })
+    : []
+
+  const nineSheetOptions = nineOptions.map((entry) => ({
+    id: entry.id,
+    label:
+      baseCourse && entry.id === baseCourse.id
+        ? t('setup.sameNineTwice', { name: entry.name })
+        : entry.name,
+  }))
 
   return (
     <div className="screen">
@@ -119,31 +148,17 @@ export default function SetupTeeScreen({
             <>
               <label className="field tee-field">
                 <span className="field-label">{t('setup.teeForAll')}</span>
-                <select
-                  className="name-input"
-                  value={tee?.id ?? ''}
-                  onChange={(e) => onTeeIdChange(e.target.value)}
-                  aria-label={t('setup.teeForAll')}
+                <button
+                  type="button"
+                  className="name-input pick-trigger"
+                  onClick={() => setTeeSheetOpen(true)}
+                  aria-haspopup="dialog"
                 >
-                  {teeOptions.map((option) => {
-                    // Délka i norma patří k hraným jamkám, ne k celému resortu.
-                    const played = layout
-                      ? layoutTee(course, layout, option.id)
-                      : undefined
-                    const distance =
-                      played?.distance !== undefined
-                        ? ` · ${new Intl.NumberFormat(localeTag(), {
-                            maximumFractionDigits: 0,
-                          }).format(played.distance)} m`
-                        : ''
-                    return (
-                      <option key={option.id} value={option.id}>
-                        {localizedTeeName(option.id, option.name)}
-                        {distance}
-                      </option>
-                    )
-                  })}
-                </select>
+                  <span>
+                    {tee ? localizedTeeName(tee.id, tee.name) : t('setup.teeForAll')}
+                  </span>
+                  <ChevronDownIcon />
+                </button>
               </label>
               <p className="hint">{t('setup.teeIndividualHint')}</p>
             </>
@@ -181,20 +196,19 @@ export default function SetupTeeScreen({
               {secondNine && (
                 <label className="field">
                   <span className="field-label">{t('setup.secondNine')}</span>
-                  <select
-                    className="name-input"
-                    value={secondNine.id}
-                    onChange={(event) => onSecondNineIdChange(event.target.value)}
-                    aria-label={t('setup.secondNine')}
+                  <button
+                    type="button"
+                    className="name-input pick-trigger"
+                    onClick={() => setSecondNineSheetOpen(true)}
+                    aria-haspopup="dialog"
                   >
-                    {nineOptions.map((entry) => (
-                      <option key={entry.id} value={entry.id}>
-                        {entry.id === baseCourse.id
-                          ? t('setup.sameNineTwice', { name: entry.name })
-                          : entry.name}
-                      </option>
-                    ))}
-                  </select>
+                    <span>
+                      {secondNine.id === baseCourse.id
+                        ? t('setup.sameNineTwice', { name: secondNine.name })
+                        : secondNine.name}
+                    </span>
+                    <ChevronDownIcon />
+                  </button>
                 </label>
               )}
               <p className="hint">{t('setup.secondNineHint')}</p>
@@ -285,6 +299,26 @@ export default function SetupTeeScreen({
           {t('setup.next')}
         </button>
       </footer>
+
+      {teeSheetOpen && (
+        <PickSheet
+          title={t('setup.teeForAll')}
+          selectedId={tee?.id ?? ''}
+          onSelect={onTeeIdChange}
+          onClose={() => setTeeSheetOpen(false)}
+          options={teeSheetOptions}
+        />
+      )}
+
+      {secondNineSheetOpen && (
+        <PickSheet
+          title={t('setup.secondNine')}
+          selectedId={secondNine?.id ?? ''}
+          onSelect={onSecondNineIdChange}
+          onClose={() => setSecondNineSheetOpen(false)}
+          options={nineSheetOptions}
+        />
+      )}
     </div>
   )
 }

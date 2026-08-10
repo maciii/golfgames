@@ -131,8 +131,6 @@ export const cs = {
   'setup.secondNineHint':
     'Devítka se dá zahrát dvakrát dokola nebo ji spojit s jinou; na pořadí záleží.',
   'setup.sameNineTwice': '{name} podruhé',
-  'setup.savedPlayerWithTee': '{name} · {tee}',
-  'setup.savedPlayerWithHandicapAndTee': '{name} · HCP {handicap} · {tee}',
   'setup.courseHint': 'Pary a stroke indexy se převezmou z hřiště ({count} jamek).',
   'setup.noCourseHint':
     'Bez hřiště se hraje jako dosud: pary se nastavují při hře a handicapy se nepočítají.',
@@ -142,7 +140,6 @@ export const cs = {
   'setup.handicapStrokes': 'Rány',
   'setup.handicapFor': 'Handicap hráče {name}',
   'setup.noHandicap': 'bez HCP',
-  'setup.savedPlayerWithHandicap': '{name} · HCP {handicap}',
   'setup.strokesGiven': {
     one: '{count} rána',
     few: '{count} rány',

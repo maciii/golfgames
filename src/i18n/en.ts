@@ -120,8 +120,6 @@ export const en: Record<MessageKey, Message> = {
   'setup.secondNineHint':
     'A nine can be played twice around or joined with another one; the order matters.',
   'setup.sameNineTwice': '{name} again',
-  'setup.savedPlayerWithTee': '{name} · {tee}',
-  'setup.savedPlayerWithHandicapAndTee': '{name} · HCP {handicap} · {tee}',
   'setup.courseHint': 'Pars and stroke indexes come from the course ({count} holes).',
   'setup.noCourseHint':
     'Without a course nothing changes: pars are set while playing and handicaps are not used.',
@@ -131,7 +129,6 @@ export const en: Record<MessageKey, Message> = {
   'setup.handicapStrokes': 'Strokes',
   'setup.handicapFor': 'Handicap for {name}',
   'setup.noHandicap': 'no HCP',
-  'setup.savedPlayerWithHandicap': '{name} · HCP {handicap}',
   'setup.strokesGiven': { one: '{count} stroke', other: '{count} strokes' },
   'setup.handicapHintRated':
     'The playing handicap is calculated from the {tee} tee rating (CR {cr}, SR {sr}).',

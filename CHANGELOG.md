@@ -7,6 +7,20 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.6] – 2026-08-10
+
+### Změněno
+
+- **Poslední dva nativní `<select>` v appce nahrazeny vlastním listem.**
+  Odpaliště pro všechny a Druhá devítka na kroku Odpaliště a jamky teď
+  fungují stejně jako výběr hřiště/země - žádný nativní `<select>`
+  v appce už nezůstal.
+- **Krok Hráči má jen jeden seznam uložených hráčů.** Oddělené „Oblíbení
+  hráči" nad ním dávaly smysl jen jako duplicita - sloučeno do jednoho
+  seznamu „Uložení hráči", který zobrazuje jen jméno a příjmení (bez
+  hvězdičky, HCP a odpaliště v popisku). Klepnutí pořád tiše doplní
+  uložený HCP a odpaliště hráče do kola.
+
 ## [0.40.5] – 2026-08-10
 
 ### Změněno

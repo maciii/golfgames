@@ -1421,17 +1421,6 @@ button {
 
 /* Rychlá volba oblíbených hráčů nad formulářem - vlastní zvýrazněná krabička,
    ať nesplývá se seznamem všech uložených hráčů pod formulářem. */
-.favorite-players {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.favorite-players .chip svg {
-  flex: none;
-  color: var(--score-eagle);
-}
-
 .roster-head {
   display: flex;
   align-items: baseline;

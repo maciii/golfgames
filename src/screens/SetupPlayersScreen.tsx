@@ -9,7 +9,7 @@ import {
   playerCourseHandicap,
 } from '../handicap'
 import { localizedTeeName, useT } from '../i18n'
-import { BackIcon, StarIcon, TeeFlagIcon } from './icons'
+import { BackIcon, TeeFlagIcon } from './icons'
 import TeeSheet, { teeColorClass, type TeeSheetRow } from './TeeSheet'
 import { resolveCourseSetup } from './setupCourse'
 
@@ -148,31 +148,6 @@ export default function SetupPlayersScreen({
     }
   }
 
-  function rosterLabel(entry: RosterEntry): string {
-    const teeName = entry.preferredTeeId
-      ? localizedTeeName(
-          entry.preferredTeeId,
-          teeOptions.find((option) => option.id === entry.preferredTeeId)?.name ??
-            entry.preferredTeeId,
-        )
-      : undefined
-    if (entry.handicapIndex !== undefined && teeName) {
-      return t('setup.savedPlayerWithHandicapAndTee', {
-        name: entry.name,
-        handicap: formatHandicapIndex(entry.handicapIndex),
-        tee: teeName,
-      })
-    }
-    if (entry.handicapIndex !== undefined) {
-      return t('setup.savedPlayerWithHandicap', {
-        name: entry.name,
-        handicap: formatHandicapIndex(entry.handicapIndex),
-      })
-    }
-    if (teeName) return t('setup.savedPlayerWithTee', { name: entry.name, tee: teeName })
-    return entry.name
-  }
-
   function forgetPlayer(entry: RosterEntry) {
     setRoster(removeFromRoster(entry.id))
   }
@@ -184,7 +159,6 @@ export default function SetupPlayersScreen({
       .filter(Boolean),
   )
   const available = roster.filter((entry) => !used.has(entry.name.trim().toLowerCase()))
-  const favoriteAvailable = available.filter((entry) => entry.favorite)
 
   return (
     <div className="screen">
@@ -218,26 +192,6 @@ export default function SetupPlayersScreen({
               </button>
             ))}
           </div>
-
-          {favoriteAvailable.length > 0 && (
-            <div className="card favorite-players">
-              <span className="roster-label">{t('home.favoritePlayers')}</span>
-              <div className="chip-row">
-                {favoriteAvailable.map((entry) => (
-                  <button
-                    key={entry.id}
-                    type="button"
-                    className="chip"
-                    onClick={() => useRosterEntry(entry)}
-                    aria-label={t('setup.addPlayer', { name: entry.name })}
-                  >
-                    <StarIcon />
-                    {rosterLabel(entry)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           <div className="setup-player-list">
             {Array.from({ length: playerCount }, (_, i) => {
@@ -318,7 +272,7 @@ export default function SetupPlayersScreen({
                         : t('setup.addPlayer', { name: entry.name })
                     }
                   >
-                    {rosterLabel(entry)}
+                    {entry.name}
                     {rosterEditing && <span className="chip-x">×</span>}
                   </button>
                 ))}

@@ -63,22 +63,6 @@ export function ChevronDownIcon() {
   )
 }
 
-/** Hvězdička oblíbeného hráče - nakreslená, ne textový znak ★, ze stejného
- *  důvodu jako HeartIcon výš. */
-export function StarIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M12 2.5l2.9 6.3 6.8.7-5.1 4.7 1.5 6.8L12 17.6l-6.1 3.4 1.5-6.8-5.1-4.7 6.8-.7z" />
-    </svg>
-  )
-}
-
 /**
  * Praporek na odpališti - značí volbu odpaliště jinak než jen barevným
  * kolečkem, které v seznamu hráčů splývalo s ostatními kulatými prvky.
