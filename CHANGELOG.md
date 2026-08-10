@@ -7,6 +7,30 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.1] – 2026-08-10
+
+### Opraveno
+
+- **Kolo bez hřiště se vždycky založilo na osmnáct jamek.** Volba 6, 9 nebo
+  12 jamek v kroku Odpaliště a jamky se do založeného kola nedostala - krok
+  Sázka počítal délku kola s natvrdo psanou osmnáctkou místo se zvolenou
+  hodnotou. Hlídá to teď e2e test.
+- **HCP index se v kroku Hráči zobrazoval jinak než jinde v appce.** Sjednocení
+  z 0.40.0 minulo krok Hráči, takže tam u uloženého hráče svítilo „30.1", kde
+  Domů i obrazovka Hráči píšou „30,1". Oba kroky zakládání kola teď používají
+  stejné `parseHandicapIndex`/`formatHandicapIndex` jako zbytek appky.
+
+### Změněno
+
+- **Testy rozhraní odpovídají krokovému zakládání kola.** Sada v `e2e/`
+  pořád vedla appku přes jednu obrazovku nastavení, která od 0.40.0
+  neexistuje, takže od domovské obrazovky (0.39.0) neprocházela. Rozvržení
+  se teď kontroluje v každém z pěti kroků zvlášť a přibyl test na to, že
+  zpět prochází kroky pozpátku.
+- **Rozdělení čtyř hráčů do dvojic žije na jednom místě.** Krok Hra
+  a zakládání kola měly každý vlastní kopii téže tabulky; hráči by při
+  rozejití dostali jiné dvojice, než jaké si vybrali.
+
 ## [0.40.0] – 2026-08-10
 
 ### Přidáno

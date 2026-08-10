@@ -570,6 +570,7 @@ function AppShell() {
         courseId={selectedCourseId ?? ''}
         loopIds={loopIds}
         secondNineId={secondNineId}
+        holeCount={holeCount}
         teeId={teeId}
         playerCount={playerCount}
         onPlayerCountChange={setPlayerCount}
@@ -616,6 +617,7 @@ function AppShell() {
         courseId={selectedCourseId ?? ''}
         loopIds={loopIds}
         secondNineId={secondNineId}
+        holeCount={holeCount}
         teeId={teeId}
         playerTeeIds={playerTeeIds}
         gameId={gameId}

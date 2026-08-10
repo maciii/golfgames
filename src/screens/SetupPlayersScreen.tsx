@@ -3,7 +3,11 @@ import type { Course } from '../courses/types'
 import { layoutTee } from '../courses/layout'
 import type { RosterEntry } from '../storage'
 import { loadRoster, removeFromRoster } from '../storage'
-import { playerCourseHandicap } from '../handicap'
+import {
+  formatHandicapIndex,
+  parseHandicapIndex,
+  playerCourseHandicap,
+} from '../handicap'
 import { localizedTeeName, useT } from '../i18n'
 import TeeSheet, { teeColorClass, type TeeSheetRow } from './TeeSheet'
 import { resolveCourseSetup } from './setupCourse'
@@ -16,6 +20,8 @@ interface Props {
   courseId: string
   loopIds: string[]
   secondNineId: string | undefined
+  /** Počet jamek zvolený v kroku odpališť; uplatní se jen u kola bez hřiště. */
+  holeCount: number
   teeId: string
   playerCount: number
   onPlayerCountChange: (value: number) => void
@@ -45,6 +51,7 @@ export default function SetupPlayersScreen({
   courseId,
   loopIds,
   secondNineId,
+  holeCount,
   teeId,
   playerCount,
   onPlayerCountChange,
@@ -67,7 +74,15 @@ export default function SetupPlayersScreen({
   const [rosterEditing, setRosterEditing] = useState(false)
   const [teeSheetFor, setTeeSheetFor] = useState<number | null>(null)
 
-  const setup = resolveCourseSetup(courses, courseId, loopIds, secondNineId, teeId, 18, t)
+  const setup = resolveCourseSetup(
+    courses,
+    courseId,
+    loopIds,
+    secondNineId,
+    teeId,
+    holeCount,
+    t,
+  )
   const { course, layout, teeOptions, playedHoles, playedTee } = setup
   const canUseNet = course !== undefined
 
@@ -88,10 +103,7 @@ export default function SetupPlayersScreen({
 
   /** Zadaná hodnota u hráče; prázdné pole znamená "hraje bez handicapu". */
   function handicapValue(index: number): number | undefined {
-    const raw = handicapText[index] ?? ''
-    if (!raw.trim()) return undefined
-    const value = Number.parseFloat(raw.replace(',', '.'))
-    return Number.isFinite(value) ? value : undefined
+    return parseHandicapIndex(handicapText[index] ?? '')
   }
 
   function playingHandicapFor(index: number): number | undefined {
@@ -128,7 +140,7 @@ export default function SetupPlayersScreen({
     if (slot === -1) return
     onNameChange(slot, entry.name)
     if (entry.handicapIndex !== undefined) {
-      onHandicapTextChange(slot, `${entry.handicapIndex}`)
+      onHandicapTextChange(slot, formatHandicapIndex(entry.handicapIndex))
     }
     const preferred = entry.preferredTeeId
     if (preferred && teeOptions.some((option) => option.id === preferred)) {
@@ -147,14 +159,14 @@ export default function SetupPlayersScreen({
     if (entry.handicapIndex !== undefined && teeName) {
       return t('setup.savedPlayerWithHandicapAndTee', {
         name: entry.name,
-        handicap: entry.handicapIndex,
+        handicap: formatHandicapIndex(entry.handicapIndex),
         tee: teeName,
       })
     }
     if (entry.handicapIndex !== undefined) {
       return t('setup.savedPlayerWithHandicap', {
         name: entry.name,
-        handicap: entry.handicapIndex,
+        handicap: formatHandicapIndex(entry.handicapIndex),
       })
     }
     if (teeName) return t('setup.savedPlayerWithTee', { name: entry.name, tee: teeName })

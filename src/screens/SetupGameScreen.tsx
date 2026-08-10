@@ -7,8 +7,12 @@ import { APP_VERSION } from '../version'
 /**
  * Tři možná rozdělení čtyř hráčů do dvojic. Víc jich neexistuje - u čtyř
  * hráčů určuje dvojice už jen to, koho dostane první hráč za partnera.
+ *
+ * Vybírá se tady, ale uplatňuje se až při zakládání kola v `SetupBetScreen`,
+ * a to podle indexu do tohohle pole - dvě kopie by se rozešly a hráči by
+ * dostali jiné dvojice, než jaké si vybrali.
  */
-const PAIRINGS: number[][][] = [
+export const PAIRINGS: number[][][] = [
   [
     [0, 1],
     [2, 3],

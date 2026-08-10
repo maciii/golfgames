@@ -1,6 +1,6 @@
 import type { Course } from '../courses/types'
 import { getGame } from '../games'
-import { playerCourseHandicap } from '../handicap'
+import { parseHandicapIndex, playerCourseHandicap } from '../handicap'
 import { loadGameOptions, saveSettings } from '../storage'
 import type {
   Currency,
@@ -13,6 +13,8 @@ import { DEFAULT_POINT_VALUE } from '../types'
 import { useAccount } from '../sync/AccountContext'
 import { useT } from '../i18n'
 import { resolveCourseSetup } from './setupCourse'
+// Dvojice se vybírají v kroku Hra; tady se jen uplatní podle vybraného indexu.
+import { PAIRINGS } from './SetupGameScreen'
 import { APP_VERSION } from '../version'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
@@ -23,6 +25,8 @@ interface Props {
   courseId: string
   loopIds: string[]
   secondNineId: string | undefined
+  /** Počet jamek zvolený v kroku odpališť; uplatní se jen u kola bez hřiště. */
+  holeCount: number
   teeId: string
   playerTeeIds: string[]
   gameId: string
@@ -46,6 +50,7 @@ export default function SetupBetScreen({
   courseId,
   loopIds,
   secondNineId,
+  holeCount,
   teeId,
   playerTeeIds,
   gameId,
@@ -66,7 +71,17 @@ export default function SetupBetScreen({
   const { status } = useAccount()
   const noBet = settings.pointValue <= 0
 
-  const setup = resolveCourseSetup(courses, courseId, loopIds, secondNineId, teeId, 18, t)
+  // Bez hřiště určuje délku kola volba z kroku odpališť - natvrdo psaná
+  // osmnáctka by z kola „na devět jamek bez hřiště" udělala osmnáctku.
+  const setup = resolveCourseSetup(
+    courses,
+    courseId,
+    loopIds,
+    secondNineId,
+    teeId,
+    holeCount,
+    t,
+  )
   const { baseCourse, secondNine, course, layout, playedHoles, playedTee, layoutName } =
     setup
 
@@ -109,10 +124,7 @@ export default function SetupBetScreen({
 
   /** Zadaná hodnota u hráče; prázdné pole znamená "hraje bez handicapu". */
   function handicapValue(index: number): number | undefined {
-    const raw = handicapText[index] ?? ''
-    if (!raw.trim()) return undefined
-    const value = Number.parseFloat(raw.replace(',', '.'))
-    return Number.isFinite(value) ? value : undefined
+    return parseHandicapIndex(handicapText[index] ?? '')
   }
 
   function playerTeeId(index: number): string {
@@ -133,7 +145,7 @@ export default function SetupBetScreen({
             loopIds,
             secondNineId,
             playerTeeId(index),
-            18,
+            holeCount,
             t,
           ).playedTee
         : undefined
@@ -185,7 +197,7 @@ export default function SetupBetScreen({
 
     function layoutTeeOf(id: string) {
       return course && layout
-        ? resolveCourseSetup(courses, courseId, loopIds, secondNineId, id, 18, t)
+        ? resolveCourseSetup(courses, courseId, loopIds, secondNineId, id, holeCount, t)
             .playedTee
         : undefined
     }
@@ -322,22 +334,3 @@ export default function SetupBetScreen({
     </div>
   )
 }
-
-/**
- * Tři možná rozdělení čtyř hráčů do dvojic. Víc jich neexistuje - u čtyř
- * hráčů určuje dvojice už jen to, koho dostane první hráč za partnera.
- */
-const PAIRINGS: number[][][] = [
-  [
-    [0, 1],
-    [2, 3],
-  ],
-  [
-    [0, 2],
-    [1, 3],
-  ],
-  [
-    [0, 3],
-    [1, 2],
-  ],
-]

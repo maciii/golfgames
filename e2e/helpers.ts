@@ -88,17 +88,60 @@ export async function expectTappable(page: Page, selector: string): Promise<void
 }
 
 /**
- * Přeskočí výběr hřiště a otevře nastavení kola.
+ * Kroky zakládání kola po výběru hřiště, v pořadí, ve kterém se procházejí.
  *
- * Nové kolo začíná hřištěm, ale testy rozvržení se ptají na nastavení - a bez
- * hřiště vypadá stejně jako dřív, takže se na něj jde odkazem „Hrát bez
- * hřiště".
+ * Krok 1 je výběr hřiště (`CoursePickerScreen`) a ten má vlastní pomocníky -
+ * jde z něj odbočit na hru bez hřiště, takže se nechová jako ostatní kroky.
  */
-export async function openSetup(page: Page): Promise<void> {
+export const SETUP_STEPS = ['tee', 'players', 'game', 'bet'] as const
+export type SetupStep = (typeof SETUP_STEPS)[number]
+
+/**
+ * Nadpis kroku v obou jazycích. Testy běží v češtině (viz `playwright.config.ts`),
+ * ale příliš to nestojí za to, aby se rozbily po přepnutí výchozího jazyka.
+ */
+const STEP_TITLE: Record<SetupStep, RegExp> = {
+  tee: /Odpaliště a jamky|Tees and holes/i,
+  players: /Hráči|Players/i,
+  game: /Hra a dvojice|Game and teams/i,
+  bet: /Sázka|Stake/i,
+}
+
+/** Čeká, až je vidět daný krok zakládání kola. */
+export async function expectSetupStep(page: Page, step: SetupStep): Promise<void> {
+  await expect(page.locator('.app-header h1')).toHaveText(STEP_TITLE[step])
+}
+
+/**
+ * Z domovské obrazovky na výběr hřiště - první krok nového kola.
+ *
+ * Appka od rozhodnutí #28 začíná domovskou obrazovkou, ne rovnou hřištěm.
+ */
+export async function openCoursePicker(page: Page): Promise<void> {
+  await page.locator('.home-new-round').click()
+  await expect(page.locator('.course-list')).toBeVisible()
+}
+
+/**
+ * Přeskočí výběr hřiště a otevře zakládání kola na zvoleném kroku.
+ *
+ * Bez hřiště vypadají kroky stejně jako s ním (jen bez odpališť), takže se
+ * testy rozvržení nemusí spoléhat na stažený katalog - ten na CI ani nemusí
+ * být dostupný.
+ */
+export async function openSetup(page: Page, step: SetupStep = 'players'): Promise<void> {
+  await openCoursePicker(page)
   await page
     .locator('.app-footer .link-button', { hasText: /bez hřiště|without a course/i })
     .click()
-  await expect(page.locator('.app-footer .primary-button')).toBeVisible()
+  await expectSetupStep(page, 'tee')
+
+  const target = SETUP_STEPS.indexOf(step)
+  for (let i = 0; i < target; i += 1) {
+    await page.locator('.app-footer .primary-button').click()
+    const next = SETUP_STEPS[i + 1]
+    if (next) await expectSetupStep(page, next)
+  }
 }
 
 /**
@@ -108,7 +151,7 @@ export async function openSetup(page: Page): Promise<void> {
  * ze dvou možných obrazovek.
  */
 export async function startRound(page: Page): Promise<void> {
-  await openSetup(page)
+  await openSetup(page, 'bet')
   await page.locator('.app-footer .primary-button').click()
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
 }
@@ -116,4 +159,13 @@ export async function startRound(page: Page): Promise<void> {
 /** Hraje se zápis skóre na šířku jako scorekarta? */
 export async function isLandscapeScorecard(page: Page): Promise<boolean> {
   return page.locator('.landscape-scorecard').isVisible()
+}
+
+/** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
+export async function currentRound(page: Page): Promise<{ holeCount: number }> {
+  const raw = await page.evaluate(() =>
+    window.localStorage.getItem('golfgames.currentRound.v1'),
+  )
+  expect(raw, 'rozehrané kolo není v úložišti').not.toBeNull()
+  return JSON.parse(raw!) as { holeCount: number }
 }
