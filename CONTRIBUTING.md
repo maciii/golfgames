@@ -78,8 +78,17 @@ src/
     matchPlay.ts      Match play
     fixtures.ts       pomocník pro testy
     index.ts          registr her
+  courses/
+    types.ts          model hřiště, kontrola tvaru, odpaliště
+    layout.ts         hraný výřez hřiště a norma odpaliště pro něj
+    composite.ts      osmnáctka složená ze dvou devítek
+    catalog.ts        stahování hřišť z katalogu
+    geo.ts            řazení hřišť podle vzdálenosti
   screens/
-    SetupScreen.tsx       volba hry, hráčů, dvojic, sázky a počtu jamek
+    CoursePickerScreen.tsx výběr hřiště; první krok nového kola
+    CourseEditScreen.tsx  ruční zadání a úprava hřiště
+    SetupScreen.tsx       hřiště, odpaliště, hráči, hra, dvojice a sázka
+    TeeSheet.tsx          výběr odpaliště jednoho hráče
     PlayScreen.tsx        zápis skóre po jamkách
     BonusSheet.tsx        výběr extra bodů pro hráče na jamce
     GameSettingsScreen.tsx nastavení bodování konkrétní hry

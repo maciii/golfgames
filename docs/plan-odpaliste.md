@@ -1,5 +1,26 @@
 # Odpaliště u hráče, složené devítky a nový postup zakládání kola
 
+> **Plán je uzavřený (2026-08-10).** Model a výpočty vyšly v **0.36.0**,
+> obrazovky v **0.37.0**. Zůstává tu jako doklad, proč se to udělalo takhle;
+> rozhodnutí je shrnuté v [`decisions.md`](decisions.md) pod bodem 26.
+>
+> **Co se udělalo jinak, než plán říkal:**
+>
+> - `courseHandicap()` se přece jen změnil. Plán psal, že zůstává, ale mezitím
+>   se opravovalo počítání devítky s vlastní normou (0.35.0), takže bere hrané
+>   a normované jamky zvlášť. `playerCourseHandicap()` stojí na nové podobě.
+> - `composeNines()` si nepočítá vlastní matematiku. Devítky vkládá do `loops`
+>   a normu složí `layoutTee()` – tentýž kód, který skládá osmnáctky na
+>   resortech. Dvě implementace stejného pravidla by se rozešly.
+> - Devítka, kterou klub normuje jako dvě kola dokola (Gloria Verde, CR 70,3 na
+>   devíti jamkách), se napřed zkrátí. Plán s tím nepočítal – v katalogu je
+>   takových hřišť deset, ne pět, a jedno z nich pravidlo `CR = CR₁ + CR₂`
+>   rozbíjelo.
+> - `teeTouched` v draftu není. Prázdná volba u hráče znamená „jako celé kolo",
+>   takže neprázdná hodnota je sama tím příznakem – jeden stav místo dvou.
+> - Názvy devítek nad OUT/IN ve scorekartě nejsou: scorekarta žádné sekce
+>   OUT/IN nemá. Složené kolo se pozná podle názvu hřiště.
+
 ## Kontext
 
 Dnes má kolo **jedno odpaliště pro všechny**. `SetupScreen` drží jediné

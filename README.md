@@ -65,12 +65,19 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 - **Nepovinná záloha do cloudu** – po přihlášení účtem Google se kola průběžně
   zálohují a jsou dostupná z dalších zařízení. Bez přihlášení se nemění vůbec
   nic: aplikace nenaváže spojení a všechno zůstává v telefonu
-- **Hřiště a handicapy** – hřiště se zadá jednou i s pary jamek, stroke indexem
+- **Hřiště a handicapy** – kolo začíná výběrem hřiště, ať je z čeho počítat.
+  Hřiště se dá vzít z katalogu nebo zadat ručně i s pary jamek, stroke indexem
   a odpališti (CR a SR) a zůstane v telefonu. Kolo pak jde hrát netto: rány se
   rozdělí podle obtížnosti jamek, hrací handicap se dopočítá z indexu podle
   WHS, nebo se zadá rovnou v ranách
+- **Vlastní odpaliště pro každého hráče** – muž ze žlutých, žena z červených.
+  Klepnutí na barevný štítek u jména otevře výběr s délkou, normou a hlavně
+  s tím, kolik ran z daného odpaliště hráč dostane. Rozdíl je velký: index
+  30,1 znamená 28 ran z červených, ale 35 ze žlutých
+- **Osmnáctka ze dvou devítek** – devítijamkové hřiště jde zahrát dvakrát
+  dokola nebo spojit s jinou devítkou; pary, stroke indexy i norma se složí
 - **Seznam hráčů** – spoluhráči se ukládají sami, při dalším kole se jen
-  vyberou klepnutím; pamatuje se i jejich handicapový index
+  vyberou klepnutím; pamatuje se i jejich handicapový index a odpaliště
 - **Offline provoz** – service worker předcachuje celou aplikaci, signál
   není potřeba
 - **Česky i anglicky** – jazyk se vybere podle prohlížeče a přepíná se

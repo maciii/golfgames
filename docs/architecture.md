@@ -78,7 +78,7 @@ interface Round {
   finishedAt?: string // chybí => kolo je rozehrané
   players: Player[] // id 'p1'..'p4'
   teams: Team[] // prázdné u her jednotlivců; id 't1', 't2'
-  holeCount: number // 9 nebo 18
+  holeCount: number // 6, 9, 12 nebo 18; nikdy víc (MAX_LAYOUT_HOLES)
   pars: number[] // délka === holeCount
   scores: Record<PlayerId, (number | null)[]>
   bonuses: Record<PlayerId, BonusId[][]> // extra body na jamce
@@ -394,28 +394,38 @@ nepřekreslil.
 Tok jednoho kola:
 
 ```
-SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
-     │                     │                       │
-     │              (BonusSheet)            (Scorecard)
-     └──▶ GameSettingsScreen
+CoursePickerScreen ──▶ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
+                            │                     │                       │
+                            │              (BonusSheet)            (Scorecard)
+                            ├──▶ GameSettingsScreen
+                            ├──▶ CourseEditScreen
+                            └──▶ TeeSheet
 ```
+
+Kolo **začíná výběrem hřiště**, ne nastavením: bez hřiště není z čeho vybrat
+odpaliště ani počítat handicapy. Výběr hřiště je proto zároveň první obrazovkou
+aplikace i podobrazovkou nastavení – v prvním případě místo „Zpět" nabízí hru
+bez hřiště a odkazy na archiv, zálohu a účet (`pickerAtStart` v `App.tsx`).
 
 `ResultsScreen` slouží zároveň jako detail archivního kola (`readOnly`).
 
 ## Obrazovky
 
-| Soubor                   | Co dělá                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `SetupScreen.tsx`        | hra, hráči, dvojice, sázka, hraný výřez hřiště (půlka osmnáctky, devítky resortu v pořadí); vstup do nastavení hry |
-| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta                   |
-| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                                |
-| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                                              |
-| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                                    |
-| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami, dekoracemi a vlastními sloupci hry; u netto her přepínač reference HCP           |
-| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                                              |
-| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                                           |
-| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                                 |
-| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                            |
+| Soubor                   | Co dělá                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `CoursePickerScreen.tsx` | hledání hřiště, poloha, oblíbená, katalog; v režimu startu i vstup do archivu, zálohy a účtu             |
+| `CourseEditScreen.tsx`   | ruční zadání a úprava hřiště: pary, stroke index, devítky, odpaliště                                     |
+| `SetupScreen.tsx`        | hřiště a odpaliště, hráči s handicapem a vlastním odpalištěm, hra, dvojice, sázka, hraný výřez hřiště    |
+| `TeeSheet.tsx`           | výběr odpaliště jednoho hráče: délka, norma a kolik ran z něj dostane                                    |
+| `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta         |
+| `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                      |
+| `GameSettingsScreen.tsx` | hodnoty extra bodů, násobiče za výsledek, další volby                                                    |
+| `ResultsScreen.tsx`      | pořadí, vyrovnání, scorekarta, konfigurace kola                                                          |
+| `Scorecard.tsx`          | tabulka se značkami, HCP tečkami, dekoracemi a vlastními sloupci hry; u netto her přepínač reference HCP |
+| `ArchiveScreen.tsx`      | seznam odehraných kol                                                                                    |
+| `BackupScreen.tsx`       | stažení zálohy do souboru a obnova z něj                                                                 |
+| `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                       |
+| `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                  |
 
 ### Ovládání zápisu skóre
 
@@ -529,6 +539,9 @@ v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
 | lepší míč a součet dvojice       | `src/games/shared.ts`                   |
 | model hřiště a jeho kontrola     | `src/courses/types.ts`                  |
 | výřez hřiště a norma pro něj     | `src/courses/layout.ts`                 |
+| osmnáctka ze dvou devítek        | `src/courses/composite.ts`              |
+| odpaliště hráče a jeho handicap  | `src/handicap.ts`                       |
+| výběr odpaliště hráče            | `src/screens/TeeSheet.tsx`              |
 | zadání hřiště                    | `src/screens/CourseEditScreen.tsx`      |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
 | co se ukládá do telefonu         | `src/storage.ts`                        |

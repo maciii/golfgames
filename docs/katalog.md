@@ -35,7 +35,7 @@ course/<id>.json    celá scorekarta jednoho hřiště včetně devítek
 meta.json           datum sestavení, počet hřišť
 ```
 
-Rejstřík má při dnešních 350 hřištích 49 kB. Dělení podle polohy by byla
+Rejstřík má při dnešních 353 hřištích 49 kB. Dělení podle polohy by byla
 složitost bez užitku; až katalog vyroste na tisíce hřišť, rozdělí se podle
 geohashe.
 
