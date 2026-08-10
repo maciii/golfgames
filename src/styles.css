@@ -692,39 +692,6 @@ button {
   align-items: stretch;
 }
 
-.tee-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
-  gap: 8px;
-  width: 100%;
-  flex: 0 1 auto;
-}
-
-.tee-option {
-  --tee-color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 5px 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--bg-elevated);
-  color: var(--text);
-  text-align: left;
-  font-weight: 600;
-}
-
-.tee-option:hover,
-.tee-option:focus-visible {
-  border-color: var(--tee-color);
-}
-
-.tee-option.selected {
-  border-color: var(--tee-color);
-  box-shadow: inset 0 0 0 2px var(--tee-color);
-}
-
 .tee-swatch {
   flex: 0 0 18px;
   width: 18px;
@@ -732,20 +699,6 @@ button {
   border: 1px solid color-mix(in srgb, var(--tee-color) 70%, white);
   border-radius: 50%;
   background: var(--tee-color);
-}
-
-.tee-option-label {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.tee-option-distance {
-  color: var(--text-dim);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.2;
 }
 
 /* Odpaliště v hlavičce scorekarty; jen u kola z víc odpališť. */
@@ -778,6 +731,39 @@ button {
   gap: 6px;
 }
 
+/* Jméno a odpaliště hráče na jednom řádku - odpaliště je jen barevná kulička,
+   ať se u čtyř hráčů nezalamuje na druhý řádek. Klepnutí na kuličku otevře
+   plný výběr (`TeeSheet`) s délkou, normou a přepočtem na rány - to se do
+   kuličky samotné nevejde a ani nemusí, vybírá se podle barvy. */
+.setup-player-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-player-main .name-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.tee-dot {
+  --tee-color: var(--text-dim);
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--tee-color);
+  background: var(--bg-elevated);
+}
+
+.tee-dot .tee-swatch {
+  width: 20px;
+  height: 20px;
+}
+
 .setup-player-meta {
   display: flex;
   align-items: center;
@@ -794,29 +780,6 @@ button {
   color: var(--text-dim);
   font-size: 13px;
   margin-inline-start: auto;
-}
-
-/* Štítek odpaliště v řádku hráče. Jedno klepnutí otevře výběr - proto štítek,
-   ne rozbalovací nabídka schovaná v detailu hráče. */
-.tee-chip {
-  --tee-color: var(--text-dim);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 4px 12px;
-  border: 1px solid var(--tee-color);
-  border-radius: 999px;
-  background: var(--bg-elevated);
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.tee-chip .tee-swatch {
-  flex-basis: 14px;
-  width: 14px;
-  height: 14px;
 }
 
 /* Výběr odpaliště: délka, norma a hlavně kolik ran z něj hráč dostane. */
@@ -2534,9 +2497,10 @@ div.course-item {
   width: var(--tap);
   height: var(--tap);
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-dim);
-  font-size: 27px;
-  line-height: 1;
 }
 
 .course-favorite:hover,
@@ -2702,10 +2666,9 @@ div.course-item {
     --screen-padding: 28px;
   }
 
-  /* Jména hráčů a odpaliště se vejdou vedle sebe; místo se využije do šířky
-     místo aby se sloupec protahoval do délky. */
-  .name-list,
-  .tee-options {
+  /* Jména hráčů se vejdou vedle sebe; místo se využije do šířky místo aby
+     se sloupec protahoval do délky. */
+  .name-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 10px;

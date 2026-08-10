@@ -594,6 +594,65 @@ nikdy neměla co zobrazit.
 
 ---
 
+## 29. Zakládání kola rozdělené na kroky
+
+**Kontext.** `SetupScreen` byl jeden formulář na 1150 řádků - hřiště,
+odpaliště, výřez, hráči, handicapy, hra, dvojice i sázka na jedné dlouhé
+obrazovce. Šlo to, dokud appka neměla zpětnou navigaci (rozhodnutí #27) -
+každé zanoření znamenalo riziko ztráty rozepsaných dat. S History API riziko
+zmizelo, takže nic nebránilo rozdělit zakládání kola na kroky, jak appka
+dělá u domovské obrazovky a menu (#28).
+
+**Rozhodnutí.** Pět kroků: hřiště (`CoursePickerScreen`, beze změny) →
+odpaliště a jamky (`SetupTeeScreen`) → hráči (`SetupPlayersScreen`) → hra
+a dvojice (`SetupGameScreen`) → sázka (`SetupBetScreen`, tady se kolo i
+zakládá). Navigace je lineární se zpětnou vazbou přes History API - žádné
+tečky ani přehled kroků, zpět/swipe vrací přesně o krok s vyplněnými
+hodnotami. Rozepsaný stav kola (jména, hra, odpaliště, sázka...) žije přímo
+v `AppShell`, ne v odděleném „draftu" jedné obrazovky - kroky se mezi sebou
+přepínají stejně jako kterákoli jiná obrazovka appky a nikdy se neodpojí,
+takže není co ztratit ani co explicitně pamatovat.
+
+**Počet hráčů už neurčuje hra, ale naopak.** Dřív se v jedné obrazovce
+vybírala hra a počet hráčů se jí musel přizpůsobit. V krokovém pořadí přijdou
+hráči dřív než hra, takže se to muselo otočit: `SetupPlayersScreen` nabízí
+vždycky 1 až 4 hráče a `SetupGameScreen` z `GAMES` přefiltruje jen ty, co
+zvolený počet podporují (`playerCounts.includes(playerCount)`). Změna počtu
+hráčů v kroku zpátky proto při návratu do kroku Hra může vyřadit dřív
+vybranou hru - `SetupGameScreen` na to hlídá efektem, který v tom případě
+vybere první dostupnou.
+
+**Sdílená logika hřiště žije v `setupCourse.ts`.** Odvození hřiště, výřezu
+a odpaliště (`resolveCourseSetup()`) potřebují tři různé kroky (odpaliště,
+hráči, sázka) i finální sestavení kola - bez společného místa by se ta samá
+logika musela počítat čtyřikrát. Je to čistá funkce nad seznamem hřišť, žádný
+React ani `storage.ts` uvnitř, takže jde otestovat i použít odkudkoli.
+
+**Proč `CoursePickerScreen` zůstává mimo krokové obrazovky.** Byl to už
+hotový, samostatný krok dřív, než začalo rozdělení - není důvod ho po vzoru
+ostatních kroků přejmenovávat na `SetupCourseScreen`, jen aby seděl jmenný
+vzor. Používá se navíc i mimo zakládání kola (`mode="browse"` z menu, #28),
+takže je logicky správně mimo `Setup*` rodinu obrazovek.
+
+**Hrát bez sázky.** `money.ts` už dřív bral `pointValue <= 0` jako „bez
+sázky" (`settleRound()` vrátí `kind: 'none'`, sekce se skryje) - chyběl jen
+srozumitelný přepínač. `SetupBetScreen` teď nabízí „Hrát bez sázky", který
+schová měnu a hodnotu bodu a nastaví `pointValue` na 0; zapnutí/vypnutí
+přepínače si navíc pamatuje poslední nenulovou hodnotu, ať se při zrušení
+sázky nezadává znova.
+
+**Zahození rozehraného kola je odkaz, ne tlačítko.** `ResultsScreen` u
+nedohraného kola nabízel dřív dvě rovnocenná tlačítka - „Zpět do hry" a „Nové
+kolo", které ale u nedohraného kola ve skutečnosti znamenalo „zahoď rozehrané
+kolo" a rovnou to potvrzovalo dialogem. Jediná očekávaná akce u průběžných
+výsledků je pokračovat ve hře, proto je teď „Zpět do hry" jediné plnohodnotné
+tlačítko a zahození je podřazený odkaz „Zahodit rozehrané kolo" s jasnějším
+potvrzením. U dohraného kola (kolo je bezpečně v archivu) zůstávají „Upravit
+skóre" a „Nové kolo" rovnocenná tlačítka jako dřív - tam žádné riziko ztráty
+dat není.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:

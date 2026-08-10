@@ -77,6 +77,12 @@ export const cs = {
   // --- úvodní obrazovka ---------------------------------------------------
   'setup.title': 'Golf Games',
   'setup.subtitle': 'Nové kolo',
+  'setup.next': 'Další',
+  'setup.stepTeeTitle': 'Odpaliště a jamky',
+  'setup.stepGameTitle': 'Hra a dvojice',
+  'setup.teeIndividualHint': 'Odpaliště jednotlivých hráčů jde vybrat v dalším kroku.',
+  'setup.noBet': 'Hrát bez sázky',
+  'setup.noBetHint': 'Appka spočítá jen výsledky hry, žádné peníze.',
   'setup.game': 'Hra',
   'setup.gameSettings': 'Nastavení bodování hry',
   'setup.gameSettingsFor': 'Nastavení bodování hry {name}',
@@ -296,7 +302,9 @@ export const cs = {
   'results.editScores': 'Upravit skóre',
   'results.backToPlay': 'Zpět do hry',
   'results.newRound': 'Nové kolo',
-  'results.discardConfirm': 'Rozehrané kolo se smaže. Opravdu chceš začít nové?',
+  'results.discardRound': 'Zahodit rozehrané kolo',
+  'results.discardConfirm':
+    'Rozehrané kolo se smaže a nedá se vrátit. Opravdu ho chceš zahodit?',
 
   // --- scorekarta ---------------------------------------------------------
   'scorecard.hole': 'Jamka',

@@ -294,26 +294,32 @@ export default function ResultsScreen({
       </main>
 
       <footer className="app-footer">
-        <div className="footer-row">
-          {readOnly ? (
-            <button type="button" className="primary-button" onClick={onBack}>
-              {t('results.backToArchive')}
+        {readOnly ? (
+          <button type="button" className="primary-button" onClick={onBack}>
+            {t('results.backToArchive')}
+          </button>
+        ) : finished ? (
+          <div className="footer-row">
+            <button type="button" className="secondary-button" onClick={onResume}>
+              {t('results.editScores')}
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                className={finished ? 'secondary-button' : 'primary-button'}
-                onClick={onResume}
-              >
-                {finished ? t('results.editScores') : t('results.backToPlay')}
-              </button>
-              <button type="button" className="secondary-button" onClick={newRound}>
-                {t('results.newRound')}
-              </button>
-            </>
-          )}
-        </div>
+            <button type="button" className="secondary-button" onClick={newRound}>
+              {t('results.newRound')}
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Rozehrané kolo má jen jednu očekávanou akci - pokračovat ve hře.
+                Zahodit rozehrané kolo je vzácná a nevratná volba, proto je to
+                podřazený odkaz, ne rovnocenné tlačítko vedle "Zpět do hry". */}
+            <button type="button" className="primary-button" onClick={onResume}>
+              {t('results.backToPlay')}
+            </button>
+            <button type="button" className="link-button danger" onClick={newRound}>
+              {t('results.discardRound')}
+            </button>
+          </>
+        )}
         <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>

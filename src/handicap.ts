@@ -1,5 +1,6 @@
 import type { BonusId, PlayerId, Round, RoundTee } from './types'
 import { diffToPar, parAt, scoreAt } from './types'
+import { localeTag } from './i18n'
 
 /**
  * Handicapy a netto výpočty.
@@ -16,6 +17,26 @@ import { diffToPar, parAt, scoreAt } from './types'
 
 /** Slope neutrálního hřiště. Vzorec pro hrací handicap je k němu vztažený. */
 export const NEUTRAL_SLOPE = 113
+
+/**
+ * Zadaný index; prázdné pole znamená „bez handicapu". Přijme tečku i čárku -
+ * mobilní numerická klávesnice nabízí jednu podle jazyka systému, ne appky.
+ */
+export function parseHandicapIndex(raw: string): number | undefined {
+  if (!raw.trim()) return undefined
+  const value = Number.parseFloat(raw.replace(',', '.'))
+  return Number.isFinite(value) ? value : undefined
+}
+
+/**
+ * Zobrazí index v jednotném tvaru bez ohledu na to, jestli byl zadaný
+ * s tečkou nebo čárkou - desetinný oddělovač podle jazyka appky, nejvýš
+ * jedno desetinné místo. Jen zobrazení, index samotný se nezaokrouhluje.
+ */
+export function formatHandicapIndex(value: number | undefined): string {
+  if (value === undefined) return ''
+  return new Intl.NumberFormat(localeTag(), { maximumFractionDigits: 1 }).format(value)
+}
 
 /**
  * Jamky plného kola. Index je vztažený k osmnáctce, takže kratší kolo z něj

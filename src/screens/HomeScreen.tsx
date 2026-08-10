@@ -3,6 +3,7 @@ import type { Course } from '../courses/types'
 import type { Round } from '../types'
 import { formatRoundDate } from '../types'
 import { getGame } from '../games'
+import { formatHandicapIndex } from '../handicap'
 import type { RosterEntry } from '../storage'
 import { loadCourses, loadFavoriteCourseIds, loadRoster } from '../storage'
 import { usePwaInstall } from '../pwa'
@@ -116,6 +117,47 @@ export default function HomeScreen({
           {t('home.newRound')}
         </button>
 
+        {favoriteCourses.length > 0 && (
+          <section className="home-section">
+            <h2>{t('home.favoriteCourses')}</h2>
+            <div className="home-list">
+              {favoriteCourses.map((course) => (
+                <button
+                  key={course.id}
+                  type="button"
+                  className="home-card"
+                  onClick={() => onPickFavoriteCourse(course)}
+                >
+                  <span className="home-card-title">{course.name}</span>
+                  <span className="home-card-meta">
+                    {t('picker.holes', { count: course.holeCount })}
+                    {course.tees.length > 0 ? ` · ${t('picker.rated')}` : ''}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {favoritePlayers.length > 0 && (
+          <section className="home-section">
+            <h2>{t('home.favoritePlayers')}</h2>
+            <div className="chip-row">
+              {favoritePlayers.map((entry) => (
+                <span key={entry.id} className="chip">
+                  {entry.name}
+                  {typeof entry.handicapIndex === 'number' && (
+                    <span className="chip-meta">
+                      {' '}
+                      · {formatHandicapIndex(entry.handicapIndex)}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
         {lastRound && (
           <section className="home-section">
             <div className="home-section-head">
@@ -136,44 +178,6 @@ export default function HomeScreen({
               </span>
               <span className="home-card-meta">{lastRoundLine(lastRound)}</span>
             </button>
-          </section>
-        )}
-
-        {favoritePlayers.length > 0 && (
-          <section className="home-section">
-            <h2>{t('home.favoritePlayers')}</h2>
-            <div className="chip-row">
-              {favoritePlayers.map((entry) => (
-                <span key={entry.id} className="chip">
-                  {entry.name}
-                  {typeof entry.handicapIndex === 'number' && (
-                    <span className="chip-meta"> · {entry.handicapIndex}</span>
-                  )}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {favoriteCourses.length > 0 && (
-          <section className="home-section">
-            <h2>{t('home.favoriteCourses')}</h2>
-            <div className="home-list">
-              {favoriteCourses.map((course) => (
-                <button
-                  key={course.id}
-                  type="button"
-                  className="home-card"
-                  onClick={() => onPickFavoriteCourse(course)}
-                >
-                  <span className="home-card-title">{course.name}</span>
-                  <span className="home-card-meta">
-                    {t('picker.holes', { count: course.holeCount })}
-                    {course.tees.length > 0 ? ` · ${t('picker.rated')}` : ''}
-                  </span>
-                </button>
-              ))}
-            </div>
           </section>
         )}
 

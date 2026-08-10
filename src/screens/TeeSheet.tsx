@@ -8,8 +8,8 @@ import { localeTag, localizedTeeName, useLocale } from '../i18n'
  * dostane. To poslední číslo nikde jinde není a je to přesně ta informace,
  * kvůli které se odpaliště mění.
  *
- * Komponenta je jen zobrazení; co která volba znamená, spočítá `SetupScreen`
- * a předá hotové řádky.
+ * Komponenta je jen zobrazení; co která volba znamená, spočítá volající krok
+ * zakládání kola (`SetupTeeScreen`, `SetupPlayersScreen`) a předá hotové řádky.
  */
 
 export interface TeeSheetRow {

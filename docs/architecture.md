@@ -402,18 +402,18 @@ nepřekreslil.
 Tok appky:
 
 ```
-HomeScreen ──▶ CoursePickerScreen ──▶ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
-    │                  │                    │                    │                       │
-    ├──▶ MenuSheet     │             (BonusSheet)           (Scorecard)
-    │      ├──▶ CoursePickerScreen (mode="browse") ──▶ CourseEditScreen
-    │      ├──▶ PlayersScreen
-    │      ├──▶ ArchiveScreen / BackupScreen / AccountScreen
+HomeScreen ──▶ CoursePickerScreen ──▶ SetupTeeScreen ──▶ SetupPlayersScreen ──▶ SetupGameScreen ──▶ SetupBetScreen
+    │                  │                                                                                  │ start
+    ├──▶ MenuSheet     │                                                                                  ▼
+    │      ├──▶ CoursePickerScreen (mode="browse") ──▶ CourseEditScreen                          PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
+    │      ├──▶ PlayersScreen                                                                        │                       │
+    │      ├──▶ ArchiveScreen / BackupScreen / AccountScreen                                   (BonusSheet)            (Scorecard)
     │
-    └──▶ ArchiveScreen (poslední odehraná hra), CoursePickerScreen (oblíbené hřiště → rovnou SetupScreen)
+    └──▶ ArchiveScreen (poslední odehraná hra), CoursePickerScreen (oblíbené hřiště → rovnou SetupTeeScreen)
 
-    (ze SetupScreen dál) ├──▶ GameSettingsScreen
-                          ├──▶ CourseEditScreen
-                          └──▶ TeeSheet
+    (v krocích zakládání kola) SetupTeeScreen/SetupPlayersScreen ──▶ TeeSheet
+                                SetupTeeScreen ──▶ CoursePickerScreen / CourseEditScreen
+                                SetupGameScreen ──▶ GameSettingsScreen
 ```
 
 **`HomeScreen` je skutečný vstupní bod appky** (rozhodnutí #28) – zobrazí se,
@@ -423,12 +423,18 @@ hřiště) je přímo na ní; co se dělá zřídka a záměrně (procházet hř
 spravovat hráče, záloha, účet) je za `MenuSheet` – modálním listem, ne
 samostatnou obrazovkou v historii.
 
+**Zakládání kola je rozdělené na kroky** (rozhodnutí #29): hřiště →
+odpaliště a jamky → hráči → hra a dvojice → sázka, kde se kolo i založí.
 Nové kolo pak **začíná výběrem hřiště**, ne nastavením: bez hřiště není z čeho
 vybrat odpaliště ani počítat handicapy. `CoursePickerScreen` proto slouží ve
-dvou režimech (`mode` prop): `'start'` vede k `SetupScreen` a v prvním kroku
-nabízí i hru bez hřiště (`pickerAtStart` v `App.tsx`); `'browse'` z menu vede
-místo toho na `CourseEditScreen` – jde jen o správu hřišť, ne o založení kola,
-takže se v něm ani nenabízí volba „bez hřiště".
+dvou režimech (`mode` prop): `'start'` vede k `SetupTeeScreen` a v prvním
+kroku nabízí i hru bez hřiště (`pickerAtStart` v `App.tsx`); `'browse'` z menu
+vede místo toho na `CourseEditScreen` – jde jen o správu hřišť, ne o založení
+kola, takže se v něm ani nenabízí volba „bez hřiště". Rozepsaný stav kola
+(jména, hra, odpaliště, sázka...) žije přímo v `AppShell`, ne v odděleném
+draftu jedné obrazovky – kroky se mezi sebou přepínají stejně jako kterákoli
+jiná obrazovka appky a nikdy se neodpojí. Odvození hřiště a výřezu, které
+potřebuje víc kroků najednou, počítá sdílené `src/screens/setupCourse.ts`.
 
 `ResultsScreen` slouží zároveň jako detail archivního kola (`readOnly`).
 
@@ -441,7 +447,10 @@ takže se v něm ani nenabízí volba „bez hřiště".
 | `PlayersScreen.tsx`      | správa uložených spoluhráčů: zvýraznění na domovské obrazovce, handicap, přidání a smazání               |
 | `CoursePickerScreen.tsx` | hledání hřiště, poloha, oblíbená, katalog; režim startu kola i čisté procházení z menu (`mode` prop)     |
 | `CourseEditScreen.tsx`   | ruční zadání a úprava hřiště: pary, stroke index, devítky, odpaliště                                     |
-| `SetupScreen.tsx`        | hřiště a odpaliště, hráči s handicapem a vlastním odpalištěm, hra, dvojice, sázka, hraný výřez hřiště    |
+| `SetupTeeScreen.tsx`     | krok 1 zakládání kola: odpaliště pro všechny a výřez hřiště (počet jamek, devítky)                       |
+| `SetupPlayersScreen.tsx` | krok 2: kolik hráčů, jména, odpaliště a handicap jednotlivců, oblíbení hráči                             |
+| `SetupGameScreen.tsx`    | krok 3: hra (jen ty, co podporují zvolený počet hráčů) a dvojice                                         |
+| `SetupBetScreen.tsx`     | krok 4, poslední: sázka nebo hra bez peněz, tady se kolo zakládá                                         |
 | `TeeSheet.tsx`           | výběr odpaliště jednoho hráče: délka, norma a kolik ran z něj dostane                                    |
 | `PlayScreen.tsx`         | zápis skóre po jamkách, značky, extra body, ukončení kola; na mobilu v landscape živá scorekarta         |
 | `BonusSheet.tsx`         | výběr extra bodů pro hráče na jamce                                                                      |

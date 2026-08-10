@@ -9,16 +9,10 @@ import {
 } from '../storage'
 import { APP_VERSION } from '../version'
 import { useT } from '../i18n'
+import { formatHandicapIndex, parseHandicapIndex } from '../handicap'
 
 interface Props {
   onBack: () => void
-}
-
-/** Zadaná hodnota; prázdné pole znamená „bez handicapu". */
-function parseHandicap(raw: string): number | undefined {
-  if (!raw.trim()) return undefined
-  const value = Number.parseFloat(raw.replace(',', '.'))
-  return Number.isFinite(value) ? value : undefined
 }
 
 /**
@@ -34,10 +28,7 @@ export default function PlayersScreen({ onBack }: Props) {
   const [roster, setRoster] = useState<RosterEntry[]>(() => loadRoster())
   const [handicapText, setHandicapText] = useState<Record<string, string>>(() =>
     Object.fromEntries(
-      loadRoster().map((entry) => [
-        entry.id,
-        typeof entry.handicapIndex === 'number' ? String(entry.handicapIndex) : '',
-      ]),
+      loadRoster().map((entry) => [entry.id, formatHandicapIndex(entry.handicapIndex)]),
     ),
   )
   const [newName, setNewName] = useState('')
@@ -48,8 +39,11 @@ export default function PlayersScreen({ onBack }: Props) {
   }
 
   function commitHandicap(entryId: string) {
-    const value = parseHandicap(handicapText[entryId] ?? '')
+    const value = parseHandicapIndex(handicapText[entryId] ?? '')
     setRoster(setRosterHandicap(entryId, value))
+    // Zpětně dosadí naformátovanou hodnotu - ať zadání "30,1" i "30.1"
+    // skončí na displeji stejně.
+    setHandicapText((prev) => ({ ...prev, [entryId]: formatHandicapIndex(value) }))
   }
 
   function remove(entry: RosterEntry) {
@@ -60,7 +54,7 @@ export default function PlayersScreen({ onBack }: Props) {
   function addPlayer() {
     const name = newName.trim()
     if (!name) return
-    const handicapIndex = parseHandicap(newHandicap)
+    const handicapIndex = parseHandicapIndex(newHandicap)
     const updated = addToRoster(
       [name],
       handicapIndex === undefined ? undefined : [handicapIndex],
@@ -70,7 +64,7 @@ export default function PlayersScreen({ onBack }: Props) {
     if (added) {
       setHandicapText((prev) => ({
         ...prev,
-        [added.id]: handicapIndex === undefined ? '' : String(handicapIndex),
+        [added.id]: formatHandicapIndex(handicapIndex),
       }))
     }
     setNewName('')

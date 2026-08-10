@@ -85,9 +85,16 @@ src/
     catalog.ts        stahování hřišť z katalogu
     geo.ts            řazení hřišť podle vzdálenosti
   screens/
+    HomeScreen.tsx         vstupní bod appky: nová hra, oblíbení, menu
+    MenuSheet.tsx          modální list - hřiště, hráči, archiv, záloha, účet
+    PlayersScreen.tsx      správa uložených spoluhráčů a oblíbených
     CoursePickerScreen.tsx výběr hřiště; první krok nového kola
     CourseEditScreen.tsx  ruční zadání a úprava hřiště
-    SetupScreen.tsx       hřiště, odpaliště, hráči, hra, dvojice a sázka
+    SetupTeeScreen.tsx     krok 1: odpaliště pro všechny, výřez hřiště
+    SetupPlayersScreen.tsx krok 2: hráči, handicapy, odpaliště jednotlivců
+    SetupGameScreen.tsx    krok 3: hra a dvojice
+    SetupBetScreen.tsx     krok 4: sázka; tady se kolo zakládá
+    setupCourse.ts         sdílené odvození hřiště a výřezu pro kroky výš
     TeeSheet.tsx          výběr odpaliště jednoho hráče
     PlayScreen.tsx        zápis skóre po jamkách
     BonusSheet.tsx        výběr extra bodů pro hráče na jamce

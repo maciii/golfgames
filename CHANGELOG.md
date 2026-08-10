@@ -7,6 +7,52 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.0] – 2026-08-10
+
+### Přidáno
+
+- **Zakládání kola rozdělené na kroky.** Místo jednoho dlouhého formuláře teď
+  appka vede pěti obrazovkami: hřiště → odpaliště a jamky → hráči → hra
+  a dvojice → sázka. Krok Hráči je teď nezávislý na hře - vybírá se v něm
+  1 až 4 hráči a krok Hra podle toho nabídne jen hry, které se s tolika
+  hráči dají hrát (dřív to bylo naopak). Zpět/swipe mezi kroky navigují
+  přesně o krok zpátky s vyplněnými hodnotami, appku opustí jen z domovské
+  obrazovky.
+- **Hrát bez sázky.** Appka uměla nulovou sázku tiše schovat, jen k tomu
+  chyběl srozumitelný přepínač. Krok Sázka ho teď má - schová měnu
+  a hodnotu bodu a appka spočítá jen výsledek hry.
+- **Oblíbení hráči v kroku Hráči.** Hráči označení hvězdičkou v `Hráči`
+  z menu jdou přidat do kola jedním klepnutím, nahoře nad běžným seznamem
+  uložených hráčů.
+
+### Změněno
+
+- **Odpaliště pro všechny je jeden select box.** Šest velkých dlaždic
+  nahradil kompaktní výběr s titulkem - u hřiště s víc odpališti to ušetří
+  hodně místa.
+- **Řádek hráče je na jednom řádku.** Odpaliště je teď jen barevná kulička
+  vedle jména, ne celý štítek s textem - klepnutí na ni pořád otevře plný
+  výběr s délkou, normou a přepočtem na rány.
+- **Tlačítka u rozehraného kola.** "Zpět do hry" je teď jediné zřetelné
+  tlačítko u průběžných výsledků; zahození rozehraného kola je vzácná
+  a nevratná akce, proto je z rovnocenného tlačítka "Nové kolo" teď
+  podřazený odkaz "Zahodit rozehrané kolo" s jasnějším potvrzením.
+- **Pořadí na domovské obrazovce.** Oblíbená hřiště jsou teď hned pod
+  Novou hrou, pod nimi oblíbení hráči a naposledy poslední odehraná hra.
+
+### Opraveno
+
+- **Oblíbená hřiště na domovské obrazovce se řídila stažením, ne srdíčkem.**
+  Hřiště označené jako oblíbené, ale ještě nestažené do telefonu, se na
+  domovské obrazovce vůbec neukázalo. Označení srdíčkem teď hřiště rovnou
+  stáhne, takže se oblíbenost řídí opravdu jen srdíčkem.
+- **Srdíčko oblíbeného hřiště se na některých systémech deformovalo.**
+  Textový znak ♥/♡ nahradila nakreslená ikona, která vypadá všude stejně.
+  Stejnou cestou (kreslené ikony) jde i menu.
+- **HCP index se ukládal nejednotně podle toho, jestli se zadala tečka,
+  nebo čárka.** Appka teď vždycky zobrazí stejný tvar bez ohledu na to, co
+  hráč napsal - sjednocení žije jako sdílená funkce v `handicap.ts`.
+
 ## [0.39.1] – 2026-08-10
 
 ### Opraveno
