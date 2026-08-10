@@ -95,7 +95,12 @@ export default function TeeSheet({
                 className={`tee-row tee-option-${teeColorClass(row.id)}${
                   selected ? ' selected' : ''
                 }`}
-                onClick={() => onSelect(row.id)}
+                onClick={() => {
+                  // Klepnutí na barvu rovnou vybere a zavře - volba je
+                  // jednorázová, netřeba ji ještě potvrzovat druhým krokem.
+                  onSelect(row.id)
+                  onClose()
+                }}
                 aria-pressed={selected}
               >
                 <span className="tee-swatch" aria-hidden="true" />

@@ -279,7 +279,7 @@ export default function SetupBetScreen({
           </label>
 
           {!noBet && (
-            <>
+            <div className="bet-card">
               <div className="segmented">
                 {CURRENCIES.map((code) => (
                   <button
@@ -296,9 +296,9 @@ export default function SetupBetScreen({
 
               <label className="field">
                 <span className="field-label">{t('setup.pointValue')}</span>
-                <span className="field-input">
+                <span className="amount-input">
                   <input
-                    className="name-input value-input"
+                    className="amount-value-input"
                     type="text"
                     inputMode="decimal"
                     value={pointValueText}
@@ -312,7 +312,7 @@ export default function SetupBetScreen({
               </label>
 
               <p className="hint">{t('setup.stakeHint')}</p>
-            </>
+            </div>
           )}
 
           {noBet && <p className="hint">{t('setup.noBetHint')}</p>}

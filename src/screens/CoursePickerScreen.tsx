@@ -13,6 +13,7 @@ import {
 import { localeTag } from '../i18n'
 import type { MessageKey } from '../i18n'
 import { useT } from '../i18n'
+import { HeartIcon } from './icons'
 
 /**
  * Výběr hřiště.
@@ -45,30 +46,6 @@ interface Props {
    * dostane vždycky vybrané hřiště, nikdy `null`.
    */
   mode?: 'start' | 'browse'
-}
-
-/**
- * Srdíčko oblíbeného hřiště - nakreslené, ne textový znak ♥/♡. Ten se
- * na různých systémech vykresloval jinak (i deformovaně), protože se pro
- * něj bere emoji nebo symbolový font podle toho, co je zrovna po ruce.
- */
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      aria-hidden="true"
-    >
-      <path
-        d="M12 20.3s-7.6-4.4-10.1-9C.5 7.9 2 4.6 5.5 4.1c2-.3 3.9.6 6.5 3.1 2.6-2.5 4.5-3.4 6.5-3.1 3.5.5 5 3.8 3.6 7.2-2.5 4.6-10.1 9-10.1 9z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
 }
 
 /** Bez diakritiky a malými písmeny, ať „Karlstejn" najde „Karlštejn". */
@@ -302,6 +279,21 @@ export default function CoursePickerScreen({
   }, [allRows, country, query])
 
   /**
+   * Zhuštěný přehled srdíčkem označených hřišť nahoře, mimo dlouhý seznam -
+   * ten dole slouží k hledání a procházení, tenhle k rychlému výběru toho,
+   * co se hraje nejčastěji. Při hledání zmizí, ať nezabírá místo dvojmo.
+   */
+  const favoriteRows = useMemo(
+    () =>
+      allRows
+        .filter((row) => favoriteSet.has(row.id))
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, localeTag(), { sensitivity: 'base' }),
+        ),
+    [allRows, favoriteSet],
+  )
+
+  /**
    * Oblíbenost se řídí výhradně srdíčkem, ne tím, jestli je hřiště stažené -
    * ale na domovské obrazovce se oblíbená hřiště čtou z `loadCourses()`
    * (jen to, co je v telefonu), takže katalogové hřiště bez stažení by se
@@ -374,6 +366,23 @@ export default function CoursePickerScreen({
       </header>
 
       <main className="content">
+        {favoriteRows.length > 0 && !query.trim() && (
+          <div className="favorite-course-row">
+            {favoriteRows.map((row) => (
+              <button
+                key={row.id}
+                type="button"
+                className="favorite-course-chip"
+                onClick={() => void choose(row)}
+                disabled={downloading !== null}
+              >
+                <HeartIcon filled />
+                <span className="favorite-course-chip-name">{row.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="picker-search-row">
           <input
             className="name-input"

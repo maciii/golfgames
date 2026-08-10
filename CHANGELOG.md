@@ -7,6 +7,30 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.3] – 2026-08-10
+
+### Změněno
+
+- **Oblíbená hřiště na Domů i ve výběru hřiště mají zhuštěný přehled.**
+  Místo velkých boxů přes celou šířku je teď nahoře řádek srdíčkových
+  pilulek jen se jménem hřiště - tap rovnou vybere. Ve výběru hřiště mizí
+  při hledání, ať nezabírá místo dvojmo.
+- **Oblíbení hráči v kroku Hráči mají vlastní krabičku.** Dřív splývali se
+  seznamem všech uložených hráčů pod nimi a hvězdička byla textový znak
+  ★, který se na různých systémech vykresloval jinak - teď je to stejná
+  nakreslená ikona jako zbytek appky.
+- **Odpaliště hráče značí vlaječka, ne kolečko.** Velké barevné kolečko u
+  jména hráče splývalo s ostatními kulatými prvky; teď je tam barevná
+  vlaječka na tónovaném podkladu, jasněji odkazuje na teebox.
+- **Krok Sázka je jedna karta, ne volně poskládané prvky.** Měna, hodnota
+  bodu a nápověda k nim teď drží opticky pohromadě.
+
+### Opraveno
+
+- **Výběr odpaliště v dialogu vyžadoval zavřít dialog zvlášť.** Klepnutí
+  na barvu teď rovnou vybere a dialog zavře - nebyl důvod to potvrzovat
+  druhým krokem.
+
 ## [0.40.2] – 2026-08-10
 
 ### Změněno

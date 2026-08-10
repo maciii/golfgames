@@ -9,6 +9,7 @@ import { loadCourses, loadFavoriteCourseIds, loadRoster } from '../storage'
 import { usePwaInstall } from '../pwa'
 import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, useLocale } from '../i18n'
 import type { MessageKey } from '../i18n'
+import { HeartIcon } from './icons'
 import MenuSheet from './MenuSheet'
 
 interface Props {
@@ -119,19 +120,16 @@ export default function HomeScreen({
         {favoriteCourses.length > 0 && (
           <section className="home-section">
             <h2>{t('home.favoriteCourses')}</h2>
-            <div className="home-list">
+            <div className="favorite-course-row">
               {favoriteCourses.map((course) => (
                 <button
                   key={course.id}
                   type="button"
-                  className="home-card"
+                  className="favorite-course-chip"
                   onClick={() => onPickFavoriteCourse(course)}
                 >
-                  <span className="home-card-title">{course.name}</span>
-                  <span className="home-card-meta">
-                    {t('picker.holes', { count: course.holeCount })}
-                    {course.tees.length > 0 ? ` · ${t('picker.rated')}` : ''}
-                  </span>
+                  <HeartIcon filled />
+                  <span className="favorite-course-chip-name">{course.name}</span>
                 </button>
               ))}
             </div>

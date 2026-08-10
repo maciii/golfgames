@@ -313,12 +313,6 @@ button {
   min-height: auto;
 }
 
-.home-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .home-card {
   display: flex;
   flex-direction: column;
@@ -746,22 +740,26 @@ button {
   min-width: 0;
 }
 
+/* Praporek místo kolečka - odkazuje na odpaliště samotné (teebox), barva
+   uvnitř řekne kterou. Kolečko tady splývalo s ostatními kulatými prvky
+   (fotky hráčů, radio tlačítka) a nebylo jasné, že jde zrovna o odpaliště. */
 .tee-dot {
   --tee-color: var(--text-dim);
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--tee-color);
-  background: var(--bg-elevated);
+  border: 1px solid color-mix(in srgb, var(--tee-color) 55%, transparent);
+  background: color-mix(in srgb, var(--tee-color) 18%, var(--bg-elevated));
 }
 
-.tee-dot .tee-swatch {
-  width: 20px;
-  height: 20px;
+.tee-dot svg {
+  width: 22px;
+  height: 22px;
+  color: var(--tee-color);
 }
 
 .setup-player-meta {
@@ -1376,6 +1374,23 @@ button {
   gap: 8px;
 }
 
+/* Rychlá volba oblíbených hráčů nad formulářem - vlastní zvýrazněná krabička,
+   ať nesplývá se seznamem všech uložených hráčů pod formulářem. */
+.favorite-players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+
+.favorite-players .chip svg {
+  flex: none;
+  color: var(--score-eagle);
+}
+
 .roster-head {
   display: flex;
   align-items: baseline;
@@ -1424,6 +1439,42 @@ button {
 .chip-x {
   font-size: 18px;
   line-height: 1;
+}
+
+/* --- zhuštěný přehled oblíbených hřišť (Home, výběr hřiště) -------------- */
+
+.favorite-course-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.favorite-course-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 0 14px 0 10px;
+  border-radius: 20px;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 550;
+  text-align: left;
+}
+
+.favorite-course-chip svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--score-birdie);
+}
+
+.favorite-course-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* --- pole s hodnotou a přepínač ------------------------------------------ */
@@ -1498,6 +1549,55 @@ button {
   font-size: 15px;
   color: var(--text-dim);
   min-width: 20px;
+}
+
+/* --- karta sázky (krok Sázka) --------------------------------------------- */
+
+/* Měna, hodnota bodu a nápověda k nim patří opticky k sobě - dřív byly jen
+   volně poskládané pod sebou vedle přepínače „Hrát bez sázky", což působilo
+   rozházené. Karta je drží pohromadě. */
+.bet-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+
+.bet-card .hint {
+  margin: 0;
+}
+
+/* Vstup s jednotkou v jedné ohraničené krabičce, ne malé pole s textem
+   volně vedle sebe. */
+.amount-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-input);
+}
+
+.amount-value-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  /* 16px brání iOS Safari v automatickém zoomu při zaostření pole. */
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-value-input:focus {
+  outline: none;
 }
 
 @media (max-width: 480px) {

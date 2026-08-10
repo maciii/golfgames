@@ -9,6 +9,7 @@ import {
   playerCourseHandicap,
 } from '../handicap'
 import { localizedTeeName, useT } from '../i18n'
+import { StarIcon, TeeFlagIcon } from './icons'
 import TeeSheet, { teeColorClass, type TeeSheetRow } from './TeeSheet'
 import { resolveCourseSetup } from './setupCourse'
 
@@ -212,7 +213,7 @@ export default function SetupPlayersScreen({
           </div>
 
           {favoriteAvailable.length > 0 && (
-            <div className="roster">
+            <div className="favorite-players">
               <span className="roster-label">{t('home.favoritePlayers')}</span>
               <div className="chip-row">
                 {favoriteAvailable.map((entry) => (
@@ -223,7 +224,8 @@ export default function SetupPlayersScreen({
                     onClick={() => useRosterEntry(entry)}
                     aria-label={t('setup.addPlayer', { name: entry.name })}
                   >
-                    ★ {rosterLabel(entry)}
+                    <StarIcon />
+                    {rosterLabel(entry)}
                   </button>
                 ))}
               </div>
@@ -256,7 +258,7 @@ export default function SetupPlayersScreen({
                         aria-label={t('setup.playerTee', { name: displayName(i) })}
                         title={localizedTeeName(rowTeeId, rowTee?.name ?? rowTeeId)}
                       >
-                        <span className="tee-swatch" aria-hidden="true" />
+                        <TeeFlagIcon />
                       </button>
                     )}
                   </div>
