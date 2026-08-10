@@ -383,8 +383,16 @@ Volba jazyka: uložená předvolba → jazyk prohlížeče → angličtina.
 `App.tsx` drží čtyři věci: rozehrané kolo, archiv, jméno viditelné obrazovky
 (`'setup' | 'play' | 'results' | 'archive' | 'gameSettings'`) a rozepsaný draft
 nastavení nového kola. Draft zůstává v kořeni aplikace, aby přechod do výběru
-hřiště nebo jiné podobrazovky nesmazal zadané hráče, hru ani handicapy. Router
-tu není záměrně – navigace je plochá a router by byl jen váha navíc.
+hřiště nebo jiné podobrazovky nesmazal zadané hráče, hru ani handicapy.
+Navigace je plochá – aplikace se ovládá jednou rukou na hřišti, takže se nikam
+nezanořuje – ale žádný routovací balíček nepoužívá.
+
+**Zpět/swipe naviguje v appce, ne appku neopouští** (rozhodnutí #27). Každá
+změna viditelné obrazovky a otevřeného kola v archivu se zapíše přes
+`history.pushState`; `popstate` ji obnoví. Tlačítka „Zpět" v obrazovkách volají
+`window.history.back()`, takže tlačítko i gesto zpět dělají totéž. Appku zpět
+opustí jedině z kořenové obrazovky – jinde vždycky naviguje o krok zpátky
+uvnitř appky.
 
 Kolo se ukládá `useEffect`em při každé změně, takže ho není potřeba ukládat
 ručně z obrazovek. Všechny změny skóre jdou přes callbacky v `App.tsx`, které

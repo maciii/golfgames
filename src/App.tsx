@@ -51,10 +51,24 @@ function viewForRound(round: Round | null): View {
 }
 
 /**
+ * Otisk viditelné obrazovky pro navigaci prohlížeče (rozhodnutí #27
+ * v docs/decisions.md). Jen `view` a otevřené kolo v archivu - zbytek stavu
+ * je rozepsaná data (draft, vybrané hřiště), ne pozice, a zpět se nesmí
+ * ztratit.
+ */
+interface NavSnapshot {
+  view: View
+  openArchiveId: string | null
+}
+
+/**
  * Kořen aplikace: drží rozehrané kolo, archiv a to, která obrazovka je vidět.
  *
- * Navigace je záměrně plochá - aplikace se ovládá jednou rukou na hřišti,
- * takže se nikam nezanořuje a router by byl zbytečná váha.
+ * Navigace je plochá - aplikace se ovládá jednou rukou na hřišti, takže se
+ * nikam nezanořuje - ale zpět/swipe naviguje uvnitř appky přes History API
+ * (viz `popstate` níž), ne appku rovnou neopouští. Appka do historie
+ * prohlížeče dřív nezapisovala nic, takže první gesto zpět appku vždycky
+ * opustilo, i uprostřed zapisování skóre.
  */
 function AppShell() {
   const { noteRoundChange, dataVersion, discardRound: discardSyncedRound } = useAccount()
@@ -84,13 +98,48 @@ function AppShell() {
   const setupScrollTop = useRef(0)
   const restoreSetupScroll = useRef(false)
 
+  // `isPoppingHistory` odliší návrat přes zpět/swipe (stav se jen převezme
+  // z historie) od běžné navigace vpřed (stav se zapíše jako nový krok).
+  const isPoppingHistory = useRef(false)
+  const hasPushedInitialHistory = useRef(false)
+
+  useEffect(() => {
+    const snapshot: NavSnapshot = { view, openArchiveId }
+    if (isPoppingHistory.current) {
+      isPoppingHistory.current = false
+      return
+    }
+    if (!hasPushedInitialHistory.current) {
+      // První obrazovka appky nahradí dnešní krok historie, nepřidává nový -
+      // odsud má zpět appku opravdu opustit.
+      hasPushedInitialHistory.current = true
+      window.history.replaceState(snapshot, '')
+      return
+    }
+    window.history.pushState(snapshot, '')
+  }, [view, openArchiveId])
+
+  useEffect(() => {
+    const onPopState = (event: PopStateEvent) => {
+      const snapshot = event.state as NavSnapshot | null
+      // Chybějící stav je krok před první obrazovkou appky - tam ji necháme
+      // opravdu opustit, o to se postará prohlížeč sám.
+      if (!snapshot) return
+      isPoppingHistory.current = true
+      setView(snapshot.view)
+      setOpenArchiveId(snapshot.openArchiveId)
+      if (snapshot.view === 'setup') restoreSetupScroll.current = true
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
   const rememberSetupDraft = useCallback((draft: SetupDraft) => {
     setSetupDraft(draft)
   }, [])
 
   const leaveSetup = useCallback(() => {
-    restoreSetupScroll.current = true
-    setView('setup')
+    window.history.back()
   }, [])
 
   const openSetupSubscreen = useCallback((nextView: View) => {
@@ -222,19 +271,6 @@ function AppShell() {
     setOpenArchiveId(null)
   }, [])
 
-  /** Kam se vrátit z podobrazovky: do rozehrané hry, výsledků, nebo na úvod. */
-  const mainView = useCallback((): View => {
-    if (round) return viewForRound(round)
-    // Kdo už hřiště vybral nebo má rozepsané nastavení, vrací se do nastavení -
-    // ne zpátky na výběr hřiště, kterým kolo teprve začínalo.
-    return setupDraft || selectedCourseId ? 'setup' : 'coursePicker'
-  }, [round, setupDraft, selectedCourseId])
-
-  const leaveArchive = useCallback(() => {
-    setOpenArchiveId(null)
-    setView(mainView())
-  }, [mainView])
-
   // Když synchronizace přinesla data z cloudu, načteme je do obrazovky.
   // Zůstáváme přitom tam, kde uživatel je - jen se pod ním obnoví obsah.
   useEffect(() => {
@@ -243,13 +279,7 @@ function AppShell() {
 
   if (view === 'gameSettings' && settingsGameId) {
     return (
-      <GameSettingsScreen
-        gameId={settingsGameId}
-        onBack={() => {
-          setSettingsGameId(null)
-          setView(round ? 'play' : 'setup')
-        }}
-      />
+      <GameSettingsScreen gameId={settingsGameId} onBack={() => window.history.back()} />
     )
   }
 
@@ -311,19 +341,19 @@ function AppShell() {
 
   if (view === 'backup') {
     return (
-      <BackupScreen onImported={reloadFromStorage} onBack={() => setView(mainView())} />
+      <BackupScreen onImported={reloadFromStorage} onBack={() => window.history.back()} />
     )
   }
 
   if (view === 'privacy') {
-    return <PrivacyScreen onBack={() => setView('account')} />
+    return <PrivacyScreen onBack={() => window.history.back()} />
   }
 
   if (view === 'account') {
     return (
       <AccountScreen
         onOpenPrivacy={() => setView('privacy')}
-        onBack={() => setView(mainView())}
+        onBack={() => window.history.back()}
       />
     )
   }
@@ -332,7 +362,7 @@ function AppShell() {
     const opened = archive.find((r) => r.id === openArchiveId)
     if (opened) {
       return (
-        <ResultsScreen round={opened} readOnly onBack={() => setOpenArchiveId(null)} />
+        <ResultsScreen round={opened} readOnly onBack={() => window.history.back()} />
       )
     }
     return (
@@ -340,7 +370,7 @@ function AppShell() {
         rounds={archive}
         onOpen={setOpenArchiveId}
         onDelete={removeArchived}
-        onBack={leaveArchive}
+        onBack={() => window.history.back()}
       />
     )
   }

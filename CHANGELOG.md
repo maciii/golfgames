@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.38.0] – 2026-08-10
+
+### Přidáno
+
+- **Zpět a swipe teď navigují v appce, ne z ní ven.** Appka dřív do historie
+  prohlížeče nezapisovala nic, takže první gesto zpět appku vždycky rovnou
+  opustilo — klidně uprostřed zapisování skóre. Každá obrazovka i otevřené
+  kolo v archivu se teď zapisují přes `history.pushState`; appku zpět opustí
+  jedině z úvodní obrazovky, jinde vždycky naviguje o krok zpátky uvnitř
+  appky. Viz rozhodnutí #27 v `docs/decisions.md`.
+
 ## [0.37.2] – 2026-08-10
 
 ### Opraveno

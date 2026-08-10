@@ -509,6 +509,41 @@ když se u hráčů liší.
 
 ---
 
+## 27. Navigace: History API místo bezstavového přepínače
+
+**Kontext.** `App.tsx` přepínal obrazovky jediným `useState<View>` a do
+historie prohlížeče nikdy nic nezapisoval - tak znělo předchozí rozhodnutí,
+zapsané přímo v komentáři u `AppShell`: „Router tu není záměrně - navigace je
+plochá a router by byl zbytečná váha." Dávalo to smysl, dokud byla appka
+v podstatě lineární tok. Jenže swipe zpět na iPhonu, gesto/tlačítko zpět na
+Androidu i tlačítko zpět v desktop prohlížeči berou krok z historie
+_prohlížeče_, ne appky - a protože appka do ní nikdy nic nezapsala, první
+gesto zpět appku vždycky rovnou opustilo, klidně uprostřed zapisování skóre.
+
+**Rozhodnutí.** Každá změna viditelné obrazovky (`view`) a otevřeného kola
+v archivu (`openArchiveId`) se zapíše přes `history.pushState`; `popstate` tu
+samou dvojici obnoví (`NavSnapshot` v `App.tsx`). Žádný routovací balíček -
+jen `pushState`/`popState` napojené na existující `setView`/`setOpenArchiveId`.
+Tlačítka „Zpět" v obrazovkách teď volají `window.history.back()` místo
+přímého přepínání stavu, takže tlačítko i gesto zpět dělají přesně totéž a
+appku pustí zpátky jen k obrazovce, na které uživatel opravdu byl.
+
+**Proč jen `view` a `openArchiveId`.** Zbytek stavu (`selectedCourseId`,
+`setupDraft`, `settingsGameId`, `editingCourseId`) je rozepsaná data, ne
+pozice v appce - kdyby zpět přepisovalo i je, ztratil by se rozepsaný draft
+při návratu z podobrazovky, přesně to, co `setupDraft` v kořeni appky záměrně
+chrání (bod 3). `settingsGameId` a `editingCourseId` navíc obrazovka čte, jen
+když `view` sedí na dané podobrazovce, takže zůstat jim chvíli neaktuální po
+odchodu nevadí.
+
+**Důsledek.** Appku teď zpět opustí jedině z kořenové obrazovky - odkudkoli
+jinde naviguje o krok zpátky uvnitř appky. Bude to důležité i při zabalení
+appky do Capacitoru/TWA pro App Store a Google Play, kde nativní
+tlačítko/gesto zpět mapuje přímo na historii WebView - bez zapsaných kroků by
+jedno gesto zavřelo celou appku stejně, jako to dnes dělá v prohlížeči.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
