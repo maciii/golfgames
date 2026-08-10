@@ -220,7 +220,7 @@ export default function SetupPlayersScreen({
           </div>
 
           {favoriteAvailable.length > 0 && (
-            <div className="favorite-players">
+            <div className="card favorite-players">
               <span className="roster-label">{t('home.favoritePlayers')}</span>
               <div className="chip-row">
                 {favoriteAvailable.map((entry) => (

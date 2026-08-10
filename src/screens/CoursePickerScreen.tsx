@@ -376,62 +376,69 @@ export default function CoursePickerScreen({
 
       <main className="content">
         {favoriteRows.length > 0 && !query.trim() && (
-          <div className="favorite-course-row">
-            {favoriteRows.map((row) => (
-              <button
-                key={row.id}
-                type="button"
-                className="favorite-course-chip"
-                onClick={() => void choose(row)}
-                disabled={downloading !== null}
-              >
-                <HeartIcon filled />
-                <span className="favorite-course-chip-name">{row.name}</span>
-              </button>
-            ))}
-          </div>
+          <section className="card section">
+            <h2 className="section-title">{t('home.favoriteCourses')}</h2>
+            <div className="favorite-course-row">
+              {favoriteRows.map((row) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  className="favorite-course-chip"
+                  onClick={() => void choose(row)}
+                  disabled={downloading !== null}
+                >
+                  <HeartIcon filled />
+                  <span className="favorite-course-chip-name">{row.name}</span>
+                </button>
+              ))}
+            </div>
+          </section>
         )}
 
-        <div className="picker-search-row">
-          <input
-            className="name-input"
-            type="search"
-            inputMode="search"
-            autoComplete="off"
-            placeholder={t('picker.search')}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label={t('picker.search')}
-          />
+        <section className="card section">
+          <div className="picker-search-row">
+            <input
+              className="name-input"
+              type="search"
+              inputMode="search"
+              autoComplete="off"
+              placeholder={t('picker.search')}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label={t('picker.search')}
+            />
+            <button
+              type="button"
+              className={`location-sort-button${nearestFirst ? ' active' : ''}`}
+              onClick={() => setNearestFirst((value) => !value)}
+              aria-label={
+                nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')
+              }
+              aria-pressed={nearestFirst}
+              title={nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')}
+            >
+              ⌖
+            </button>
+          </div>
+
           <button
             type="button"
-            className={`location-sort-button${nearestFirst ? ' active' : ''}`}
-            onClick={() => setNearestFirst((value) => !value)}
-            aria-label={nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')}
-            aria-pressed={nearestFirst}
-            title={nearestFirst ? t('picker.sortGrouped') : t('picker.sortNearest')}
+            className="name-input pick-trigger"
+            onClick={() => setCountrySheetOpen(true)}
+            aria-haspopup="dialog"
           >
-            ⌖
+            <span>
+              {country
+                ? `${countryName(country, localeTag())} (${country})`
+                : t('picker.allCountries')}
+            </span>
+            <ChevronDownIcon />
           </button>
-        </div>
 
-        <button
-          type="button"
-          className="name-input pick-trigger"
-          onClick={() => setCountrySheetOpen(true)}
-          aria-haspopup="dialog"
-        >
-          <span>
-            {country
-              ? `${countryName(country, localeTag())} (${country})`
-              : t('picker.allCountries')}
-          </span>
-          <ChevronDownIcon />
-        </button>
-
-        {locationState === 'unavailable' && (
-          <p className="hint">{t('picker.locationUnavailable')}</p>
-        )}
+          {locationState === 'unavailable' && (
+            <p className="hint">{t('picker.locationUnavailable')}</p>
+          )}
+        </section>
 
         {catalogError && <p className="notice error">{t(catalogError)}</p>}
 

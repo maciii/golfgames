@@ -185,6 +185,16 @@ button {
   gap: 10px;
 }
 
+/* Vizuálně ohraničený blok - společný základ karet napříč appkou (domů,
+   výběr hřiště, záloha dat, ...). Kombinuje se s vlastní layout třídou
+   dané karty (`.card.bet-card`, `.card.home-section`, ...). */
+.card {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+
 .section-title {
   margin: 0;
   font-size: 13px;
@@ -318,11 +328,13 @@ button {
   margin-top: 4px;
 }
 
+/* Kombinuje se s `.card` - vlastní ohraničený blok pro každou sekci Home
+   (oblíbená hřiště, oblíbení hráči, poslední hra), ať jsou vidět jako
+   oddělené celky, ne jen podnadpisy nad sebou. */
 .home-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 20px;
 }
 
 .home-section-head {
@@ -344,14 +356,16 @@ button {
   min-height: auto;
 }
 
+/* O odstín světlejší než karta Home, do které je vnořené (`--bg-input`
+   místo `--bg-elevated`) - jinak by splynulo s podkladem. */
 .home-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
   text-align: left;
   padding: 14px 16px;
-  border-radius: 14px;
-  background: var(--bg-elevated);
+  border-radius: 12px;
+  background: var(--bg-input);
 }
 
 .home-card-title {
@@ -1411,10 +1425,6 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  border-radius: 14px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--line);
 }
 
 .favorite-players .chip svg {
@@ -1592,10 +1602,6 @@ button {
   flex-direction: column;
   gap: 14px;
   margin-top: 12px;
-  padding: 14px;
-  border-radius: 14px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--line);
 }
 
 .bet-card .hint {

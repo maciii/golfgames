@@ -287,7 +287,7 @@ export default function SetupBetScreen({
           </label>
 
           {!noBet && (
-            <div className="bet-card">
+            <div className="card bet-card">
               <div className="segmented">
                 {CURRENCIES.map((code) => (
                   <button

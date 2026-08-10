@@ -96,7 +96,7 @@ export default function BackupScreen({ onImported, onBack }: Props) {
       <main className="content">
         <p className="hint">{t('backup.intro')}</p>
 
-        <section className="section">
+        <section className="card section">
           <h2 className="section-title">{t('backup.exportTitle')}</h2>
           <button type="button" className="primary-button" onClick={download}>
             {t('backup.download')}
@@ -104,7 +104,7 @@ export default function BackupScreen({ onImported, onBack }: Props) {
           <p className="hint">{t('backup.downloadHint')}</p>
         </section>
 
-        <section className="section">
+        <section className="card section">
           <h2 className="section-title">{t('backup.importTitle')}</h2>
 
           <div className="segmented">

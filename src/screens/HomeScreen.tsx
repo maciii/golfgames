@@ -141,7 +141,7 @@ export default function HomeScreen({
         </button>
 
         {favoriteCourses.length > 0 && (
-          <section className="home-section">
+          <section className="card home-section">
             <h2>{t('home.favoriteCourses')}</h2>
             <div className="favorite-course-row">
               {favoriteCourses.map((course) => (
@@ -160,7 +160,7 @@ export default function HomeScreen({
         )}
 
         {favoritePlayers.length > 0 && (
-          <section className="home-section">
+          <section className="card home-section">
             <h2>{t('home.favoritePlayers')}</h2>
             <div className="chip-row">
               {favoritePlayers.map((entry) => (
@@ -179,7 +179,7 @@ export default function HomeScreen({
         )}
 
         {lastRound && (
-          <section className="home-section">
+          <section className="card home-section">
             <div className="home-section-head">
               <h2>{t('home.lastRound')}</h2>
               <button type="button" className="link-button" onClick={onOpenArchive}>

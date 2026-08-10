@@ -7,6 +7,18 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.5] – 2026-08-10
+
+### Změněno
+
+- **Domů, Hřiště a Záloha dat mají obsah rozdělený do ohraničených karet.**
+  Domů: Oblíbená hřiště, Oblíbení hráči a Poslední hra jsou teď vizuálně
+  oddělené bloky místo podnadpisů nad sebou. Hřiště: Oblíbená hřiště mají
+  vlastní kartu, Hledání a filtr zemí/polohy další. Záloha dat: Zálohovat
+  a Obnovit ze zálohy jsou dvě oddělené karty. Zavedena sdílená `.card`
+  třída, kterou teď používají i dřívější karty (krok Sázka, oblíbení
+  hráči v zakládání kola) - vzhled je tak jednotný napříč appkou.
+
 ## [0.40.4] – 2026-08-10
 
 ### Přidáno
