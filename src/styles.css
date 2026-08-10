@@ -271,6 +271,185 @@ button {
   display: none;
 }
 
+/* --- domovská obrazovka --------------------------------------------------- */
+
+.icon-button {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  font-size: 20px;
+  line-height: 1;
+  flex: none;
+}
+
+.home-new-round {
+  margin-top: 4px;
+}
+
+.home-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.home-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-section-head h2,
+.home-section > h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.home-section-head .link-button {
+  padding: 0;
+  min-height: auto;
+}
+
+.home-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.home-card-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.home-card-meta {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.chip-meta {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* --- menu ------------------------------------------------------------------ */
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-item {
+  width: 100%;
+  text-align: left;
+  min-height: var(--tap);
+  padding: 0 4px;
+  font-size: 17px;
+  font-weight: 550;
+  border-bottom: 1px solid var(--line);
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+/* --- hráči ------------------------------------------------------------------ */
+
+.players-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.players-add-row .name-input {
+  /* `min-width:0` je nutné - bez něj flex položka nejde zúžit pod svou
+     obsahovou šířku a řádek přeteče přes displej. */
+  flex: 1;
+  min-width: 0;
+}
+
+.players-add-row .value-input {
+  flex: 0 0 64px;
+  min-width: 0;
+}
+
+.players-add-button {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.players-add-button:disabled {
+  opacity: 0.4;
+}
+
+.players-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.players-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+}
+
+.favorite-star {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  font-size: 19px;
+  color: var(--text-dim);
+}
+
+.favorite-star.active {
+  color: var(--score-eagle);
+}
+
+.players-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.players-hcp {
+  flex: 0 0 64px;
+  min-width: 0;
+}
+
+.players-remove {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 20px;
+  line-height: 1;
+}
+
 /* Výsledek zálohování nebo obnovy. */
 .notice {
   padding: 12px 14px;

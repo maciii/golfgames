@@ -399,21 +399,36 @@ ručně z obrazovek. Všechny změny skóre jdou přes callbacky v `App.tsx`, kt
 `Round` mění **neměnně** (nové pole/objekt, ne mutace) – jinak by se React
 nepřekreslil.
 
-Tok jednoho kola:
+Tok appky:
 
 ```
-CoursePickerScreen ──▶ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
-                            │                     │                       │
-                            │              (BonusSheet)            (Scorecard)
-                            ├──▶ GameSettingsScreen
-                            ├──▶ CourseEditScreen
-                            └──▶ TeeSheet
+HomeScreen ──▶ CoursePickerScreen ──▶ SetupScreen ──start──▶ PlayScreen ──finish──▶ ResultsScreen ──▶ ArchiveScreen
+    │                  │                    │                    │                       │
+    ├──▶ MenuSheet     │             (BonusSheet)           (Scorecard)
+    │      ├──▶ CoursePickerScreen (mode="browse") ──▶ CourseEditScreen
+    │      ├──▶ PlayersScreen
+    │      ├──▶ ArchiveScreen / BackupScreen / AccountScreen
+    │
+    └──▶ ArchiveScreen (poslední odehraná hra), CoursePickerScreen (oblíbené hřiště → rovnou SetupScreen)
+
+    (ze SetupScreen dál) ├──▶ GameSettingsScreen
+                          ├──▶ CourseEditScreen
+                          └──▶ TeeSheet
 ```
 
-Kolo **začíná výběrem hřiště**, ne nastavením: bez hřiště není z čeho vybrat
-odpaliště ani počítat handicapy. Výběr hřiště je proto zároveň první obrazovkou
-aplikace i podobrazovkou nastavení – v prvním případě místo „Zpět" nabízí hru
-bez hřiště a odkazy na archiv, zálohu a účet (`pickerAtStart` v `App.tsx`).
+**`HomeScreen` je skutečný vstupní bod appky** (rozhodnutí #28) – zobrazí se,
+kdykoli není rozehrané kolo. Dělí obrazovky podle toho, jak často se používají:
+co se dělá skoro pokaždé (nová hra, poslední výsledek, oblíbení hráči a
+hřiště) je přímo na ní; co se dělá zřídka a záměrně (procházet hřiště,
+spravovat hráče, záloha, účet) je za `MenuSheet` – modálním listem, ne
+samostatnou obrazovkou v historii.
+
+Nové kolo pak **začíná výběrem hřiště**, ne nastavením: bez hřiště není z čeho
+vybrat odpaliště ani počítat handicapy. `CoursePickerScreen` proto slouží ve
+dvou režimech (`mode` prop): `'start'` vede k `SetupScreen` a v prvním kroku
+nabízí i hru bez hřiště (`pickerAtStart` v `App.tsx`); `'browse'` z menu vede
+místo toho na `CourseEditScreen` – jde jen o správu hřišť, ne o založení kola,
+takže se v něm ani nenabízí volba „bez hřiště".
 
 `ResultsScreen` slouží zároveň jako detail archivního kola (`readOnly`).
 
@@ -421,7 +436,10 @@ bez hřiště a odkazy na archiv, zálohu a účet (`pickerAtStart` v `App.tsx`)
 
 | Soubor                   | Co dělá                                                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `CoursePickerScreen.tsx` | hledání hřiště, poloha, oblíbená, katalog; v režimu startu i vstup do archivu, zálohy a účtu             |
+| `HomeScreen.tsx`         | vstupní bod appky: nová hra, poslední výsledek, oblíbení hráči a hřiště, otevření menu                   |
+| `MenuSheet.tsx`          | modální list s tím, co se dělá zřídka: hřiště, hráči, archiv, záloha, účet                               |
+| `PlayersScreen.tsx`      | správa uložených spoluhráčů: zvýraznění na domovské obrazovce, handicap, přidání a smazání               |
+| `CoursePickerScreen.tsx` | hledání hřiště, poloha, oblíbená, katalog; režim startu kola i čisté procházení z menu (`mode` prop)     |
 | `CourseEditScreen.tsx`   | ruční zadání a úprava hřiště: pary, stroke index, devítky, odpaliště                                     |
 | `SetupScreen.tsx`        | hřiště a odpaliště, hráči s handicapem a vlastním odpalištěm, hra, dvojice, sázka, hraný výřez hřiště    |
 | `TeeSheet.tsx`           | výběr odpaliště jednoho hráče: délka, norma a kolik ran z něj dostane                                    |

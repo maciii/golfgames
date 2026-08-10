@@ -142,6 +142,7 @@ export function mergeRosters(
       ...(typeof entry.preferredTeeId === 'string' && entry.preferredTeeId
         ? { preferredTeeId: entry.preferredTeeId }
         : {}),
+      ...(entry.favorite ? { favorite: true } : {}),
     })
   }
 

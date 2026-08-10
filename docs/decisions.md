@@ -544,6 +544,54 @@ jedno gesto zavřelo celou appku stejně, jako to dnes dělá v prohlížeči.
 
 ---
 
+## 28. Domovská obrazovka a menu
+
+**Kontext.** Appka dřív začínala rovnou výběrem hřiště - logické pro start
+kola, ale appka neměla žádné místo, které by odpovědělo na „co chci s appkou
+udělat" dřív, než se rozhodne za uživatele. Zápis skóre je odteď zpětně
+navigovatelný (bod 27), takže přidání kořenové obrazovky navíc nic nerozbije -
+jen se za ni posune to, co dřív bylo první.
+
+**Rozhodnutí.** `HomeScreen` je nová skutečná první obrazovka, zobrazí se
+kdykoli není rozehrané kolo. Dělí zbytek appky podle frekvence použití: co se
+dělá skoro pokaždé (nová hra, poslední odehraná hra, oblíbení hráči a hřiště)
+je přímo na ní; co se dělá zřídka a záměrně (procházet a spravovat hřiště,
+spravovat hráče, záloha, účet) je za `MenuSheet`. `CoursePickerScreen` byl do
+teď jen krok zakládání kola - dostal `mode` prop (`'start' | 'browse'`), aby
+šel použít i pro čisté procházení hřišť z menu (vede na `CourseEditScreen`
+místo do `SetupScreen`, a nenabízí volbu „bez hřiště", která by tam neznamenala
+nic).
+
+**Menu je list (`MenuSheet`), ne obrazovka v historii.** Appka podobné listy
+už měla (`TeeSheet`, `BonusSheet`) - jde o stejný vzor, otevře a zavře ho
+lokální stav `HomeScreen`, ne `history.pushState`. Zpět z otevřeného menu ho
+tak jen zavře jako kteroukoli jinou vrstvu nad appkou, ne že by musel
+projíždět vlastním krokem historie.
+
+**Oblíbení hráči.** `RosterEntry` dostal `favorite?: boolean` - stejný vzor
+jako `preferredTeeId`, ne samostatný klíč jako `favoriteCourses` (roster žije
+celý v jednom místě, netřeba ho zvlášť indexovat). Nová obrazovka
+`PlayersScreen` je první místo, kde jde seznam hráčů spravovat mimo zakládání
+kola - přidat, smazat, upravit HCP a zvýraznit na domovské obrazovce.
+
+**Vyhledávání hráčů z ČGF/Týčka zůstává mimo appku.** ČGF zrušilo veřejnou
+databázi hráčů kvůli GDPR už v roce 2018 a nenabízí k ní žádné API; napojení
+Týčka na jejich data je uzavřené partnerství, ne otevřené rozhraní pro cizí
+appky. Appka proto zůstává u vlastního lokálního seznamu - není co napojit bez
+toho, aby se z projektu stal oficiální partner ČGF, což je obchodní krok, ne
+kód.
+
+**Co se vědomě nedělá.** `CoursePickerScreen` v režimu `'start'` pořád nabízí
+i odkazy na archiv/zálohu/účet ve svém spodním panelu (`pickerAtStart`),
+přestože je teď má i `HomeScreen` v menu - mírná duplicita, ale bezpečnější
+než měnit existující podmíněné vykreslování composePickeru kvůli obrazovce,
+která ho jen předchází. Karta „Pokračovat" v rozehraném kole na domovskou
+obrazovku nepatří - appka při rozehraném kole vede rovnou do `PlayScreen`
+(`viewForRound()`), Home se zobrazí, jen když kolo neexistuje, takže by karta
+nikdy neměla co zobrazit.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:

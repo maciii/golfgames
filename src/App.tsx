@@ -19,12 +19,15 @@ import AccountScreen from './screens/AccountScreen'
 import PrivacyScreen from './screens/PrivacyScreen'
 import CourseEditScreen from './screens/CourseEditScreen'
 import CoursePickerScreen from './screens/CoursePickerScreen'
+import HomeScreen from './screens/HomeScreen'
+import PlayersScreen from './screens/PlayersScreen'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 import { getGame } from './games'
 import type { HoleSetupSelection } from './games'
 
 type View =
+  | 'home'
   | 'setup'
   | 'play'
   | 'results'
@@ -35,6 +38,7 @@ type View =
   | 'privacy'
   | 'courseEdit'
   | 'coursePicker'
+  | 'players'
 
 /**
  * Kam obrazovka patří podle stavu kola.
@@ -42,11 +46,13 @@ type View =
  * Platí to na dvou místech - při startu aplikace a při návratu z podobrazovky -
  * a obě musí odpovídat, jinak refresh přistane jinde, než kde uživatel byl.
  *
- * Nové kolo začíná **výběrem hřiště**: bez hřiště není z čeho vybrat odpaliště
- * ani počítat handicapy, takže se nastavení kola otevírá až proti němu.
+ * Bez rozehraného kola appka vede na domovskou obrazovku - tu skutečnou
+ * první, ze které se dá založit nová hra, otevřít menu nebo pokračovat
+ * v posledních výsledcích. Nové kolo pak začíná **výběrem hřiště**: bez
+ * hřiště není z čeho vybrat odpaliště ani počítat handicapy.
  */
 function viewForRound(round: Round | null): View {
-  if (!round) return 'coursePicker'
+  if (!round) return 'home'
   return round.finishedAt ? 'results' : 'play'
 }
 
@@ -95,6 +101,12 @@ function AppShell() {
    * hru bez hřiště a odkazy na archiv, zálohu a účet.
    */
   const [pickerAtStart, setPickerAtStart] = useState(true)
+  /**
+   * Výběr hřiště vede buď do zakládání kola, nebo je to čisté procházení
+   * z menu (`onBrowseCourses` na `HomeScreen`) - tam klepnutí na hřiště
+   * otevře jeho úpravu, ne rovnou nastavení kola.
+   */
+  const [pickerMode, setPickerMode] = useState<'start' | 'browse'>('start')
   const setupScrollTop = useRef(0)
   const restoreSetupScroll = useRef(false)
 
@@ -242,8 +254,7 @@ function AppShell() {
     setSetupDraft(undefined)
     setSelectedCourseId(undefined)
     setRound(null)
-    setPickerAtStart(true)
-    setView('coursePicker')
+    setView('home')
   }, [round, discardSyncedRound])
 
   const removeArchived = useCallback(
@@ -258,6 +269,13 @@ function AppShell() {
   const openArchive = useCallback(() => {
     setArchive(loadArchive())
     setOpenArchiveId(null)
+    setView('archive')
+  }, [])
+
+  /** Otevře konkrétní odehrané kolo z domovské obrazovky rovnou v detailu. */
+  const openArchivedRound = useCallback((roundId: string) => {
+    setArchive(loadArchive())
+    setOpenArchiveId(roundId)
     setView('archive')
   }, [])
 
@@ -286,8 +304,18 @@ function AppShell() {
   if (view === 'coursePicker') {
     return (
       <CoursePickerScreen
+        mode={pickerMode}
         {...(selectedCourseId ? { selectedId: selectedCourseId } : {})}
         onSelect={(course) => {
+          // Čisté procházení z menu vede na úpravu hřiště, ne do zakládání
+          // kola - o hru se nikdo neprosí, jen chce spravovat seznam.
+          if (pickerMode === 'browse') {
+            if (course) {
+              setEditingCourseId(course.id)
+              setView('courseEdit')
+            }
+            return
+          }
           setSelectedCourseId(course?.id)
           // Z prvního kroku se jde dál na nastavení, z podobrazovky zpátky
           // tam, odkud uživatel přišel (včetně místa, kde skončil).
@@ -299,7 +327,7 @@ function AppShell() {
           setView('courseEdit')
         }}
         onBack={leaveSetup}
-        {...(pickerAtStart
+        {...(pickerAtStart && pickerMode === 'start'
           ? {
               onSkip: () => {
                 setSelectedCourseId(undefined)
@@ -313,6 +341,10 @@ function AppShell() {
           : {})}
       />
     )
+  }
+
+  if (view === 'players') {
+    return <PlayersScreen onBack={() => window.history.back()} />
   }
 
   if (view === 'courseEdit') {
@@ -375,6 +407,33 @@ function AppShell() {
     )
   }
 
+  if (view === 'home') {
+    return (
+      <HomeScreen
+        archive={archive}
+        onNewRound={() => {
+          setPickerAtStart(true)
+          setPickerMode('start')
+          setView('coursePicker')
+        }}
+        onOpenRound={openArchivedRound}
+        onPickFavoriteCourse={(course) => {
+          setSelectedCourseId(course.id)
+          setView('setup')
+        }}
+        onOpenArchive={openArchive}
+        onOpenPlayers={() => setView('players')}
+        onBrowseCourses={() => {
+          setPickerAtStart(false)
+          setPickerMode('browse')
+          setView('coursePicker')
+        }}
+        onOpenBackup={() => setView('backup')}
+        onOpenAccount={() => setView('account')}
+      />
+    )
+  }
+
   if (!round) {
     return (
       <SetupScreen
@@ -392,6 +451,7 @@ function AppShell() {
         }}
         onPickCourse={() => {
           setPickerAtStart(false)
+          setPickerMode('start')
           openSetupSubscreen('coursePicker')
         }}
         {...(selectedCourseId ? { selectedCourseId } : {})}

@@ -20,6 +20,38 @@ export const en: Record<MessageKey, Message> = {
   'common.holePoints': 'Points for the hole',
   'common.dash': '–',
 
+  // --- home screen and menu ------------------------------------------------
+  'home.openMenu': 'Menu',
+  'home.newRound': 'New round',
+  'home.lastRound': 'Last round',
+  'home.seeArchive': 'Archive',
+  'home.favoritePlayers': 'Favorite players',
+  'home.favoriteCourses': 'Favorite courses',
+  'menu.title': 'Menu',
+  'menu.courses': 'Courses',
+  'menu.players': 'Players',
+  'menu.archive': 'Archive',
+  'menu.backup': 'Backup',
+  'menu.account': 'Account',
+
+  // --- players (roster management) -----------------------------------------
+  'players.title': 'Players',
+  'players.empty': 'No saved players yet',
+  'players.count': {
+    one: '{count} saved player',
+    other: '{count} saved players',
+  },
+  'players.emptyHint':
+    'Playing partners save themselves when you start a round, or add one right here.',
+  'players.namePlaceholder': 'Name',
+  'players.hcpPlaceholder': 'HCP',
+  'players.hcpFor': 'Handicap index for {name}',
+  'players.add': 'Add',
+  'players.remove': 'Remove {name}',
+  'players.removeConfirm': 'Remove {name} from the list?',
+  'players.addFavorite': 'Highlight {name} on the home screen',
+  'players.removeFavorite': 'Stop highlighting {name} on the home screen',
+
   // --- setup --------------------------------------------------------------
   'setup.title': 'Golf Games',
   'setup.subtitle': 'New round',
@@ -92,15 +124,15 @@ export const en: Record<MessageKey, Message> = {
   'setup.backup': 'Data backup',
   'setup.signIn': 'Sign in and back up',
   'setup.account': 'Account and sync',
-  'setup.installApp': 'Add Golf Games to home screen',
-  'setup.installAppBenefit':
+  'pwa.installApp': 'Add Golf Games to home screen',
+  'pwa.installAppBenefit':
     'Open the app with one tap without the address bar. Scoring stays available even without a signal.',
-  'setup.installIosTitle': 'Add to home screen',
-  'setup.installIosHint': 'In Safari, tap Share and choose Add to Home Screen.',
-  'setup.installBrowserTitle': 'Install the app',
-  'setup.installBrowserHint':
+  'pwa.installIosTitle': 'Add to home screen',
+  'pwa.installIosHint': 'In Safari, tap Share and choose Add to Home Screen.',
+  'pwa.installBrowserTitle': 'Install the app',
+  'pwa.installBrowserHint':
     'Open the browser menu and choose Install app or Add to home screen.',
-  'setup.installClose': 'Close instructions',
+  'pwa.installClose': 'Close instructions',
   'setup.start': 'Start round',
   'setup.language': 'Language',
   'setup.syncedShort': 'backed up',
@@ -522,6 +554,7 @@ export const en: Record<MessageKey, Message> = {
   // Course picker
   'picker.title': 'Choose a course',
   'picker.startTitle': 'Where are you playing?',
+  'picker.browseTitle': 'Courses',
   'picker.skipCourse': 'Play without a course',
   'picker.count': '{stored} on this phone, {total} available',
   'picker.loading': 'Loading the course catalogue…',
