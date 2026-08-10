@@ -67,6 +67,12 @@ export const en: Record<MessageKey, Message> = {
   // --- setup --------------------------------------------------------------
   'setup.title': 'Golf Games',
   'setup.subtitle': 'New round',
+  'setup.next': 'Next',
+  'setup.stepTeeTitle': 'Tees and holes',
+  'setup.stepGameTitle': 'Game and teams',
+  'setup.teeIndividualHint': 'Individual player tees can be set in the next step.',
+  'setup.noBet': 'Play without a bet',
+  'setup.noBetHint': 'The app will only work out the game result, no money.',
   'setup.game': 'Game',
   'setup.gameSettings': 'Scoring settings',
   'setup.gameSettingsFor': 'Scoring settings for {name}',
@@ -278,8 +284,9 @@ export const en: Record<MessageKey, Message> = {
   'results.editScores': 'Edit scores',
   'results.backToPlay': 'Back to the round',
   'results.newRound': 'New round',
+  'results.discardRound': 'Discard round in progress',
   'results.discardConfirm':
-    'The round in progress will be deleted. Do you really want to start a new one?',
+    "The round in progress will be deleted and can't be undone. Discard it?",
 
   // --- scorecard ----------------------------------------------------------
   'scorecard.hole': 'Hole',

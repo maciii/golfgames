@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import {
   courseHandicap,
+  formatHandicapIndex,
   hasMixedTees,
+  parseHandicapIndex,
   playerCourseHandicap,
   playerTee,
   exclusiveBonusOutcome,
@@ -28,6 +30,26 @@ beforeAll(() => setActiveLocale('cs'))
 
 /** SI osmnáctijamkového hřiště: jamka 1 je nejtěžší, jamka 18 nejlehčí. */
 const SI_18 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+
+describe('zadání handicapového indexu', () => {
+  it('parseHandicapIndex přijme tečku i čárku', () => {
+    expect(parseHandicapIndex('30.1')).toBe(30.1)
+    expect(parseHandicapIndex('30,1')).toBe(30.1)
+  })
+
+  it('parseHandicapIndex prázdné pole znamená bez handicapu', () => {
+    expect(parseHandicapIndex('')).toBeUndefined()
+    expect(parseHandicapIndex('   ')).toBeUndefined()
+  })
+
+  it('formatHandicapIndex zobrazí obojí zadání stejně', () => {
+    expect(formatHandicapIndex(parseHandicapIndex('30.1'))).toBe(
+      formatHandicapIndex(parseHandicapIndex('30,1')),
+    )
+    expect(formatHandicapIndex(18)).toBe('18')
+    expect(formatHandicapIndex(undefined)).toBe('')
+  })
+})
 
 describe('courseHandicap', () => {
   it('na neutrálním hřišti (SR 113, CR = par) vrací index zaokrouhlený', () => {

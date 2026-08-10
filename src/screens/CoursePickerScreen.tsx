@@ -47,6 +47,30 @@ interface Props {
   mode?: 'start' | 'browse'
 }
 
+/**
+ * Srdíčko oblíbeného hřiště - nakreslené, ne textový znak ♥/♡. Ten se
+ * na různých systémech vykresloval jinak (i deformovaně), protože se pro
+ * něj bere emoji nebo symbolový font podle toho, co je zrovna po ruce.
+ */
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      aria-hidden="true"
+    >
+      <path
+        d="M12 20.3s-7.6-4.4-10.1-9C.5 7.9 2 4.6 5.5 4.1c2-.3 3.9.6 6.5 3.1 2.6-2.5 4.5-3.4 6.5-3.1 3.5.5 5 3.8 3.6 7.2-2.5 4.6-10.1 9-10.1 9z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 /** Bez diakritiky a malými písmeny, ať „Karlstejn" najde „Karlštejn". */
 function foldText(value: string): string {
   return value
@@ -277,8 +301,31 @@ export default function CoursePickerScreen({
     })
   }, [allRows, country, query])
 
-  function toggleFavorite(rowId: string) {
-    toggleFavoriteCourse(rowId)
+  /**
+   * Oblíbenost se řídí výhradně srdíčkem, ne tím, jestli je hřiště stažené -
+   * ale na domovské obrazovce se oblíbená hřiště čtou z `loadCourses()`
+   * (jen to, co je v telefonu), takže katalogové hřiště bez stažení by se
+   * tam nikdy neukázalo. Přidání do oblíbených proto hřiště nejdřív stáhne,
+   * přesně jako `choose()` - odebrání už stahovat nemusí.
+   */
+  async function toggleFavorite(row: Row) {
+    const willFavorite = !favoriteSet.has(row.id)
+    if (willFavorite && !row.stored) {
+      setDownloading(row.id)
+      setCatalogError(null)
+      try {
+        const course = await fetchCourse(row.id)
+        saveCourse(course)
+        setStored(loadCourses())
+      } catch (error: unknown) {
+        const reason = error instanceof CatalogError ? error.reason : 'broken'
+        setCatalogError(CATALOG_ERROR[reason])
+        setDownloading(null)
+        return
+      }
+      setDownloading(null)
+    }
+    toggleFavoriteCourse(row.id)
     setFavoriteIds(loadFavoriteCourseIds())
   }
 
@@ -416,7 +463,8 @@ export default function CoursePickerScreen({
               <button
                 type="button"
                 className={`course-favorite${favoriteSet.has(row.id) ? ' active' : ''}`}
-                onClick={() => toggleFavorite(row.id)}
+                onClick={() => void toggleFavorite(row)}
+                disabled={downloading !== null}
                 aria-label={
                   favoriteSet.has(row.id)
                     ? t('picker.removeFavorite', { name: row.name })
@@ -429,7 +477,7 @@ export default function CoursePickerScreen({
                     : t('picker.addFavorite', { name: row.name })
                 }
               >
-                {favoriteSet.has(row.id) ? '♥' : '♡'}
+                <HeartIcon filled={favoriteSet.has(row.id)} />
               </button>
             </div>
           ))}
