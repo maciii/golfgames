@@ -126,7 +126,9 @@ async function deleteRounds(uid: string, roundIds: string[]): Promise<void> {
 // --- předvolby ------------------------------------------------------------
 
 interface PrefsDocument {
-  roster?: { id: string; name: string }[]
+  // Handicap i odpaliště jsou volitelné: hráči uložení dřív je nemají a kolo
+  // bez hřiště odpaliště nezná.
+  roster?: { id: string; name: string; handicapIndex?: number; preferredTeeId?: string }[]
   settings?: unknown
   gameOptions?: unknown
   /**

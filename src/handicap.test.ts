@@ -1,6 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import {
   courseHandicap,
+  hasMixedTees,
+  playerCourseHandicap,
+  playerTee,
   exclusiveBonusOutcome,
   normalizeStrokeIndex,
   stablefordPoints,
@@ -9,8 +12,8 @@ import {
   strokesRelativeToBest,
   netDiffToPar,
 } from './handicap'
-import type { Round } from './types'
-import { DEFAULT_GAME_OPTIONS } from './types'
+import type { Round, RoundCourse } from './types'
+import { DEFAULT_GAME_OPTIONS, createRound } from './types'
 import { makeRound } from './games/fixtures'
 import { setActiveLocale } from './i18n'
 
@@ -71,6 +74,92 @@ describe('courseHandicap', () => {
     expect(courseHandicap(18, 139, 73.9, 72)).toBe(
       courseHandicap(18, 139, 73.9, 72, 18, 18),
     )
+  })
+})
+
+describe('odpaliště hráče', () => {
+  /** Colony Golf East podle scorekarty klubu. */
+  const east: RoundCourse = {
+    name: 'Colony Golf – East',
+    teeId: 'yellow',
+    teeName: 'Žlutá',
+    courseRating: 72.9,
+    slopeRating: 132,
+    par: 73,
+    strokeIndex: SI_18,
+    tees: [
+      { id: 'yellow', name: 'Žlutá', courseRating: 72.9, slopeRating: 132, par: 73 },
+      { id: 'red', name: 'Červená', courseRating: 68.6, slopeRating: 122, par: 73 },
+      { id: 'black', name: 'Černá', par: 73 },
+    ],
+  }
+
+  const round = (): Round =>
+    createRound({
+      gameId: 'skins',
+      playerNames: ['Martin', 'Eva'],
+      holeCount: 18,
+      course: east,
+      playerTeeIds: [undefined, 'red'],
+    })
+
+  it('hráč bez vlastní volby hraje z odpaliště kola', () => {
+    expect(round().players[0]?.teeId).toBe('yellow')
+    expect(playerTee(round(), 'p1')?.name).toBe('Žlutá')
+  })
+
+  it('hráč s vlastní volbou si nese své odpaliště', () => {
+    expect(round().players[1]?.teeId).toBe('red')
+    expect(playerTee(round(), 'p2')?.courseRating).toBe(68.6)
+  })
+
+  it('z různých odpališť vyjdou různé rány', () => {
+    // Kvůli tomuhle rozdílu to celé je: sedm ran, tedy dva Stablefordovy body
+    // na skoro každé druhé jamce.
+    expect(playerCourseHandicap(18.4, east.tees?.[0], 18, 73)).toBe(21)
+    expect(playerCourseHandicap(30.1, east.tees?.[1], 18, 73)).toBe(28)
+    expect(playerCourseHandicap(30.1, east.tees?.[0], 18, 73)).toBe(35)
+  })
+
+  it('odpaliště bez normy bere index rovnou jako rány', () => {
+    expect(playerCourseHandicap(18.4, east.tees?.[2], 18, 73)).toBe(18)
+    expect(playerCourseHandicap(18.4, undefined, 18, 73)).toBe(18)
+  })
+
+  it('devítka z osmnáctijamkové normy se krátí i tady', () => {
+    const tee = { courseRating: 72.9, slopeRating: 132, par: 73, ratedHoles: 18 }
+    expect(playerCourseHandicap(18.4, tee, 9, 73)).toBe(11)
+  })
+
+  it('starší kolo bez nabídky odpališť vrací odpaliště kola všem', () => {
+    const { tees: _tees, ...withoutTees } = east
+    const old = createRound({
+      gameId: 'skins',
+      playerNames: ['Martin', 'Eva'],
+      holeCount: 18,
+      course: withoutTees,
+    })
+    expect(playerTee(old, 'p2')).toEqual({
+      id: 'yellow',
+      name: 'Žlutá',
+      courseRating: 72.9,
+      slopeRating: 132,
+      par: 73,
+    })
+  })
+
+  it('pozná, že se hraje z víc odpališť', () => {
+    expect(hasMixedTees(round())).toBe(true)
+    expect(
+      hasMixedTees(
+        createRound({
+          gameId: 'skins',
+          playerNames: ['Martin', 'Eva'],
+          holeCount: 18,
+          course: east,
+        }),
+      ),
+    ).toBe(false)
   })
 })
 

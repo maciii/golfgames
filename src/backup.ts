@@ -139,6 +139,9 @@ export function mergeRosters(
       ...(typeof entry.handicapIndex === 'number'
         ? { handicapIndex: entry.handicapIndex }
         : {}),
+      ...(typeof entry.preferredTeeId === 'string' && entry.preferredTeeId
+        ? { preferredTeeId: entry.preferredTeeId }
+        : {}),
     })
   }
 

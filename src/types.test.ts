@@ -245,3 +245,34 @@ describe('Změna paru jamky', () => {
     expect(bonusesAt(next, 'p1', 0)).toEqual(['bunker'])
   })
 })
+
+describe('odpaliště hráčů', () => {
+  it('bez vlastní volby dostanou všichni odpaliště kola', () => {
+    const round = createRound({
+      gameId: 'skins',
+      playerNames: ['A', 'B'],
+      holeCount: 18,
+      course: { name: 'Test', teeId: 'yellow', teeName: 'Žlutá', strokeIndex: [] },
+    })
+
+    expect(round.players.map((player) => player.teeId)).toEqual(['yellow', 'yellow'])
+  })
+
+  it('vlastní volba přebije odpaliště kola, chybějící ne', () => {
+    const round = createRound({
+      gameId: 'skins',
+      playerNames: ['A', 'B', 'C'],
+      holeCount: 18,
+      course: { name: 'Test', teeId: 'yellow', teeName: 'Žlutá', strokeIndex: [] },
+      playerTeeIds: ['red', undefined, 'blue'],
+    })
+
+    expect(round.players.map((player) => player.teeId)).toEqual(['red', 'yellow', 'blue'])
+  })
+
+  it('kolo bez hřiště odpaliště nikomu nepřidělí', () => {
+    const round = createRound({ gameId: 'skins', playerNames: ['A'], holeCount: 18 })
+
+    expect(round.players[0]?.teeId).toBeUndefined()
+  })
+})

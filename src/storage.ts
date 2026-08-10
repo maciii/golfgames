@@ -93,6 +93,12 @@ export function normalizeRound(round: Round): Round {
             round.course.strokeIndex.length === round.holeCount
               ? [...round.course.strokeIndex]
               : [],
+          // Nabídka odpališť je pole objektů, takže se kopíruje po prvcích -
+          // jinak by ji kolo sdílelo s tím, odkud přišla (invariant #2).
+          ...(Array.isArray(round.course.tees)
+            ? { tees: round.course.tees.map((tee) => ({ ...tee })) }
+            : {}),
+          ...(round.course.composite ? { composite: { ...round.course.composite } } : {}),
         }
       : undefined
 
@@ -326,6 +332,25 @@ export interface RosterEntry {
    * Chybí u hráčů uložených před zavedením handicapů.
    */
   handicapIndex?: number
+  /**
+   * Odpaliště, ze kterého hráč obvykle hraje ('yellow', 'red', ...).
+   *
+   * Id odpališť jsou v katalogu barvy, takže preference platí i na hřišti,
+   * kde hráč ještě nehrál. Když ho hřiště nemá, použije se výchozí odpaliště
+   * kola.
+   */
+  preferredTeeId?: string
+}
+
+/** Zapamatuje si odpaliště u uloženého hráče. */
+export function setRosterTee(entryId: string, teeId: string | undefined): RosterEntry[] {
+  const roster = loadRoster().map((entry) =>
+    entry.id === entryId
+      ? { ...entry, ...(teeId === undefined ? {} : { preferredTeeId: teeId }) }
+      : entry,
+  )
+  write(ROSTER_KEY, roster)
+  return roster
 }
 
 /** Zapamatuje si handicapový index u uloženého hráče. */
@@ -359,6 +384,7 @@ export function loadRoster(): RosterEntry[] {
 export function addToRoster(
   names: string[],
   handicapIndexes?: (number | undefined)[],
+  teeIds?: (string | undefined)[],
 ): RosterEntry[] {
   const roster = loadRoster()
 
@@ -371,13 +397,17 @@ export function addToRoster(
       typeof handicapIndex === 'number' && Number.isFinite(handicapIndex)
         ? handicapIndex
         : undefined
+    const teeId = teeIds?.[index]
+    const storedTee = typeof teeId === 'string' && teeId ? teeId : undefined
     const known = roster.find(
       (entry) => entry.name.trim().toLowerCase() === name.toLowerCase(),
     )
 
     if (known) {
-      // Prázdný nebo ručně zadaný počet ran nesmí přepsat uložený HCP index.
+      // Prázdný nebo ručně zadaný počet ran nesmí přepsat uložený HCP index -
+      // a stejné pravidlo platí pro odpaliště: kolo bez hřiště žádné nemá.
       if (storedIndex !== undefined) known.handicapIndex = storedIndex
+      if (storedTee !== undefined) known.preferredTeeId = storedTee
       continue
     }
 
@@ -385,6 +415,7 @@ export function addToRoster(
       id: `r${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
       name,
       ...(storedIndex !== undefined ? { handicapIndex: storedIndex } : {}),
+      ...(storedTee !== undefined ? { preferredTeeId: storedTee } : {}),
     })
   }
 

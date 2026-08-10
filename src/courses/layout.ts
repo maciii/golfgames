@@ -126,7 +126,7 @@ export interface CourseLayout {
  * mezi smyčky prostřídají: první smyčka lichá, druhá sudá (u tří smyček po
  * třech). Přesně tak to dělají klubové scorekarty složených osmnáctek.
  */
-function combineStrokeIndex(slices: number[][]): number[] {
+export function combineStrokeIndex(slices: number[][]): number[] {
   const first = slices[0]
   if (slices.length === 1 && first) return [...first]
 

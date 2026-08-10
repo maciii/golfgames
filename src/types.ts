@@ -286,6 +286,47 @@ export interface RoundCourse {
   par?: number
   /** Stroke index jamek (1 = nejtěžší), délka === holeCount. */
   strokeIndex: number[]
+  /**
+   * Všechna odpaliště hřiště, ne jen zvolené.
+   *
+   * Hráči hrají z různých odpališť a každé má vlastní normu; kolo si proto
+   * musí nést celou nabídku, aby šel handicap dopočítat i zpětně. Pole výš
+   * (`teeId`, `courseRating`, ...) zůstávají a popisují **výchozí** odpaliště
+   * kola - archivní kola se tím nemění a kód, který je čte, funguje dál.
+   */
+  tees?: RoundTee[]
+  /**
+   * Ze kterých devítek je kolo složené.
+   *
+   * Jen popis pro zobrazení - pary, stroke indexy i normy výš jsou už
+   * poskládané za obě devítky dohromady.
+   */
+  composite?: RoundComposite
+}
+
+/**
+ * Odpaliště tak, jak si ho nese odehrané kolo (hluboká kopie z katalogu).
+ *
+ * Proti `CourseTee` chybí `holeCount`: norma v kole už je přepočtená na jamky,
+ * které se opravdu hrají, takže tady by jen mátl.
+ */
+export interface RoundTee {
+  id: string
+  name: string
+  courseRating?: number
+  slopeRating?: number
+  par?: number
+  /** Délka v metrech. */
+  distance?: number
+}
+
+/** Popis kola složeného ze dvou devítek. */
+export interface RoundComposite {
+  frontName: string
+  backName: string
+  /** Id hřiště devítky v katalogu; ručně zadaná ho mít nemusí. */
+  frontId?: string
+  backId?: string
 }
 
 export interface Round {
@@ -356,6 +397,13 @@ export interface CreateRoundOptions {
   handicapIndexes?: (number | undefined)[]
   /** Hrací handicapy v ranách ve stejném pořadí jako `playerNames`. */
   playingHandicaps?: (number | undefined)[]
+  /**
+   * Odpaliště jednotlivých hráčů ve stejném pořadí jako `playerNames`.
+   *
+   * Bez hodnoty dostane hráč výchozí odpaliště kola, takže volající, který
+   * odpaliště nerozlišuje, se nemusí měnit.
+   */
+  playerTeeIds?: (string | undefined)[]
   netScoring?: boolean
   /** Číslo první hrané jamky; 10 u zadní devítky osmnáctijamkového hřiště. */
   startHole?: number
@@ -371,18 +419,26 @@ export function createRound({
   pars,
   handicapIndexes,
   playingHandicaps,
+  playerTeeIds,
   netScoring,
   startHole,
 }: CreateRoundOptions): Round {
-  const players: Player[] = playerNames.map((name, i) => ({
-    id: `p${i + 1}`,
-    name: name.trim() || t('common.player', { number: i + 1 }),
-    ...(handicapIndexes?.[i] !== undefined ? { handicapIndex: handicapIndexes[i] } : {}),
-    ...(playingHandicaps?.[i] !== undefined
-      ? { playingHandicap: playingHandicaps[i] }
-      : {}),
-    ...(course?.teeId ? { teeId: course.teeId } : {}),
-  }))
+  const players: Player[] = playerNames.map((name, i) => {
+    // Bez vlastní volby hraje hráč z výchozího odpaliště kola - přesně jako
+    // dřív, kdy odpaliště bylo jen jedno pro všechny.
+    const teeId = playerTeeIds?.[i] ?? course?.teeId
+    return {
+      id: `p${i + 1}`,
+      name: name.trim() || t('common.player', { number: i + 1 }),
+      ...(handicapIndexes?.[i] !== undefined
+        ? { handicapIndex: handicapIndexes[i] }
+        : {}),
+      ...(playingHandicaps?.[i] !== undefined
+        ? { playingHandicap: playingHandicaps[i] }
+        : {}),
+      ...(teeId ? { teeId } : {}),
+    }
+  })
 
   const scores: Record<PlayerId, (number | null)[]> = {}
   const bonuses: Record<PlayerId, BonusId[][]> = {}

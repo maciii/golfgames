@@ -103,6 +103,17 @@ describe('Záloha - slučování hráčů', () => {
     expect(merged.map((e) => e.name)).toEqual(['Adam', 'Bára'])
   })
 
+  it('přenese handicap i odpaliště', () => {
+    const merged = mergeRosters(
+      [],
+      [{ id: 'r9', name: 'Eva', handicapIndex: 30.1, preferredTeeId: 'red' }],
+    )
+
+    expect(merged).toEqual([
+      { id: 'r9', name: 'Eva', handicapIndex: 30.1, preferredTeeId: 'red' },
+    ])
+  })
+
   it('duplicitu bez ohledu na velikost písmen nepřidá', () => {
     const merged = mergeRosters(
       [{ id: 'r1', name: 'Adam' }],

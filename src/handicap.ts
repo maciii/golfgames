@@ -1,4 +1,4 @@
-import type { BonusId, PlayerId, Round } from './types'
+import type { BonusId, PlayerId, Round, RoundTee } from './types'
 import { diffToPar, parAt, scoreAt } from './types'
 
 /**
@@ -58,6 +58,48 @@ export function courseHandicap(
   return Math.round(
     handicapIndex * indexShare * (slopeRating / NEUTRAL_SLOPE) +
       (courseRating - par) * ratingShare,
+  )
+}
+
+/**
+ * Norma odpaliště v podobě, ve které vstupuje do hracího handicapu.
+ *
+ * Strukturální typ, ne `LayoutTee` z `src/courses/layout.ts` - ten modul sahá
+ * sem a opačný import by udělal kruh. Sedí na `LayoutTee` i na `RoundTee`.
+ */
+export interface HandicapTee {
+  courseRating?: number
+  slopeRating?: number
+  /** Par, ke kterému se norma vztahuje. */
+  par?: number
+  /** Kolika jamek se norma týká; bez hodnoty sedí přesně na hrané jamky. */
+  ratedHoles?: number
+}
+
+/**
+ * Hrací handicap hráče z normy **jeho** odpaliště.
+ *
+ * Odpaliště je vlastnost hráče, ne kola: muž ze žlutých a žena z červených
+ * mají každý jinou normu a člen `CR − par` je přesně to, co je srovná. Bez
+ * normy (ručně zadané hřiště, neocejchované odpaliště) se index bere rovnou
+ * jako počet ran - jinak by na takovém hřišti nešlo hrát netto vůbec.
+ */
+export function playerCourseHandicap(
+  handicapIndex: number,
+  tee: HandicapTee | undefined,
+  holeCount: number,
+  fallbackPar: number,
+): number {
+  if (tee?.courseRating === undefined || tee.slopeRating === undefined) {
+    return Math.round(handicapIndex)
+  }
+  return courseHandicap(
+    handicapIndex,
+    tee.slopeRating,
+    tee.courseRating,
+    tee.par ?? fallbackPar,
+    holeCount,
+    tee.ratedHoles ?? holeCount,
   )
 }
 
@@ -140,6 +182,37 @@ export function roundStrokeIndex(round: Round): number[] {
 export function playingHandicap(round: Round, playerId: PlayerId): number {
   const player = round.players.find((p) => p.id === playerId)
   return player?.playingHandicap ?? 0
+}
+
+/**
+ * Odpaliště, ze kterého hráč hrál.
+ *
+ * Kola založená před rozlišením odpališť nabídku `course.tees` nenesou a mají
+ * jen jedno odpaliště pro všechny - to se v takovém případě vrátí každému,
+ * takže se zobrazení nemusí ptát, jak staré kolo čte.
+ */
+export function playerTee(round: Round, playerId: PlayerId): RoundTee | undefined {
+  const course = round.course
+  if (!course) return undefined
+
+  const teeId = round.players.find((p) => p.id === playerId)?.teeId ?? course.teeId
+  const known = course.tees?.find((tee) => tee.id === teeId)
+  if (known) return known
+
+  if (course.teeId === undefined && course.teeName === undefined) return undefined
+  return {
+    id: course.teeId ?? '',
+    name: course.teeName ?? '',
+    ...(course.courseRating !== undefined ? { courseRating: course.courseRating } : {}),
+    ...(course.slopeRating !== undefined ? { slopeRating: course.slopeRating } : {}),
+    ...(course.par !== undefined ? { par: course.par } : {}),
+  }
+}
+
+/** Hraje se kolo z víc odpališť? Rozhoduje o tom, jestli je vůbec zobrazovat. */
+export function hasMixedTees(round: Round): boolean {
+  const first = round.players[0]?.teeId
+  return round.players.some((player) => player.teeId !== first)
 }
 
 /**
