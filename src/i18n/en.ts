@@ -10,6 +10,7 @@ import type { MessageKey } from './index'
 export const en: Record<MessageKey, Message> = {
   // --- shared -------------------------------------------------------------
   'common.back': 'Back',
+  'common.close': 'Close',
   'common.done': 'Done',
   'common.edit': 'Edit',
   'common.version': 'version {version}',
@@ -63,6 +64,14 @@ export const en: Record<MessageKey, Message> = {
   'setup.newCourse': 'New course',
   'setup.editCourse': 'Edit course',
   'setup.tee': 'Tee',
+  'setup.teeForAll': 'Tee for everyone',
+  'setup.playerTee': 'Tee for {name}',
+  'setup.secondNine': 'Second nine',
+  'setup.secondNineHint':
+    'A nine can be played twice around or joined with another one; the order matters.',
+  'setup.sameNineTwice': '{name} again',
+  'setup.savedPlayerWithTee': '{name} · {tee}',
+  'setup.savedPlayerWithHandicapAndTee': '{name} · HCP {handicap} · {tee}',
   'setup.courseHint': 'Pars and stroke indexes come from the course ({count} holes).',
   'setup.noCourseHint':
     'Without a course nothing changes: pars are set while playing and handicaps are not used.',
@@ -378,6 +387,10 @@ export const en: Record<MessageKey, Message> = {
   'score.triple': 'Triple bogey or worse',
 
   // --- result multipliers -------------------------------------------------
+  'tee.sheetTitle': 'Tee – {name}',
+  'tee.useForAll': 'Use for all players',
+  'tee.notRated': 'not rated',
+  'tee.rating': 'CR {cr} / SR {sr}',
   'tier.birdie.name': 'Birdie',
   'tier.birdie.note': 'one under par',
   'tier.eagle.name': 'Eagle',
@@ -508,6 +521,8 @@ export const en: Record<MessageKey, Message> = {
 
   // Course picker
   'picker.title': 'Choose a course',
+  'picker.startTitle': 'Where are you playing?',
+  'picker.skipCourse': 'Play without a course',
   'picker.count': '{stored} on this phone, {total} available',
   'picker.loading': 'Loading the course catalogue…',
   'picker.inCatalog': 'in catalogue',

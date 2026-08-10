@@ -31,6 +31,18 @@ interface Props {
   onSelect: (course: Course | null) => void
   onNewCourse: () => void
   onBack: () => void
+  /**
+   * Režim startu kola: obrazovka je první, ne podobrazovka nastavení.
+   *
+   * Není odkud se vracet, takže místo „Zpět" nabídne hru bez hřiště a spodní
+   * odkazy, které jsou jinak na nastavení kola - bez nich by se z první
+   * obrazovky nedalo do archivu ani na účet.
+   */
+  onSkip?: () => void
+  onOpenArchive?: () => void
+  onOpenBackup?: () => void
+  onOpenAccount?: () => void
+  archiveCount?: number
 }
 
 /** Bez diakritiky a malými písmeny, ať „Karlstejn" najde „Karlštejn". */
@@ -136,6 +148,11 @@ export default function CoursePickerScreen({
   onSelect,
   onNewCourse,
   onBack,
+  onSkip,
+  onOpenArchive,
+  onOpenBackup,
+  onOpenAccount,
+  archiveCount = 0,
 }: Props) {
   const t = useT()
   const [stored, setStored] = useState<Course[]>(() => loadCourses())
@@ -291,10 +308,12 @@ export default function CoursePickerScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('picker.title')}</h1>
+        {onSkip === undefined && (
+          <button type="button" className="link-button" onClick={onBack}>
+            {t('common.back')}
+          </button>
+        )}
+        <h1>{onSkip ? t('picker.startTitle') : t('picker.title')}</h1>
         <p className="subtitle">
           {loading
             ? t('picker.loading')
@@ -416,9 +435,31 @@ export default function CoursePickerScreen({
       </main>
 
       <footer className="app-footer">
-        <button type="button" className="secondary-button" onClick={onNewCourse}>
-          {t('setup.newCourse')}
-        </button>
+        <div className="link-row">
+          <button type="button" className="link-button" onClick={onNewCourse}>
+            {t('setup.newCourse')}
+          </button>
+          {onSkip && (
+            <button type="button" className="link-button" onClick={onSkip}>
+              {t('picker.skipCourse')}
+            </button>
+          )}
+        </div>
+        {onSkip && (
+          <div className="link-row">
+            <button type="button" className="link-button" onClick={onOpenArchive}>
+              {archiveCount > 0
+                ? t('setup.archiveWithCount', { count: archiveCount })
+                : t('setup.archive')}
+            </button>
+            <button type="button" className="link-button" onClick={onOpenBackup}>
+              {t('setup.backup')}
+            </button>
+            <button type="button" className="link-button" onClick={onOpenAccount}>
+              {t('setup.signIn')}
+            </button>
+          </div>
+        )}
         {/* Katalog je pod ODbL a ta vyžaduje uvést zdroj tam, kde se data
             používají - nestačí ho mít v README katalogu. */}
         <p className="hint catalog-credit">

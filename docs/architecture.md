@@ -138,6 +138,22 @@ což je přesně to, co normovací tabulka ČGF uvádí. Bez devítkových norem
 použije norma hřiště; `tee.holeCount` říká, kolika jamek se týká, a `layoutTee()`
 to předá dál jako `ratedHoles`.
 
+**Odpaliště je vlastnost hráče.** `Player.teeId` říká, odkud hráč hraje, a
+`RoundCourse.tees` nese celou nabídku odpališť i s normami. Pole na úrovni kola
+(`teeId`, `courseRating`, `slopeRating`, `par`) popisují **výchozí** odpaliště,
+takže starší kola i kód, který je čte, fungují beze změny; `playerTee()`
+v `src/handicap.ts` z nich odpaliště poskládá i pro kolo, které nabídku nenese.
+Hrací handicap počítá `playerCourseHandicap()` z normy toho odpaliště, ze
+kterého hráč opravdu hraje — viz rozhodnutí #26.
+
+**Osmnáctku jde složit ze dvou devítek.** `composeNines()`
+v `src/courses/composite.ts` z nich udělá obyčejný `Course` o osmnácti jamkách,
+takže výběr odpališť i zakládání kola fungují beze změny. Skládání samo
+nepočítá: devítky vloží do `loops` a normu složí `layoutTee()`, tedy tentýž
+kód, který skládá osmnáctky na resortech. Devítka, kterou klub normuje jako dvě
+kola dokola (`tee.holeCount` = 18), se napřed zkrátí na jednu devítku — jinak
+by se její norma započítala dvakrát.
+
 **Hrané jamky a normované jamky nejsou totéž.** `courseHandicap()` proto bere
 oba údaje a každý člen vzorce krátí jiným: index vždycky podílem hraných jamek
 proti osmnáctce (WHS počítá devítkový handicap z poloviny indexu), `CR − par`

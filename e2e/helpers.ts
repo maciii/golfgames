@@ -88,12 +88,27 @@ export async function expectTappable(page: Page, selector: string): Promise<void
 }
 
 /**
+ * Přeskočí výběr hřiště a otevře nastavení kola.
+ *
+ * Nové kolo začíná hřištěm, ale testy rozvržení se ptají na nastavení - a bez
+ * hřiště vypadá stejně jako dřív, takže se na něj jde odkazem „Hrát bez
+ * hřiště".
+ */
+export async function openSetup(page: Page): Promise<void> {
+  await page
+    .locator('.app-footer .link-button', { hasText: /bez hřiště|without a course/i })
+    .click()
+  await expect(page.locator('.app-footer .primary-button')).toBeVisible()
+}
+
+/**
  * Založí kolo s výchozím nastavením a počká na obrazovku zápisu skóre.
  *
  * Na telefonu na šířku převezme zápis živá scorekarta, takže se čeká na jednu
  * ze dvou možných obrazovek.
  */
 export async function startRound(page: Page): Promise<void> {
+  await openSetup(page)
   await page.locator('.app-footer .primary-button').click()
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
 }

@@ -12,12 +12,14 @@ import {
 import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
 import { getGame } from '../games'
 import {
+  hasMixedTees,
   isNetRound,
+  playerTee,
   roundStrokeIndex,
   strokesReceived,
   strokesRelativeToBest,
 } from '../handicap'
-import { dynamicKey, useT } from '../i18n'
+import { dynamicKey, localizedTeeName, useT } from '../i18n'
 
 /**
  * Scorekarta se značkami podle golfové konvence.
@@ -135,6 +137,14 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   const [hcpDotsMode, setHcpDotsMode] = useState<'course' | 'best-player'>('best-player')
   const extras = game.scorecardColumns?.(round) ?? []
   const columns = buildColumns(round, extras)
+  /** Hráli všichni ze stejného odpaliště? Pak se v hlavičce neopakuje. */
+  const mixedTees = hasMixedTees(round)
+
+  /** Odpaliště hráče pro hlavičku sloupce; bez hřiště chybí. */
+  function teeLabel(player: Player): string | undefined {
+    const tee = playerTee(round, player.id)
+    return tee ? localizedTeeName(tee.id, tee.name) : undefined
+  }
   const playerTotals = new Map<string, ScorecardPlayerTotal>()
   if (game.scorecardPlayerTotal) {
     for (const player of scorecardPlayers(round)) {
@@ -243,6 +253,13 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                   >
                     {/* Dlouhá jména se zkrátí, ať se tabulka vejde na šířku. */}
                     <span className="col-name">{column.player.name}</span>
+                    {/* Odpaliště se ukazuje jen tehdy, když se liší - u kola
+                        z jedné barvy by to byl sloupec stejných slov. */}
+                    {mixedTees && (
+                      <span className="col-tee">
+                        {teeLabel(column.player) ?? t('common.dash')}
+                      </span>
+                    )}
                   </th>
                 ) : (
                   <th

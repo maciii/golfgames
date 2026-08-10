@@ -4,6 +4,7 @@ import {
   expectNothingClipped,
   expectTappable,
   isLandscapeScorecard,
+  openSetup,
   startRound,
 } from './helpers'
 
@@ -21,16 +22,25 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('.screen')).toBeVisible()
 })
 
+test('výběr hřiště jako první krok se vejde do displeje', async ({ page }) => {
+  // Nové kolo začíná hřištěm, takže je to úplně první obrazovka aplikace.
+  await expectNoHorizontalOverflow(page)
+  await expectNothingClipped(page)
+})
+
 test('zadání kola se vejde do displeje', async ({ page }) => {
+  await openSetup(page)
   await expectNoHorizontalOverflow(page)
   await expectNothingClipped(page)
 })
 
 test('tlačítko Začít kolo je vidět a jde na něj klepnout', async ({ page }) => {
+  await openSetup(page)
   await expectTappable(page, '.app-footer .primary-button')
 })
 
 test('přepínače a pole zůstávají v displeji i s dlouhými jmény', async ({ page }) => {
+  await openSetup(page)
   // Delší jméno, než se do políčka vejde - nesmí roztlačit rozvržení.
   const names = page.locator('.name-input')
   await names.first().fill('Bartoloměj Nejdelšíjméno Novotný-Svobodová')
@@ -40,6 +50,7 @@ test('přepínače a pole zůstávají v displeji i s dlouhými jmény', async (
 })
 
 test('rozbalené nastavení bodování se vejde do displeje', async ({ page }) => {
+  await openSetup(page)
   await page.locator('.game-settings-button').first().click()
   await expect(page.locator('.section-title').first()).toBeVisible()
 
@@ -96,6 +107,7 @@ test('sloupec aplikace se na širokém displeji neroztáhne donekonečna', async
 })
 
 test('patička zůstává na dohled i po odrolování obsahu', async ({ page }) => {
+  await openSetup(page)
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
 
   const footer = page.locator('.app-footer').first()
@@ -121,6 +133,7 @@ test('panel s extra body se vejde do displeje', async ({ page }) => {
 test('náhled rozhraní pro vizuální kontrolu', async ({ page }, testInfo) => {
   // Není to porovnání proti baseline - jen doklad, jak appka v daném profilu
   // vypadala. Rozdíly v antialiasingu mezi enginy by baseline dělaly nestabilní.
+  await openSetup(page)
   await testInfo.attach(`setup-${testInfo.project.name}.png`, {
     body: await page.screenshot({ fullPage: true }),
     contentType: 'image/png',

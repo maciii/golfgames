@@ -16,6 +16,7 @@ import type { Message } from './plural'
 export const cs = {
   // --- společné ----------------------------------------------------------
   'common.back': 'Zpět',
+  'common.close': 'Zavřít',
   'common.done': 'Hotovo',
   'common.edit': 'Upravit',
   'common.version': 'verze {version}',
@@ -70,6 +71,14 @@ export const cs = {
   'setup.newCourse': 'Nové hřiště',
   'setup.editCourse': 'Upravit hřiště',
   'setup.tee': 'Odpaliště',
+  'setup.teeForAll': 'Odpaliště pro všechny',
+  'setup.playerTee': 'Odpaliště hráče {name}',
+  'setup.secondNine': 'Druhá devítka',
+  'setup.secondNineHint':
+    'Devítka se dá zahrát dvakrát dokola nebo ji spojit s jinou; na pořadí záleží.',
+  'setup.sameNineTwice': '{name} podruhé',
+  'setup.savedPlayerWithTee': '{name} · {tee}',
+  'setup.savedPlayerWithHandicapAndTee': '{name} · HCP {handicap} · {tee}',
   'setup.courseHint': 'Pary a stroke indexy se převezmou z hřiště ({count} jamek).',
   'setup.noCourseHint':
     'Bez hřiště se hraje jako dosud: pary se nastavují při hře a handicapy se nepočítají.',
@@ -398,6 +407,10 @@ export const cs = {
   'score.triple': 'Triple',
 
   // --- násobiče za výsledek ----------------------------------------------
+  'tee.sheetTitle': 'Odpaliště – {name}',
+  'tee.useForAll': 'Použít pro všechny hráče',
+  'tee.notRated': 'bez normy',
+  'tee.rating': 'CR {cr} / SR {sr}',
   'tier.birdie.name': 'Birdie',
   'tier.birdie.note': 'jedna rána pod par',
   'tier.eagle.name': 'Eagle',
@@ -533,6 +546,8 @@ export const cs = {
 
   // Výběr hřiště
   'picker.title': 'Výběr hřiště',
+  'picker.startTitle': 'Kde se hraje?',
+  'picker.skipCourse': 'Hrát bez hřiště',
   'picker.count': '{stored} v telefonu, {total} k dispozici',
   'picker.loading': 'Načítám katalog hřišť…',
   'picker.inCatalog': 'v katalogu',

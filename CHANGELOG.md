@@ -7,6 +7,32 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.37.0] – 2026-08-10
+
+### Přidáno
+
+- **Každý hráč si vybírá vlastní odpaliště.** V řádku hráče je barevný štítek;
+  klepnutí otevře list s délkou, normou a hlavně s tím, **kolik ran z daného
+  odpaliště dostane** — to je informace, kvůli které se odpaliště vybírá.
+  Hrací handicap se pak počítá z jeho normy, ne z jedné společné: na Colony
+  Golf East dostane hráčka s indexem 30,1 z červených 28 ran místo 35 ze
+  žlutých. Odpaliště pro celé kolo se dá pořád nastavit jedním klepnutím
+  a tlačítko „Použít pro všechny hráče" ho srovná zpátky.
+- **Kolo začíná výběrem hřiště.** Bez hřiště není z čeho vybrat odpaliště ani
+  počítat handicapy, takže se nastavení otevírá až proti němu. Hrát bez hřiště
+  jde dál — odkazem na první obrazovce.
+- **Osmnáctka ze dvou devítek.** Devítijamkové hřiště jde zahrát dvakrát dokola
+  nebo spojit s jinou devítkou; pary, stroke indexy i norma se z obou složí.
+- **Seznam hráčů si pamatuje odpaliště.** Vedle handicapu, takže se u známého
+  spoluhráče vyplní obojí najednou.
+- Na scorekartě je u jména vidět odpaliště, když se hráči nehrají ze stejného.
+
+### Změněno
+
+- Nastavení kola je přeskládané: nahoře hřiště, pak hráči i s handicapem
+  a odpalištěm v jednom řádku, teprve pak hra a sázka. Samostatná sekce
+  handicapů zmizela — jméno se zbytečně opakovalo na dvou místech.
+
 ## [0.36.0] – 2026-08-10
 
 ### Přidáno

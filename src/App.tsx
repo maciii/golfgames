@@ -41,9 +41,12 @@ type View =
  *
  * Platí to na dvou místech - při startu aplikace a při návratu z podobrazovky -
  * a obě musí odpovídat, jinak refresh přistane jinde, než kde uživatel byl.
+ *
+ * Nové kolo začíná **výběrem hřiště**: bez hřiště není z čeho vybrat odpaliště
+ * ani počítat handicapy, takže se nastavení kola otevírá až proti němu.
  */
 function viewForRound(round: Round | null): View {
-  if (!round) return 'setup'
+  if (!round) return 'coursePicker'
   return round.finishedAt ? 'results' : 'play'
 }
 
@@ -71,6 +74,13 @@ function AppShell() {
   // Hřiště předvybrané v nastavení kola po návratu ze zadání.
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>()
   const [setupDraft, setSetupDraft] = useState<SetupDraft | undefined>()
+  /**
+   * Je výběr hřiště prvním krokem nového kola, nebo podobrazovkou nastavení?
+   *
+   * V prvním kroku není kam se vracet, takže obrazovka místo „Zpět" nabídne
+   * hru bez hřiště a odkazy na archiv, zálohu a účet.
+   */
+  const [pickerAtStart, setPickerAtStart] = useState(true)
   const setupScrollTop = useRef(0)
   const restoreSetupScroll = useRef(false)
 
@@ -110,8 +120,9 @@ function AppShell() {
   }, [round, noteRoundChange, dataVersion])
 
   const startRound = useCallback((options: CreateRoundOptions) => {
-    // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně.
-    addToRoster(options.playerNames, options.handicapIndexes)
+    // Spoluhráči se do seznamu doplní sami, ať se nikde nezakládají ručně -
+    // a s nimi i handicap a odpaliště, ze kterého hráli.
+    addToRoster(options.playerNames, options.handicapIndexes, options.playerTeeIds)
     setSetupDraft(undefined)
     setRound(createRound(options))
     setView('play')
@@ -180,8 +191,10 @@ function AppShell() {
     // Dohrané kolo už je v archivu; Nové kolo jen opustí jeho výsledky.
     if (!round.finishedAt) discardSyncedRound(round.id)
     setSetupDraft(undefined)
+    setSelectedCourseId(undefined)
     setRound(null)
-    setView('setup')
+    setPickerAtStart(true)
+    setView('coursePicker')
   }, [round, discardSyncedRound])
 
   const removeArchived = useCallback(
@@ -210,7 +223,12 @@ function AppShell() {
   }, [])
 
   /** Kam se vrátit z podobrazovky: do rozehrané hry, výsledků, nebo na úvod. */
-  const mainView = useCallback((): View => viewForRound(round), [round])
+  const mainView = useCallback((): View => {
+    if (round) return viewForRound(round)
+    // Kdo už hřiště vybral nebo má rozepsané nastavení, vrací se do nastavení -
+    // ne zpátky na výběr hřiště, kterým kolo teprve začínalo.
+    return setupDraft || selectedCourseId ? 'setup' : 'coursePicker'
+  }, [round, setupDraft, selectedCourseId])
 
   const leaveArchive = useCallback(() => {
     setOpenArchiveId(null)
@@ -241,13 +259,28 @@ function AppShell() {
         {...(selectedCourseId ? { selectedId: selectedCourseId } : {})}
         onSelect={(course) => {
           setSelectedCourseId(course?.id)
-          leaveSetup()
+          // Z prvního kroku se jde dál na nastavení, z podobrazovky zpátky
+          // tam, odkud uživatel přišel (včetně místa, kde skončil).
+          if (pickerAtStart) setView('setup')
+          else leaveSetup()
         }}
         onNewCourse={() => {
           setEditingCourseId(null)
           setView('courseEdit')
         }}
         onBack={leaveSetup}
+        {...(pickerAtStart
+          ? {
+              onSkip: () => {
+                setSelectedCourseId(undefined)
+                setView('setup')
+              },
+              onOpenArchive: openArchive,
+              onOpenBackup: () => setView('backup'),
+              onOpenAccount: () => setView('account'),
+              archiveCount: archive.length,
+            }
+          : {})}
       />
     )
   }
@@ -327,7 +360,10 @@ function AppShell() {
           setEditingCourseId(courseId ?? null)
           openSetupSubscreen('courseEdit')
         }}
-        onPickCourse={() => openSetupSubscreen('coursePicker')}
+        onPickCourse={() => {
+          setPickerAtStart(false)
+          openSetupSubscreen('coursePicker')
+        }}
         {...(selectedCourseId ? { selectedCourseId } : {})}
         {...(setupDraft ? { initialDraft: setupDraft } : {})}
         onDraftChange={rememberSetupDraft}

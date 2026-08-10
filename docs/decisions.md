@@ -481,6 +481,34 @@ shodných scorekaret na jeden resort. Stroke index se mezi devítkami prostříd
 
 ---
 
+## 26. Odpaliště je vlastnost hráče, ne kola
+
+**Rozhodnutí.** Kolo si drží **výchozí odpaliště** a hráč z něj může mít
+vlastní. Hrací handicap se počítá z normy jeho odpaliště; kolo nese celou
+nabídku (`RoundCourse.tees`), aby šlo dohledat i zpětně. Volba je v řádku
+hráče jedno klepnutí, ne zanoření do detailu.
+
+**Proč.** Muži hrají ze žlutých, ženy z červených, a rozdílná norma odpaliště
+je přesně to, co má hru vyrovnat — člen `CR − par` ve vzorci WHS. S jedním
+odpalištěm pro všechny se počítá nesmysl: na Colony Golf East vyjde hráčce
+s indexem 30,1 z červených 28 ran, ale ze žlutých 35. Sedm ran je dva
+Stablefordovy body na skoro každé druhé jamce.
+
+**Proč ne pánské a dámské normy u jednoho odpaliště.** Skutečné karty je mají
+(černé odpaliště na Colony Golf má jen dámskou normu, proto je v katalogu bez
+CR a SR). Znamenalo by to pohlaví u hráče, dvě dvojice CR/SR v `CourseTee`
+a hlavně dohledání druhé sady čísel u tří stovek hřišť v katalogu. Volba
+odpaliště u hráče pokrývá běžný případ; tohle je samostatná změna.
+
+**Důsledky.** Prázdná volba u hráče neznamená „žádné odpaliště", ale „jako celé
+kolo" — hromadná volba se tak propíše sama a nikde se nemusí pamatovat, komu
+se odpaliště měnilo ručně. Seznam hráčů si preferovanou barvu pamatuje vedle
+handicapu; barvy jsou v katalogu stejné napříč hřišti, takže preference platí
+i tam, kde hráč ještě nehrál. Na scorekartě se odpaliště ukazuje jen tehdy,
+když se u hráčů liší.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:
