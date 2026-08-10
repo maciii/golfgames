@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { decodeBonuses, encodeBonuses, fromDocument, toDocument } from './document'
+import {
+  decodeBonuses,
+  encodeBonuses,
+  forFirestore,
+  fromDocument,
+  toDocument,
+} from './document'
 import type { Round } from '../types'
 import { makeRound } from '../games/fixtures'
+import { normalizeCourse } from '../courses/types'
 
 /**
  * Tvar dokumentu pro Firestore.
@@ -120,5 +127,64 @@ describe('Dokument z Firestore', () => {
   it('poškozený obsah nezhavaruje', () => {
     expect(decodeBonuses(null, 3)).toEqual({})
     expect(decodeBonuses({ p1: 'nesmysl' }, 2).p1).toEqual([[], []])
+  })
+})
+
+describe('forFirestore', () => {
+  /**
+   * `normalizeCourse()` nechává v hřišti `loops: undefined`, aby přebilo
+   * poškozené smyčky z uložené kopie. Do Firestoru to poslat nejde - odmítne
+   * celý zápis chybou `invalid-argument`, takže přestane fungovat celá
+   * synchronizace předvoleb, ne jen jedno hřiště.
+   */
+  it('zahodí klíče s hodnotou undefined', () => {
+    const course = { id: 'x', name: 'X', loops: undefined, catalogUpdatedAt: undefined }
+
+    const clean = forFirestore(course)
+
+    expect(Object.keys(clean)).toEqual(['id', 'name'])
+    expect('loops' in clean).toBe(false)
+  })
+
+  it('projde i do vnořených objektů a polí', () => {
+    const prefs = {
+      courses: [{ id: 'a', loops: undefined, tees: [{ id: 'yellow', par: undefined }] }],
+      roster: [{ id: 'r1', name: 'Eva', preferredTeeId: undefined }],
+    }
+
+    expect(forFirestore(prefs)).toEqual({
+      courses: [{ id: 'a', tees: [{ id: 'yellow' }] }],
+      roster: [{ id: 'r1', name: 'Eva' }],
+    })
+  })
+
+  it('nemění délku pole - z undefined udělá null', () => {
+    // Vyhozením prvku by se posunuly indexy a pars[3] by přestal být par
+    // čtvrté jamky.
+    expect(forFirestore({ pars: [4, undefined, 5] })).toEqual({ pars: [4, null, 5] })
+  })
+
+  it('vyčistí hřiště tak, jak ho aplikace opravdu drží', () => {
+    // Ne vymyšlený objekt, ale výstup normalizeCourse() - právě on do
+    // předvoleb `undefined` dostává a právě on shodil synchronizaci.
+    const course = normalizeCourse({
+      id: 'local:test',
+      name: 'Testovací',
+      holeCount: 9,
+      pars: [4, 4, 3, 4, 5, 4, 3, 4, 4],
+      strokeIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      tees: [{ id: 'yellow', name: 'Žlutá' }],
+      source: 'manual',
+    })
+    expect('loops' in course).toBe(true)
+    expect(course.loops).toBeUndefined()
+
+    expect('loops' in forFirestore(course)).toBe(false)
+  })
+
+  it('nesahá na hodnoty, které Firestore přijme', () => {
+    const round = { id: 'r', scores: { p1: [4, null, 5] }, teams: [{ id: 't1' }] }
+
+    expect(forFirestore(round)).toEqual(round)
   })
 })

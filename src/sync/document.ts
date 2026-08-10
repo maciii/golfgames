@@ -17,8 +17,46 @@ import type { BonusId, PlayerId, Round } from '../types'
  * jednoduchých hodnot a `teams` je pole objektů (pole uvnitř objektu vadí
  * nemusí).
  *
+ * Druhá past se stejnou chybou je `undefined` v jakémkoli poli – od toho je
+ * `forFirestore()`.
+ *
  * Modul je schválně bez jediného odkazu na Firebase, aby šel testovat.
  */
+
+/**
+ * Hodnota bez `undefined`, kterou Firestore přijme.
+ *
+ * **Firestore odmítne `undefined` v jakémkoli poli** – celý zápis skončí
+ * chybou `invalid-argument`, stejnou jako u pole uvnitř pole. A `undefined` se
+ * do dat dostane snadno a záměrně: `normalizeCourse()` zapisuje
+ * `loops: undefined`, aby přebilo poškozené smyčky z uložené kopie, a
+ * `copyAsPrivateCourse()` totéž s `catalogUpdatedAt`. V paměti je to správně –
+ * hodnota musí přebít to, co přišlo ze spreadu – jen se to nesmí poslat dál.
+ *
+ * Kolo tenhle problém nemá: `toDocument()` ho posílá přes JSON, které
+ * `undefined` zahodí samo. Předvolby se ale skládají z živých objektů
+ * (hřiště, seznam hráčů, nastavení), takže potřebují tohle.
+ *
+ * Prvky pole se nezahazují, jen se z `undefined` stane `null`: vyhozením by se
+ * posunuly indexy a `pars[3]` by přestal být par čtvrté jamky.
+ */
+export function forFirestore<T>(value: T): T {
+  return strip(value) as T
+}
+
+function strip(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => (item === undefined ? null : strip(item)))
+  }
+  if (value === null || typeof value !== 'object') return value
+
+  const result: Record<string, unknown> = {}
+  for (const [key, item] of Object.entries(value)) {
+    if (item === undefined) continue
+    result[key] = strip(item)
+  }
+  return result
+}
 
 /** Kola z aplikace do tvaru pro Firestore. */
 export function encodeBonuses(

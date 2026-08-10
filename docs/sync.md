@@ -31,6 +31,13 @@ v aplikaci   bonuses.p1 = [[], ['longest'], []]
 v dokumentu  bonuses.p1 = { "1": ['longest'] }
 ```
 
+**Druhá past se stejnou chybou: `undefined`.** Firestore ho odmítá v jakémkoli
+poli a shodí tím **celý zápis**, ne jen problémovou hodnotu. Do dat se přitom
+dostane záměrně – `normalizeCourse()` zapisuje `loops: undefined`, aby přebilo
+poškozené smyčky z uložené kopie. Kola tím netrpí, protože `toDocument()` je
+posílá přes JSON, které `undefined` zahodí samo; dokument předvoleb se skládá
+z živých objektů, takže projde `forFirestore()`.
+
 Převod tam i zpět je v [`src/sync/document.ts`](../src/sync/document.ts) jako
 čisté funkce s testy. Přibude-li do modelu další pole polí, musí projít stejnou
 cestou.

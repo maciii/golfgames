@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.37.2] – 2026-08-10
+
+### Opraveno
+
+- **Synchronizace předvoleb padala na `invalid-argument`.** Do dokumentu
+  s hřišti, seznamem hráčů a nastavením se posílala hřiště tak, jak je drží
+  aplikace — a `normalizeCourse()` v nich nechává `loops: undefined`, aby
+  přebilo poškozené smyčky z uložené kopie. Firestore ale `undefined` odmítá
+  a shodí **celý zápis**, takže se nepřenášela ani hřiště, ani spoluhráči, ani
+  sázka. Kola se synchronizovala dál — ta jdou přes JSON, které `undefined`
+  zahodí samo. Nově se dokument předvoleb čistí stejně (`forFirestore()`).
+  Chyba je v aplikaci od 7. srpna.
+
 ## [0.37.1] – 2026-08-10
 
 ### Opraveno

@@ -20,7 +20,7 @@ import {
 } from '../storage'
 import { isValidCourse, normalizeCourse } from '../courses/types'
 import { mergeCourses, mergeRosters } from '../backup'
-import { fromDocument, toDocument } from './document'
+import { forFirestore, fromDocument, toDocument } from './document'
 import {
   finishedRounds,
   mergeRounds,
@@ -209,14 +209,19 @@ async function syncPrefs(uid: string, deletedRoundIds: string[]): Promise<void> 
   }
 
   const stamp = new Date().toISOString()
-  await setDoc(reference, {
-    roster,
-    settings: loadSettings(),
-    gameOptions: loadAllGameOptions(),
-    courses,
-    deletedRoundIds: mergedDeleted,
-    updatedAt: stamp,
-  })
+  // Hřiště jdou do dokumentu tak, jak je drží aplikace, a `normalizeCourse()`
+  // v nich nechává `loops: undefined`. Firestore by celý zápis odmítl.
+  await setDoc(
+    reference,
+    forFirestore({
+      roster,
+      settings: loadSettings(),
+      gameOptions: loadAllGameOptions(),
+      courses,
+      deletedRoundIds: mergedDeleted,
+      updatedAt: stamp,
+    }),
+  )
   savePrefsStamp(stamp)
 }
 

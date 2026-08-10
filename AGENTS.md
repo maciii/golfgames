@@ -138,6 +138,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   `row.value` se předává do `settleRound()` jako počet jednotek; u Skins je
   to součet skinů a přiznaných extra bodů.
 - **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
+- **Firestore odmítá `undefined`** a shodí tím celý zápis chybou
+  `invalid-argument`. `normalizeCourse()` ho do hřiště zapisuje záměrně
+  (`loops: undefined` přebíjí poškozené smyčky), takže všechno, co jde do
+  Firestoru mimo `toDocument()`, musí projít `forFirestore()`.
 - **Firestore neumí pole uvnitř pole.** `Round.bonuses` je
   `bonuses[hráč][jamka]`, tedy pole polí, a přímý zápis skončí chybou
   `invalid-argument`. Převod do mapové podoby a zpět je v `src/sync/document.ts`.
