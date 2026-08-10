@@ -7,6 +7,31 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.36.0] – 2026-08-10
+
+### Přidáno
+
+- **Základ pro odpaliště u jednotlivých hráčů.** Kolo si nese celou nabídku
+  odpališť hřiště a hráč může mít vlastní; hrací handicap se pak počítá z jeho
+  normy, ne z jedné společné. Rozdíl je velký — na Colony Golf East vyjde
+  hráčce s indexem 30,1 z červených 28 ran, ze žlutých 35. Seznam hráčů si
+  odpaliště pamatuje vedle handicapu a přenáší ho přes zálohu i cloud.
+- **Skládání osmnáctky ze dvou devítek.** Devítka se běžně hraje dvakrát
+  dokola nebo se spojí s jinou; nové `composeNines()` z nich udělá obyčejné
+  osmnáctijamkové hřiště. Normu skládá tentýž kód jako u resortů (CR se sčítá,
+  SR průměruje, stroke indexy se proloží), takže Spa Golf Club dvakrát dá
+  CR 65,0 / SR 124 / par 68. Devítka, kterou klub normuje jako dvě kola dokola
+  (Gloria Verde), se napřed zkrátí, aby se norma nezapočítala dvakrát.
+
+**Zatím se tím nic nemění v ovládání** — obrazovky pořád nabízejí jedno
+odpaliště pro celé kolo. Tahle verze je model a výpočty, na kterých to teprve
+vznikne.
+
+### Opraveno
+
+- Seznam hráčů se přes cloud přenášel bez handicapových indexů; po přihlášení
+  na jiném zařízení chyběly.
+
 ## [0.35.0] – 2026-08-09
 
 ### Opraveno
