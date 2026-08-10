@@ -9,6 +9,7 @@ import {
 } from '../courses/types'
 import { deleteCourse, saveCourse } from '../storage'
 import { useT } from '../i18n'
+import { BackIcon } from './icons'
 
 /**
  * Zadání a úprava hřiště.
@@ -252,10 +253,17 @@ export default function CourseEditScreen({ course, onSaved, onDeleted, onBack }:
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{course ? t('course.editTitle') : t('course.newTitle')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{course ? t('course.editTitle') : t('course.newTitle')}</h1>
+        </div>
       </header>
 
       <main className="content">

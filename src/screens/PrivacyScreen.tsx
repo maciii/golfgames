@@ -1,4 +1,5 @@
 import { useT } from '../i18n'
+import { BackIcon } from './icons'
 
 /** Kontakt správce údajů. Změna e-mailu je jen tady. */
 const CONTACT = 'martin@kubecka.cz'
@@ -28,7 +29,17 @@ export default function PrivacyScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{t('privacy.title')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('privacy.title')}</h1>
+        </div>
         <p className="subtitle">Golf Games</p>
       </header>
 
@@ -59,12 +70,6 @@ export default function PrivacyScreen({ onBack }: { onBack: () => void }) {
           </p>
         </section>
       </main>
-
-      <footer className="app-footer">
-        <button type="button" className="primary-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-      </footer>
     </div>
   )
 }

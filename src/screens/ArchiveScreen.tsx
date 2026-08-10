@@ -3,6 +3,7 @@ import { firstHoleNumber, formatRoundDate, holeNumber, roundCompleteness } from 
 import { getGame } from '../games'
 import { t as translate, useT } from '../i18n'
 import type { MessageKey } from '../i18n'
+import { BackIcon } from './icons'
 
 interface Props {
   rounds: Round[]
@@ -58,7 +59,17 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{t('archive.title')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('archive.title')}</h1>
+        </div>
         <p className="subtitle">
           {rounds.length === 0
             ? t('archive.empty')
@@ -105,12 +116,6 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
           </ul>
         )}
       </main>
-
-      <footer className="app-footer">
-        <button type="button" className="primary-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-      </footer>
     </div>
   )
 }

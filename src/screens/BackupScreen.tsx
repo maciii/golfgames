@@ -3,6 +3,7 @@ import type { ImportMode, ImportSummary } from '../backup'
 import { applyBackup, backupFileName, createBackup, parseBackup } from '../backup'
 import { useT } from '../i18n'
 import type { MessageKey } from '../i18n'
+import { BackIcon } from './icons'
 
 interface Props {
   /** Zavolá se po úspěšném importu, ať aplikace načte nový stav z úložiště. */
@@ -78,7 +79,17 @@ export default function BackupScreen({ onImported, onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{t('backup.title')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('backup.title')}</h1>
+        </div>
         <p className="subtitle">{t('backup.subtitle')}</p>
       </header>
 
@@ -143,12 +154,6 @@ export default function BackupScreen({ onImported, onBack }: Props) {
         {message && <p className="notice">{message}</p>}
         {error && <p className="notice error">{error}</p>}
       </main>
-
-      <footer className="app-footer">
-        <button type="button" className="primary-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-      </footer>
     </div>
   )
 }

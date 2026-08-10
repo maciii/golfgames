@@ -27,12 +27,6 @@ export const LOCALE_LABEL: Record<Locale, string> = {
   en: 'English',
 }
 
-/** Vlajka v kompaktním přepínači jazyka na úvodní obrazovce. */
-export const LOCALE_FLAG: Record<Locale, string> = {
-  cs: '🇨🇿',
-  en: '🇬🇧',
-}
-
 /** Značka jazyka pro Intl - formát peněz, datumů a řazení. */
 const LOCALE_TAG: Record<Locale, string> = {
   cs: 'cs-CZ',

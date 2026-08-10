@@ -5,6 +5,7 @@ import type { SignInError, SyncStatus } from '../sync/AccountContext'
 import { APP_VERSION } from '../version'
 import { useT } from '../i18n'
 import type { MessageKey } from '../i18n'
+import { BackIcon } from './icons'
 
 interface Props {
   onOpenPrivacy: () => void
@@ -76,7 +77,18 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <h1>{t('account.title')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            disabled={busy}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('account.title')}</h1>
+        </div>
         <p className="subtitle">{t('account.subtitle')}</p>
       </header>
 
@@ -179,12 +191,6 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
           </>
         )}
       </main>
-
-      <footer className="app-footer">
-        <button type="button" className="primary-button" onClick={onBack} disabled={busy}>
-          {t('common.back')}
-        </button>
-      </footer>
     </div>
   )
 }

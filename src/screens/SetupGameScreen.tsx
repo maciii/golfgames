@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { GAMES, getGame } from '../games'
 import { useT } from '../i18n'
 import type { MessageKey } from '../i18n'
+import { BackIcon } from './icons'
 
 /**
  * Tři možná rozdělení čtyř hráčů do dvojic. Víc jich neexistuje - u čtyř
@@ -75,10 +76,17 @@ export default function SetupGameScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('setup.stepGameTitle')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('setup.stepGameTitle')}</h1>
+        </div>
         <p className="subtitle">{t('setup.subtitle')}</p>
       </header>
 

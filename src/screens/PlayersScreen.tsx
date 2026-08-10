@@ -9,6 +9,7 @@ import {
 } from '../storage'
 import { useT } from '../i18n'
 import { formatHandicapIndex, parseHandicapIndex } from '../handicap'
+import { BackIcon } from './icons'
 
 interface Props {
   onBack: () => void
@@ -73,10 +74,17 @@ export default function PlayersScreen({ onBack }: Props) {
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('players.title')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('players.title')}</h1>
+        </div>
         <p className="subtitle">
           {roster.length === 0
             ? t('players.empty')

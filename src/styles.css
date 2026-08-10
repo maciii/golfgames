@@ -86,11 +86,41 @@ button {
   letter-spacing: -0.01em;
 }
 
+/* Wordmark na Home - viz BrandMark v HomeScreen.tsx. */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.brand-mark-text em {
+  font-style: normal;
+  color: var(--accent);
+}
+
 .setup-header-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Tlačítko zpět vedle titulku - nahrazuje osamocený textový odkaz nad
+   nadpisem (nebo velké tlačítko v patičce), který v appce působil nesourodě. */
+.screen-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.screen-header-row h1 {
+  flex: 1;
+  min-width: 0;
 }
 
 .language-switcher {
@@ -105,8 +135,9 @@ button {
   width: 40px;
   height: 36px;
   border-radius: 8px;
-  font-size: 21px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   filter: grayscale(0.75);
   opacity: 0.65;
 }
@@ -2525,12 +2556,50 @@ button {
   border-color: var(--accent);
 }
 
-.country-filter {
-  display: block;
+/* Vlastní rozbalovací tlačítko místo nativního `<select>` - viz PickSheet. */
+.pick-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
 }
 
-.country-filter .name-input {
-  width: 100%;
+.pick-trigger svg {
+  flex: none;
+  color: var(--text-dim);
+}
+
+.pick-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-align: left;
+  font-size: 15px;
+}
+
+.pick-row.selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  font-weight: 600;
+}
+
+.pick-row-label {
+  flex: 1;
+  min-width: 0;
 }
 
 .sr-only {
@@ -2739,7 +2808,6 @@ div.course-item {
   .language-button {
     width: 34px;
     height: 32px;
-    font-size: 18px;
   }
 
   .hole-number {

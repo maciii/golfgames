@@ -1,6 +1,7 @@
 import type { Course } from '../courses/types'
 import { layoutTee } from '../courses/layout'
 import { localeTag, localizedTeeName, useT } from '../i18n'
+import { BackIcon } from './icons'
 import { loopLabel, resolveCourseSetup, toggleLoop } from './setupCourse'
 
 /** Počty jamek pro kolo bez hřiště. Šestka i dvanáctka existují - krátká hřiště se staví právě takhle. */
@@ -73,10 +74,17 @@ export default function SetupTeeScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('setup.stepTeeTitle')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('setup.stepTeeTitle')}</h1>
+        </div>
         <p className="subtitle">{t('setup.subtitle')}</p>
       </header>
 

@@ -7,10 +7,31 @@ import { formatHandicapIndex } from '../handicap'
 import type { RosterEntry } from '../storage'
 import { loadCourses, loadFavoriteCourseIds, loadRoster } from '../storage'
 import { usePwaInstall } from '../pwa'
-import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, useLocale } from '../i18n'
+import { LOCALES, LOCALE_LABEL, useLocale } from '../i18n'
 import type { MessageKey } from '../i18n'
-import { HeartIcon } from './icons'
+import { FlagIcon, HeartIcon } from './icons'
 import MenuSheet from './MenuSheet'
+
+/**
+ * Wordmark na Home mísro textového „Golf Games" - jméno appky se zvažuje
+ * (viz docs/decisions.md), tohle je zatím jen kosmetická značka na jednom
+ * místě, snadno vratná. Dva překrývající se kruhy narážejí na „-some" ve
+ * jméně (twosome, foursome - běžná golfová slova pro počet hráčů ve
+ * skupině), „Fair" pak na fairway i poctivou hru.
+ */
+function BrandMark() {
+  return (
+    <span className="brand-mark">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="6" fill="currentColor" opacity="0.35" />
+        <circle cx="15" cy="15" r="6" fill="currentColor" />
+      </svg>
+      <span className="brand-mark-text">
+        Fair<em>some</em>
+      </span>
+    </span>
+  )
+}
 
 interface Props {
   archive: Round[]
@@ -89,7 +110,9 @@ export default function HomeScreen({
           >
             <span aria-hidden="true">☰</span>
           </button>
-          <h1>{t('setup.title')}</h1>
+          <h1>
+            <BrandMark />
+          </h1>
           <div className="language-switcher" aria-label={t('setup.language')}>
             {LOCALES.map((code) => (
               <button
@@ -101,7 +124,7 @@ export default function HomeScreen({
                 aria-pressed={code === locale}
                 title={LOCALE_LABEL[code]}
               >
-                {LOCALE_FLAG[code]}
+                <FlagIcon locale={code} />
               </button>
             ))}
           </div>

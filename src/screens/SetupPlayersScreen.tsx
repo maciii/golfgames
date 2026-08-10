@@ -9,7 +9,7 @@ import {
   playerCourseHandicap,
 } from '../handicap'
 import { localizedTeeName, useT } from '../i18n'
-import { StarIcon, TeeFlagIcon } from './icons'
+import { BackIcon, StarIcon, TeeFlagIcon } from './icons'
 import TeeSheet, { teeColorClass, type TeeSheetRow } from './TeeSheet'
 import { resolveCourseSetup } from './setupCourse'
 
@@ -189,10 +189,17 @@ export default function SetupPlayersScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('setup.players')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('setup.players')}</h1>
+        </div>
         <p className="subtitle">{t('setup.subtitle')}</p>
       </header>
 

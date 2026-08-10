@@ -12,6 +12,7 @@ import type {
 import { DEFAULT_POINT_VALUE } from '../types'
 import { useAccount } from '../sync/AccountContext'
 import { useT } from '../i18n'
+import { BackIcon } from './icons'
 import { resolveCourseSetup } from './setupCourse'
 // Dvojice se vybírají v kroku Hra; tady se jen uplatní podle vybraného indexu.
 import { PAIRINGS } from './SetupGameScreen'
@@ -260,10 +261,17 @@ export default function SetupBetScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        <button type="button" className="link-button" onClick={onBack}>
-          {t('common.back')}
-        </button>
-        <h1>{t('setup.stake')}</h1>
+        <div className="screen-header-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
+          <h1>{t('setup.stake')}</h1>
+        </div>
         <p className="subtitle">{t('setup.subtitle')}</p>
       </header>
 

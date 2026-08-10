@@ -7,6 +7,29 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.4] – 2026-08-10
+
+### Přidáno
+
+- **Wordmark „Fairsome" na Home.** Zatím jen kosmetická značka místo
+  textu „Golf Games" na jednom místě - o skutečném jméně appky se ještě
+  rozhoduje.
+
+### Změněno
+
+- **Tlačítko Zpět je teď ikona vedle titulku, ne osamocený text nebo
+  velké tlačítko dole.** Sjednoceno na 11 obrazovkách: Hřiště, Hráči,
+  Archiv, Účet, Záloha dat, Zásady soukromí, Úprava hřiště a všechny
+  čtyři kroky zakládání kola.
+- **Vlajky jazyků jsou nakreslené, ne emoji.** Na Windows se emoji
+  vlajek zobrazovaly jen jako dvoupísmenný kód (CZ/GB), protože je
+  systémový emoji font nemá - stejná třída chyby jako dřív u srdíčka
+  a hvězdičky.
+- **Výběr země ve výběru hřiště má vlastní seznam místo nativního
+  `<select>`.** Rozbalený nativní seznam kreslí na Windows/Chrome
+  systém včetně modrého zvýraznění, které CSS nejde přebarvit - teď je
+  to stejný princip jako `TeeSheet` u odpališť.
+
 ## [0.40.3] – 2026-08-10
 
 ### Změněno

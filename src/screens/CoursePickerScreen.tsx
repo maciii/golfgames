@@ -13,7 +13,8 @@ import {
 import { localeTag } from '../i18n'
 import type { MessageKey } from '../i18n'
 import { useT } from '../i18n'
-import { HeartIcon } from './icons'
+import { BackIcon, ChevronDownIcon, HeartIcon } from './icons'
+import PickSheet from './PickSheet'
 
 /**
  * Výběr hřiště.
@@ -163,6 +164,7 @@ export default function CoursePickerScreen({
   const [downloading, setDownloading] = useState<string | null>(null)
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => loadFavoriteCourseIds())
   const [country, setCountry] = useState('')
+  const [countrySheetOpen, setCountrySheetOpen] = useState(false)
   const [nearestFirst, setNearestFirst] = useState(true)
   const [location, setLocation] = useState<GeoPoint | null>(null)
   const [locationState, setLocationState] = useState<LocationState>('loading')
@@ -346,18 +348,25 @@ export default function CoursePickerScreen({
   return (
     <div className="screen">
       <header className="app-header">
-        {onSkip === undefined && (
-          <button type="button" className="link-button" onClick={onBack}>
-            {t('common.back')}
-          </button>
-        )}
-        <h1>
-          {mode === 'browse'
-            ? t('picker.browseTitle')
-            : onSkip
-              ? t('picker.startTitle')
-              : t('picker.title')}
-        </h1>
+        <div className="screen-header-row">
+          {onSkip === undefined && (
+            <button
+              type="button"
+              className="icon-button"
+              onClick={onBack}
+              aria-label={t('common.back')}
+            >
+              <BackIcon />
+            </button>
+          )}
+          <h1>
+            {mode === 'browse'
+              ? t('picker.browseTitle')
+              : onSkip
+                ? t('picker.startTitle')
+                : t('picker.title')}
+          </h1>
+        </div>
         <p className="subtitle">
           {loading
             ? t('picker.loading')
@@ -406,22 +415,19 @@ export default function CoursePickerScreen({
           </button>
         </div>
 
-        <label className="country-filter">
-          <span className="sr-only">{t('picker.country')}</span>
-          <select
-            className="name-input"
-            value={country}
-            onChange={(event) => setCountry(event.target.value)}
-            aria-label={t('picker.country')}
-          >
-            <option value="">{t('picker.allCountries')}</option>
-            {countries.map((code) => (
-              <option key={code} value={code}>
-                {countryName(code, localeTag())} ({code})
-              </option>
-            ))}
-          </select>
-        </label>
+        <button
+          type="button"
+          className="name-input pick-trigger"
+          onClick={() => setCountrySheetOpen(true)}
+          aria-haspopup="dialog"
+        >
+          <span>
+            {country
+              ? `${countryName(country, localeTag())} (${country})`
+              : t('picker.allCountries')}
+          </span>
+          <ChevronDownIcon />
+        </button>
 
         {locationState === 'unavailable' && (
           <p className="hint">{t('picker.locationUnavailable')}</p>
@@ -517,6 +523,22 @@ export default function CoursePickerScreen({
           </a>
         </p>
       </footer>
+
+      {countrySheetOpen && (
+        <PickSheet
+          title={t('picker.country')}
+          selectedId={country}
+          onSelect={setCountry}
+          onClose={() => setCountrySheetOpen(false)}
+          options={[
+            { id: '', label: t('picker.allCountries') },
+            ...countries.map((code) => ({
+              id: code,
+              label: `${countryName(code, localeTag())} (${code})`,
+            })),
+          ]}
+        />
+      )}
     </div>
   )
 }
