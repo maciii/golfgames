@@ -28,6 +28,29 @@ Společné pro všechny hry:
 - [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Dots](#dots-nine-dot--six-dot) · [Match play](#match-play)
 - [Přidání další hry](#přidání-další-hry)
 
+## Kolik hráčů která hra potřebuje
+
+Počet hráčů není doporučení, ale podmínka hry: `GameDefinition.playerCounts`
+říká, které počty se v zakládání kola vůbec nabídnou, a přepnutí hry počet
+hráčů srovná, když ho nová hra nepodporuje. Tabulka je tedy přepisem toho, co
+hry deklarují – při změně musí sedět obojí.
+
+| Hra                   | Hráči     | Uspořádání                                |
+| --------------------- | --------- | ----------------------------------------- |
+| Best + Součet         | **4**     | dvě pevné dvojice                         |
+| Levá-Pravá            | **4**     | dvojice se určují znovu na každé jamce    |
+| Skins                 | **2–4**   | každý sám za sebe                         |
+| Match play            | **2 a 4** | 2 jednotlivci, 4 jako dvojice (four-ball) |
+| Stableford            | **1–4**   | každý sám za sebe; jediná hra pro jednoho |
+| Dots (Nine / Six Dot) | **3**     | každý sám za sebe                         |
+
+Tři počty stojí za vysvětlení. **Match play přeskakuje trojici**, protože zápas
+má dvě strany – dva jednotlivce, nebo dvě dvojice – a tři hráči se na ně
+nerozdělí. **Dots je jen pro tři**, protože se na jamce rozdává pevný počet
+bodů za pořadí a obě tabulky mají tři místa (9 bodů 5-3-1, 6 bodů 4-2-0).
+**Stableford jako jediný zvládne jednoho hráče**, protože se boduje proti paru,
+ne proti soupeři.
+
 ## Vzdaná jamka vs. nehraná jamka
 
 Chybějící zápis znamená dvě různé věci a aplikace je rozlišuje podle toho,
