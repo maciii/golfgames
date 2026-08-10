@@ -35,8 +35,23 @@ export const cs = {
   'home.favoriteCourses': 'Oblíbená hřiště',
   'menu.title': 'Menu',
   'menu.courses': 'Hřiště',
+  'menu.coursesCount': {
+    one: '{count} uložené',
+    few: '{count} uložená',
+    other: '{count} uložených',
+  },
   'menu.players': 'Hráči',
+  'menu.playersCount': {
+    one: '{count} spoluhráč',
+    few: '{count} spoluhráči',
+    other: '{count} spoluhráčů',
+  },
   'menu.archive': 'Archiv',
+  'menu.archiveCount': {
+    one: '{count} odehrané',
+    few: '{count} odehraná',
+    other: '{count} odehraných',
+  },
   'menu.backup': 'Záloha dat',
   'menu.account': 'Účet',
 

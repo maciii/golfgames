@@ -32,17 +32,12 @@ interface Props {
   onNewCourse: () => void
   onBack: () => void
   /**
-   * Režim startu kola: obrazovka je první, ne podobrazovka nastavení.
-   *
-   * Není odkud se vracet, takže místo „Zpět" nabídne hru bez hřiště a spodní
-   * odkazy, které jsou jinak na nastavení kola - bez nich by se z první
-   * obrazovky nedalo do archivu ani na účet.
+   * Režim startu kola: obrazovka je první podobrazovka zakládání kola, ne
+   * návrat k rozepsanému nastavení - proto nabídne i hru bez hřiště. Odkazy
+   * na archiv/zálohu/účet tu záměrně nejsou - stejné položky má i menu na
+   * domovské obrazovce, odkud se do zakládání kola vstupuje.
    */
   onSkip?: () => void
-  onOpenArchive?: () => void
-  onOpenBackup?: () => void
-  onOpenAccount?: () => void
-  archiveCount?: number
   /**
    * Čisté procházení hřišť z menu, ne první krok zakládání kola.
    *
@@ -156,10 +151,6 @@ export default function CoursePickerScreen({
   onNewCourse,
   onBack,
   onSkip,
-  onOpenArchive,
-  onOpenBackup,
-  onOpenAccount,
-  archiveCount = 0,
   mode = 'start',
 }: Props) {
   const t = useT()
@@ -460,21 +451,6 @@ export default function CoursePickerScreen({
             </button>
           )}
         </div>
-        {onSkip && (
-          <div className="link-row">
-            <button type="button" className="link-button" onClick={onOpenArchive}>
-              {archiveCount > 0
-                ? t('setup.archiveWithCount', { count: archiveCount })
-                : t('setup.archive')}
-            </button>
-            <button type="button" className="link-button" onClick={onOpenBackup}>
-              {t('setup.backup')}
-            </button>
-            <button type="button" className="link-button" onClick={onOpenAccount}>
-              {t('setup.signIn')}
-            </button>
-          </div>
-        )}
         {/* Katalog je pod ODbL a ta vyžaduje uvést zdroj tam, kde se data
             používají - nestačí ho mít v README katalogu. */}
         <p className="hint catalog-credit">

@@ -219,6 +219,9 @@ export default function HomeScreen({
           onOpenArchive={onOpenArchive}
           onOpenBackup={onOpenBackup}
           onOpenAccount={onOpenAccount}
+          courseCount={courses.length}
+          playerCount={roster.length}
+          archiveCount={archive.length}
         />
       )}
     </div>
