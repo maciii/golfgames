@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.39.0] – 2026-08-10
+
+### Přidáno
+
+- **Domovská obrazovka.** Appka teď začíná skutečnou úvodní obrazovkou místo
+  rovnou výběrem hřiště: velké tlačítko Nová hra, poslední odehraná hra
+  s výsledkem, krátký seznam oblíbených hráčů a oblíbená hřiště, ze kterých
+  jde spustit založení kola rovnou s předvyplněným hřištěm.
+- **Hlavní menu.** Vše, co se používá zřídka a záměrně, je teď za jedním
+  menu (ikona vlevo nahoře na domovské obrazovce): Nová hra, Hřiště, Hráči,
+  Archiv, Záloha dat, Účet.
+- **Hřiště jde procházet i mimo zakládání kola.** Položka Hřiště v menu
+  otevře stejný výběr hřiště jako při zakládání kola, ale klepnutí na hřiště
+  vede na jeho úpravu, ne do nastavení kola — hodí se na správu katalogu
+  a oblíbených bez toho, aby appka nutila založit hru.
+- **Obrazovka Hráči.** Nová správa uložených spoluhráčů: přidání, smazání,
+  úprava handicapového indexu a zvýraznění hráče pro domovskou obrazovku.
+  Appka se vědomě nenapojuje na ČGF ani Týčko — ČGF zrušilo veřejnou databázi
+  hráčů kvůli GDPR už v roce 2018 a Týčko má na svá data jen uzavřené
+  partnerství, ne otevřené API.
+
 ## [0.38.0] – 2026-08-10
 
 ### Přidáno

@@ -340,6 +340,23 @@ export interface RosterEntry {
    * kola.
    */
   preferredTeeId?: string
+  /**
+   * Hráč zvýrazněný na domovské obrazovce pro rychlé založení kola.
+   *
+   * Čistě lokální předvolba - nepřenáší se do zakládání kola ani přes ni
+   * neprochází žádný výpočet, proto na rozdíl od `favoriteCourses` nepotřebuje
+   * vlastní klíč: obojí žije přímo na záznamu hráče jako `preferredTeeId`.
+   */
+  favorite?: boolean
+}
+
+/** Přepne, jestli je hráč zvýrazněný na domovské obrazovce. */
+export function toggleRosterFavorite(entryId: string): RosterEntry[] {
+  const roster = loadRoster().map((entry) =>
+    entry.id === entryId ? { ...entry, favorite: !entry.favorite } : entry,
+  )
+  write(ROSTER_KEY, roster)
+  return roster
 }
 
 /** Zapamatuje si odpaliště u uloženého hráče. */

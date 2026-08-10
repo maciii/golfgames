@@ -123,6 +123,12 @@ describe('Záloha - slučování hráčů', () => {
     expect(merged).toHaveLength(1)
     expect(merged[0]?.id).toBe('r1')
   })
+
+  it('přenese zvýraznění na domovské obrazovce', () => {
+    const merged = mergeRosters([], [{ id: 'r9', name: 'Eva', favorite: true }])
+
+    expect(merged[0]?.favorite).toBe(true)
+  })
 })
 
 describe('Záloha - čtení souboru', () => {

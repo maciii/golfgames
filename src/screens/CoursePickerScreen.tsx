@@ -43,6 +43,13 @@ interface Props {
   onOpenBackup?: () => void
   onOpenAccount?: () => void
   archiveCount?: number
+  /**
+   * Čisté procházení hřišť z menu, ne první krok zakládání kola.
+   *
+   * Volba „bez hřiště" v takovém kontextu nedává smysl, proto zmizí; `onSelect`
+   * dostane vždycky vybrané hřiště, nikdy `null`.
+   */
+  mode?: 'start' | 'browse'
 }
 
 /** Bez diakritiky a malými písmeny, ať „Karlstejn" najde „Karlštejn". */
@@ -153,6 +160,7 @@ export default function CoursePickerScreen({
   onOpenBackup,
   onOpenAccount,
   archiveCount = 0,
+  mode = 'start',
 }: Props) {
   const t = useT()
   const [stored, setStored] = useState<Course[]>(() => loadCourses())
@@ -313,7 +321,13 @@ export default function CoursePickerScreen({
             {t('common.back')}
           </button>
         )}
-        <h1>{onSkip ? t('picker.startTitle') : t('picker.title')}</h1>
+        <h1>
+          {mode === 'browse'
+            ? t('picker.browseTitle')
+            : onSkip
+              ? t('picker.startTitle')
+              : t('picker.title')}
+        </h1>
         <p className="subtitle">
           {loading
             ? t('picker.loading')
@@ -370,8 +384,9 @@ export default function CoursePickerScreen({
 
         <div className="course-list">
           {/* Volba "bez hřiště" patří na začátek, ale ne mezi výsledky hledání -
-              tam by se tvářila jako nalezené hřiště. */}
-          {!query.trim() && (
+              tam by se tvářila jako nalezené hřiště - a v čistém procházení
+              nedává smysl vůbec. */}
+          {mode === 'start' && !query.trim() && (
             <button
               type="button"
               className={`course-item${selectedId ? '' : ' selected'}`}

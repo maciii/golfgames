@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addToRoster, loadRoster, setRosterTee } from './storage'
+import { addToRoster, loadRoster, setRosterTee, toggleRosterFavorite } from './storage'
 
 /**
  * Testy seznamu hráčů.
@@ -67,5 +67,21 @@ describe('odpaliště v seznamu hráčů', () => {
 
     expect(roster.find((entry) => entry.name === 'Eva')?.preferredTeeId).toBe('blue')
     expect(roster.find((entry) => entry.name === 'Martin')?.preferredTeeId).toBe('yellow')
+  })
+})
+
+describe('oblíbení hráči na domovské obrazovce', () => {
+  it('toggleRosterFavorite zapne a zase vypne', () => {
+    addToRoster(['Eva', 'Martin'])
+    const eva = loadRoster().find((entry) => entry.name === 'Eva')!
+
+    const withFavorite = toggleRosterFavorite(eva.id)
+    expect(withFavorite.find((entry) => entry.name === 'Eva')?.favorite).toBe(true)
+    expect(
+      withFavorite.find((entry) => entry.name === 'Martin')?.favorite,
+    ).toBeUndefined()
+
+    const withoutFavorite = toggleRosterFavorite(eva.id)
+    expect(withoutFavorite.find((entry) => entry.name === 'Eva')?.favorite).toBe(false)
   })
 })

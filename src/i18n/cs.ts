@@ -26,6 +26,39 @@ export const cs = {
   'common.holePoints': 'Body za jamku',
   'common.dash': '–',
 
+  // --- domovská obrazovka a menu -------------------------------------------
+  'home.openMenu': 'Menu',
+  'home.newRound': 'Nová hra',
+  'home.lastRound': 'Poslední hra',
+  'home.seeArchive': 'Archiv',
+  'home.favoritePlayers': 'Oblíbení hráči',
+  'home.favoriteCourses': 'Oblíbená hřiště',
+  'menu.title': 'Menu',
+  'menu.courses': 'Hřiště',
+  'menu.players': 'Hráči',
+  'menu.archive': 'Archiv',
+  'menu.backup': 'Záloha dat',
+  'menu.account': 'Účet',
+
+  // --- hráči (správa seznamu) ----------------------------------------------
+  'players.title': 'Hráči',
+  'players.empty': 'Zatím žádní uložení hráči',
+  'players.count': {
+    one: '{count} uložený hráč',
+    few: '{count} uložení hráči',
+    other: '{count} uložených hráčů',
+  },
+  'players.emptyHint':
+    'Spoluhráči se ukládají sami při založení kola, nebo je přidej rovnou tady.',
+  'players.namePlaceholder': 'Jméno',
+  'players.hcpPlaceholder': 'HCP',
+  'players.hcpFor': 'Handicapový index hráče {name}',
+  'players.add': 'Přidat',
+  'players.remove': 'Smazat hráče {name}',
+  'players.removeConfirm': 'Smazat hráče {name} ze seznamu?',
+  'players.addFavorite': 'Zvýraznit {name} na domovské obrazovce',
+  'players.removeFavorite': 'Přestat zvýrazňovat {name} na domovské obrazovce',
+
   // --- úvodní obrazovka ---------------------------------------------------
   'setup.title': 'Golf Games',
   'setup.subtitle': 'Nové kolo',
@@ -103,15 +136,15 @@ export const cs = {
   'setup.backup': 'Záloha dat',
   'setup.signIn': 'Přihlásit se a zálohovat',
   'setup.account': 'Účet a synchronizace',
-  'setup.installApp': 'Přidat Golf Games na plochu',
-  'setup.installAppBenefit':
+  'pwa.installApp': 'Přidat Golf Games na plochu',
+  'pwa.installAppBenefit':
     'Spustíš aplikaci jedním klepnutím bez adresního řádku. Zápis skóre zůstane dostupný i bez signálu.',
-  'setup.installIosTitle': 'Přidání na plochu',
-  'setup.installIosHint': 'V Safari klepni na Sdílet a zvol Přidat na plochu.',
-  'setup.installBrowserTitle': 'Přidání aplikace',
-  'setup.installBrowserHint':
+  'pwa.installIosTitle': 'Přidání na plochu',
+  'pwa.installIosHint': 'V Safari klepni na Sdílet a zvol Přidat na plochu.',
+  'pwa.installBrowserTitle': 'Přidání aplikace',
+  'pwa.installBrowserHint':
     'V nabídce prohlížeče zvol Instalovat aplikaci nebo Přidat na plochu.',
-  'setup.installClose': 'Zavřít návod',
+  'pwa.installClose': 'Zavřít návod',
   'setup.start': 'Začít kolo',
   'setup.language': 'Jazyk',
   'setup.syncedShort': 'zálohováno',
@@ -547,6 +580,7 @@ export const cs = {
   // Výběr hřiště
   'picker.title': 'Výběr hřiště',
   'picker.startTitle': 'Kde se hraje?',
+  'picker.browseTitle': 'Hřiště',
   'picker.skipCourse': 'Hrát bez hřiště',
   'picker.count': '{stored} v telefonu, {total} k dispozici',
   'picker.loading': 'Načítám katalog hřišť…',
