@@ -184,7 +184,6 @@ export default function AccountScreen({ onOpenPrivacy, onBack }: Props) {
         <button type="button" className="primary-button" onClick={onBack} disabled={busy}>
           {t('common.back')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

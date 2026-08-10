@@ -2,7 +2,6 @@ import type { Course } from '../courses/types'
 import { layoutTee } from '../courses/layout'
 import { localeTag, localizedTeeName, useT } from '../i18n'
 import { loopLabel, resolveCourseSetup, toggleLoop } from './setupCourse'
-import { APP_VERSION } from '../version'
 
 /** Počty jamek pro kolo bez hřiště. Šestka i dvanáctka existují - krátká hřiště se staví právě takhle. */
 const HOLE_OPTIONS = [6, 9, 12, 18]
@@ -277,7 +276,6 @@ export default function SetupTeeScreen({
         <button type="button" className="primary-button" onClick={onNext}>
           {t('setup.next')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

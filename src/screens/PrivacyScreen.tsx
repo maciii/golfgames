@@ -1,4 +1,3 @@
-import { APP_VERSION } from '../version'
 import { useT } from '../i18n'
 
 /** Kontakt správce údajů. Změna e-mailu je jen tady. */
@@ -65,7 +64,6 @@ export default function PrivacyScreen({ onBack }: { onBack: () => void }) {
         <button type="button" className="primary-button" onClick={onBack}>
           {t('common.back')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

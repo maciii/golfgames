@@ -7,7 +7,6 @@ import {
   setRosterHandicap,
   toggleRosterFavorite,
 } from '../storage'
-import { APP_VERSION } from '../version'
 import { useT } from '../i18n'
 import { formatHandicapIndex, parseHandicapIndex } from '../handicap'
 
@@ -165,10 +164,6 @@ export default function PlayersScreen({ onBack }: Props) {
           </ul>
         )}
       </main>
-
-      <footer className="app-footer">
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
-      </footer>
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { GAMES, getGame } from '../games'
 import { useT } from '../i18n'
 import type { MessageKey } from '../i18n'
-import { APP_VERSION } from '../version'
 
 /**
  * Tři možná rozdělení čtyř hráčů do dvojic. Víc jich neexistuje - u čtyř
@@ -151,7 +150,6 @@ export default function SetupGameScreen({
         <button type="button" className="primary-button" onClick={onNext}>
           {t('setup.next')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

@@ -3,7 +3,6 @@ import type { Round } from '../types'
 import { BONUSES, formatHoleList, formatRoundDate, roundCompleteness } from '../types'
 import { getGame } from '../games'
 import { formatMoney, settleRound } from '../money'
-import { APP_VERSION } from '../version'
 import Scorecard from './Scorecard'
 import { dynamicKey, useT } from '../i18n'
 import type { MessageKey } from '../i18n'
@@ -320,7 +319,6 @@ export default function ResultsScreen({
             </button>
           </>
         )}
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

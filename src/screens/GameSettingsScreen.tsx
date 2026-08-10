@@ -4,7 +4,6 @@ import { BONUSES, RESULT_TIERS } from '../types'
 import { getGame } from '../games'
 import { NINE_DOT, SIX_DOT } from '../games/dots'
 import { loadGameOptions, saveGameOptions } from '../storage'
-import { APP_VERSION } from '../version'
 import { dynamicKey, useT } from '../i18n'
 import type { MessageKey } from '../i18n'
 
@@ -482,7 +481,6 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
         <button type="button" className="primary-button" onClick={onBack}>
           {t('common.done')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

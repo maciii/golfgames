@@ -15,7 +15,6 @@ import { useT } from '../i18n'
 import { resolveCourseSetup } from './setupCourse'
 // Dvojice se vybírají v kroku Hra; tady se jen uplatní podle vybraného indexu.
 import { PAIRINGS } from './SetupGameScreen'
-import { APP_VERSION } from '../version'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
 const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
@@ -324,12 +323,13 @@ export default function SetupBetScreen({
         <button type="button" className="primary-button" onClick={start}>
           {t('setup.start')}
         </button>
-        <p className="version">
-          {t('common.version', { version: APP_VERSION })}
-          {status === 'synced' && ` · ${t('setup.syncedShort')}`}
-          {status === 'syncing' && ` · ${t('setup.syncingShort')}`}
-          {status === 'offline' && ` · ${t('setup.offlineShort')}`}
-        </p>
+        {(status === 'synced' || status === 'syncing' || status === 'offline') && (
+          <p className="version">
+            {status === 'synced' && t('setup.syncedShort')}
+            {status === 'syncing' && t('setup.syncingShort')}
+            {status === 'offline' && t('setup.offlineShort')}
+          </p>
+        )}
       </footer>
     </div>
   )

@@ -7,7 +7,6 @@ import { formatHandicapIndex } from '../handicap'
 import type { RosterEntry } from '../storage'
 import { loadCourses, loadFavoriteCourseIds, loadRoster } from '../storage'
 import { usePwaInstall } from '../pwa'
-import { APP_VERSION } from '../version'
 import { LOCALES, LOCALE_FLAG, LOCALE_LABEL, useLocale } from '../i18n'
 import type { MessageKey } from '../i18n'
 import MenuSheet from './MenuSheet'
@@ -209,10 +208,6 @@ export default function HomeScreen({
           </section>
         )}
       </main>
-
-      <footer className="app-footer">
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
-      </footer>
 
       {menuOpen && (
         <MenuSheet

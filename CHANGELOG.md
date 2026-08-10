@@ -7,6 +7,15 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.40.2] – 2026-08-10
+
+### Změněno
+
+- **Číslo verze je vidět jen v menu.** Dřív se opakovalo v patičce skoro
+  každé obrazovky, kde bylo zbytečné a matlo (vypadalo, jako by appka mohla
+  mít na různých obrazovkách jinou verzi). Stav zálohy (zálohováno/
+  synchronizuji/bez připojení) v posledním kroku zakládání kola zůstává.
+
 ## [0.40.1] – 2026-08-10
 
 ### Opraveno

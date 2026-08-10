@@ -1,7 +1,6 @@
 import type { Round } from '../types'
 import { firstHoleNumber, formatRoundDate, holeNumber, roundCompleteness } from '../types'
 import { getGame } from '../games'
-import { APP_VERSION } from '../version'
 import { t as translate, useT } from '../i18n'
 import type { MessageKey } from '../i18n'
 
@@ -111,7 +110,6 @@ export default function ArchiveScreen({ rounds, onOpen, onDelete, onBack }: Prop
         <button type="button" className="primary-button" onClick={onBack}>
           {t('common.back')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

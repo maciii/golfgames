@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import type { ImportMode, ImportSummary } from '../backup'
 import { applyBackup, backupFileName, createBackup, parseBackup } from '../backup'
-import { APP_VERSION } from '../version'
 import { useT } from '../i18n'
 import type { MessageKey } from '../i18n'
 
@@ -149,7 +148,6 @@ export default function BackupScreen({ onImported, onBack }: Props) {
         <button type="button" className="primary-button" onClick={onBack}>
           {t('common.back')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )

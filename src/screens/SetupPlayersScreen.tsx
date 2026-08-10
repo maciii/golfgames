@@ -11,7 +11,6 @@ import {
 import { localizedTeeName, useT } from '../i18n'
 import TeeSheet, { teeColorClass, type TeeSheetRow } from './TeeSheet'
 import { resolveCourseSetup } from './setupCourse'
-import { APP_VERSION } from '../version'
 
 const PLAYER_COUNT_OPTIONS = [1, 2, 3, 4]
 
@@ -387,7 +386,6 @@ export default function SetupPlayersScreen({
         <button type="button" className="primary-button" onClick={onNext}>
           {t('setup.next')}
         </button>
-        <p className="version">{t('common.version', { version: APP_VERSION })}</p>
       </footer>
     </div>
   )
