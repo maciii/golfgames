@@ -29,8 +29,20 @@ export const en: Record<MessageKey, Message> = {
   'home.favoriteCourses': 'Favorite courses',
   'menu.title': 'Menu',
   'menu.courses': 'Courses',
+  'menu.coursesCount': {
+    one: '{count} saved',
+    other: '{count} saved',
+  },
   'menu.players': 'Players',
+  'menu.playersCount': {
+    one: '{count} playing partner',
+    other: '{count} playing partners',
+  },
   'menu.archive': 'Archive',
+  'menu.archiveCount': {
+    one: '{count} played',
+    other: '{count} played',
+  },
   'menu.backup': 'Backup',
   'menu.account': 'Account',
 

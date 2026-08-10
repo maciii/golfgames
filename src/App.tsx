@@ -333,10 +333,6 @@ function AppShell() {
                 setSelectedCourseId(undefined)
                 setView('setup')
               },
-              onOpenArchive: openArchive,
-              onOpenBackup: () => setView('backup'),
-              onOpenAccount: () => setView('account'),
-              archiveCount: archive.length,
             }
           : {})}
       />

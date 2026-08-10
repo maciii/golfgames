@@ -581,11 +581,13 @@ appky. Appka proto zůstává u vlastního lokálního seznamu - není co napoji
 toho, aby se z projektu stal oficiální partner ČGF, což je obchodní krok, ne
 kód.
 
-**Co se vědomě nedělá.** `CoursePickerScreen` v režimu `'start'` pořád nabízí
-i odkazy na archiv/zálohu/účet ve svém spodním panelu (`pickerAtStart`),
-přestože je teď má i `HomeScreen` v menu - mírná duplicita, ale bezpečnější
-než měnit existující podmíněné vykreslování composePickeru kvůli obrazovce,
-která ho jen předchází. Karta „Pokračovat" v rozehraném kole na domovskou
+**`CoursePickerScreen` už odkazy na archiv/zálohu/účet ve spodním panelu
+nemá.** Ty samé položky teď má `HomeScreen` v menu, odkud se do zakládání kola
+vstupuje - ponechat je na obou místech by byla čistá duplicita. Zůstává jen
+„Hrát bez hřiště" (`onSkip`), protože to je akce specifická pro zakládání
+kola, ne pro appku jako celek.
+
+**Co se vědomě nedělá.** Karta „Pokračovat" v rozehraném kole na domovskou
 obrazovku nepatří - appka při rozehraném kole vede rovnou do `PlayScreen`
 (`viewForRound()`), Home se zobrazí, jen když kolo neexistuje, takže by karta
 nikdy neměla co zobrazit.

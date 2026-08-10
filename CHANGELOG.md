@@ -7,6 +7,18 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.39.1] – 2026-08-10
+
+### Opraveno
+
+- **Menu odpovídá schválenému návrhu.** První verze byla jen textový seznam
+  odshora - teď je to výsuvný panel zleva s ikonkami a počty uložených
+  položek u Hřišť, Hráčů a Archivu, přesně podle mockupu.
+- **Zakládání kola už nenabízí zdvojené odkazy.** `CoursePickerScreen` ve
+  spodním panelu přestal nabízet Archiv/Zálohu/Účet - stejné položky má
+  domovská obrazovka v menu, odkud se do zakládání kola vstupuje. Zůstává jen
+  „Hrát bez hřiště", které je specifické pro zakládání kola.
+
 ## [0.39.0] – 2026-08-10
 
 ### Přidáno
