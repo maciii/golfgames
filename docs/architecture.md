@@ -429,6 +429,20 @@ bez hřiště a odkazy na archiv, zálohu a účet (`pickerAtStart` v `App.tsx`)
 
 ### Ovládání zápisu skóre
 
+**Celý zápis se musí vejít na jednu obrazovku.** Na jamce se zapisují čtyři
+skóre jednou rukou, často v rukavici a na slunci; rolovat za posledním hráčem
+je v té situaci nepoužitelné. `PlayScreen` proto na telefonním viewportu nesmí
+přerůst výšku displeje – hlídá to test v `e2e/responsive.spec.ts`, protože
+rozvržení se dá rozbít i změnou, která se `PlayScreen` vůbec netýká: stylopis
+je jeden a globální, takže obecné jméno třídy (`.player-row`) si dvě obrazovky
+přebijou. Třídy vázané na jednu obrazovku proto nesou předponu
+(`.setup-player-row`).
+
+Na displeji pod 700 px (iPhone SE) se čtyři hráči nevejdou zhruba o 200 px –
+je to starší nedostatek, ne regrese, a test ho drží jako `fixme`. Ušetřit ta
+místa znamená něco obětovat (nápovědu pod zápisem, odkazy, mezery, nebo výšku
+bloků dvojic), což je rozhodnutí o nejpoužívanější obrazovce.
+
 Vychází z toho, že aplikace se ovládá palcem jedné ruky:
 
 - `−` z prázdné buňky zapíše **birdie**, `+` **bogey**, klepnutí doprostřed

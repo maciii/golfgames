@@ -891,13 +891,13 @@ export default function SetupScreen({
 
           {/* Jméno, handicap i odpaliště jednoho hráče v jednom řádku. Dřív
               byly handicapy vlastní sekcí a jméno se opakovalo na dvou místech. */}
-          <div className="player-list">
+          <div className="setup-player-list">
             {Array.from({ length: playerCount }, (_, i) => {
               const rowTeeId = playerTeeId(i)
               const rowTee = teeOptions.find((option) => option.id === rowTeeId)
               const strokes = playingHandicapFor(i)
               return (
-                <div key={i} className="player-row">
+                <div key={i} className="setup-player-row">
                   <input
                     className="name-input"
                     type="text"
@@ -909,10 +909,10 @@ export default function SetupScreen({
                     onChange={(e) => updateName(i, e.target.value)}
                   />
                   {(netScoring || teeOptions.length > 0) && (
-                    <div className="player-row-meta">
+                    <div className="setup-player-meta">
                       {netScoring && (
                         <input
-                          className="name-input value-input player-handicap"
+                          className="name-input value-input setup-player-handicap"
                           type="text"
                           inputMode="decimal"
                           value={handicapText[i] ?? ''}
@@ -934,7 +934,7 @@ export default function SetupScreen({
                         </button>
                       )}
                       {netScoring && (
-                        <span className="player-strokes">
+                        <span className="setup-player-strokes">
                           {strokes === undefined
                             ? t('setup.noHandicap')
                             : t('setup.strokesGiven', { count: strokes })}

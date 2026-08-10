@@ -499,33 +499,37 @@ button {
   white-space: nowrap;
 }
 
-/* Řádek hráče: jméno nahoře, pod ním handicap, odpaliště a výsledek. Na
-   telefonu se to vedle sebe nevejde, takže meta řádek zalamuje. */
-.player-list {
+/* Řádek hráče v zakládání kola: jméno nahoře, pod ním handicap, odpaliště
+   a výsledek. Na telefonu se to vedle sebe nevejde, takže meta řádek zalamuje.
+
+   Předpona `setup-` je nutná: `.player-row` a `.player-list` patří zápisu
+   skóre (`PlayScreen`) a ten má úplně jiné rozvržení - řádek vedle sebe, ne
+   pod sebou. Stejné jméno by mu podsunulo `flex-direction: column`. */
+.setup-player-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.player-row {
+.setup-player-row {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.player-row-meta {
+.setup-player-meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.player-handicap {
+.setup-player-handicap {
   flex: 0 0 86px;
   width: 86px;
 }
 
-.player-strokes {
+.setup-player-strokes {
   color: var(--text-dim);
   font-size: 13px;
   margin-inline-start: auto;

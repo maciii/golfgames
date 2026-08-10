@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.37.1] – 2026-08-10
+
+### Opraveno
+
+- **Zápis skóre se roztáhl na dvojnásobek a začal rolovat.** Řádek hráče
+  v zakládání kola dostal v 0.37.0 stejný název třídy jako řádek v zápisu
+  skóre (`.player-row`) a podsunul mu svislé rozvržení: jméno a stepper se
+  postavily pod sebe, řádek narostl ze 72 na 178 px a obrazovka přerostla
+  displej o 401 px. Třídy zakládání kola teď nesou předponu `setup-`.
+
 ## [0.37.0] – 2026-08-10
 
 ### Přidáno

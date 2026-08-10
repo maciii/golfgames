@@ -73,6 +73,35 @@ test('zápis skóre se vejde do displeje a stepper jde ovládat', async ({ page 
   await expectTappable(page, '.score-value')
 })
 
+test('zápis skóre se vejde na jednu obrazovku bez rolování', async ({ page }) => {
+  // Na jamce se zapisují čtyři skóre jednou rukou, často v rukavici. Rolovat
+  // za posledním hráčem je v té situaci nepoužitelné, takže se celý zápis musí
+  // vejít do displeje - viz nepřekročitelné pravidlo 10 v AGENTS.md.
+  await startRound(page)
+  test.skip(
+    await isLandscapeScorecard(page),
+    'na šířku zapisuje scorekarta, která se posouvá uvnitř svého rámu',
+  )
+  // Na iPhonu SE se čtyři hráči nevejdou ani dnes - chybí zhruba 200 px.
+  // Je to starší nedostatek, ne regrese; `fixme` ho drží viditelný v reportu
+  // místo toho, aby se schoval za zelenou.
+  const viewport = page.viewportSize()
+  test.fixme(
+    (viewport?.height ?? 0) < 700,
+    'na displeji pod 700 px se čtyři hráči zatím nevejdou',
+  )
+
+  const { scrollHeight, clientHeight } = await page.evaluate(() => ({
+    scrollHeight: document.documentElement.scrollHeight,
+    clientHeight: document.documentElement.clientHeight,
+  }))
+
+  expect(
+    scrollHeight,
+    `zápis skóre přerostl displej o ${scrollHeight - clientHeight} px`,
+  ).toBeLessThanOrEqual(clientHeight + 1)
+})
+
 test('scorekarta se posouvá uvnitř svého rámu, ne celou stránkou', async ({ page }) => {
   await startRound(page)
 

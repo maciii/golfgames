@@ -88,6 +88,13 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 9. **Nepřidávej závislosti bez důvodu.** Runtime závislosti jsou dneska
    `react`, `react-dom` a `firebase` a je to záměr. Firebase je navíc jediná,
    která se nedostane do hlavního bundlu (viz níž).
+10. **Zápis skóre se musí vejít na jednu obrazovku.** Na jamce se hraje jednou
+    rukou, často v rukavici – rolovat za dalším hráčem je při zápisu čtyř
+    skóre nepoužitelné. `PlayScreen` proto na telefonním viewportu nesmí
+    přerůst výšku displeje. Hlídá to test `e2e/responsive.spec.ts`; když ho
+    nová úprava shodí, není to chyba testu. **Známá výjimka:** na displeji
+    pod 700 px (iPhone SE) se čtyři hráči nevejdou zhruba o 200 px už dlouho;
+    test to drží jako `fixme`, aby se na to nezapomnělo.
 
 ## Nejčastější zdroje chyb
 
@@ -108,6 +115,11 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   výřez parů a SI a `startHole` podle hrané části. Číslo pro hráče dává
   výhradně `holeNumber(round, hole)` - v UI, ve výpisech jamek i v pravidle
   o dvojnásobné 9. a 18. jamce.
+- **Názvy tříd v CSS jsou globální.** `src/styles.css` je jediný stylopis bez
+  modulů, takže obecné jméno jako `.player-row` si dvě obrazovky snadno
+  přebijou – a projeví se to až na té, kterou zrovna nikdo nezkoumá. Řádek
+  hráče v zakládání kola se proto jmenuje `.setup-player-row`; zápis skóre měl
+  `.player-row` dřív. Nová obecně znějící třída patří k obrazovce předponou.
 - **Výřez hřiště počítá jen `src/courses/layout.ts`.** Obrazovky si pary,
   stroke index ani normu odpaliště pro hranou část neodvozují samy - jinak by
   výběr jamek a hrací handicap tvrdily každý něco jiného. Na pořadí devítek
