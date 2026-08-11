@@ -581,6 +581,8 @@ export const cs = {
   'dot.columnAria': '{name}: body za jamku',
 
   // Zadání hřiště
+  'scorecard.turnShort': 'OUT',
+  'scorecard.turn': 'Mezisoučet po první devítce',
   'scorecard.strokeIndex': 'Stroke index jamky',
   'scorecard.strokeIndexShort': 'SI',
   'scorecard.title': 'Scorekarta',

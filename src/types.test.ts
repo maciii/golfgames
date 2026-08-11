@@ -8,9 +8,13 @@ import {
   holeNumber,
   isHoleStarted,
   parAt,
+  parTotalBetween,
   roundCompleteness,
   setHolePar,
+  strokeTotal,
+  strokeTotalBetween,
   toggleBonus,
+  turnHole,
 } from './types'
 import { normalizeRound } from './storage'
 import { makeRound } from './games/fixtures'
@@ -274,5 +278,76 @@ describe('odpaliště hráčů', () => {
     const round = createRound({ gameId: 'skins', playerNames: ['A'], holeCount: 18 })
 
     expect(round.players[0]?.teeId).toBeUndefined()
+  })
+})
+
+describe('mezisoučet po devíti jamkách', () => {
+  /** Osmnáctka, kde první devítka dá 40 ran a druhá 45. */
+  const round = makeRound({
+    gameId: 'skins',
+    players: ['Adam'],
+    pars: Array.from({ length: 18 }, () => 4),
+    scores: [[4, 4, 4, 5, 4, 4, 4, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]],
+  })
+
+  it('sečte jen jamky ve výřezu', () => {
+    expect(strokeTotalBetween(round, 'p1', 0, 9)).toBe(40)
+    expect(strokeTotalBetween(round, 'p1', 9, 18)).toBe(45)
+  })
+
+  it('obě devítky dohromady dají celkový součet', () => {
+    expect(
+      strokeTotalBetween(round, 'p1', 0, 9) + strokeTotalBetween(round, 'p1', 9, 18),
+    ).toBe(strokeTotal(round, 'p1'))
+  })
+
+  it('nezapsaná jamka se počítá jako nula, stejně jako v celkovém součtu', () => {
+    const started = makeRound({
+      gameId: 'skins',
+      players: ['Adam'],
+      pars: Array.from({ length: 18 }, () => 4),
+      scores: [[4, 5, null, null, null, null, null, null, null]],
+    })
+
+    expect(strokeTotalBetween(started, 'p1', 0, 9)).toBe(9)
+  })
+
+  it('par se bere přes parAt, takže kolo bez hřiště má výchozí par', () => {
+    const noCourse = createRound({
+      gameId: 'skins',
+      playerNames: ['Adam'],
+      holeCount: 18,
+    })
+
+    expect(parTotalBetween(noCourse, 0, 9)).toBe(9 * parAt(noCourse, 0))
+  })
+
+  it('ukazuje se jen na osmnáctce, kratší kolo se nedělí', () => {
+    expect(turnHole(round)).toBe(9)
+    expect(
+      turnHole(
+        makeRound({
+          gameId: 'skins',
+          players: ['Adam'],
+          pars: Array.from({ length: 9 }, () => 4),
+          scores: [[]],
+        }),
+      ),
+    ).toBeUndefined()
+  })
+
+  it('na zadní devítce osmnáctky dělí kolo podle hraných jamek, ne podle čísel', () => {
+    // Kolo začínající desítkou má jamky 10-18 a pak 1-9; mezisoučet patří po
+    // deváté odehrané jamce, tedy na indexu 9.
+    const fromTen = makeRound({
+      gameId: 'skins',
+      players: ['Adam'],
+      pars: Array.from({ length: 18 }, () => 4),
+      scores: [Array.from({ length: 18 }, () => 5)],
+      startHole: 10,
+    })
+
+    expect(turnHole(fromTen)).toBe(9)
+    expect(strokeTotalBetween(fromTen, 'p1', 0, 9)).toBe(45)
   })
 })

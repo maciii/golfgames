@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.41.0] – 2026-08-11
+
+### Přidáno
+
+- **Mezisoučet po první devítce na scorekartě.** Kolo na osmnáct jamek má
+  teď pod devátou jamkou řádek `OUT` se součtem parů a ran každého hráče,
+  přesně jako turnajová scorekarta. Kratší kolo se nedělí - mezisoučet po
+  devíti jamkách z dvanáctky nic neříká. Sloupce her (skiny, body) se
+  nesčítají: jejich průběžná hodnota nemusí jít rozdělit na poloviny kola.
+
 ## [0.40.6] – 2026-08-10
 
 ### Změněno

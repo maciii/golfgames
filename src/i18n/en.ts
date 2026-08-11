@@ -553,6 +553,8 @@ export const en: Record<MessageKey, Message> = {
   'dot.columnAria': '{name}: points for the hole',
 
   // Course editor
+  'scorecard.turnShort': 'OUT',
+  'scorecard.turn': 'Front nine subtotal',
   'scorecard.strokeIndex': 'Stroke index of the hole',
   'scorecard.strokeIndexShort': 'SI',
   'scorecard.title': 'Scorecard',

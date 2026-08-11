@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import type { Player, Round, ScoreCategory } from '../types'
 import {
   holeNumber,
   parAt,
+  parTotalBetween,
   scoreAt,
   scoreCategory,
   scorecardPlayers,
   strokeTotal,
+  strokeTotalBetween,
   teamName,
+  turnHole,
 } from '../types'
 import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
 import { getGame } from '../games'
@@ -155,6 +158,11 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
     scorecardPlayers(round).map((player, playerIndex) => [player.id, playerIndex]),
   )
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
+  /**
+   * Po kolikáté jamce se ukáže mezisoučet. Na osmnáctce je to po první
+   * devítce jako na turnajové scorekartě, kratší kolo se nedělí.
+   */
+  const turn = turnHole(round)
 
   // Stroke index se ukazuje jen u netto kola - u brutto je to sloupec navíc
   // s číslem, které na nic nemá vliv, a mřížka je na telefonu úzká.
@@ -277,97 +285,136 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
           </thead>
           <tbody>
             {Array.from({ length: round.holeCount }, (_, hole) => (
-              <tr
-                key={hole}
-                ref={
-                  mode === 'live' && hole === round.currentHole
-                    ? currentHoleRef
-                    : undefined
-                }
-                className={
-                  mode === 'live' && hole === round.currentHole
-                    ? 'current-hole'
-                    : undefined
-                }
-              >
-                <th scope="row">{holeNumber(round, hole)}</th>
-                <td className="par-cell">{parAt(round, hole)}</td>
-                {showStrokeIndex && (
-                  <td className="par-cell si-cell">{strokeIndex[hole] ?? hole + 1}</td>
-                )}
-                {columns.map((column) => {
-                  if (column.kind === 'player') {
-                    const decoration = game.scorecardPlayerCell?.(
-                      round,
-                      column.player.id,
-                      hole,
-                    )
-                    const dotCount =
-                      showHcpDots && hcpDotsMode === 'course'
-                        ? strokesReceived(round, column.player.id, hole)
-                        : showHcpDots
-                          ? strokesRelativeToBest(round, column.player.id, hole)
-                          : 0
-                    const visibleDots = Math.max(0, dotCount)
-                    const player = round.players.find(
-                      (entry) => entry.id === column.player.id,
-                    )
-                    const hcpDots =
-                      visibleDots > 0
-                        ? {
-                            text: '•'.repeat(visibleDots),
-                            ariaLabel: t(
-                              hcpDotsMode === 'course'
-                                ? 'scorecard.dotsCourseAria'
-                                : 'scorecard.dotsBestPlayerAria',
-                              {
-                                name: player?.name ?? column.player.id,
-                                count: visibleDots,
-                              },
-                            ),
-                          }
-                        : undefined
-                    const labels = [
-                      decoration?.pairing?.ariaLabel,
-                      decoration?.skin?.ariaLabel,
-                    ].filter((label): label is string => Boolean(label))
-                    const decorationLabel = labels.join(' · ')
+              <Fragment key={hole}>
+                <tr
+                  ref={
+                    mode === 'live' && hole === round.currentHole
+                      ? currentHoleRef
+                      : undefined
+                  }
+                  className={
+                    mode === 'live' && hole === round.currentHole
+                      ? 'current-hole'
+                      : undefined
+                  }
+                >
+                  <th scope="row">{holeNumber(round, hole)}</th>
+                  <td className="par-cell">{parAt(round, hole)}</td>
+                  {showStrokeIndex && (
+                    <td className="par-cell si-cell">{strokeIndex[hole] ?? hole + 1}</td>
+                  )}
+                  {columns.map((column) => {
+                    if (column.kind === 'player') {
+                      const decoration = game.scorecardPlayerCell?.(
+                        round,
+                        column.player.id,
+                        hole,
+                      )
+                      const dotCount =
+                        showHcpDots && hcpDotsMode === 'course'
+                          ? strokesReceived(round, column.player.id, hole)
+                          : showHcpDots
+                            ? strokesRelativeToBest(round, column.player.id, hole)
+                            : 0
+                      const visibleDots = Math.max(0, dotCount)
+                      const player = round.players.find(
+                        (entry) => entry.id === column.player.id,
+                      )
+                      const hcpDots =
+                        visibleDots > 0
+                          ? {
+                              text: '•'.repeat(visibleDots),
+                              ariaLabel: t(
+                                hcpDotsMode === 'course'
+                                  ? 'scorecard.dotsCourseAria'
+                                  : 'scorecard.dotsBestPlayerAria',
+                                {
+                                  name: player?.name ?? column.player.id,
+                                  count: visibleDots,
+                                },
+                              ),
+                            }
+                          : undefined
+                      const labels = [
+                        decoration?.pairing?.ariaLabel,
+                        decoration?.skin?.ariaLabel,
+                      ].filter((label): label is string => Boolean(label))
+                      const decorationLabel = labels.join(' · ')
+                      return (
+                        <td
+                          key={column.player.id}
+                          className={`${playerColumnClass(column.playerIndex)}${
+                            decoration?.skin ? ' skin-awarded' : ''
+                          }${decoration?.pairing ? ' pairing-marked' : ''}`}
+                          aria-label={decorationLabel || undefined}
+                          title={decorationLabel || undefined}
+                        >
+                          <ScoreCell
+                            score={scoreAt(round, column.player.id, hole)}
+                            par={parAt(round, hole)}
+                            decoration={decoration}
+                            hcpDots={hcpDots}
+                          />
+                        </td>
+                      )
+                    }
+
+                    const pairingDecoration = column.column.afterPlayerId
+                      ? game.scorecardPlayerCell?.(
+                          round,
+                          column.column.afterPlayerId,
+                          hole,
+                        )
+                      : undefined
                     return (
                       <td
-                        key={column.player.id}
-                        className={`${playerColumnClass(column.playerIndex)}${
-                          decoration?.skin ? ' skin-awarded' : ''
-                        }${decoration?.pairing ? ' pairing-marked' : ''}`}
-                        aria-label={decorationLabel || undefined}
-                        title={decorationLabel || undefined}
+                        key={column.column.id}
+                        className={`${extraColumnClass(column.column, playerIndexes)}${
+                          column.column.cell(round, hole) ? '' : ' empty'
+                        }${pairingDecoration?.pairing ? ' pairing-marked-extra' : ''}`}
+                        aria-label={pairingDecoration?.pairing?.ariaLabel}
+                        title={pairingDecoration?.pairing?.ariaLabel}
                       >
-                        <ScoreCell
-                          score={scoreAt(round, column.player.id, hole)}
-                          par={parAt(round, hole)}
-                          decoration={decoration}
-                          hcpDots={hcpDots}
-                        />
+                        {column.column.cell(round, hole) || '–'}
                       </td>
                     )
-                  }
-
-                  const pairingDecoration = column.column.afterPlayerId
-                    ? game.scorecardPlayerCell?.(round, column.column.afterPlayerId, hole)
-                    : undefined
-                  return (
-                    <td
-                      key={column.column.id}
-                      className={`${extraColumnClass(column.column, playerIndexes)}${
-                        column.column.cell(round, hole) ? '' : ' empty'
-                      }${pairingDecoration?.pairing ? ' pairing-marked-extra' : ''}`}
-                      aria-label={pairingDecoration?.pairing?.ariaLabel}
-                      title={pairingDecoration?.pairing?.ariaLabel}
+                  })}
+                </tr>
+                {/* Mezisoučet po první devítce stojí uvnitř mřížky, hned pod
+                    devátou jamkou - na turnajové scorekartě je OUT taky řádek
+                    tabulky, ne poznámka pod ní. Sloupce hry (skiny, body) se
+                    nesčítají: jejich průběžná hodnota nemusí jít rozdělit na
+                    poloviny kola, a půlka skinů nic neříká. */}
+                {hole + 1 === turn && (
+                  <tr className="scorecard-turn-row">
+                    <th
+                      scope="row"
+                      className="scorecard-turn-label"
+                      title={t('scorecard.turn')}
+                      aria-label={t('scorecard.turn')}
                     >
-                      {column.column.cell(round, hole) || '–'}
-                    </td>
-                  )
-                })}
-              </tr>
+                      {t('scorecard.turnShort')}
+                    </th>
+                    <td className="par-cell">{parTotalBetween(round, 0, turn)}</td>
+                    {showStrokeIndex && <td className="par-cell si-cell" />}
+                    {columns.map((column) =>
+                      column.kind === 'player' ? (
+                        <td
+                          key={column.player.id}
+                          className={playerColumnClass(column.playerIndex)}
+                        >
+                          {strokeTotalBetween(round, column.player.id, 0, turn)}
+                        </td>
+                      ) : (
+                        <td
+                          key={column.column.id}
+                          className={extraColumnClass(column.column, playerIndexes)}
+                        />
+                      ),
+                    )}
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
           <tfoot>

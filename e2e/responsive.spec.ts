@@ -8,6 +8,7 @@ import {
   expectTappable,
   isLandscapeScorecard,
   openCoursePicker,
+  openScorecard,
   openSetup,
   startRound,
 } from './helpers'
@@ -92,6 +93,35 @@ test('kolo bez hřiště si nese zvolený počet jamek', async ({ page }) => {
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
 
   expect((await currentRound(page)).holeCount).toBe(9)
+})
+
+test('scorekarta ukazuje mezisoučet po první devítce jen na osmnáctce', async ({
+  page,
+}) => {
+  // Kolo bez hřiště má výchozích 18 jamek, takže par první devítky je 9 × 4.
+  await startRound(page)
+  await openScorecard(page)
+
+  const turnRow = page.locator('.scorecard-turn-row')
+  await expect(turnRow).toHaveCount(1)
+  await expect(turnRow.locator('.par-cell')).toHaveText('36')
+
+  // Mezisoučet stojí hned pod devátou jamkou, ne až na konci tabulky.
+  const holeBefore = turnRow.locator('xpath=preceding-sibling::tr[1]/th')
+  await expect(holeBefore).toHaveText('9')
+})
+
+test('scorekarta devítijamkového kola mezisoučet nemá', async ({ page }) => {
+  await openSetup(page, 'tee')
+  await page.locator('.segment', { hasText: /^9$/ }).click()
+  for (let click = 0; click < 4; click += 1) {
+    await page.locator('.app-footer .primary-button').click()
+  }
+  await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
+  await openScorecard(page)
+
+  await expect(page.locator('.scorecard')).toBeVisible()
+  await expect(page.locator('.scorecard-turn-row')).toHaveCount(0)
 })
 
 test('zápis skóre se vejde do displeje a stepper jde ovládat', async ({ page }) => {

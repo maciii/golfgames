@@ -2008,6 +2008,24 @@ button {
     inset 0 -1px 0 var(--score-eagle);
 }
 
+/*
+ * Mezisoučet po první devítce. Čte se jako součet, ne jako další jamka, ale
+ * nesmí přebít celkový součet v patičce - proto tučné písmo a linky nahoře
+ * i dole, ale bez zvýrazněného pozadí.
+ */
+.scorecard tbody tr.scorecard-turn-row > th,
+.scorecard tbody tr.scorecard-turn-row > td {
+  font-weight: 700;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.scorecard tbody tr.scorecard-turn-row .scorecard-turn-label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
 .scorecard-game-total-row {
   border-top: 1px solid var(--line);
 }

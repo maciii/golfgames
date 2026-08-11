@@ -161,6 +161,19 @@ export async function isLandscapeScorecard(page: Page): Promise<boolean> {
   return page.locator('.landscape-scorecard').isVisible()
 }
 
+/**
+ * Otevře scorekartu z rozehraného kola.
+ *
+ * Na šířku je scorekarta rovnou místo zápisu skóre; na výšku se na ni jde
+ * odkazem na průběžné výsledky pod zápisem.
+ */
+export async function openScorecard(page: Page): Promise<void> {
+  if (!(await isLandscapeScorecard(page))) {
+    await page.locator('.content .link-row .link-button').first().click()
+  }
+  await expect(page.locator('.scorecard').first()).toBeVisible()
+}
+
 /** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
 export async function currentRound(page: Page): Promise<{ holeCount: number }> {
   const raw = await page.evaluate(() =>

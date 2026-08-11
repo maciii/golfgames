@@ -692,7 +692,48 @@ export function diffToPar(round: Round, playerId: PlayerId, hole: number): numbe
 
 /** Součet ran hráče přes zapsané jamky. */
 export function strokeTotal(round: Round, playerId: PlayerId): number {
-  return (round.scores[playerId] ?? []).reduce<number>((sum, s) => sum + (s ?? 0), 0)
+  return strokeTotalBetween(round, playerId, 0, round.holeCount)
+}
+
+/**
+ * Součet ran na části kola; `from` se počítá, `to` už ne. Meze jsou indexy
+ * jamek od nuly, ne čísla jamek pro hráče - výřez hřiště čísluje jinak
+ * (viz `holeNumber()`), ale první devítka kola jsou vždycky indexy 0 až 8.
+ *
+ * Nezapsaná jamka se počítá jako nula, stejně jako v celkovém součtu -
+ * mezisoučet rozehraného kola tak roste s tím, co je zapsané.
+ */
+export function strokeTotalBetween(
+  round: Round,
+  playerId: PlayerId,
+  from: number,
+  to: number,
+): number {
+  return (round.scores[playerId] ?? [])
+    .slice(from, to)
+    .reduce<number>((sum, s) => sum + (s ?? 0), 0)
+}
+
+/**
+ * Součet parů na části kola; meze jako u `strokeTotalBetween()`.
+ *
+ * Bere se přes `parAt()`, ne přímo z `round.pars` - u kola bez hřiště je pole
+ * parů prázdné a jamka pak má výchozí par.
+ */
+export function parTotalBetween(round: Round, from: number, to: number): number {
+  let total = 0
+  for (let hole = from; hole < to; hole += 1) total += parAt(round, hole)
+  return total
+}
+
+/**
+ * Jamka, po které se na scorekartě ukáže mezisoučet, nebo `undefined`, když
+ * se nikde neukazuje. Osmnáctka se dělí na devítky přesně jako turnajová
+ * scorekarta (OUT/IN); kratší kolo se nedělí - mezisoučet po devíti jamkách
+ * z dvanáctky nic neříká.
+ */
+export function turnHole(round: Round): number | undefined {
+  return round.holeCount === 18 ? 9 : undefined
 }
 
 /** Kolik jamek už má hráč zapsaných. */
