@@ -65,7 +65,6 @@ export const en: Record<MessageKey, Message> = {
   'players.removeFavorite': 'Stop highlighting {name} on the home screen',
 
   // --- setup --------------------------------------------------------------
-  'setup.title': 'Golf Games',
   'setup.subtitle': 'New round',
   'setup.next': 'Next',
   'setup.stepTeeTitle': 'Tees and holes',
@@ -127,6 +126,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.netScoring': 'Play with handicap strokes (net)',
   'setup.handicapIndex': 'Index',
   'setup.handicapStrokes': 'Strokes',
+  'setup.handicapShort': 'HCP',
   'setup.handicapFor': 'Handicap for {name}',
   'setup.noHandicap': 'no HCP',
   'setup.strokesGiven': { one: '{count} stroke', other: '{count} strokes' },
@@ -139,7 +139,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.backup': 'Data backup',
   'setup.signIn': 'Sign in and back up',
   'setup.account': 'Account and sync',
-  'pwa.installApp': 'Add Golf Games to home screen',
+  'pwa.installApp': 'Add Fairsome to home screen',
   'pwa.installAppBenefit':
     'Open the app with one tap without the address bar. Scoring stays available even without a signal.',
   'pwa.installIosTitle': 'Add to home screen',
@@ -332,7 +332,7 @@ export const en: Record<MessageKey, Message> = {
   'backup.summary': 'The archive holds {count} rounds',
   'backup.summaryAdded': '{count} of them new',
   'backup.summaryCurrent': 'the round in progress was restored too',
-  'backup.errorInvalid': 'This file is not a Golf Games backup, or it is damaged.',
+  'backup.errorInvalid': 'This file is not a Fairsome backup, or it is damaged.',
   'backup.errorTooNew':
     'The backup comes from a newer version of the app. Update the app and try again.',
 
@@ -598,7 +598,7 @@ export const en: Record<MessageKey, Message> = {
   'picker.addFavorite': 'Add {name} to favorites',
   'picker.removeFavorite': 'Remove {name} from favorites',
   'picker.noCourseMeta': 'Pars are set while playing, handicaps are not used.',
-  'picker.credit': 'Courses from the open Golf Games catalogue, ODbL licensed.',
+  'picker.credit': 'Courses from the open Fairsome catalogue, ODbL licensed.',
   'picker.creditLink': 'Source and corrections',
   'picker.holes': { one: '{count} hole', other: '{count} holes' },
   'picker.loops': { one: '{count} nine', other: '{count} nines' },

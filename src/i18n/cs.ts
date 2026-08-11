@@ -75,7 +75,6 @@ export const cs = {
   'players.removeFavorite': 'Přestat zvýrazňovat {name} na domovské obrazovce',
 
   // --- úvodní obrazovka ---------------------------------------------------
-  'setup.title': 'Golf Games',
   'setup.subtitle': 'Nové kolo',
   'setup.next': 'Další',
   'setup.stepTeeTitle': 'Odpaliště a jamky',
@@ -138,6 +137,7 @@ export const cs = {
   'setup.netScoring': 'Hrát na rány s handicapem (netto)',
   'setup.handicapIndex': 'Index',
   'setup.handicapStrokes': 'Rány',
+  'setup.handicapShort': 'HCP',
   'setup.handicapFor': 'Handicap hráče {name}',
   'setup.noHandicap': 'bez HCP',
   'setup.strokesGiven': {
@@ -154,7 +154,7 @@ export const cs = {
   'setup.backup': 'Záloha dat',
   'setup.signIn': 'Přihlásit se a zálohovat',
   'setup.account': 'Účet a synchronizace',
-  'pwa.installApp': 'Přidat Golf Games na plochu',
+  'pwa.installApp': 'Přidat Fairsome na plochu',
   'pwa.installAppBenefit':
     'Spustíš aplikaci jedním klepnutím bez adresního řádku. Zápis skóre zůstane dostupný i bez signálu.',
   'pwa.installIosTitle': 'Přidání na plochu',
@@ -358,7 +358,7 @@ export const cs = {
   'backup.summary': 'V archivu je {count} kol',
   'backup.summaryAdded': 'z toho {count} nových',
   'backup.summaryCurrent': 'obnovilo se i rozehrané kolo',
-  'backup.errorInvalid': 'Tenhle soubor není záloha Golf Games, nebo je poškozený.',
+  'backup.errorInvalid': 'Tenhle soubor není záloha Fairsome, nebo je poškozený.',
   'backup.errorTooNew':
     'Záloha pochází z novější verze aplikace. Aktualizuj aplikaci a zkus to znovu.',
 
@@ -628,7 +628,7 @@ export const cs = {
   'picker.addFavorite': 'Přidat hřiště {name} mezi oblíbená',
   'picker.removeFavorite': 'Odebrat hřiště {name} z oblíbených',
   'picker.noCourseMeta': 'Pary se nastavují při hře, handicapy se nepočítají.',
-  'picker.credit': 'Hřiště z otevřeného katalogu Golf Games, licence ODbL.',
+  'picker.credit': 'Hřiště z otevřeného katalogu Fairsome, licence ODbL.',
   'picker.creditLink': 'Zdroj a opravy',
   'picker.holes': { one: '{count} jamka', few: '{count} jamky', other: '{count} jamek' },
   'picker.loops': {

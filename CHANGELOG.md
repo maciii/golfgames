@@ -7,6 +7,37 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.42.0] – 2026-08-11
+
+### Změněno
+
+- **Appka se jmenuje Fairsome.** Dosud to byl jen wordmark na úvodní
+  obrazovce; jméno „Golf Games" zůstávalo v manifestu PWA, a telefon proto
+  při ukládání na plochu pořád nabízel staré jméno. Přejmenováno je i
+  v titulku stránky, na úvodní obrazovce před načtením appky, v nabídce
+  instalace, v hlášce u zálohy, v kreditu katalogu hřišť a na obrazovce
+  soukromí. Formát souboru zálohy se **nemění** - marker uvnitř zůstává
+  `golfgames-backup`, takže dosud vytvořené zálohy jdou naimportovat dál.
+  Zapsáno jako rozhodnutí #30 v `docs/decisions.md`.
+- **HCP se zadává přímo v řádku hráče.** Pole stálo na samostatném řádku pod
+  jménem; teď je mezi jménem a odpalištěm, takže se řádek čte zleva doprava
+  jako „kdo - s jakým handicapem - odkud". Kolik ran hráč dostane zůstává
+  drobným písmem pod polem - je to výsledek zadání, ne další pole.
+- **Řádky se součty ve scorekartě mají vlastní pruh.** Mezisoučet po devítce
+  i celkový součet dřív splývaly s jamkami: střídavý akcent hráčských sloupců
+  jde skrz celou tabulku a samotné tučné písmo se v mřížce plné značek
+  ztratilo.
+
+### Opraveno
+
+- **List s výběrem hodnoty neměl tlačítko Zavřít.** `PickSheet` (odpaliště
+  pro všechny, druhá devítka, filtr zemí) šel zavřít jen klepnutím vedle
+  něj - na rozdíl od výběru odpaliště, extra bodů i menu, které Zavřít mají.
+  U dlouhého seznamu zemí to byla jediná cesta ven a nebyla vidět.
+- **Čtečka obrazovky ohlašovala volby v listu jako přepínače.** `PickSheet`
+  má `role="radiogroup"`, ale řádky hlásily `aria-pressed`; teď je to
+  `role="radio"` s `aria-checked`.
+
 ## [0.41.0] – 2026-08-11
 
 ### Přidáno

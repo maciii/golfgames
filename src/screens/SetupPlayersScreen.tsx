@@ -200,6 +200,9 @@ export default function SetupPlayersScreen({
               const strokes = playingHandicapFor(i)
               return (
                 <div key={i} className="setup-player-row">
+                  {/* Jméno, HCP a odpaliště patří k jednomu hráči, takže stojí
+                      na jednom řádku. HCP je mezi nimi záměrně: čte se zleva
+                      doprava jako „kdo - s jakým handicapem - odkud". */}
                   <div className="setup-player-main">
                     <input
                       className="name-input"
@@ -211,6 +214,17 @@ export default function SetupPlayersScreen({
                       value={names[i] ?? ''}
                       onChange={(e) => onNameChange(i, e.target.value)}
                     />
+                    {netScoring && (
+                      <input
+                        className="name-input value-input setup-player-handicap"
+                        type="text"
+                        inputMode="decimal"
+                        placeholder={t('setup.handicapShort')}
+                        value={handicapText[i] ?? ''}
+                        onChange={(e) => onHandicapTextChange(i, e.target.value)}
+                        aria-label={t('setup.handicapFor', { name: displayName(i) })}
+                      />
+                    )}
                     {teeOptions.length > 0 && (
                       <button
                         type="button"
@@ -223,22 +237,15 @@ export default function SetupPlayersScreen({
                       </button>
                     )}
                   </div>
+                  {/* Kolik ran hráč dostane, je výsledek zadaného HCP, ne další
+                      pole k vyplnění - proto drobným písmem pod řádkem a ne
+                      mezi ovladači. */}
                   {netScoring && (
-                    <div className="setup-player-meta">
-                      <input
-                        className="name-input value-input setup-player-handicap"
-                        type="text"
-                        inputMode="decimal"
-                        value={handicapText[i] ?? ''}
-                        onChange={(e) => onHandicapTextChange(i, e.target.value)}
-                        aria-label={t('setup.handicapFor', { name: displayName(i) })}
-                      />
-                      <span className="setup-player-strokes">
-                        {strokes === undefined
-                          ? t('setup.noHandicap')
-                          : t('setup.strokesGiven', { count: strokes })}
-                      </span>
-                    </div>
+                    <span className="setup-player-strokes">
+                      {strokes === undefined
+                        ? t('setup.noHandicap')
+                        : t('setup.strokesGiven', { count: strokes })}
+                    </span>
                   )}
                 </div>
               )

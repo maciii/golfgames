@@ -249,7 +249,7 @@ describe('Záloha - hřiště', () => {
 describe('Záloha - jméno souboru', () => {
   it('obsahuje datum vytvoření', () => {
     expect(backupFileName(new Date('2026-08-03T18:00:00.000Z'))).toBe(
-      'golfgames-zaloha-2026-08-03.json',
+      'fairsome-zaloha-2026-08-03.json',
     )
   })
 })

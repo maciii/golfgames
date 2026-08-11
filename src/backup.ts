@@ -240,7 +240,7 @@ export function parseBackup(text: string): ParseResult {
 /** Jméno souboru s datem, ať jde ve stažených souborech poznat, co je co. */
 export function backupFileName(now: Date = new Date()): string {
   const stamp = now.toISOString().slice(0, 10)
-  return `golfgames-zaloha-${stamp}.json`
+  return `fairsome-zaloha-${stamp}.json`
 }
 
 // --- obálky nad localStorage ----------------------------------------------

@@ -27,6 +27,10 @@
   /* Mezery v trojitém obrysu jsou u černé světlé - kdyby měly barvu podkladu,
      černá značka by na tmavém pozadí splynula a obrys by nebyl vidět. */
   --score-triple-gap: #8a8a8a;
+  /* Pruh pod řádky se součty ve scorekartě. Světlejší než list, ne tmavší -
+     součet má z tabulky vystoupit, ne do ní zapadnout. Sytější tón by
+     soupeřil se značkami skóre, které jsou to hlavní. */
+  --scorecard-summary: #24402e;
   --tap: 48px;
 }
 
@@ -807,22 +811,25 @@ button {
   color: var(--tee-color);
 }
 
-.setup-player-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+/* HCP stojí mezi jménem a odpalištěm, takže musí zůstat úzké - růst má jen
+   jméno. Selektor je zanořený schválně: pole nese i `.name-input`, které
+   o řádek výš dostává `flex: 1`, a to by jinak roztáhlo HCP na půl řádku.
+   Dvě číslice s desetinným místem se do 76 px vejdou i s velkým písmem. */
+.setup-player-main .setup-player-handicap {
+  flex: 0 0 76px;
+  width: 76px;
+  text-align: center;
 }
 
-.setup-player-handicap {
-  flex: 0 0 86px;
-  width: 86px;
-}
-
+/* Kolik ran hráč dostane: výsledek zadaného HCP, ne další pole. Drobným
+   písmem pod řádek a zarovnané pod HCP (odsazení o šířku praporku
+   odpaliště), ať je vidět, ke kterému poli patří. */
 .setup-player-strokes {
+  display: block;
   color: var(--text-dim);
   font-size: 13px;
-  margin-inline-start: auto;
+  text-align: right;
+  padding-inline-end: 48px;
 }
 
 /* Výběr odpaliště: délka, norma a hlavně kolik ran z něj hráč dostane. */
@@ -2009,18 +2016,30 @@ button {
 }
 
 /*
- * Mezisoučet po první devítce. Čte se jako součet, ne jako další jamka, ale
- * nesmí přebít celkový součet v patičce - proto tučné písmo a linky nahoře
- * i dole, ale bez zvýrazněného pozadí.
+ * Řádky se součty (mezisoučet po devítce i celkový součet v patičce) mají
+ * vlastní tmavší pruh přes celou šířku. Bez něj splývaly s jamkami: střídavý
+ * akcent hráčských sloupců jde skrz celou tabulku a samotné tučné písmo se
+ * v mřížce plné značek ztratí. Pruh musí přebít `.player-col-a/-b`, proto ta
+ * delší selektorová cesta - ne `!important`.
  */
 .scorecard tbody tr.scorecard-turn-row > th,
-.scorecard tbody tr.scorecard-turn-row > td {
+.scorecard tbody tr.scorecard-turn-row > td,
+.scorecard tfoot tr > th,
+.scorecard tfoot tr > td {
+  background: var(--scorecard-summary);
   font-weight: 700;
   border-top: 1px solid var(--line);
+}
+
+/* Mezisoučet uzavírá první devítku, takže má linku i pod sebou; patička
+   tabulku končí a spodní linka by tam visela ve vzduchu. */
+.scorecard tbody tr.scorecard-turn-row > th,
+.scorecard tbody tr.scorecard-turn-row > td {
   border-bottom: 1px solid var(--line);
 }
 
-.scorecard tbody tr.scorecard-turn-row .scorecard-turn-label {
+.scorecard tbody tr.scorecard-turn-row .scorecard-turn-label,
+.scorecard tfoot tr > th {
   font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--text-dim);

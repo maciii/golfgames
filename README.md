@@ -1,4 +1,4 @@
-# Golf Games
+# Fairsome
 
 Zápis golfového skóre po jamkách pro 1–4 hráče podle zvolené hry a vyhodnocení různých typů
 golfových her – včetně extra bodů a peněžního vyrovnání sázky.
@@ -91,17 +91,17 @@ Přesné vyhodnocení včetně okrajových situací popisuje
 
 1. Otevřít adresu aplikace v **Safari** (jiné prohlížeče na iOS instalaci na
    plochu nenabízejí).
-2. Na úvodní obrazovce klepnout na **Přidat Golf Games na plochu**.
+2. Na úvodní obrazovce klepnout na **Přidat Fairsome na plochu**.
 3. V návodu aplikace klepnout na _Sdílet_ → **Přidat na plochu**.
 4. Spouštět z ikony – aplikace běží na celou obrazovku bez adresního řádku.
 
 **Android**
 
 1. Otevřít adresu v **Chrome**.
-2. Na úvodní obrazovce klepnout na **Přidat Golf Games na plochu**.
+2. Na úvodní obrazovce klepnout na **Přidat Fairsome na plochu**.
 3. Potvrdit nativní nabídku instalace. Když se nezobrazí, otevřít nabídku ⋮ a
    zvolit **Instalovat aplikaci** nebo **Přidat na plochu**.
-4. Aplikace se nainstaluje jako WebAPK s názvem **Golf Games** a vlastní ikonou.
+4. Aplikace se nainstaluje jako WebAPK s názvem **Fairsome** a vlastní ikonou.
 
 Tlačítko se v nainstalované aplikaci nezobrazuje náhodou – instalace přidá ikonu
 na plochu, otevře aplikaci bez adresního řádku a zachová offline provoz.

@@ -651,6 +651,31 @@ potvrzením. U dohraného kola (kolo je bezpečně v archivu) zůstávají „Up
 skóre" a „Nové kolo" rovnocenná tlačítka jako dřív - tam žádné riziko ztráty
 dat není.
 
+## 30. Appka se jmenuje Fairsome
+
+**Kontext.** Pracovní jméno „Golf Games" popisovalo, co appka dělá, ale
+nedalo se pod ním nic postavit: je to obecné spojení, na ploše telefonu
+vypadá jako složka a v katalogu hřišť i v zálohách se objevovalo jako
+značka, kterou nikdo nezvolil.
+
+**Rozhodnutí.** Appka se jmenuje **Fairsome**. Dva překrývající se kruhy ve
+wordmarku narážejí na „-some" (twosome, foursome - běžná golfová slova pro
+počet hráčů ve skupině), „Fair" na fairway i na poctivou hru.
+
+**Kde všude jméno je.** Manifest PWA (`name`, `short_name` ve
+`vite.config.ts` - tohle je to, co telefon nabídne při ukládání na plochu),
+`<title>` a `apple-mobile-web-app-title` v `index.html`, úvodní obrazovka
+před načtením appky, texty v `src/i18n/` (nabídka instalace, chybová hláška
+u zálohy, kredit katalogu hřišť), obrazovka soukromí a `public/soukromi.html`.
+Wordmark na `HomeScreen` je jediné místo, kde jméno není text, ale značka.
+
+**Co se nepřejmenovává.** `BACKUP_FORMAT` v `backup.ts` zůstává
+`'golfgames-backup'` - je to marker uvnitř souboru zálohy a přejmenování by
+znamenalo, že appka odmítne všechny dosud vytvořené zálohy. Jméno souboru
+(`fairsome-zaloha-*.json`) se změnit smí, protože import se řídí markerem,
+ne názvem. Repozitář, npm balíček ani doména se nepřejmenovávají - je to
+zbytečný zásah do nasazení za nulový přínos pro uživatele.
+
 ---
 
 ## Otevřené otázky

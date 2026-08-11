@@ -10,6 +10,7 @@ import {
   openCoursePicker,
   openScorecard,
   openSetup,
+  openSetupWithCourse,
   startRound,
 } from './helpers'
 
@@ -93,6 +94,39 @@ test('kolo bez hřiště si nese zvolený počet jamek', async ({ page }) => {
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
 
   expect((await currentRound(page)).holeCount).toBe(9)
+})
+
+test('HCP se zadává v řádku hráče mezi jménem a odpalištěm', async ({ page }) => {
+  await openSetupWithCourse(page)
+  await page.locator('.app-footer .primary-button').click()
+  await expectSetupStep(page, 'players')
+  await page.locator('.switch input[type=checkbox]').first().check()
+
+  // Pořadí v řádku je celý smysl téhle úpravy: jméno, HCP, odpaliště.
+  const row = page.locator('.setup-player-main').first()
+  const order = await row.evaluate((element) =>
+    [...element.children].map((child) => {
+      if (child.classList.contains('setup-player-handicap')) return 'handicap'
+      if (child.classList.contains('tee-dot')) return 'tee'
+      return 'name'
+    }),
+  )
+  expect(order).toEqual(['name', 'handicap', 'tee'])
+
+  await expectNoHorizontalOverflow(page)
+  await expectNothingClipped(page)
+})
+
+test('list s výběrem jde zavřít tlačítkem, nejen klepnutím vedle', async ({ page }) => {
+  // Ostatní listy (odpaliště, extra body, menu) Zavřít mají; u dlouhého
+  // seznamu je klepnutí vedle jediná cesta ven jen těžko k nalezení.
+  await openSetupWithCourse(page)
+  await page.locator('.pick-trigger').first().click()
+  const sheet = page.locator('.sheet')
+  await expect(sheet).toBeVisible()
+
+  await sheet.locator('.link-button').last().click()
+  await expect(sheet).toBeHidden()
 })
 
 test('scorekarta ukazuje mezisoučet po první devítce jen na osmnáctce', async ({

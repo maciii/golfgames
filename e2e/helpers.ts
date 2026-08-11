@@ -88,6 +88,48 @@ export async function expectTappable(page: Page, selector: string): Promise<void
 }
 
 /**
+ * Hřiště uložené rovnou do úložiště.
+ *
+ * Kroky, které se ptají na odpaliště nebo handicap, bez hřiště nemají co
+ * ukázat - a stahovat kvůli tomu katalog by testy pověsilo na síť.
+ */
+const PREVIEW_COURSE = {
+  id: 'local:e2e',
+  name: 'Testovací hřiště',
+  country: 'CZ',
+  holeCount: 18,
+  pars: [4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4],
+  strokeIndex: [5, 1, 17, 7, 11, 3, 15, 9, 13, 6, 2, 18, 8, 12, 4, 16, 10, 14],
+  tees: [
+    { id: 'yellow', name: 'Žlutá', courseRating: 71.2, slopeRating: 128, par: 71 },
+    { id: 'red', name: 'Červená', courseRating: 70.1, slopeRating: 124, par: 71 },
+  ],
+  source: 'manual',
+  origin: 'private',
+}
+
+/** Uloží testovací hřiště a načte appku znovu, ať ho vidí. */
+export async function seedCourse(page: Page): Promise<void> {
+  await page.evaluate((course) => {
+    window.localStorage.setItem('golfgames.courses.v1', JSON.stringify([course]))
+  }, PREVIEW_COURSE)
+  await page.reload()
+  await expect(page.locator('.screen')).toBeVisible()
+}
+
+/** Nové kolo na testovacím hřišti; končí na kroku odpališť. */
+export async function openSetupWithCourse(page: Page): Promise<void> {
+  await seedCourse(page)
+  await openCoursePicker(page)
+  await page
+    .locator('.course-item-main')
+    .filter({ hasText: PREVIEW_COURSE.name })
+    .first()
+    .click()
+  await expectSetupStep(page, 'tee')
+}
+
+/**
  * Kroky zakládání kola po výběru hřiště, v pořadí, ve kterém se procházejí.
  *
  * Krok 1 je výběr hřiště (`CoursePickerScreen`) a ten má vlastní pomocníky -

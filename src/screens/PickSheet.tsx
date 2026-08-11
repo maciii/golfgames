@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useT } from '../i18n'
 
 /**
  * Vlastní list pro výběr jedné hodnoty z více možností - ne nativní `<select>`.
@@ -30,6 +31,8 @@ export default function PickSheet({
   onSelect,
   onClose,
 }: Props) {
+  const t = useT()
+
   return (
     <div
       className="sheet-backdrop"
@@ -51,6 +54,7 @@ export default function PickSheet({
               <button
                 key={option.id}
                 type="button"
+                role="radio"
                 className={`pick-row${selected ? ' selected' : ''}`}
                 onClick={() => {
                   // Klepnutí rovnou vybere a zavře - stejně jako u TeeSheet
@@ -58,7 +62,7 @@ export default function PickSheet({
                   onSelect(option.id)
                   onClose()
                 }}
-                aria-pressed={selected}
+                aria-checked={selected}
               >
                 {option.icon}
                 <span className="pick-row-label">{option.label}</span>
@@ -66,6 +70,10 @@ export default function PickSheet({
             )
           })}
         </div>
+
+        <button type="button" className="link-button" onClick={onClose}>
+          {t('common.close')}
+        </button>
       </div>
     </div>
   )

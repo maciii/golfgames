@@ -36,8 +36,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Golf Games',
-        short_name: 'Golf Games',
+        name: 'Fairsome',
+        short_name: 'Fairsome',
         // Manifest je statický, takže nese neutrální angličtinu; jazyk
         // samotné aplikace se přepíná v jejím nastavení.
         description: 'Hole by hole golf scoring for several game formats',

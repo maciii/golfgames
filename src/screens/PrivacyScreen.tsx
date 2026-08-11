@@ -40,7 +40,7 @@ export default function PrivacyScreen({ onBack }: { onBack: () => void }) {
           </button>
           <h1>{t('privacy.title')}</h1>
         </div>
-        <p className="subtitle">Golf Games</p>
+        <p className="subtitle">Fairsome</p>
       </header>
 
       <main className="content prose">

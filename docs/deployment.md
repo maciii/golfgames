@@ -106,7 +106,7 @@ u aplikace přidané na plochu.
 
 ## Přidání na plochu
 
-Na úvodní obrazovce je tlačítko **Přidat Golf Games na plochu**. Aplikace ho
+Na úvodní obrazovce je tlačítko **Přidat Fairsome na plochu**. Aplikace ho
 zobrazuje jen mimo standalone režim a na mobilním profilu nebo v prohlížeči,
 který podporuje instalaci PWA.
 

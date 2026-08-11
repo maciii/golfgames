@@ -13,9 +13,8 @@ import { FlagIcon, HeartIcon } from './icons'
 import MenuSheet from './MenuSheet'
 
 /**
- * Wordmark na Home mísro textového „Golf Games" - jméno appky se zvažuje
- * (viz docs/decisions.md), tohle je zatím jen kosmetická značka na jednom
- * místě, snadno vratná. Dva překrývající se kruhy narážejí na „-some" ve
+ * Wordmark na Home. Jméno appky je Fairsome (rozhodnutí #30 v
+ * docs/decisions.md). Dva překrývající se kruhy narážejí na „-some" ve
  * jméně (twosome, foursome - běžná golfová slova pro počet hráčů ve
  * skupině), „Fair" pak na fairway i poctivou hru.
  */
