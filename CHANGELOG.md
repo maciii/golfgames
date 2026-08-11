@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.42.1] – 2026-08-11
+
+### Opraveno
+
+- **Z výběru hřiště nevedla cesta zpět.** První krok nového kola schovával
+  tlačítko Zpět s odůvodněním, že v prvním kroku není kam se vracet - jenže
+  vede se sem z domovské obrazovky, kde je menu s účtem, zálohou i archivem.
+  Kdo se dostal na výběr hřiště, uvízl: v nainstalované PWA není systémové
+  gesto zpět ani lišta prohlížeče, takže obrazovka bez tlačítka je slepá
+  ulička. Zpět je tam teď vždycky.
+
+### Přidáno
+
+- **Tažení od levého okraje jako „zpět".** Appka běží na ploše ve
+  `standalone` režimu, kde iOS ani Android žádné systémové gesto zpět
+  nedávají - v prohlížeči fungovalo, v nainstalované appce ne. Gesto teď
+  obsluhuje appka sama (`src/swipeBack.ts`). Vypíná se na výchozí obrazovce,
+  aby appku omylem neopustilo, a nespustí se, když tah začne uvnitř
+  scorekarty nebo čehokoli jiného, co se samo posouvá do stran. Doplněno
+  k rozhodnutí #27 v `docs/decisions.md`.
+
 ## [0.42.0] – 2026-08-11
 
 ### Změněno

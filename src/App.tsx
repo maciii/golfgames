@@ -29,6 +29,7 @@ import SetupGameScreen from './screens/SetupGameScreen'
 import SetupBetScreen from './screens/SetupBetScreen'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
+import { useSwipeBack } from './swipeBack'
 import { DEFAULT_GAME_ID, getGame } from './games'
 import type { HoleSetupSelection } from './games'
 
@@ -234,6 +235,11 @@ function AppShell() {
     }
     window.history.pushState(snapshot, '')
   }, [view, openArchiveId])
+
+  // Tažení od levého okraje jako „zpět" - v nainstalované PWA není systémové
+  // gesto ani lišta prohlížeče. Na výchozí obrazovce dané stavem kola se
+  // vypíná: odtud by „zpět" appku opustilo.
+  useSwipeBack(view !== viewForRound(round))
 
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {

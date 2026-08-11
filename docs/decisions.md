@@ -536,6 +536,21 @@ chrání (bod 3). `settingsGameId` a `editingCourseId` navíc obrazovka čte, je
 když `view` sedí na dané podobrazovce, takže zůstat jim chvíli neaktuální po
 odchodu nevadí.
 
+**Gesto zpět si appka obsluhuje sama (`src/swipeBack.ts`).** Zápis do historie
+sám o sobě nestačí: nainstalovaná PWA běží ve `display: standalone`, kde iOS
+ani Android nedávají appce systémové gesto zpět a není tam ani lišta
+prohlížeče se šipkou. V prohlížeči gesto funguje, v appce na ploše ne - a
+protože se appka na plochu instalovat má, byla každá obrazovka bez tlačítka
+Zpět slepá ulička. Tažení od levého okraje proto poslouchá appka sama a mapuje
+ho na `history.back()`. Gesto se vypíná na výchozí obrazovce (odtud by
+znamenalo opuštění appky) a nespustí se, když tah začne uvnitř něčeho, co se
+samo posouvá do stran - scorekarta na telefonu sahá až k okraji displeje.
+
+**Tlačítko Zpět má i první krok nového kola.** `CoursePickerScreen` ho zprvu
+schovával s odůvodněním, že v prvním kroku není kam se vracet. To neplatí:
+vede se sem z domovské obrazovky, kde je menu s účtem, zálohou i archivem -
+bez tlačítka se z výběru hřiště nedalo dostat nikam.
+
 **Důsledek.** Appku teď zpět opustí jedině z kořenové obrazovky - odkudkoli
 jinde naviguje o krok zpátky uvnitř appky. Bude to důležité i při zabalení
 appky do Capacitoru/TWA pro App Store a Google Play, kde nativní

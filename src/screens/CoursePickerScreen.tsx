@@ -349,16 +349,18 @@ export default function CoursePickerScreen({
     <div className="screen">
       <header className="app-header">
         <div className="screen-header-row">
-          {onSkip === undefined && (
-            <button
-              type="button"
-              className="icon-button"
-              onClick={onBack}
-              aria-label={t('common.back')}
-            >
-              <BackIcon />
-            </button>
-          )}
+          {/* Zpět je tady vždycky, i v prvním kroku nového kola. Vede se sem
+              z domovské obrazovky, takže je kam se vracet - a v nainstalované
+              PWA na iOSu není žádné systémové gesto zpět ani lišta prohlížeče,
+              takže obrazovka bez tlačítka je slepá ulička. */}
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <BackIcon />
+          </button>
           <h1>
             {mode === 'browse'
               ? t('picker.browseTitle')

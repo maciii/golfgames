@@ -579,6 +579,7 @@ v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
 | -------------------------------- | --------------------------------------- |
 | bodování Best + Součet           | `src/games/bestAggregate.ts`            |
 | PWA instalace a režim            | `src/pwa.ts`                            |
+| gesto zpět od levého okraje      | `src/swipeBack.ts`                      |
 | chování vzdané jamky             | `src/games/shared.ts` + konkrétní hra   |
 | seznam extra bodů, jejich značky | `src/types.ts` (`BONUSES`)              |
 | výchozí hodnoty a násobiče       | `src/types.ts` (`DEFAULT_GAME_OPTIONS`) |

@@ -12,6 +12,7 @@ import {
   openSetup,
   openSetupWithCourse,
   startRound,
+  swipeBack,
 } from './helpers'
 
 /**
@@ -94,6 +95,88 @@ test('kolo bez hřiště si nese zvolený počet jamek', async ({ page }) => {
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
 
   expect((await currentRound(page)).holeCount).toBe(9)
+})
+
+test('z výběru hřiště vede cesta zpět na domovskou obrazovku', async ({ page }) => {
+  // Nainstalovaná PWA nemá systémové gesto zpět ani lištu prohlížeče, takže
+  // obrazovka bez tlačítka Zpět je slepá ulička - odsud se nedal otevřít ani
+  // účet, ani záloha, protože obojí je v menu na domovské obrazovce.
+  await openCoursePicker(page)
+  await page.locator('.app-header .icon-button').first().click()
+  await expect(page.locator('.home-new-round')).toBeVisible()
+})
+
+test('tažení od levého okraje funguje jako zpět', async ({ page }, testInfo) => {
+  test.skip(
+    !testInfo.project.name.startsWith('phone-'),
+    'gesto se ovládá prstem, na desktopu se nesleduje',
+  )
+  await openSetup(page, 'game')
+  await swipeBack(page)
+  await expectSetupStep(page, 'players')
+})
+
+test('tažení uprostřed obrazovky ani krátké tažení nenaviguje', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !testInfo.project.name.startsWith('phone-'),
+    'gesto se ovládá prstem, na desktopu se nesleduje',
+  )
+  await openSetup(page, 'game')
+
+  // Začátek mimo pás u okraje: to je běžné tažení po obsahu.
+  await swipeBack(page, { fromX: 150, toX: 320 })
+  await expectSetupStep(page, 'game')
+
+  // Krátké cuknutí od okraje taky ne - jinak by gesto chytalo omyly.
+  await swipeBack(page, { fromX: 5, toX: 40 })
+  await expectSetupStep(page, 'game')
+})
+
+test('na výchozí obrazovce gesto zpět appku neopustí', async ({ page }, testInfo) => {
+  test.skip(
+    !testInfo.project.name.startsWith('phone-'),
+    'gesto se ovládá prstem, na desktopu se nesleduje',
+  )
+  await expect(page.locator('.home-new-round')).toBeVisible()
+  await swipeBack(page)
+  await expect(page.locator('.home-new-round')).toBeVisible()
+})
+
+test('gesto zpět nekrade tažení scorekartě', async ({ page }, testInfo) => {
+  test.skip(
+    !testInfo.project.name.startsWith('phone-'),
+    'gesto se ovládá prstem, na desktopu se nesleduje',
+  )
+  // Scorekarta se posouvá do stran a na telefonu sahá až k okraji displeje.
+  await startRound(page)
+  await openScorecard(page)
+
+  const wrap = page.locator('.scorecard-wrap').first()
+  const geometry = await wrap.evaluate((element) => ({
+    left: element.getBoundingClientRect().left,
+    top: element.getBoundingClientRect().top,
+    scrolls: element.scrollWidth > element.clientWidth,
+  }))
+
+  // Na širším telefonu se tabulka vejde celá a není co ukrást - gesto tam smí
+  // fungovat i nad scorekartou. Konflikt existuje jen tam, kde se karta
+  // opravdu posouvá.
+  test.skip(!geometry.scrolls, 'scorekarta se na tomhle displeji vejde celá')
+
+  // Tah musí začít uvnitř tabulky, ale pořád v pásu u okraje - jinak by test
+  // jen ověřoval, že gesto funguje vedle scorekarty.
+  const fromX = Math.round(geometry.left) + 2
+  expect(fromX, 'scorekarta nezasahuje do pásu u okraje').toBeLessThan(28)
+
+  await swipeBack(page, {
+    fromX,
+    toX: fromX + 160,
+    y: Math.round(geometry.top) + 20,
+  })
+
+  await expect(page.locator('.scorecard').first()).toBeVisible()
 })
 
 test('HCP se zadává v řádku hráče mezi jménem a odpalištěm', async ({ page }) => {

@@ -216,6 +216,46 @@ export async function openScorecard(page: Page): Promise<void> {
   await expect(page.locator('.scorecard').first()).toBeVisible()
 }
 
+/**
+ * Přejede prstem od levého okraje doprava - gesto „zpět".
+ *
+ * Playwright umí klepnutí, ne tah, takže se dotykové události posílají ručně.
+ * Testuje se tím obsluha gesta, ne systémové gesto prohlížeče - to
+ * v nainstalované PWA stejně žádné není, o což tady jde.
+ */
+export async function swipeBack(
+  page: Page,
+  options: { fromX?: number; toX?: number; y?: number } = {},
+): Promise<void> {
+  const { fromX = 5, toX = 160, y = 400 } = options
+  await page.evaluate(
+    ({ fromX, toX, y }) => {
+      const target = document.elementFromPoint(fromX, y) ?? document.body
+
+      // WebKit neumí `new Touch()` (Illegal constructor) a `TouchEvent` se
+      // konstruktorem nedá postavit všude stejně. Obsluha gesta čte jen
+      // `touches.length`, `clientX/clientY` a `target`, takže stačí obyčejná
+      // událost s dopsanými poli - a funguje ve všech třech enginech.
+      const send = (type: string, x: number, ended: boolean) => {
+        const point = { clientX: x, clientY: y, identifier: 1, target }
+        const event = new Event(type, { bubbles: true, cancelable: true })
+        Object.assign(event, {
+          touches: ended ? [] : [point],
+          targetTouches: ended ? [] : [point],
+          changedTouches: [point],
+        })
+        target.dispatchEvent(event)
+      }
+
+      send('touchstart', fromX, false)
+      send('touchmove', (fromX + toX) / 2, false)
+      send('touchmove', toX, false)
+      send('touchend', toX, true)
+    },
+    { fromX, toX, y },
+  )
+}
+
 /** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
 export async function currentRound(page: Page): Promise<{ holeCount: number }> {
   const raw = await page.evaluate(() =>
