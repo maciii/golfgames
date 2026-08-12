@@ -18,17 +18,32 @@ export const MIN_TAP_SIZE = 44
  * Vodorovný posuv znamená, že něco přeteklo z displeje - na telefonu je to
  * nejčastější a nejotravnější chyba rozvržení. Jeden pixel tolerance kryje
  * zaokrouhlení při neceločíselném device pixel ratio.
+ *
+ * Měří se stránka i posouvatelný obsah obrazovky: obsah má vlastní svislý
+ * posuv, takže přeteklý prvek by roztáhl do šířky jeho, ne stránku.
  */
 export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
-  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }))
+  const boxes = await page.evaluate(() => {
+    const measured = [
+      { name: 'stránka', element: document.documentElement as Element },
+      ...[...document.querySelectorAll('.screen .content')].map((element) => ({
+        name: 'obsah obrazovky',
+        element,
+      })),
+    ]
+    return measured.map(({ name, element }) => ({
+      name,
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+    }))
+  })
 
-  expect(
-    scrollWidth,
-    `stránka přetéká o ${scrollWidth - clientWidth} px do šířky`,
-  ).toBeLessThanOrEqual(clientWidth + 1)
+  for (const box of boxes) {
+    expect(
+      box.scrollWidth,
+      `${box.name} přetéká o ${box.scrollWidth - box.clientWidth} px do šířky`,
+    ).toBeLessThanOrEqual(box.clientWidth + 1)
+  }
 }
 
 /**
@@ -217,6 +232,53 @@ export async function openScorecard(page: Page): Promise<void> {
 }
 
 /**
+ * Odroluje obsah obrazovky na konec.
+ *
+ * Posouvá se `.content`, ne stránka (patička musí zůstat na místě), takže
+ * `window.scrollTo` by nic neudělal.
+ */
+export async function scrollContentToEnd(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const content = document.querySelector('.screen .content')
+    if (!content) return 0
+    content.scrollTop = content.scrollHeight
+    return content.scrollTop
+  })
+}
+
+/**
+ * Posune obsah obrazovky tak, aby horní hrana prvku byla přímo pod hlavičkou.
+ *
+ * `scrollIntoViewIfNeeded()` u prvku vyššího než displej (scorekarta) srovná
+ * jeho **spodní** hranu, takže horní zůstane mimo displej - a test, který
+ * chce klepnout dvacet pixelů pod horní hranu, by mířil mimo.
+ */
+export async function scrollContentToTopOf(page: Page, selector: string): Promise<void> {
+  await page.evaluate((selector) => {
+    const content = document.querySelector('.screen .content')
+    const target = document.querySelector(selector)
+    if (!content || !target) return
+    content.scrollTop +=
+      target.getBoundingClientRect().top - content.getBoundingClientRect().top
+  }, selector)
+}
+
+/** Rámec patičky vůči displeji - pro kontrolu, že se při posouvání nehýbe. */
+export async function footerBox(
+  page: Page,
+): Promise<{ top: number; bottom: number; viewport: number }> {
+  return page.evaluate(() => {
+    const footer = document.querySelector('.screen .app-footer')
+    const box = footer?.getBoundingClientRect()
+    return {
+      top: Math.round(box?.top ?? -1),
+      bottom: Math.round(box?.bottom ?? -1),
+      viewport: window.innerHeight,
+    }
+  })
+}
+
+/**
  * Přejede prstem od levého okraje doprava - gesto „zpět".
  *
  * Playwright umí klepnutí, ne tah, takže se dotykové události posílají ručně.
@@ -259,24 +321,35 @@ export async function swipeBack(
 /**
  * Odehrané kolo vložené rovnou do archivu.
  *
- * Odehrát ho klepáním by znamenalo osmnáct jamek krát dva hráče v každém
- * profilu; jde tu o práci s archivem, ne o zápis skóre.
+ * Odehrát ho klepáním by znamenalo osmnáct jamek krát tři hráče v každém
+ * profilu; jde tu o práci s archivem, ne o zápis skóre. Kolo je celé, aby
+ * detail měl scorekartu na osmnáct jamek - tedy nejdelší obsah, jaký appka
+ * na jedné obrazovce zobrazuje.
  */
+const ARCHIVED_PLAYERS = ['Eva', 'Martin', 'Alex']
+const ARCHIVED_PARS = [4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4]
+
+/** Skóre hráče: par plus nula až dvě rány, u každého hráče posunuté. */
+function archivedScores(player: number): number[] {
+  return ARCHIVED_PARS.map((par, hole) => par + ((hole + player) % 3))
+}
+
 const ARCHIVED_ROUND = {
   id: 'e2e-archived',
   gameId: 'best-aggregate',
   createdAt: '2026-06-01T08:00:00.000Z',
   finishedAt: '2026-06-01T12:00:00.000Z',
   updatedAt: '2026-06-01T12:00:00.000Z',
-  players: [
-    { id: 'p1', name: 'Eva' },
-    { id: 'p2', name: 'Martin' },
-  ],
+  players: ARCHIVED_PLAYERS.map((name, index) => ({ id: `p${index + 1}`, name })),
   teams: [],
-  holeCount: 3,
-  pars: [4, 4, 4],
-  scores: { p1: [4, 4, 4], p2: [5, 5, 5] },
-  bonuses: { p1: [[], [], []], p2: [[], [], []] },
+  holeCount: ARCHIVED_PARS.length,
+  pars: ARCHIVED_PARS,
+  scores: Object.fromEntries(
+    ARCHIVED_PLAYERS.map((_, player) => [`p${player + 1}`, archivedScores(player)]),
+  ),
+  bonuses: Object.fromEntries(
+    ARCHIVED_PLAYERS.map((_, player) => [`p${player + 1}`, ARCHIVED_PARS.map(() => [])]),
+  ),
   currentHole: 0,
   settings: {
     currency: 'CZK',
@@ -289,6 +362,9 @@ const ARCHIVED_ROUND = {
     },
   },
 }
+
+/** Skóre prvního hráče v seedovaném kole - proti čemu se oprava poměřuje. */
+export const ARCHIVED_FIRST_SCORE = archivedScores(0)
 
 /** Uloží odehrané kolo do archivu a načte appku znovu, ať ho vidí. */
 export async function seedArchivedRound(page: Page): Promise<void> {

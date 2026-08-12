@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import {
+  ARCHIVED_FIRST_SCORE,
   archivedRound,
   expectNoHorizontalOverflow,
   expectNothingClipped,
@@ -35,7 +36,7 @@ test('oprava skóre se propíše do archivu', async ({ page }) => {
   test.skip(await isLandscapeScorecard(page), 'zápis skóre je na šířku scorekarta')
 
   const before = await archivedRound(page)
-  expect(before.scores.p1).toEqual([4, 4, 4])
+  expect(before.scores.p1).toEqual(ARCHIVED_FIRST_SCORE)
 
   await page.locator('.player-row').first().locator('.step-button').last().click()
 
@@ -44,7 +45,9 @@ test('oprava skóre se propíše do archivu', async ({ page }) => {
   await expect(page.locator('.app-header h1')).toHaveText(/Archivní kolo|Archived round/i)
 
   const after = await archivedRound(page)
-  expect(after.scores.p1).toEqual([5, 4, 4])
+  // Opravena je jen první jamka, zbytek kola se nesmí hnout.
+  expect(after.scores.p1?.[0]).toBe((ARCHIVED_FIRST_SCORE[0] ?? 0) + 1)
+  expect(after.scores.p1?.slice(1)).toEqual(ARCHIVED_FIRST_SCORE.slice(1))
   expect(after.updatedAt).not.toBe(before.updatedAt)
 })
 

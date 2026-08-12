@@ -137,6 +137,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
   `row.value` se předává do `settleRound()` jako počet jednotek; u Skins je
   to součet skinů a přiznaných extra bodů.
+- **Stránka se neposouvá, posouvá se `.content`.** Obrazovka je vysoká jako
+  displej (rozhodnutí #32), takže `window.scrollY` je vždycky nula
+  a `window.scrollTo()` nic nedělá. Nový kód pracuje se `scrollTop` na
+  `.content`; hlavička a patička se posouvat nemají.
 - **Oprava archivního kola nejde přes `archiveRound()`.** Ta staví kolo na
   začátek archivu, takže by oprava loňské hry z ní udělala „poslední
   odehranou". Zpětná editace používá `updateArchivedRound()` a míří do

@@ -6,11 +6,15 @@ import {
   expectNothingClipped,
   expectSetupStep,
   expectTappable,
+  footerBox,
   isLandscapeScorecard,
   openCoursePicker,
   openScorecard,
   openSetup,
+  openArchivedRoundDetail,
   openSetupWithCourse,
+  scrollContentToEnd,
+  scrollContentToTopOf,
   startRound,
   swipeBack,
 } from './helpers'
@@ -154,10 +158,14 @@ test('gesto zpět nekrade tažení scorekartě', async ({ page }, testInfo) => {
   await openScorecard(page)
 
   const wrap = page.locator('.scorecard-wrap').first()
+  // Na malém displeji je scorekarta pod přehledem výsledků, takže se k ní
+  // nejdřív musí odrolovat - tah má začít uvnitř ní, ne pod ní.
+  await scrollContentToTopOf(page, '.scorecard-wrap')
   const geometry = await wrap.evaluate((element) => ({
     left: element.getBoundingClientRect().left,
     top: element.getBoundingClientRect().top,
     scrolls: element.scrollWidth > element.clientWidth,
+    viewport: window.innerHeight,
   }))
 
   // Na širším telefonu se tabulka vejde celá a není co ukrást - gesto tam smí
@@ -170,11 +178,10 @@ test('gesto zpět nekrade tažení scorekartě', async ({ page }, testInfo) => {
   const fromX = Math.round(geometry.left) + 2
   expect(fromX, 'scorekarta nezasahuje do pásu u okraje').toBeLessThan(28)
 
-  await swipeBack(page, {
-    fromX,
-    toX: fromX + 160,
-    y: Math.round(geometry.top) + 20,
-  })
+  const y = Math.round(geometry.top) + 20
+  expect(y, 'tah by začal mimo displej, ne ve scorekartě').toBeLessThan(geometry.viewport)
+
+  await swipeBack(page, { fromX, toX: fromX + 160, y })
 
   await expect(page.locator('.scorecard').first()).toBeVisible()
 })
@@ -285,10 +292,15 @@ test('zápis skóre se vejde na jednu obrazovku bez rolování', async ({
     'na displeji pod 700 px se čtyři hráči zatím nevejdou',
   )
 
-  const { scrollHeight, clientHeight } = await page.evaluate(() => ({
-    scrollHeight: document.documentElement.scrollHeight,
-    clientHeight: document.documentElement.clientHeight,
-  }))
+  // Obrazovka je vysoká jako displej a roluje se obsah v ní, takže „nevejde
+  // se" znamená, že má obsah co posouvat.
+  const { scrollHeight, clientHeight } = await page.evaluate(() => {
+    const content = document.querySelector('.screen .content')
+    return {
+      scrollHeight: content?.scrollHeight ?? 0,
+      clientHeight: content?.clientHeight ?? 0,
+    }
+  })
 
   expect(
     scrollHeight,
@@ -329,13 +341,58 @@ test('sloupec aplikace se na širokém displeji neroztáhne donekonečna', async
   expect(width).toBeLessThanOrEqual(Math.min(viewport, 720) + 1)
 })
 
-test('patička zůstává na dohled i po odrolování obsahu', async ({ page }) => {
-  await openSetup(page, 'players')
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+test('patička se posouváním obsahu nehýbe', async ({ page }) => {
+  // Patička se držela dole přes `position: sticky` nad rolující stránkou.
+  // Na iOS v nainstalované PWA se při tažení prstem odlepila doprostřed
+  // displeje a překryla obsah. Obrazovka je proto vysoká jako displej
+  // a roluje se jen obsah - patička nemá jak přijít o své místo.
+  // Detail archivního kola je nejdelší obsah v appce (scorekarta, vyrovnání)
+  // a je to obrazovka, na které se chyba ukázala.
+  await openArchivedRoundDetail(page)
 
-  const footer = page.locator('.app-footer').first()
-  await expect(footer).toBeVisible()
+  const atTop = await footerBox(page)
+  expect(atTop.bottom, 'patička nesedí na spodní hraně displeje').toBeGreaterThan(
+    atTop.viewport - 60,
+  )
+  expect(atTop.bottom).toBeLessThanOrEqual(atTop.viewport + 1)
+
+  const scrolled = await scrollContentToEnd(page)
+  expect(scrolled, 'detail kola se nemá kam posunout').toBeGreaterThan(0)
+
+  expect(await footerBox(page)).toEqual(atTop)
+  await expect(page.locator('.app-footer').first()).toBeVisible()
   await expectTappable(page, '.app-footer .primary-button')
+
+  // A na konci obsahu nesmí patička zakrývat jeho poslední kus.
+  const overlap = await page.evaluate(() => {
+    const content = document.querySelector('.screen .content')
+    const footer = document.querySelector('.screen .app-footer')
+    const last = content?.lastElementChild
+    if (!content || !footer || !last) return 0
+    return Math.round(
+      last.getBoundingClientRect().bottom - footer.getBoundingClientRect().top,
+    )
+  })
+  expect(overlap, `patička překrývá konec obsahu o ${overlap} px`).toBeLessThanOrEqual(1)
+})
+
+test('stránka se neposouvá, posouvá se obsah obrazovky', async ({ page }) => {
+  // Kdyby se posouvala stránka, vrátila by se s ní i sticky patička a s ní
+  // celá chyba na iOS.
+  await openArchivedRoundDetail(page)
+  await scrollContentToEnd(page)
+
+  const pageScroll = await page.evaluate(() => ({
+    scrollY: window.scrollY,
+    docScroll: document.documentElement.scrollHeight,
+    docClient: document.documentElement.clientHeight,
+  }))
+
+  expect(pageScroll.scrollY, 'stránka se posunula').toBe(0)
+  expect(
+    pageScroll.docScroll,
+    `stránka je o ${pageScroll.docScroll - pageScroll.docClient} px vyšší než displej`,
+  ).toBeLessThanOrEqual(pageScroll.docClient + 1)
 })
 
 test('panel s extra body se vejde do displeje', async ({ page }) => {

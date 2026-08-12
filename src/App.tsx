@@ -36,6 +36,19 @@ import type { HoleSetupSelection } from './games'
 
 const MAX_PLAYERS = 4
 
+/**
+ * Posuv obsahu obrazovky.
+ *
+ * Obrazovka je vysoká jako displej a roluje se `.content` uvnitř, ne stránka
+ * (viz `.screen` v `styles.css`), takže `window.scrollY` je vždycky nula.
+ * Vždycky je vidět jedna obrazovka, proto stačí najít její obsah v DOM -
+ * předávat ref přes všechny kroky zakládání kola by jim přidalo prop, která
+ * o obsahu nic neříká.
+ */
+function contentScroller(): Element | null {
+  return document.querySelector('.screen .content')
+}
+
 type View =
   | 'home'
   | 'setupTee'
@@ -272,7 +285,7 @@ function AppShell() {
   }, [])
 
   const openSetupSubscreen = useCallback((nextView: View) => {
-    setupScrollTop.current = window.scrollY
+    setupScrollTop.current = contentScroller()?.scrollTop ?? 0
     restoreSetupScroll.current = true
     setView(nextView)
   }, [])
@@ -281,7 +294,8 @@ function AppShell() {
     if (!SETUP_STEP_VIEWS.includes(view) || !restoreSetupScroll.current) return
     restoreSetupScroll.current = false
     const frame = window.requestAnimationFrame(() => {
-      window.scrollTo({ top: setupScrollTop.current, behavior: 'auto' })
+      const content = contentScroller()
+      if (content) content.scrollTop = setupScrollTop.current
     })
     return () => window.cancelAnimationFrame(frame)
   }, [view])

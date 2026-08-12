@@ -733,6 +733,36 @@ kola - appku může telefon zabít kdykoli a data drží jen `localStorage`.
 Synchronizaci se oprava hlásí jen když se opravdu změnila data
 (`updatedAt`), takže listování jamkami v archivu nic do cloudu neposílá.
 
+## 32. Obrazovka je vysoká jako displej, roluje se obsah
+
+**Kontext.** Obrazovka byla vysoká podle obsahu, posouvala se celá stránka
+a patička s hlavním tlačítkem se držela dole přes `position: sticky`.
+V prohlížeči to fungovalo. V nainstalované PWA na iOS ne: při tažení prstem
+se patička odlepila, zůstala stát doprostřed displeje a překryla obsah pod
+sebou. Sticky patička je na iOS posouvaná kompozitorem podle omezení
+spočítaného při layoutu, takže jakákoli změna výšky dokumentu pod rukou
+(přepnutí způsobu vyrovnání, dorolování na konec) ji nechá na místě, kde
+zůstat nemá.
+
+**Rozhodnutí.** `.screen` je vysoká `100dvh` s `overflow: hidden` a roluje se
+jen `.content` uvnitř. Hlavička i patička jsou obyčejné položky flexu, které
+nemá co posunout - pod nimi se nikdy nic neposouvá. Je to rozvržení
+aplikace, ne webové stránky, což je přesně to, co appka na hřišti má být.
+
+**Co to mění.** Hlavička zůstává vidět pořád, takže tlačítko zpět v jejím
+levém rohu je dosažitelné i uprostřed dlouhé scorekarty - dřív odrolovalo
+z displeje. Nová obrazovka vždycky začíná na svém začátku (dřív si stránka
+nesla posuv z té předchozí). V prohlížeči zůstane lišta s adresou trvale
+rozbalená, protože stránka nemá čím rolovat - v nainstalované PWA, což je
+cílový režim, žádná není.
+
+**Kdo o posuvu ví.** `window.scrollY` je vždycky nula. Obnovení posuvu při
+návratu z podobrazovky zakládání kola proto čte `scrollTop` na `.content`
+(`contentScroller()` v `App.tsx`) a testy rozvržení mají
+`scrollContentToEnd()` v `e2e/helpers.ts`. Kontrola vodorovného přetečení měří
+kromě stránky i `.content` - přeteklý prvek by roztáhl do šířky jeho, ne
+stránku, a test by o něm mlčel.
+
 ---
 
 ## Otevřené otázky

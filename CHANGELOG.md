@@ -7,6 +7,23 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.43.1] – 2026-08-12
+
+### Opraveno
+
+- **Patička se při posouvání prstem odlepovala a překrývala obsah.** Obrazovka
+  byla vysoká podle obsahu, posouvala se celá stránka a patička s hlavním
+  tlačítkem se držela dole přes `position: sticky`. V nainstalované PWA na iOS
+  se při tažení prstem odlepila, zůstala stát doprostřed displeje a zakryla,
+  co bylo pod ní. Obrazovka je teď vysoká přesně jako displej a roluje se jen
+  obsah mezi hlavičkou a patičkou - ty se posouvat nemají, protože se pod nimi
+  nikdy nic neposouvá. Vedlejší efekt, který stojí za zmínku: **hlavička
+  zůstává vidět pořád**, takže tlačítko zpět je dosažitelné i uprostřed dlouhé
+  scorekarty, a nová obrazovka vždycky začíná na svém začátku místo aby
+  převzala posuv té předchozí. Rozhodnutí #32 v `docs/decisions.md`, hlídají
+  to testy „patička se posouváním obsahu nehýbe" a „stránka se neposouvá,
+  posouvá se obsah obrazovky".
+
 ## [0.43.0] – 2026-08-12
 
 ### Přidáno

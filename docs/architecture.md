@@ -468,6 +468,19 @@ sedělo s tím, co je vidět.
 | `AccountScreen.tsx`      | přihlášení, stav synchronizace, smazání účtu i dat                                                       |
 | `PrivacyScreen.tsx`      | zásady zpracování údajů                                                                                  |
 
+### Rozvržení obrazovky
+
+Každá obrazovka je `.screen` – flexový sloupec **vysoký přesně jako displej**
+(`height: 100dvh`, `overflow: hidden`). Roluje se jen `.content` uvnitř;
+`.app-header` a `.app-footer` zůstávají na svém místě a stránka samotná se
+neposouvá vůbec (`window.scrollY` je proto vždycky nula – kdo potřebuje posuv,
+pracuje s `.content`, viz `contentScroller()` v `App.tsx`).
+
+Patička se dřív držela dole přes `position: sticky` nad rolující stránkou.
+Na iOS v nainstalované PWA se při tažení prstem odlepila, doletěla doprostřed
+displeje a překryla obsah (rozhodnutí #32). Pevná výška obrazovky to řeší
+v základu, protože se pod patičkou nikdy nic neposouvá.
+
 ### Ovládání zápisu skóre
 
 **Celý zápis se musí vejít na jednu obrazovku.** Na jamce se zapisují čtyři
