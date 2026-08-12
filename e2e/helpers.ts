@@ -401,10 +401,16 @@ export async function openArchivedRoundDetail(page: Page): Promise<void> {
 }
 
 /** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
-export async function currentRound(page: Page): Promise<{ holeCount: number }> {
+export async function currentRound(page: Page): Promise<{
+  holeCount: number
+  scores: Record<string, (number | null)[]>
+}> {
   const raw = await page.evaluate(() =>
     window.localStorage.getItem('golfgames.currentRound.v1'),
   )
   expect(raw, 'rozehrané kolo není v úložišti').not.toBeNull()
-  return JSON.parse(raw!) as { holeCount: number }
+  return JSON.parse(raw!) as {
+    holeCount: number
+    scores: Record<string, (number | null)[]>
+  }
 }

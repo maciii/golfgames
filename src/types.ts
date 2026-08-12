@@ -824,6 +824,11 @@ export function isRoundComplete(round: Round): boolean {
 }
 
 /** Hráči daného týmu v pořadí, v jakém jsou v týmu uvedení. */
+/** Dvojice, ve které hráč je; u her bez dvojic vrací undefined. */
+export function teamOf(round: Round, playerId: PlayerId): Team | undefined {
+  return round.teams.find((team) => team.playerIds.includes(playerId))
+}
+
 export function teamPlayers(round: Round, team: Team): Player[] {
   return team.playerIds
     .map((id) => round.players.find((p) => p.id === id))

@@ -215,6 +215,10 @@ Hra je jeden objekt implementující `GameDefinition`
 | `scorecardPlayerCell(...)`   | ne      | dekorace výsledku hráče (např. skin a bonus) |
 | `scorecardPlayerTotal(...)`  | ne      | souhrn hry za celkovými ránami hráče         |
 | `scorecardColumns(round)`    | ne      | vlastní sloupce ve scorekartě                |
+| `sharedBall`                 | ne      | hraje dvojice jedním míčem (Foursome)?       |
+| `pairingKind`                | ne      | jsou dvojice partneři, nebo soupeři zápasu?  |
+| `teamLabel(round, team)`     | ne      | jiné pojmenování dvojice než „A + B"         |
+| `settlementGroups(round)`    | ne      | nezávislá peněžní vyrovnání v jednom kole    |
 
 Registr je [`src/games/index.ts`](../src/games/index.ts). `getGame()` při
 neznámém `id` vrací výchozí hru, aby archiv s odstraněnou hrou nespadl.
@@ -223,6 +227,22 @@ neznámém `id` vrací výchozí hru, aby archiv s odstraněnou hrou nespadl.
 podkladem pro peněžní vyrovnání – `ResultsScreen` z ní bere `row.value` jako
 „jednotky" (body, skiny, vyhrané jamky) a předá je `settleRound()`. Nová hra
 proto musí mít v první sekci hodnotu, která dává smysl přepočítat na peníze.
+Hra, ve které běží víc nezávislých her zároveň (dvě jamkovky ve flightu),
+k tomu přidá `settlementGroups()` a vyrovnání pak spočítá `settleGroups()` –
+každá skupina sama za sebe, viz [rozhodnutí #34](decisions.md).
+
+**Jeden míč na dvojici:** `sharedBall` mění zápis skóre na jeden řádek za
+dvojici a scorekartu na jeden sloupec za dvojici. `Round.scores` zůstává po
+hráčích a hodnota se ukládá **oběma** partnerům – `App.setScore()` to zajistí,
+takže hry ani obrazovky nemusí řešit, kdo z dvojice je „nositel" míče
+(rozhodnutí #33). Handicap dvojice počítá `pairPlayingHandicap()`
+v `src/handicap.ts`.
+
+**Jamkovka na společném jádru:** stav zápasu, dormie, notaci `3&2` i jamky
+mimo hru řeší `src/games/match.ts`. Varianta dodá jen strany zápasu a funkci,
+která z kola spočítá ránu strany – lepší míč u four-ballu, jediný míč
+u Foursome, vlastní skóre u jednotlivců. Match play, Foursome a dvě jamkovky
+tak sdílí jedno pravidlo místo tří kopií.
 
 **Řazení** obstarává `rankRows(rows, 'highest' | 'lowest')`: doplní pozice,
 při shodě je sdílí (1, 1, 3) a strany bez jediné započítané jamky odsune na

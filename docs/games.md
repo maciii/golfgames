@@ -25,7 +25,7 @@ Společné pro všechny hry:
 - [Nastavení bodování hry](#nastavení-bodování-hry)
 - [Sázka a peněžní vyrovnání](#sázka-a-peněžní-vyrovnání)
 - [Značky výsledku na jamce](#značky-výsledku-na-jamce)
-- [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Dots](#dots-nine-dot--six-dot) · [Match play](#match-play)
+- [Best + Součet](#best-součet) · [Levá-Pravá](#levá-pravá) · [Skins](#skins) · [Stableford](#stableford) · [Dots](#dots-nine-dot--six-dot) · [Match play](#match-play) · [Foursome](#foursome) · [Dvě jamkovky 1 na 1](#dvě-jamkovky-1-na-1)
 - [Přidání další hry](#přidání-další-hry)
 
 ## Kolik hráčů která hra potřebuje
@@ -35,18 +35,21 @@ Počet hráčů není doporučení, ale podmínka hry: `GameDefinition.playerCou
 hráčů srovná, když ho nová hra nepodporuje. Tabulka je tedy přepisem toho, co
 hry deklarují – při změně musí sedět obojí.
 
-| Hra                   | Hráči     | Uspořádání                                |
-| --------------------- | --------- | ----------------------------------------- |
-| Best + Součet         | **4**     | dvě pevné dvojice                         |
-| Levá-Pravá            | **4**     | dvojice se určují znovu na každé jamce    |
-| Skins                 | **2–4**   | každý sám za sebe                         |
-| Match play            | **2 a 4** | 2 jednotlivci, 4 jako dvojice (four-ball) |
-| Stableford            | **1–4**   | každý sám za sebe; jediná hra pro jednoho |
-| Dots (Nine / Six Dot) | **3**     | každý sám za sebe                         |
+| Hra                   | Hráči     | Uspořádání                                   |
+| --------------------- | --------- | -------------------------------------------- |
+| Best + Součet         | **4**     | dvě pevné dvojice                            |
+| Levá-Pravá            | **4**     | dvojice se určují znovu na každé jamce       |
+| Skins                 | **2–4**   | každý sám za sebe                            |
+| Match play            | **2 a 4** | 2 jednotlivci, 4 jako dvojice (four-ball)    |
+| Foursome              | **4**     | dvě dvojice, každá hraje jedním míčem        |
+| Dvě jamkovky 1 na 1   | **4**     | dva samostatné zápasy jednotlivců ve flightu |
+| Stableford            | **1–4**   | každý sám za sebe; jediná hra pro jednoho    |
+| Dots (Nine / Six Dot) | **3**     | každý sám za sebe                            |
 
 Tři počty stojí za vysvětlení. **Match play přeskakuje trojici**, protože zápas
 má dvě strany – dva jednotlivce, nebo dvě dvojice – a tři hráči se na ně
-nerozdělí. **Dots je jen pro tři**, protože se na jamce rozdává pevný počet
+nerozdělí. **Foursome a dvě jamkovky jsou jen pro čtyři**: první potřebuje dvě
+dvojice u jednoho míče, druhá dva zápasy po dvou soupeřích. **Dots je jen pro tři**, protože se na jamce rozdává pevný počet
 bodů za pořadí a obě tabulky mají tři místa (9 bodů 5-3-1, 6 bodů 4-2-0).
 **Stableford jako jediný zvládne jednoho hráče**, protože se boduje proti paru,
 ne proti soupeři.
@@ -683,6 +686,79 @@ se par v zápisu nemění ručně, přebírá se ze scorekarty hřiště.
   zápasu se už nezmění.
 - **Dvojnásobné jamky** hra nenabízí (`supportsDoubleHoles: false`) – rozbily
   by stav zápasu i notaci `3&2`.
+
+---
+
+## Foursome
+
+**Hráči:** 4 (dvě dvojice)
+**Soubor:** [`src/games/foursome.ts`](../src/games/foursome.ts)
+
+Jamkovka dvojic, které hrají **jedním míčem**. Dvojice na jamce jednou odpálí
+a dál se v ranách střídá, takže má na jamku jediné skóre – proti four-ballu se
+nevybírá lepší míč, protože žádný druhý není. Zápas na jamky se pak počítá
+úplně stejně jako [Match play](#match-play) včetně notace `3&2`, dormie
+a jamek mimo hru po rozhodnutí.
+
+**Zápis skóre je jeden na dvojici.** `PlayScreen` má proto dva řádky místo
+čtyř a scorekarta jeden sloupec na dvojici, pojmenovaný „Mac + Michal“.
+
+**Netto: rány z poloviny součtu.** Hrací handicap dvojice je polovina součtu
+hracích handicapů obou partnerů, zaokrouhlená na celé rány – tak to pro
+foursome dělá WHS. Rány se pak rozdají po jamkách podle stroke indexu jako
+u jednotlivce a tečky ve scorekartě patří dvojici, ne hráči. Se HCP 12 a 20
+dostane dvojice 16 ran.
+
+**Peníze** se počítají jako u ostatních her dvojic: rozdíl vyhraných jamek
+krát hodnota bodu platí každý hráč prohrávající dvojice svému protějšku.
+
+### Rozhodnutí tam, kde pravidla mlčí
+
+- **Vzdaná jamka** – dvojice bez zápisu na rozehrané jamce ji vzdala. Míč je
+  jeden, takže ho za ni nemá kdo dohrát a jamku bere soupeř.
+- **Kdo z dvojice je „nositel“ míče** – nikdo. Skóre se ukládá oběma
+  partnerům (rozhodnutí #33 v [decisions.md](decisions.md)), takže se
+  celkové rány, značky ani archiv nemusí ptát, kdo zapisoval.
+- **Střídání ran** aplikace nesleduje. Kdo má odpal na které jamce, je
+  pravidlo hry mezi partnery; do zápisu skóre by přineslo jen další klepání.
+- **Extra body a dvojnásobné jamky** hra nenabízí – stejný důvod jako
+  u Match play: rozbily by stav zápasu.
+
+---
+
+## Dvě jamkovky 1 na 1
+
+**Hráči:** 4 (dva zápasy po dvou)
+**Soubor:** [`src/games/singlesMatches.ts`](../src/games/singlesMatches.ts)
+
+Čtyři hráči jdou spolu v jednom flightu, ale nehrají jednu hru: běží **dva
+samostatné zápasy jednotlivců**. Kdo s kým, se vybírá v kroku hry stejně jako
+dvojice u ostatních čtyřhráčových her – jen se to jmenuje **Soupeři** a volby
+se čtou „Mac vs. Michal · Alex vs. Petr“.
+
+Každý zápas má vlastní stav, vlastní rozhodnutí (`3&2`) i vlastní peníze.
+`Round.teams` tady neznamená partnery, ale soupeře jednoho zápasu
+(`pairingKind: 'opponents'`), takže si kolo nenese žádná nová data.
+
+Při zápisu skóre je každý zápas svým blokem s hlavičkou „Mac vs. Michal“, kde
+je vidět, kdo jamku bere a jak zápas stojí. Hlavička jamky ukazuje stav obou
+zápasů zároveň.
+
+**Peníze: každý zápas zvlášť.** Rozdíl vyhraných jamek krát hodnota bodu platí
+prohrávající svému soupeři. Hráči z různých zápasů si neplatí nic, i když jdou
+ve stejném flightu – vyrovnání proto neprochází přes `settleRound()`, ale přes
+`settleGroups()` (rozhodnutí #34).
+
+### Rozhodnutí tam, kde pravidla mlčí
+
+- **Rozehraná jamka platí jen pro svůj zápas.** Jinde v aplikaci stačí zápis
+  kohokoli z flightu, aby jamka „běžela“. Tady by zápis prvního zápasu udělal
+  ze druhého vzdanou jamku, protože jeho soupeři ještě nezapsali. Jamka proto
+  běží podle dvou hráčů daného zápasu (rozhodnutí #34).
+- **Pořadí v tabulce** je podle vyhraných jamek celého flightu, aby archiv i
+  výsledky měly jedno pořadí. Skutečný výsledek je ale u každého řádku:
+  `1 UP`, `AS`, `2 DOWN` a údaj, s kým hráč hraje.
+- **Extra body a dvojnásobné jamky** hra nenabízí, stejně jako Match play.
 
 ---
 

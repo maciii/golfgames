@@ -182,6 +182,11 @@ export const cs = {
   'play.plus': '{name}: přidat ránu, z prázdné buňky bogey',
   'play.hint':
     'Klepnutím doprostřed zapíšeš par ({par}), tlačítkem − birdie a tlačítkem + bogey. Přidržením čísla zápis smažeš.',
+  'play.strokesReceivedPair': {
+    one: 'Dvojice dostává na téhle jamce 1 ránu',
+    few: 'Dvojice dostává na téhle jamce {count} rány',
+    other: 'Dvojice dostává na téhle jamce {count} ran',
+  },
   'play.strokesReceived': {
     one: 'Na téhle jamce dostává {count} ránu',
     few: 'Na téhle jamce dostává {count} rány',
@@ -492,6 +497,14 @@ export const cs = {
   'games.match-play.tagline': 'Zápas na jamky, ne na rány',
   'games.match-play.rules':
     'Zápas dvou stran - buď dva hráči proti sobě, nebo dvě dvojice, za které hraje vždy lepší míč. Kdo zahraje jamku líp, jde o jednu nahoru; shodná jamka je dělená. Zápas končí, jakmile je náskok větší než počet zbývajících jamek.',
+  'games.foursome.name': 'Foursome',
+  'games.foursome.tagline': 'Dvojice hraje jedním míčem, zápas na jamky',
+  'games.foursome.rules':
+    'Jamkovka dvou dvojic, které hrají jedním míčem: dvojice odpálí jednou a v ranách se dál střídá, takže na jamku má jediné skóre. Kdo zahraje jamku líp, jde o jednu nahoru; shodná jamka je dělená. Skóre se zapisuje jedno za dvojici. Se zapnutým netto dostane dvojice rány z poloviny součtu hracích handicapů obou partnerů.',
+  'games.singles-matches.name': 'Dvě jamkovky 1 na 1',
+  'games.singles-matches.tagline': 'Čtyři hráči v jednom flightu, dva samostatné zápasy',
+  'games.singles-matches.rules':
+    'Čtyři hráči jdou spolu v jednom flightu, ale hrají se dva samostatné zápasy jednotlivců - kdo s kým, vybereš v Soupeřích. Každý zápas se počítá sám za sebe včetně peněz: výsledek jednoho na druhý nemá vliv. Kdo zahraje jamku líp, jde o jednu nahoru; shodná jamka je dělená.',
   'games.stableford.name': 'Stableford',
   'games.stableford.tagline': 'Body za jamku, zkažená jamka kolo nezničí',
   'games.stableford.rules':
@@ -731,7 +744,18 @@ export const cs = {
   'match.hole': 'Jamka',
   'match.outOfPlay': 'Mimo hru – zápas už je rozhodnutý',
 
+  // Foursome a dvě jamkovky ve flightu
+  'foursome.net': 'Netto dvojice',
+  'foursome.pairHandicap': 'HCP dvojice {handicap}',
+  'singles.title': 'Zápasy ve flightu',
+  'singles.state': 'Stav',
+  'singles.versusJoin': ' vs. ',
+  'singles.leaderState': '{name} {state}',
+  'singles.versusDetail': 'vs. {name} · vyhrané {won} · dělené {halved}',
+  'singles.opponents': 'Soupeři',
+
   // --- peněžní vyrovnání --------------------------------------------------
+  'money.perGroup': 'Každý zápas se vyrovnává zvlášť.',
   'money.nobodyOwes': 'Nikdo nikomu nic nedluží.',
   'money.eachOpponent': 'Každý bod navíc platí každý ze soupeřů zvlášť.',
   'money.optimizedSettlement':

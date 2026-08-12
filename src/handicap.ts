@@ -286,6 +286,53 @@ export function netScoreAt(
   return score - strokesReceived(round, playerId, hole)
 }
 
+/**
+ * Hrací handicap dvojice, která hraje **jedním míčem** (foursome).
+ *
+ * WHS dává takové dvojici polovinu součtu hracích handicapů obou partnerů.
+ * Půlka se zaokrouhluje na celé rány, protože rány se přidělují po jamkách -
+ * půl rány na jamce neexistuje.
+ */
+export function pairPlayingHandicap(round: Round, playerIds: PlayerId[]): number {
+  if (playerIds.length === 0) return 0
+  const total = playerIds.reduce((sum, id) => sum + playingHandicap(round, id), 0)
+  return Math.round(total / 2)
+}
+
+/** Rány, které na jamce dostává dvojice hrající jedním míčem. */
+export function pairStrokesReceived(
+  round: Round,
+  playerIds: PlayerId[],
+  hole: number,
+): number {
+  if (!isNetRound(round)) return 0
+  const strokeIndex = roundStrokeIndex(round)[hole] ?? hole + 1
+  return strokesForHole(
+    pairPlayingHandicap(round, playerIds),
+    strokeIndex,
+    round.holeCount,
+  )
+}
+
+/**
+ * Netto rána dvojice hrající jedním míčem; null, dokud jamku nezapsala.
+ *
+ * Míč je jeden, ale `Round.scores` je po hráčích, takže zápis nese každý
+ * partner (viz rozhodnutí #33 v docs/decisions.md). Bere se první zapsaná
+ * hodnota - obě jsou stejné a jedna stačí i u kola, kde se zápis rozešel.
+ */
+export function pairNetScoreAt(
+  round: Round,
+  playerIds: PlayerId[],
+  hole: number,
+): number | null {
+  for (const id of playerIds) {
+    const score = scoreAt(round, id, hole)
+    if (score !== null) return score - pairStrokesReceived(round, playerIds, hole)
+  }
+  return null
+}
+
 /** Netto rozdíl vůči paru na jamce; null, dokud hráč jamku nezapsal. */
 export function netDiffToPar(
   round: Round,

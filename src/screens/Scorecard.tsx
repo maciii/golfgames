@@ -10,6 +10,8 @@ import {
   strokeTotal,
   strokeTotalBetween,
   teamName,
+  teamOf,
+  teamPlayers,
   turnHole,
 } from '../types'
 import type { ScorecardColumn, ScorecardPlayerCell, ScorecardPlayerTotal } from '../games'
@@ -17,6 +19,7 @@ import { getGame } from '../games'
 import {
   hasMixedTees,
   isNetRound,
+  pairStrokesReceived,
   playerTee,
   roundStrokeIndex,
   strokesReceived,
@@ -91,9 +94,9 @@ type Column =
  * Poskládá sloupce tak, aby vlastní sloupce hry stály za hráčem, ke kterému
  * patří (`afterPlayerId`); zbytek se přidá na konec.
  */
-function buildColumns(round: Round, extras: ScorecardColumn[]): Column[] {
+function buildColumns(players: Player[], extras: ScorecardColumn[]): Column[] {
   const columns: Column[] = []
-  for (const [playerIndex, player] of scorecardPlayers(round).entries()) {
+  for (const [playerIndex, player] of players.entries()) {
     columns.push({ kind: 'player', player, playerIndex })
     for (const column of extras) {
       if (column.afterPlayerId === player.id) columns.push({ kind: 'extra', column })
@@ -139,7 +142,28 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   const showHcpDots = isNetRound(round)
   const [hcpDotsMode, setHcpDotsMode] = useState<'course' | 'best-player'>('best-player')
   const extras = game.scorecardColumns?.(round) ?? []
-  const columns = buildColumns(round, extras)
+  /**
+   * Sloupce se skóre.
+   *
+   * U hry jedním míčem (foursome) má dvojice jediné skóre, uložené u obou
+   * partnerů. Dva stejné sloupce by z karty dělaly hádanku, takže dvojice
+   * dostane jeden sloupec pojmenovaný po ní; čte se přes prvního partnera.
+   */
+  const sharedBall = game.sharedBall === true && round.teams.length > 0
+  const cardPlayers = sharedBall
+    ? round.teams.flatMap((team) => {
+        const first = teamPlayers(round, team)[0]
+        return first ? [{ ...first, name: teamName(round, team) }] : []
+      })
+    : scorecardPlayers(round)
+  const columns = buildColumns(cardPlayers, extras)
+
+  /** Tečky HCP: u společného míče rány dvojice, jinak rány hráče. */
+  function courseDots(playerId: string, hole: number): number {
+    if (!sharedBall) return strokesReceived(round, playerId, hole)
+    const team = teamOf(round, playerId)
+    return team ? pairStrokesReceived(round, team.playerIds, hole) : 0
+  }
   /** Hráli všichni ze stejného odpaliště? Pak se v hlavičce neopakuje. */
   const mixedTees = hasMixedTees(round)
 
@@ -150,12 +174,12 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   }
   const playerTotals = new Map<string, ScorecardPlayerTotal>()
   if (game.scorecardPlayerTotal) {
-    for (const player of scorecardPlayers(round)) {
+    for (const player of cardPlayers) {
       playerTotals.set(player.id, game.scorecardPlayerTotal(round, player.id))
     }
   }
   const playerIndexes = new Map(
-    scorecardPlayers(round).map((player, playerIndex) => [player.id, playerIndex]),
+    cardPlayers.map((player, playerIndex) => [player.id, playerIndex]),
   )
   const parTotal = round.pars.reduce((sum, p) => sum + p, 0)
   /**
@@ -172,8 +196,9 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
   const leadingColumns = showStrokeIndex ? 3 : 2
 
   // Nadřazený řádek se jmény dvojic; každá zabírá své hráče i sloupec bodů.
-  const teamGroups = round.teams.map((team) => ({
-    name: teamName(round, team),
+  // U společného míče se vynechá - jméno dvojice je rovnou v hlavičce sloupce.
+  const teamGroups = (sharedBall ? [] : round.teams).map((team) => ({
+    name: game.teamLabel?.(round, team) ?? teamName(round, team),
     span: columns.filter(
       (c) =>
         (c.kind === 'player' && team.playerIds.includes(c.player.id)) ||
@@ -209,7 +234,7 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
       {mode === 'results' && (
         <div className="scorecard-title-row">
           <h2 className="section-title">{t('scorecard.title')}</h2>
-          {showHcpDots && (
+          {showHcpDots && !sharedBall && (
             <div className="segmented scorecard-control">
               {[
                 { id: 'course', label: t('scorecard.dotsCourse') },
@@ -311,8 +336,8 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                         hole,
                       )
                       const dotCount =
-                        showHcpDots && hcpDotsMode === 'course'
-                          ? strokesReceived(round, column.player.id, hole)
+                        showHcpDots && (hcpDotsMode === 'course' || sharedBall)
+                          ? courseDots(column.player.id, hole)
                           : showHcpDots
                             ? strokesRelativeToBest(round, column.player.id, hole)
                             : 0
@@ -325,11 +350,13 @@ export default function Scorecard({ round, mode = 'results' }: Props) {
                           ? {
                               text: '•'.repeat(visibleDots),
                               ariaLabel: t(
-                                hcpDotsMode === 'course'
+                                hcpDotsMode === 'course' || sharedBall
                                   ? 'scorecard.dotsCourseAria'
                                   : 'scorecard.dotsBestPlayerAria',
                                 {
-                                  name: player?.name ?? column.player.id,
+                                  name: sharedBall
+                                    ? column.player.name
+                                    : (player?.name ?? column.player.id),
                                   count: visibleDots,
                                 },
                               ),

@@ -19,9 +19,10 @@ import {
   teamName,
   teamPlayers,
 } from '../types'
+import type { Team } from '../types'
 import { getGame } from '../games'
 import type { HoleSetup, HoleSetupSelection } from '../games'
-import { exclusiveBonusOutcome, strokesReceived } from '../handicap'
+import { exclusiveBonusOutcome, pairStrokesReceived, strokesReceived } from '../handicap'
 import BonusSheet from './BonusSheet'
 import Scorecard from './Scorecard'
 import { useT } from '../i18n'
@@ -107,6 +108,9 @@ export default function PlayScreen({
   const holeSetup: HoleSetup | undefined = game.holeSetup?.(round, hole)
   const scoreEntryEnabled = holeSetup?.complete ?? true
   const hasBonusOptions = game.scoringOptions.bonusIds.length > 0
+  // Foursome zapisuje jedno skóre za dvojici, ne za hráče - řádek je proto
+  // jeden na dvojici a ovládá společný míč.
+  const sharedBall = game.sharedBall === true && round.teams.length > 0
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
 
@@ -309,6 +313,96 @@ export default function PlayScreen({
     )
   }
 
+  /**
+   * Řádek dvojice, která hraje jedním míčem.
+   *
+   * Skóre se čte i zapisuje přes prvního partnera; `App.setScore()` ho uloží
+   * oběma, takže je jedno, kdo je v poli první.
+   */
+  function renderBall(team: Team) {
+    const players = teamPlayers(round, team)
+    const first = players[0]
+    if (!first) return null
+
+    const score = scoreAt(round, first.id, hole)
+    const played = holesPlayed(round, first.id)
+    const toPar = strokeTotal(round, first.id) - parForPlayedHoles(round, first.id)
+    const strokes = pairStrokesReceived(round, team.playerIds, hole)
+    const holeGain = summaries.find((s) => s.id === team.id)
+
+    return (
+      <li key={team.id} className="player-row">
+        <div className="player-info">
+          <span className="player-name">
+            {game.teamLabel?.(round, team) ?? teamName(round, team)}
+            {holeGain?.entries.map((entry) => (
+              <span
+                key={entry.label}
+                className={`player-mark gain${entry.highlight ? ' best' : ''}`}
+                title={entry.label}
+                aria-label={`${entry.label}: ${entry.value}`}
+              >
+                {entry.value}
+              </span>
+            ))}
+            {/* Rány dvojice na téhle jamce - u foursome z poloviny součtu HCP. */}
+            {strokes > 0 && (
+              <span
+                className="player-mark strokes"
+                title={t('play.strokesReceivedPair', { count: strokes })}
+              >
+                {'•'.repeat(Math.min(3, strokes))}
+              </span>
+            )}
+          </span>
+          <span className="player-total">
+            {played === 0
+              ? t('play.noScore')
+              : t('play.total', {
+                  strokes: strokeTotal(round, first.id),
+                  toPar: formatToPar(toPar),
+                })}
+          </span>
+        </div>
+        <div className="stepper">
+          <button
+            type="button"
+            className="step-button"
+            onClick={() => adjust(first.id, -1)}
+            aria-label={t('play.minus', { name: teamName(round, team) })}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className="score-value"
+            onClick={() => handleScoreTap(first.id)}
+            onPointerDown={() => startLongPress(first.id)}
+            onPointerUp={cancelLongPress}
+            onPointerLeave={cancelLongPress}
+            onPointerCancel={cancelLongPress}
+            onContextMenu={(e) => e.preventDefault()}
+            aria-label={t('play.score', { name: teamName(round, team) })}
+          >
+            <span
+              className={`mark large ${score === null ? 'empty' : scoreCategory(score, par)}`}
+            >
+              {score ?? '–'}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="step-button"
+            onClick={() => adjust(first.id, 1)}
+            aria-label={t('play.plus', { name: teamName(round, team) })}
+          >
+            +
+          </button>
+        </div>
+      </li>
+    )
+  }
+
   if (showLandscapeScorecard && scoreEntryEnabled) {
     return (
       <div className="landscape-scorecard">
@@ -485,7 +579,9 @@ export default function PlayScreen({
           </div>
         )}
 
-        {round.teams.length > 0 ? (
+        {sharedBall ? (
+          <ul className="player-list">{round.teams.map(renderBall)}</ul>
+        ) : round.teams.length > 0 ? (
           round.teams.map((team) => {
             const summary = summaries.find((s) => s.id === team.id)
             return (
@@ -494,7 +590,9 @@ export default function PlayScreen({
                 className={`team-block${summary?.winner ? ' winning' : ''}`}
               >
                 <div className="team-header">
-                  <span className="team-name">{teamName(round, team)}</span>
+                  <span className="team-name">
+                    {game.teamLabel?.(round, team) ?? teamName(round, team)}
+                  </span>
                   {summary && (
                     <span className="team-summary">
                       {summary.entries.map((entry) => (

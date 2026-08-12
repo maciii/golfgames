@@ -1,4 +1,4 @@
-import type { BonusId, PlayerId, Round } from '../types'
+import type { BonusId, PlayerId, Round, Team } from '../types'
 
 /**
  * Společné rozhraní všech her.
@@ -182,6 +182,25 @@ export interface GameDefinition {
    * se počítá na jamky, kde by dvojnásobná jamka rozbila stav zápasu.
    */
   supportsDoubleHoles: boolean
+  /**
+   * Hraje dvojice **jedním míčem** (foursome)? Zápis skóre je pak jeden na
+   * dvojici a ukládá se oběma partnerům; scorekarta má jeden sloupec.
+   */
+  sharedBall?: boolean
+  /**
+   * Co `Round.teams` v téhle hře znamená: partnery jedné strany (výchozí),
+   * nebo soupeře jednoho zápasu. Rozhoduje o textech při zakládání kola
+   * i o tom, jak se čtou dvojice ve výsledcích.
+   */
+  pairingKind?: 'partners' | 'opponents'
+  /** Vlastní pojmenování dvojice, když „A + B" nesedí (dva zápasy: „A vs B"). */
+  teamLabel?(round: Round, team: Team): string
+  /**
+   * Nezávislá peněžní vyrovnání v jednom kole - vrací id řádků výsledkové
+   * tabulky, které se vyrovnávají spolu. Bez hodnoty se vyrovnává celé kolo
+   * jako jedna hra. Dva zápasy ve flightu si takhle nemíchají peníze.
+   */
+  settlementGroups?(round: Round): string[][]
   computeStandings(round: Round): StandingsSection[]
   holeSetup?(round: Round, hole: number): HoleSetup
   setHoleSetup?(round: Round, hole: number, selection: HoleSetupSelection): Round

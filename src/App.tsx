@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { BonusId, CreateRoundOptions, PlayerId, Round, RoundSettings } from './types'
-import { createRound, setHolePar, toggleBonus, touchRound } from './types'
+import { createRound, setHolePar, teamOf, toggleBonus, touchRound } from './types'
 import {
   addToRoster,
   archiveRound,
@@ -357,9 +357,18 @@ function AppShell() {
   const setScore = useCallback(
     (playerId: PlayerId, hole: number, value: number | null) => {
       updateRound((prev) => {
-        const holes = [...(prev.scores[playerId] ?? [])]
-        holes[hole] = value
-        return touchRound({ ...prev, scores: { ...prev.scores, [playerId]: holes } })
+        // Foursome hraje dvojice jedním míčem, takže jedno číslo patří oběma
+        // partnerům - `Round.scores` je po hráčích (rozhodnutí #33).
+        const ids = getGame(prev.gameId).sharedBall
+          ? (teamOf(prev, playerId)?.playerIds ?? [playerId])
+          : [playerId]
+        const scores = { ...prev.scores }
+        for (const id of ids) {
+          const holes = [...(scores[id] ?? [])]
+          holes[hole] = value
+          scores[id] = holes
+        }
+        return touchRound({ ...prev, scores })
       })
     },
     [updateRound],

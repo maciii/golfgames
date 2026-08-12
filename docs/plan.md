@@ -5,31 +5,31 @@ patří konkrétní cíl, rozhodnutí a ověřitelný výsledek.
 
 ## Cíl
 
-Umožnit dodatečnou opravu odehraného kola: z detailu archivního kola otevřít
-zápis skóre, opravit ho a uložit zpátky do archivu bez dopadu na rozehrané
-kolo.
+Doplnit zbylé jamkovkové varianty pro čtyři hráče: Foursome (dvojice jedním
+míčem) a dvě samostatné jamkovky 1 na 1 v jednom flightu.
 
 ## Úkoly
 
-- [x] Přepsat archivní kolo na jeho místě (`updateArchivedRound()`)
-- [x] Nasměrovat změny skóre přes jeden `updateRound()` v `App.tsx`
-- [x] Otevřít `PlayScreen` v režimu opravy z detailu archivního kola
-- [x] Doplnit překlady, dokumentaci, changelog a rozhodnutí #31
-- [x] Přidat testy archivu a e2e průchod opravou na telefonních profilech
-- [x] Spustit kompletní kontrolu a produkční build
+- [x] Vytáhnout jádro jamkovky do `src/games/match.ts`
+- [x] Přidat Foursome se zápisem jednoho skóre na dvojici a HCP z poloviny součtu
+- [x] Přidat dvě jamkovky 1 na 1 s vyrovnáním peněz za každý zápas zvlášť
+- [x] Upravit zápis skóre, scorekartu a volbu soupeřů v zakládání kola
+- [x] Testy pravidel, handicapu dvojice a peněz obou her
+- [x] Doplnit překlady, dokumentaci, changelog a rozhodnutí #33 a #34
+- [x] Odladit v Playwrightu na telefonních profilech a spustit kompletní kontrolu
 
 ## Rozhodnutí
 
-- Oprava jde do archivu, ne do slotu rozehraného kola - na hřišti se dá
-  dohrávat jedno kolo a zpětně opravovat jiné.
-- Opravované kolo se neukládá do vlastního stavu; odvozuje se z `view` a
-  `openArchiveId`, aby po zpět/swipe sedělo s tím, co je vidět.
-- Kolo zůstává dohrané (`finishedAt` se nemaže), takže z archivu ani z
-  peněžního vyrovnání nezmizí.
+- Společný míč se ukládá **oběma partnerům**; model kola se nemění a starý
+  archiv nepotřebuje migraci (rozhodnutí #33).
+- `Round.teams` u dvou jamkovek znamená soupeře jednoho zápasu, ne partnery
+  (`pairingKind: 'opponents'`).
+- Nezávislé zápasy se vyrovnávají přes `settleGroups()`, ne `settleRound()`;
+  rozehraná jamka je vlastnost zápasu, ne flightu (rozhodnutí #34).
 
 ## Ověření
 
-- `npx vitest run src/storage.test.ts`
-- `npx playwright test archiveEdit --project=phone-chrome-android --project=phone-safari-ios --project=phone-landscape`
+- `npx vitest run src/games/foursome.test.ts src/games/singlesMatches.test.ts`
+- `npx playwright test games4 --project=phone-chrome-android --project=phone-safari-ios`
 - `npm run check`
 - `npx vite build`

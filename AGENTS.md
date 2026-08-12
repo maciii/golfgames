@@ -137,6 +137,14 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
   `row.value` se předává do `settleRound()` jako počet jednotek; u Skins je
   to součet skinů a přiznaných extra bodů.
+- **Společný míč se ukládá oběma partnerům.** U hry, která deklaruje
+  `sharedBall` (Foursome), má dvojice na jamku jedno skóre, ale `Round.scores`
+  zůstává po hráčích - hodnotu zapíše `App.setScore()` obou partnerům
+  (rozhodnutí #33). Netto dvojice počítá `pairPlayingHandicap()`, ne handicap
+  jednotlivce.
+- **Dva zápasy v jednom kole si nemíchají peníze.** Hra s `settlementGroups()`
+  se vyrovnává po skupinách přes `settleGroups()`; `settleRound()` by počítal
+  každého proti každému (rozhodnutí #34).
 - **Stránka se neposouvá, posouvá se `.content`.** Obrazovka je vysoká jako
   displej (rozhodnutí #32), takže `window.scrollY` je vždycky nula
   a `window.scrollTo()` nic nedělá. Nový kód pracuje se `scrollTop` na

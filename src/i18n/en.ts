@@ -167,6 +167,10 @@ export const en: Record<MessageKey, Message> = {
   'play.plus': '{name}: one stroke more, bogey from an empty cell',
   'play.hint':
     'Tap the middle to enter par ({par}), − for a birdie and + for a bogey. Press and hold the number to clear it.',
+  'play.strokesReceivedPair': {
+    one: 'The pair receives 1 stroke on this hole',
+    other: 'The pair receives {count} strokes on this hole',
+  },
   'play.strokesReceived': {
     one: 'Receives {count} stroke on this hole',
     other: 'Receives {count} strokes on this hole',
@@ -467,6 +471,14 @@ export const en: Record<MessageKey, Message> = {
   'games.match-play.tagline': 'A match played by holes, not by strokes',
   'games.match-play.rules':
     'A match between two sides – either two players, or two pairs where the better ball counts. Whoever plays the hole better goes one up; a tied hole is halved. The match ends once the lead is greater than the number of remaining holes.',
+  'games.foursome.name': 'Foursome',
+  'games.foursome.tagline': 'One ball per pair, played by holes',
+  'games.foursome.rules':
+    'Match play between two pairs sharing a single ball: the pair tees off once and then alternates shots, so it has one score per hole. Whoever plays the hole better goes one up; a tied hole is halved. One score is entered per pair. With net scoring the pair receives strokes from half the sum of both partners’ playing handicaps.',
+  'games.singles-matches.name': 'Two singles matches',
+  'games.singles-matches.tagline': 'Four players in one flight, two separate matches',
+  'games.singles-matches.rules':
+    'Four players go round together in one flight, but play two separate singles matches – pick who plays whom under Opponents. Each match counts on its own, money included: the result of one has no effect on the other. Whoever plays the hole better goes one up; a tied hole is halved.',
   'games.stableford.name': 'Stableford',
   'games.stableford.tagline': 'Points per hole, one bad hole cannot ruin the round',
   'games.stableford.rules':
@@ -688,7 +700,18 @@ export const en: Record<MessageKey, Message> = {
   'match.hole': 'Hole',
   'match.outOfPlay': 'Out of play - the match is already decided',
 
+  // Foursome and two singles matches in one flight
+  'foursome.net': 'Pair net',
+  'foursome.pairHandicap': 'pair HCP {handicap}',
+  'singles.title': 'Matches in the flight',
+  'singles.state': 'State',
+  'singles.versusJoin': ' vs. ',
+  'singles.leaderState': '{name} {state}',
+  'singles.versusDetail': 'vs. {name} · won {won} · halved {halved}',
+  'singles.opponents': 'Opponents',
+
   // --- money settlement ---------------------------------------------------
+  'money.perGroup': 'Each match settles on its own.',
   'money.nobodyOwes': 'Nobody owes anybody anything.',
   'money.eachOpponent': 'Every extra point is paid by each opponent separately.',
   'money.optimizedSettlement':

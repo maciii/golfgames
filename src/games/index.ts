@@ -2,6 +2,8 @@ import type { GameDefinition } from './types'
 import { bestAggregate } from './bestAggregate'
 import { skins } from './skins'
 import { matchPlay } from './matchPlay'
+import { foursome } from './foursome'
+import { singlesMatches } from './singlesMatches'
 import { stableford } from './stableford'
 import { leftRight } from './leftRight'
 import { dots } from './dots'
@@ -20,6 +22,8 @@ export const GAMES: GameDefinition[] = [
   leftRight,
   skins,
   matchPlay,
+  foursome,
+  singlesMatches,
   stableford,
   dots,
 ]

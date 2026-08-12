@@ -62,6 +62,9 @@ export default function SetupGameScreen({
   const gameValid = availableGames.some((g) => g.id === gameId)
   const usesTeams = game.usesTeams(playerCount)
   const needsPairing = gameValid && usesTeams && playerCount === 4
+  // U dvou jamkovek ve flightu nejsou dvojice partneři, ale soupeři jednoho
+  // zápasu - jinak by volba tvrdila, že hrají spolu.
+  const opponents = game.pairingKind === 'opponents'
 
   // Změna počtu hráčů v předchozím kroku mohla vyřadit dřív zvolenou hru -
   // ať appka pořád má vybranou hru, kterou jde s tímhle počtem hrát.
@@ -132,7 +135,9 @@ export default function SetupGameScreen({
 
         {needsPairing && (
           <section className="section">
-            <h2 className="section-title">{t('setup.pairs')}</h2>
+            <h2 className="section-title">
+              {opponents ? t('singles.opponents') : t('setup.pairs')}
+            </h2>
             <div className="game-list">
               {PAIRINGS.map((option, index) => (
                 <button
@@ -143,9 +148,21 @@ export default function SetupGameScreen({
                   aria-pressed={index === pairing}
                 >
                   <span className="pairing-line">
-                    {(option[0] ?? []).map(displayName).join(' + ')}
-                    <span className="pairing-vs">{t('setup.versus')}</span>
-                    {(option[1] ?? []).map(displayName).join(' + ')}
+                    {opponents ? (
+                      // Dva zápasy: skupiny nestojí proti sobě, jsou to dvě
+                      // samostatné jamkovky - proto je odděluje tečka.
+                      <>
+                        {(option[0] ?? []).map(displayName).join(t('singles.versusJoin'))}
+                        <span className="pairing-vs">·</span>
+                        {(option[1] ?? []).map(displayName).join(t('singles.versusJoin'))}
+                      </>
+                    ) : (
+                      <>
+                        {(option[0] ?? []).map(displayName).join(' + ')}
+                        <span className="pairing-vs">{t('setup.versus')}</span>
+                        {(option[1] ?? []).map(displayName).join(' + ')}
+                      </>
+                    )}
                   </span>
                 </button>
               ))}

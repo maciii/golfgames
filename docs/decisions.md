@@ -763,6 +763,62 @@ návratu z podobrazovky zakládání kola proto čte `scrollTop` na `.content`
 kromě stránky i `.content` - přeteklý prvek by roztáhl do šířky jeho, ne
 stránku, a test by o něm mlčel.
 
+## 33. Společný míč se ukládá oběma partnerům
+
+**Kontext.** Foursome hraje dvojice jedním míčem, takže na jamku má jediné
+skóre. `Round.scores` je ale mapa **po hráčích** a je to invariant, na kterém
+stojí archiv, synchronizace i všechny ostatní hry.
+
+**Zvažované varianty.** Nové pole `Round.teamScores` by znamenalo migraci
+uložených kol a majoritní verzi kvůli jedné hře. Uložit skóre jen prvnímu
+partnerovi je horší: chybějící zápis u druhého znamená v celé aplikaci
+„vzdaná jamka“, takže by partner vzdával každou jamku kola a předčasně
+ukončené kolo by hlásilo nesmysly.
+
+**Rozhodnutí.** Hodnota se ukládá **oběma partnerům**. Zajišťuje to
+`App.setScore()` podle `GameDefinition.sharedBall`, takže se o to nestará ani
+hra, ani obrazovka - a mazání zápisu přidržením funguje stejně. Data zůstávají
+ve stejném tvaru, takže starý archiv i cloud fungují bez migrace.
+
+**Co z toho plyne pro UI.** Dva stejné sloupce ve scorekartě by z karty dělaly
+hádanku („hrál každý pět, nebo dvojice jednou pět?“), takže při `sharedBall`
+má dvojice jeden sloupec pojmenovaný po ní a jeden řádek v zápisu skóre.
+Celkové rány dvojice se čtou přes prvního partnera - jsou u obou stejné.
+
+**Netto** dvojice stojí na `pairPlayingHandicap()`: polovina součtu hracích
+handicapů obou partnerů, zaokrouhlená na celé rány (WHS pro foursome). Půl
+rány na jamce neexistuje, proto se zaokrouhluje handicap, ne výsledek.
+
+## 34. Dva zápasy v jednom flightu se nemíchají
+
+**Kontext.** Čtyři hráči v jednom flightu často hrají dvě samostatné jamkovky
+1 na 1. Appka do té doby umožňovala jen hry, ve kterých celý flight hraje
+jednu hru.
+
+**Rozhodnutí.** Nová hra „Dvě jamkovky 1 na 1“ používá `Round.teams` jako
+**soupeře jednoho zápasu**, ne jako partnery (`pairingKind: 'opponents'`).
+Model kola se tím nemění a zakládání kola používá stejnou volbu dvojic, jen
+pod jménem Soupeři a se čtením „Mac vs. Michal“.
+
+**Peníze každý zápas zvlášť.** `settleRound()` počítá zůstatky každý proti
+každému, což by ve dvou nezávislých zápasech znamenalo platby přes hry, které
+spolu nemají nic společného. Hra proto deklaruje `settlementGroups()` a
+vyrovnání spočítá `settleGroups()` - každá skupina sama za sebe, výsledky se
+slepí do jednoho přehledu. Tvar výsledku zůstává stejný, takže obrazovka
+výsledků nic dalšího neřeší.
+
+**Rozehraná jamka je vlastnost zápasu, ne flightu.** Konvence „na jamce
+zapsal aspoň jeden hráč, tedy jamka běží a komu zápis chybí, ten ji vzdal“
+platí v celé aplikaci a pro jednu společnou hru je správná. U dvou zápasů by
+ale zápis prvního udělal ze druhého vzdanou jamku pro oba jeho hráče, dokud
+nezapíšou. Jamka proto běží podle dvou hráčů daného zápasu.
+
+**Pořadí ve výsledkové tabulce** je podle vyhraných jamek celého flightu, i
+když se dva zápasy poměřovat nedají. Je to jediné pořadí, které mají výsledky
+a archiv společné, a skutečný výsledek zápasu je hned u řádku (`1 UP`, `AS`)
+včetně jména soupeře. Dvě samostatné tabulky by tuhle informaci rozdělily a
+peněžní vyrovnání by ztratilo jediný podklad.
+
 ---
 
 ## Otevřené otázky

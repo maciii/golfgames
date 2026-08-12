@@ -257,6 +257,57 @@ export function settleRound(round: Round, parties: SettlementParty[]): Settlemen
 }
 
 /**
+ * Vyrovnání několika **nezávislých** her v jednom kole.
+ *
+ * Dvě jamkovky ve flightu nejsou jedna hra o čtyřech hráčích: hráči ze dvou
+ * různých zápasů si nemají co platit. Každá skupina se proto spočítá sama za
+ * sebe a přehledy se slepí do jednoho - výsledek je tvarem k nerozeznání od
+ * běžných zůstatků, takže obrazovka výsledků nic dalšího řešit nemusí.
+ *
+ * Skupina o méně než dvou stranách se zahodí; není proti komu se vyrovnávat.
+ */
+export function settleGroups(round: Round, groups: SettlementParty[][]): Settlement {
+  const { pointValue } = round.settings
+  const usable = groups.filter((group) => group.length >= 2)
+  if (pointValue <= 0 || usable.length === 0) return { kind: 'none' }
+
+  const rows = usable.flatMap((group) => balances(group, pointValue))
+  const transfers = usable.flatMap((group) => pairwiseTransfers(group, pointValue))
+  const optimized = usable.flatMap((group) => optimizedTransfers(group, pointValue))
+
+  return {
+    kind: 'balances',
+    rows,
+    transfers,
+    optimizedTransfers: optimized,
+    summary: rows.every((row) => row.amount === 0)
+      ? t('money.nobodyOwes')
+      : t('money.perGroup'),
+  }
+}
+
+/**
+ * Jsou dva rozpisy plateb stejné?
+ *
+ * U dvou hráčů nebo u nezávislých zápasů vyjde optimalizované vyrovnání stejně
+ * jako přímé platby - a nabízet přepínač mezi dvěma totožnými seznamy je jen
+ * šum. Při jiném pořadí stejných platebních příkazů se přepínač nabídne;
+ * to nikomu neublíží a nestojí to za složitější porovnání.
+ */
+export function transfersEqual(first: Transfer[], second: Transfer[]): boolean {
+  if (first.length !== second.length) return false
+  return first.every((transfer, index) => {
+    const other = second[index]
+    return (
+      other !== undefined &&
+      transfer.fromId === other.fromId &&
+      transfer.toId === other.toId &&
+      Math.abs(transfer.amount - other.amount) < 1e-9
+    )
+  })
+}
+
+/**
  * Formátuje částku včetně měny; záporné částky nechává se znaménkem.
  *
  * Celé částky se píšou bez desetinných míst ("60 Kč"), necelé vždy na dvě

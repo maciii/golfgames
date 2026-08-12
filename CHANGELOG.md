@@ -7,6 +7,34 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.44.0] – 2026-08-12
+
+### Přidáno
+
+- **Foursome.** Jamkovka dvou dvojic, které hrají jedním míčem: dvojice odpálí
+  jednou a dál se v ranách střídá, takže má na jamku jediné skóre. Zápis skóre
+  je proto jeden na dvojici (dva řádky místo čtyř) a scorekarta má jeden
+  sloupec na dvojici. Se zapnutým netto dostane dvojice rány z **poloviny
+  součtu** hracích handicapů obou partnerů, jak to pro foursome dělá WHS.
+  Skóre se ukládá oběma partnerům, takže archiv ani synchronizace nepotřebují
+  nový tvar dat (rozhodnutí #33 v `docs/decisions.md`).
+- **Dvě jamkovky 1 na 1.** Čtyři hráči v jednom flightu, ale dva samostatné
+  zápasy jednotlivců - kdo s kým, se vybírá v kroku hry pod jménem Soupeři.
+  Každý zápas má vlastní stav i **vlastní peněžní vyrovnání**: hráči z různých
+  zápasů si neplatí nic, i když jdou spolu. Rozehraná jamka je přitom
+  vlastnost zápasu, ne flightu - jinak by zápis prvního zápasu udělal ze
+  druhého vzdanou jamku (rozhodnutí #34).
+
+### Změněno
+
+- **Jamkovka má jedno jádro.** Stav zápasu, dormie, notace `3&2` a jamky mimo
+  hru po rozhodnutí žijí v `src/games/match.ts`; Match play, Foursome i dvě
+  jamkovky se o ně dělí a dodávají jen strany zápasu a ránu strany. Pravidlo
+  tak existuje jednou, ne třikrát.
+- **Přepínač plateb se nabízí jen tehdy, když něco mění.** Když optimalizované
+  vyrovnání vyjde stejně jako přímé platby (dva hráči, nezávislé zápasy), byly
+  to dva totožné seznamy a přepínač nad nimi jen zdržoval.
+
 ## [0.43.1] – 2026-08-12
 
 ### Opraveno
