@@ -52,6 +52,11 @@ function useMobileLandscape(): boolean {
 
 interface Props {
   round: Round
+  /**
+   * Dodatečná oprava odehraného kola. Zapisuje se do archivu, ne do
+   * rozehraného kola, takže se kolo neukončuje - jen se oprava zavře.
+   */
+  editing?: boolean
   onSetScore: (playerId: PlayerId, hole: number, value: number | null) => void
   onToggleBonus: (playerId: PlayerId, hole: number, bonusId: BonusId) => void
   onSetPar: (hole: number, par: number) => void
@@ -70,6 +75,7 @@ interface Props {
  */
 export default function PlayScreen({
   round,
+  editing = false,
   onSetScore,
   onToggleBonus,
   onSetPar,
@@ -146,6 +152,13 @@ export default function PlayScreen({
    * se přitom vzdané jamky od těch, na které se vůbec nedošlo.
    */
   function finish() {
+    // Oprava archivního kola se ukládá průběžně, takže tlačítko jen zavírá
+    // zápis - vypisovat u odehraného kola chybějící jamky by nemělo co nabídnout.
+    if (editing) {
+      onFinish()
+      return
+    }
+
     const { conceded, unplayed, complete } = roundCompleteness(round)
     if (complete) {
       onFinish()
@@ -507,24 +520,32 @@ export default function PlayScreen({
 
         <p className="hint">{t('play.hint', { par })}</p>
 
-        <div className="link-row">
-          <button type="button" className="link-button" onClick={onShowResults}>
-            {t('play.standings')}
-          </button>
-          {/* Kolo může skončit kdykoli - třeba když přijde bouřka. */}
-          {!isLastHole && anyScore && (
-            <button type="button" className="link-button" onClick={finish}>
-              {t('play.finish')}
+        {/* Při opravě archivního kola se nikam neodbočuje: jamky se prochází
+            šipkami v hlavičce a výsledky jsou tam, odkud se oprava otevřela. */}
+        {!editing && (
+          <div className="link-row">
+            <button type="button" className="link-button" onClick={onShowResults}>
+              {t('play.standings')}
             </button>
-          )}
-          <button type="button" className="link-button" onClick={onOpenAccount}>
-            {t('play.account')}
-          </button>
-        </div>
+            {/* Kolo může skončit kdykoli - třeba když přijde bouřka. */}
+            {!isLastHole && anyScore && (
+              <button type="button" className="link-button" onClick={finish}>
+                {t('play.finish')}
+              </button>
+            )}
+            <button type="button" className="link-button" onClick={onOpenAccount}>
+              {t('play.account')}
+            </button>
+          </div>
+        )}
       </main>
 
       <footer className="app-footer">
-        {isLastHole ? (
+        {editing ? (
+          <button type="button" className="primary-button" onClick={finish}>
+            {t('play.saveEdits')}
+          </button>
+        ) : isLastHole ? (
           <button type="button" className="primary-button" onClick={finish}>
             {t('play.finishAndSave')}
           </button>

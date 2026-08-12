@@ -691,6 +691,48 @@ znamenalo, že appka odmítne všechny dosud vytvořené zálohy. Jméno souboru
 ne názvem. Repozitář, npm balíček ani doména se nepřejmenovávají - je to
 zbytečný zásah do nasazení za nulový přínos pro uživatele.
 
+## 31. Archivní kolo se opravuje na místě
+
+**Kontext.** Detail odehraného kola (`ResultsScreen` s `readOnly`) byl jen ke
+čtení. Opravit skóre šlo jedině u kola, které bylo zároveň to rozehrané -
+tlačítkem „Upravit skóre", které kolu smaže `finishedAt` a vrátí ho do zápisu.
+Jenže hraje se o peníze a skóre se dopočítává i po hře: přehlédnutý zápis,
+špatně sečtená jamka, dodatečně přiznaný Longest. Kdo mezitím založil další
+kolo, měl archiv zamčený.
+
+**Rozhodnutí.** Detail archivního kola nabízí „Upravit skóre" a otevře **ten
+samý `PlayScreen`** jako na hřišti (`editing` prop). Opravuje se skóre, extra
+body, par i setup jamky - stejná pravidla, stejné ovládání, žádná druhá
+obrazovka na to samé.
+
+**Zapisuje se přímo do archivu, ne do rozehraného kola.** Na hřišti se dá
+dohrávat jedno kolo a zpětně opravovat jiné; kdyby oprava zabrala slot
+rozehraného kola, přišlo by se o rozehranou hru. `App.tsx` proto posílá změny
+přes `updateRound()`, které míří buď na `round`, nebo na záznam v archivu -
+podle toho, jestli je otevřená oprava. Které kolo se opravuje, se **neukládá
+do vlastního stavu**, ale odvozuje z `view === 'archiveEdit'` a
+`openArchiveId`; jinak by se po zpět/swipe (obnovuje se jen `NavSnapshot`)
+editace rozešla s tím, co je vidět. Když je opravované kolo zároveň to
+rozehrané (typicky právě dohraná hra), zapíše se do obojího - jinak by se po
+restartu appky vrátila neopravená verze.
+
+**`archiveRound()` se na opravu nepoužívá.** Staví kolo na začátek archivu,
+což je správné při ukládání dohraného kola, ale u opravy by se rok stará hra
+vytáhla na první místo v archivu a na domovskou obrazovku jako „poslední
+odehraná". Oprava proto jde přes `updateArchivedRound()`, které kolo přepíše
+na jeho místě.
+
+**Kolo zůstává dohrané.** Oprava `finishedAt` nemaže, takže se kolo nikdy
+nevrátí do stavu „rozehrané" a v archivu ani v peněžním vyrovnání nezmizí.
+Tlačítko v patičce se proto nejmenuje „Ukončit kolo", ale „Hotovo, zpět do
+archivu" - ukládá se průběžně a není co potvrzovat. Chybějící jamky se u
+opravy nevypisují: u odehraného kola je to informace bez rozhodnutí.
+
+**Ukládá se každá změna, ne až odchod.** Stejné pravidlo jako u rozehraného
+kola - appku může telefon zabít kdykoli a data drží jen `localStorage`.
+Synchronizaci se oprava hlásí jen když se opravdu změnila data
+(`updatedAt`), takže listování jamkami v archivu nic do cloudu neposílá.
+
 ---
 
 ## Otevřené otázky

@@ -256,6 +256,74 @@ export async function swipeBack(
   )
 }
 
+/**
+ * Odehrané kolo vložené rovnou do archivu.
+ *
+ * Odehrát ho klepáním by znamenalo osmnáct jamek krát dva hráče v každém
+ * profilu; jde tu o práci s archivem, ne o zápis skóre.
+ */
+const ARCHIVED_ROUND = {
+  id: 'e2e-archived',
+  gameId: 'best-aggregate',
+  createdAt: '2026-06-01T08:00:00.000Z',
+  finishedAt: '2026-06-01T12:00:00.000Z',
+  updatedAt: '2026-06-01T12:00:00.000Z',
+  players: [
+    { id: 'p1', name: 'Eva' },
+    { id: 'p2', name: 'Martin' },
+  ],
+  teams: [],
+  holeCount: 3,
+  pars: [4, 4, 4],
+  scores: { p1: [4, 4, 4], p2: [5, 5, 5] },
+  bonuses: { p1: [[], [], []], p2: [[], [], []] },
+  currentHole: 0,
+  settings: {
+    currency: 'CZK',
+    pointValue: 10,
+    options: {
+      doubleBest: 0,
+      doubleClosingHoles: false,
+      bonusValues: {},
+      resultMultipliers: {},
+    },
+  },
+}
+
+/** Uloží odehrané kolo do archivu a načte appku znovu, ať ho vidí. */
+export async function seedArchivedRound(page: Page): Promise<void> {
+  await page.evaluate((round) => {
+    window.localStorage.setItem('golfgames.archive.v1', JSON.stringify([round]))
+  }, ARCHIVED_ROUND)
+  await page.reload()
+  await expect(page.locator('.screen')).toBeVisible()
+}
+
+/** Archivní kolo tak, jak ho appka uložila - kontrola dodatečných oprav. */
+export async function archivedRound(page: Page): Promise<{
+  scores: Record<string, (number | null)[]>
+  updatedAt?: string
+}> {
+  const raw = await page.evaluate(() =>
+    window.localStorage.getItem('golfgames.archive.v1'),
+  )
+  expect(raw, 'archiv není v úložišti').not.toBeNull()
+  const rounds = JSON.parse(raw!) as {
+    scores: Record<string, (number | null)[]>
+    updatedAt?: string
+  }[]
+  const round = rounds[0]
+  expect(round, 'archiv je prázdný').toBeDefined()
+  return round!
+}
+
+/** Otevře detail archivního kola z domovské obrazovky. */
+export async function openArchivedRoundDetail(page: Page): Promise<void> {
+  await seedArchivedRound(page)
+  await page.locator('.home-card').first().click()
+  await expect(page.locator('.app-header h1')).toHaveText(/Archivní kolo|Archived round/i)
+}
+
 /** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
 export async function currentRound(page: Page): Promise<{ holeCount: number }> {
   const raw = await page.evaluate(() =>

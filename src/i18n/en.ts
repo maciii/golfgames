@@ -177,6 +177,7 @@ export const en: Record<MessageKey, Message> = {
   'play.next': 'Next hole',
   'play.skip': 'Skip to next',
   'play.finishAndSave': 'Finish and save round',
+  'play.saveEdits': 'Done, back to archive',
   'play.incompleteTitle': 'The round is not complete.',
   'play.incompleteConceded':
     'Missing scores on holes {holes} – they will count as conceded.',

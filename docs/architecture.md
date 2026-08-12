@@ -381,7 +381,7 @@ Volba jazyka: uložená předvolba → jazyk prohlížeče → angličtina.
 ## Stav a navigace
 
 `App.tsx` drží čtyři věci: rozehrané kolo, archiv, jméno viditelné obrazovky
-(`'setup' | 'play' | 'results' | 'archive' | 'gameSettings'`) a rozepsaný draft
+(`'home' | 'play' | 'results' | 'archive' | 'archiveEdit' | ...`) a rozepsaný draft
 nastavení nového kola. Draft zůstává v kořeni aplikace, aby přechod do výběru
 hřiště nebo jiné podobrazovky nesmazal zadané hráče, hru ani handicapy.
 Navigace je plochá – aplikace se ovládá jednou rukou na hřišti, takže se nikam
@@ -397,7 +397,8 @@ uvnitř appky.
 Kolo se ukládá `useEffect`em při každé změně, takže ho není potřeba ukládat
 ručně z obrazovek. Všechny změny skóre jdou přes callbacky v `App.tsx`, které
 `Round` mění **neměnně** (nové pole/objekt, ne mutace) – jinak by se React
-nepřekreslil.
+nepřekreslil. Cíl změny určuje `updateRound()`: bez otevřené opravy je to
+rozehrané kolo, s otevřenou oprava záznamu v archivu.
 
 Tok appky:
 
@@ -437,6 +438,11 @@ jiná obrazovka appky a nikdy se neodpojí. Odvození hřiště a výřezu, kter
 potřebuje víc kroků najednou, počítá sdílené `src/screens/setupCourse.ts`.
 
 `ResultsScreen` slouží zároveň jako detail archivního kola (`readOnly`).
+Z detailu se dá kolo **dodatečně opravit** (rozhodnutí #31): „Upravit skóre"
+otevře `PlayScreen` s `editing` a zápis míří přes `updateArchivedRound()`
+rovnou do archivu, ne do rozehraného kola. Které kolo se opravuje, se
+odvozuje z `view === 'archiveEdit'` a `openArchiveId`, aby to po zpět/swipe
+sedělo s tím, co je vidět.
 
 ## Obrazovky
 

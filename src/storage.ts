@@ -187,6 +187,24 @@ export function archiveRound(round: Round): void {
   write(ARCHIVE_KEY, [round, ...rest].slice(0, ARCHIVE_LIMIT))
 }
 
+/**
+ * Přepíše kolo, které v archivu už je, **na jeho místě**.
+ *
+ * `archiveRound()` staví nejnovější kolo na začátek seznamu, což je správné
+ * při ukládání dohraného kola, ale ne při dodatečné opravě: oprava skóre
+ * z loňska by tím kolo vytáhla na první místo v archivu i na domovskou
+ * obrazovku jako „poslední odehraná hra". Kolo, které v archivu není, se
+ * neukládá - editace se vždycky týká existujícího záznamu.
+ */
+export function updateArchivedRound(round: Round): void {
+  const archive = loadArchive()
+  if (!archive.some((r) => r.id === round.id)) return
+  write(
+    ARCHIVE_KEY,
+    archive.map((r) => (r.id === round.id ? round : r)),
+  )
+}
+
 export function deleteArchivedRound(roundId: string): void {
   write(
     ARCHIVE_KEY,

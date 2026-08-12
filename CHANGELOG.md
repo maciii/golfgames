@@ -7,6 +7,21 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.43.0] – 2026-08-12
+
+### Přidáno
+
+- **Archivní kolo se dá dodatečně opravit.** Detail odehraného kola byl jen ke
+  čtení, takže přehlédnutý zápis nebo špatně sečtená jamka se už nedaly
+  spravit - dohrané kolo šlo opravit jedině dokud bylo to poslední rozehrané.
+  V detailu je teď „Upravit skóre": otevře stejný zápis skóre jako na hřišti
+  (skóre, extra body, par i setup jamky u Levé-Pravé) a ukládá rovnou do
+  archivu. Kolo přitom zůstává na svém místě v archivu i na domovské
+  obrazovce - oprava loňské hry z ní neudělá „poslední odehranou"
+  (`updateArchivedRound()` v `src/storage.ts`). Opravuje se nezávisle na
+  rozehraném kole, takže dohrávané kolo na hřišti oprava jiného kola
+  neovlivní. Rozhodnutí #31 v `docs/decisions.md`.
+
 ## [0.42.1] – 2026-08-11
 
 ### Opraveno

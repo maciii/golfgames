@@ -13,6 +13,8 @@ interface Props {
   onOpenAccount?: () => void
   /** Archivní kolo se jen prohlíží - nejde v něm pokračovat ani ho mazat. */
   readOnly?: boolean
+  /** Dodatečná oprava skóre archivního kola. */
+  onEdit?: () => void
   onResume?: () => void
   onNewRound?: () => void
   onOpenArchive?: () => void
@@ -26,6 +28,7 @@ export default function ResultsScreen({
   round,
   onOpenAccount,
   readOnly = false,
+  onEdit,
   onResume,
   onNewRound,
   onOpenArchive,
@@ -294,9 +297,18 @@ export default function ResultsScreen({
 
       <footer className="app-footer">
         {readOnly ? (
-          <button type="button" className="primary-button" onClick={onBack}>
-            {t('results.backToArchive')}
-          </button>
+          <div className="footer-row">
+            {/* Zpětná oprava odehraného kola: skóre se dá spočítat i po hře,
+                takže archiv nesmí být jen ke čtení. */}
+            {onEdit && (
+              <button type="button" className="secondary-button" onClick={onEdit}>
+                {t('results.editScores')}
+              </button>
+            )}
+            <button type="button" className="primary-button" onClick={onBack}>
+              {t('results.backToArchive')}
+            </button>
+          </div>
         ) : finished ? (
           <div className="footer-row">
             <button type="button" className="secondary-button" onClick={onResume}>

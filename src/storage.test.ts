@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addToRoster, loadRoster, setRosterTee, toggleRosterFavorite } from './storage'
+import {
+  addToRoster,
+  archiveRound,
+  loadArchive,
+  loadRoster,
+  setRosterTee,
+  toggleRosterFavorite,
+  updateArchivedRound,
+} from './storage'
+import { makeRound } from './games/fixtures'
+import type { Round } from './types'
 
 /**
  * Testy seznamu hráčů.
@@ -83,5 +93,72 @@ describe('oblíbení hráči na domovské obrazovce', () => {
 
     const withoutFavorite = toggleRosterFavorite(eva.id)
     expect(withoutFavorite.find((entry) => entry.name === 'Eva')?.favorite).toBe(false)
+  })
+})
+
+describe('dodatečná oprava archivního kola', () => {
+  /** Tři kola v archivu tak, jak by tam po sobě přišla - nejnovější první. */
+  function seedArchive(): Round[] {
+    const rounds = ['a', 'b', 'c'].map((suffix, index) => ({
+      ...makeRound({
+        gameId: 'best-aggregate',
+        players: ['Eva', 'Martin'],
+        pars: [4, 4, 4],
+        scores: [
+          [4, 4, 4],
+          [5, 5, 5],
+        ],
+      }),
+      id: `round-${suffix}`,
+      finishedAt: `2026-0${index + 1}-01T10:00:00.000Z`,
+    }))
+    // Archiv drží nejnovější kolo první, takže se ukládá v pořadí, ve kterém
+    // se dohrála.
+    for (const round of rounds) archiveRound(round)
+    return rounds
+  }
+
+  it('přepíše skóre a nechá kolo na jeho místě v archivu', () => {
+    const [oldest] = seedArchive()
+    const eva = oldest!.players[0]!
+
+    updateArchivedRound({
+      ...oldest!,
+      scores: { ...oldest!.scores, [eva.id]: [3, 4, 4] },
+      updatedAt: '2026-08-12T09:00:00.000Z',
+    })
+
+    const archive = loadArchive()
+    expect(archive.map((r) => r.id)).toEqual(['round-c', 'round-b', 'round-a'])
+    expect(archive.find((r) => r.id === 'round-a')?.scores[eva.id]).toEqual([3, 4, 4])
+    expect(archive.find((r) => r.id === 'round-a')?.updatedAt).toBe(
+      '2026-08-12T09:00:00.000Z',
+    )
+  })
+
+  it('kolo, které v archivu není, nepřidá', () => {
+    seedArchive()
+
+    updateArchivedRound({
+      ...makeRound({
+        gameId: 'best-aggregate',
+        players: ['Eva', 'Martin'],
+        pars: [4],
+        scores: [[4], [5]],
+      }),
+      id: 'round-x',
+    })
+
+    expect(loadArchive().map((r) => r.id)).toEqual(['round-c', 'round-b', 'round-a'])
+  })
+
+  it('archiveRound by naopak opravené kolo vytáhl na první místo', () => {
+    // Proto se na opravu používá updateArchivedRound: jinak by se rok stará
+    // hra po opravě tvářila jako poslední odehraná.
+    const [oldest] = seedArchive()
+
+    archiveRound(oldest!)
+
+    expect(loadArchive().map((r) => r.id)).toEqual(['round-a', 'round-c', 'round-b'])
   })
 })

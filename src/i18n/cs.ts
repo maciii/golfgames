@@ -193,6 +193,7 @@ export const cs = {
   'play.next': 'Další jamka',
   'play.skip': 'Přeskočit na další',
   'play.finishAndSave': 'Ukončit a uložit kolo',
+  'play.saveEdits': 'Hotovo, zpět do archivu',
   'play.incompleteTitle': 'Kolo není kompletní.',
   'play.incompleteConceded':
     'Chybí zápis na jamkách {holes} – budou se počítat jako vzdané.',

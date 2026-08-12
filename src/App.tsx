@@ -10,6 +10,7 @@ import {
   loadCurrentRound,
   loadSettings,
   saveCurrentRound,
+  updateArchivedRound,
 } from './storage'
 import type { Course } from './courses/types'
 import PlayScreen from './screens/PlayScreen'
@@ -44,6 +45,7 @@ type View =
   | 'play'
   | 'results'
   | 'archive'
+  | 'archiveEdit'
   | 'gameSettings'
   | 'backup'
   | 'account'
@@ -117,6 +119,15 @@ function AppShell() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>()
   // Uložená hřiště pro kroky zakládání kola; obnoví se po úpravě/stažení.
   const [courses, setCourses] = useState<Course[]>(() => loadCourses())
+  /**
+   * Archivní kolo otevřené k dodatečné opravě. Nedrží se ve vlastním stavu,
+   * ale odvozuje se z obrazovky a otevřeného kola - jinak by se po zpět/swipe
+   * (obnovuje se jen `NavSnapshot`) editace rozešla s tím, co je vidět.
+   */
+  const editedRound =
+    view === 'archiveEdit' && openArchiveId
+      ? archive.find((r) => r.id === openArchiveId)
+      : undefined
 
   // --- rozepsané založení kola ---------------------------------------------
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
@@ -298,45 +309,84 @@ function AppShell() {
     [resetSetupState],
   )
 
+  /**
+   * Kolo, do kterého míří zápis skóre.
+   *
+   * Editace archivního kola nesmí přepsat rozehrané kolo - na hřišti se dá
+   * dohrávat jedno kolo a zpětně opravovat jiné. Mění se proto přímo záznam
+   * v archivu, ne `round`.
+   */
+  const updateRound = useCallback(
+    (update: (target: Round) => Round) => {
+      if (!editedRound) {
+        setRound((prev) => (prev ? update(prev) : prev))
+        return
+      }
+
+      const next = update(editedRound)
+      if (next === editedRound) return
+      updateArchivedRound(next)
+      setArchive((prev) => prev.map((r) => (r.id === next.id ? next : r)))
+      if (round?.id === next.id) {
+        // Právě dohrané kolo je v archivu i jako rozehrané. Bez tohohle by se
+        // po restartu appky vrátila neopravená verze - a synchronizaci
+        // ohlásí změnu efekt nad `round`.
+        setRound(next)
+      } else if (next.updatedAt !== editedRound.updatedAt) {
+        // Listování jamkami čas změny nezvedá, takže není co posílat do cloudu.
+        noteRoundChange(next)
+      }
+    },
+    [editedRound, round?.id, noteRoundChange],
+  )
+
   const setScore = useCallback(
     (playerId: PlayerId, hole: number, value: number | null) => {
-      setRound((prev) => {
-        if (!prev) return prev
+      updateRound((prev) => {
         const holes = [...(prev.scores[playerId] ?? [])]
         holes[hole] = value
         return touchRound({ ...prev, scores: { ...prev.scores, [playerId]: holes } })
       })
     },
-    [],
+    [updateRound],
   )
 
-  const setBonus = useCallback((playerId: PlayerId, hole: number, bonusId: BonusId) => {
-    setRound((prev) =>
-      prev ? touchRound(toggleBonus(prev, playerId, hole, bonusId)) : prev,
-    )
-  }, [])
+  const setBonus = useCallback(
+    (playerId: PlayerId, hole: number, bonusId: BonusId) => {
+      updateRound((prev) => touchRound(toggleBonus(prev, playerId, hole, bonusId)))
+    },
+    [updateRound],
+  )
 
-  const setPar = useCallback((hole: number, par: number) => {
-    // setHolePar zároveň zahodí Longest/Nearest, když na novém paru nepatří.
-    setRound((prev) => (prev ? touchRound(setHolePar(prev, hole, par)) : prev))
-  }, [])
+  const setPar = useCallback(
+    (hole: number, par: number) => {
+      // setHolePar zároveň zahodí Longest/Nearest, když na novém paru nepatří.
+      updateRound((prev) => touchRound(setHolePar(prev, hole, par)))
+    },
+    [updateRound],
+  )
 
-  const setHoleSetup = useCallback((hole: number, selection: HoleSetupSelection) => {
-    setRound((prev) => {
-      if (!prev) return prev
-      const update = getGame(prev.gameId).setHoleSetup
-      if (!update) return prev
-      const next = update(prev, hole, selection)
-      return next === prev ? prev : touchRound(next)
-    })
-  }, [])
+  const setHoleSetup = useCallback(
+    (hole: number, selection: HoleSetupSelection) => {
+      updateRound((prev) => {
+        const update = getGame(prev.gameId).setHoleSetup
+        if (!update) return prev
+        const next = update(prev, hole, selection)
+        return next === prev ? prev : touchRound(next)
+      })
+    },
+    [updateRound],
+  )
 
-  const goToHole = useCallback((hole: number) => {
-    setRound((prev) => {
-      if (!prev) return prev
-      return { ...prev, currentHole: Math.max(0, Math.min(prev.holeCount - 1, hole)) }
-    })
-  }, [])
+  const goToHole = useCallback(
+    (hole: number) => {
+      updateRound((prev) => ({
+        ...prev,
+        currentHole: Math.max(0, Math.min(prev.holeCount - 1, hole)),
+      }))
+    },
+    [updateRound],
+  )
 
   const finishRound = useCallback(() => {
     setRound((prev) => {
@@ -385,6 +435,12 @@ function AppShell() {
     setArchive(loadArchive())
     setOpenArchiveId(roundId)
     setView('archive')
+  }, [])
+
+  /** Otevře archivní kolo v zápisu skóre - dodatečná oprava odehraného kola. */
+  const editArchivedRound = useCallback((roundId: string) => {
+    setOpenArchiveId(roundId)
+    setView('archiveEdit')
   }, [])
 
   /**
@@ -522,11 +578,37 @@ function AppShell() {
     )
   }
 
-  if (view === 'archive') {
+  // Oprava odehraného kola: stejný zápis skóre jako na hřišti, jen se ukládá
+  // rovnou do archivu a končí zpátky v jeho detailu.
+  if (editedRound) {
+    return (
+      <PlayScreen
+        round={editedRound}
+        editing
+        onSetScore={setScore}
+        onToggleBonus={setBonus}
+        onSetPar={setPar}
+        onSetHoleSetup={setHoleSetup}
+        onGoToHole={goToHole}
+        onFinish={() => window.history.back()}
+        onShowResults={() => window.history.back()}
+        onOpenAccount={() => setView('account')}
+      />
+    )
+  }
+
+  // Bez nalezeného kola (smazané, obnovené ze zálohy) spadne editace zpátky
+  // do archivu, ať appka nikdy neskončí na prázdné obrazovce.
+  if (view === 'archive' || view === 'archiveEdit') {
     const opened = archive.find((r) => r.id === openArchiveId)
     if (opened) {
       return (
-        <ResultsScreen round={opened} readOnly onBack={() => window.history.back()} />
+        <ResultsScreen
+          round={opened}
+          readOnly
+          onEdit={() => editArchivedRound(opened.id)}
+          onBack={() => window.history.back()}
+        />
       )
     }
     return (

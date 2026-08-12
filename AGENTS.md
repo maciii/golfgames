@@ -137,6 +137,10 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **První sekce z `computeStandings()` je podkladem pro peníze.** Její
   `row.value` se předává do `settleRound()` jako počet jednotek; u Skins je
   to součet skinů a přiznaných extra bodů.
+- **Oprava archivního kola nejde přes `archiveRound()`.** Ta staví kolo na
+  začátek archivu, takže by oprava loňské hry z ní udělala „poslední
+  odehranou". Zpětná editace používá `updateArchivedRound()` a míří do
+  archivu, ne do rozehraného kola (rozhodnutí #31).
 - **Nesahej na hotový build.** `dist/` je v `.gitignore` a generuje ho CI.
 - **Firestore odmítá `undefined`** a shodí tím celý zápis chybou
   `invalid-argument`. `normalizeCourse()` ho do hřiště zapisuje záměrně
