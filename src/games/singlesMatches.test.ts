@@ -3,6 +3,7 @@ import { flightMatches, singlesMatches } from './singlesMatches'
 import { makeRound } from './fixtures'
 import { setActiveLocale } from '../i18n'
 import { settleGroups } from '../money'
+import { strokesReceived } from '../handicap'
 import type { Round } from '../types'
 
 beforeAll(() => setActiveLocale('cs'))
@@ -199,6 +200,60 @@ describe('Dvě jamkovky ve flightu - peníze', () => {
 })
 
 describe('Dvě jamkovky ve flightu - netto', () => {
+  /**
+   * Osmnáctijamkové kolo, ve kterém je zapsaná jen první jamka - par 3 se
+   * stroke indexem 5. Kratší fixtura by tady lhala: na kole o jedné jamce
+   * padne celý hrací handicap na tu jamku.
+   */
+  function highHandicapRound(alexHandicap: number): Round {
+    const pars = [3, ...Array(17).fill(4)]
+    const empty = Array<number | null>(18).fill(null)
+    const round = flightRound({
+      pars,
+      scores: [
+        [6, ...empty.slice(1)],
+        [3, ...empty.slice(1)],
+        [4, ...empty.slice(1)],
+        [4, ...empty.slice(1)],
+      ],
+    })
+    round.netScoring = true
+    round.course = {
+      name: 'Testovací hřiště',
+      strokeIndex: [5, 1, 17, 7, 11, 3, 15, 9, 13, 6, 2, 18, 8, 12, 4, 16, 10, 14],
+    }
+    // Alex má index 54 a ze slopovaného odpaliště hrací handicap 61, Mac 12.
+    round.players[0]!.playingHandicap = alexHandicap
+    round.players[1]!.playingHandicap = 12
+    return round
+  }
+
+  it('par 3 s vysokým HCP: šest proti třem je dělená jamka', () => {
+    // Skutečné kolo, které vypadalo jako chyba v bodování: na jamce se SI 5
+    // dostává Alex čtyři rány a Mac jednu, takže brutto 6 proti 3 je netto
+    // 2 proti 2. Chyba byla jen v zápisu skóre, který u Alexe ukazoval tři
+    // tečky místo čtyř.
+    const round = highHandicapRound(61)
+
+    expect(strokesReceived(round, 'p1', 0)).toBe(4)
+    expect(strokesReceived(round, 'p2', 0)).toBe(1)
+
+    const [first] = flightMatches(round)
+    expect(first?.state.halved).toBe(1)
+    expect(first?.state.won).toEqual([0, 0])
+  })
+
+  it('o ránu nižší handicap by jamku Macovi dal', () => {
+    // Kontrola, že dělená jamka výš není nečitelnost výpočtu: s hracím
+    // handicapem 54 dostává Alex tři rány a netto 3 proti 2 jamku prohrává.
+    const round = highHandicapRound(54)
+
+    expect(strokesReceived(round, 'p1', 0)).toBe(3)
+
+    const [first] = flightMatches(round)
+    expect(first?.state.won).toEqual([0, 1])
+  })
+
   it('rány se odečítají hráči, ne dvojici', () => {
     const round = flightRound({
       pars: [4],

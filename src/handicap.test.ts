@@ -220,6 +220,25 @@ describe('strokesForHole', () => {
     expect(total).toBe(-3)
   })
 
+  it('vysoký handicap dává na nejtěžších jamkách čtyři rány', () => {
+    // Hráč s indexem 54 (nejvyšší, jaký WHS zná) má ze slopovaného odpaliště
+    // hrací handicap nad 54, takže na nejtěžších jamkách dostává čtyři rány.
+    // Zápis skóre je proto nesmí ukázat jako tři - viz tečky v `PlayScreen`.
+    const playing = playerCourseHandicap(
+      54,
+      { courseRating: 71.2, slopeRating: 128, par: 71 },
+      18,
+      71,
+    )
+    expect(playing).toBe(61)
+
+    expect(strokesForHole(playing, 1, 18)).toBe(4)
+    expect(strokesForHole(playing, 7, 18)).toBe(4)
+    expect(strokesForHole(playing, 8, 18)).toBe(3)
+    const total = SI_18.reduce((sum, si) => sum + strokesForHole(playing, si, 18), 0)
+    expect(total).toBe(61)
+  })
+
   it('na devítijamkovém kole rozdává rány po devíti jamkách', () => {
     const si9 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     const total = si9.reduce((sum, si) => sum + strokesForHole(5, si, 9), 0)

@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.44.1] – 2026-08-13
+
+### Opraveno
+
+- **Zápis skóre ukazoval nejvýš tři tečky HCP.** Hráč s indexem 54 má ze
+  slopovaného odpaliště hrací handicap nad 54, takže na nejtěžších jamkách
+  dostává **čtyři** rány - zápis skóre je ale zastropovával na tři, zatímco
+  scorekarta je vypisovala celé. Dvě obrazovky téhož kola si tak protiřečily
+  a dělená jamka (par 3, brutto 6 proti 3 s rozdílem tří ran) vypadala jako
+  chyba v bodování. Samotný výpočet byl správně, chyba byla jen v zobrazení;
+  teček je teď vždycky tolik, kolik ran hráč opravdu dostává. Stejně se
+  vypisují i rány dvojice u Foursome.
+
 ## [0.44.0] – 2026-08-12
 
 ### Přidáno

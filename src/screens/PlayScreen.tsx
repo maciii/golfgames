@@ -238,7 +238,11 @@ export default function PlayScreen({
               </span>
             ))}
             {/* Rány, které hráč na téhle jamce dostává. Bez toho není poznat,
-                proč má za stejný počet ran jiný výsledek než soupeř. */}
+                proč má za stejný počet ran jiný výsledek než soupeř - a proto
+                se počet teček **nesmí** zastropovat: hráč s HCP 54 dostává na
+                nejtěžších jamkách čtyři rány a tři tečky by tvrdily, že mezi
+                ním a soupeřem je o ránu menší rozdíl, než jaký se opravdu
+                počítá. Scorekarta je vypisuje celé odjakživa. */}
             {strokesReceived(round, player.id, hole) > 0 && (
               <span
                 className="player-mark strokes"
@@ -246,7 +250,7 @@ export default function PlayScreen({
                   count: strokesReceived(round, player.id, hole),
                 })}
               >
-                {'•'.repeat(Math.min(3, strokesReceived(round, player.id, hole)))}
+                {'•'.repeat(strokesReceived(round, player.id, hole))}
               </span>
             )}
           </span>
@@ -345,13 +349,14 @@ export default function PlayScreen({
                 {entry.value}
               </span>
             ))}
-            {/* Rány dvojice na téhle jamce - u foursome z poloviny součtu HCP. */}
+            {/* Rány dvojice na téhle jamce - u foursome z poloviny součtu HCP.
+                Vypisují se všechny, viz tečky u hráče výš. */}
             {strokes > 0 && (
               <span
                 className="player-mark strokes"
                 title={t('play.strokesReceivedPair', { count: strokes })}
               >
-                {'•'.repeat(Math.min(3, strokes))}
+                {'•'.repeat(strokes)}
               </span>
             )}
           </span>

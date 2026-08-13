@@ -115,6 +115,15 @@ Se zvoleným hřištěm jde zapnout **hru na rány s handicapem**. Hráč pak na
 jamce dostává rány podle svého hracího handicapu a stroke indexu jamky; při
 zápisu i ve scorekartě je to vidět jako tečky u jeho výsledku.
 
+**Teček je vždycky tolik, kolik ran hráč na jamce opravdu dostává** – žádný
+strop. Index 54 dává ze slopovaného odpaliště hrací handicap nad 54, takže na
+nejtěžších jamkách jsou to čtyři rány, a zastropovaná trojka by tvrdila, že je
+mezi hráči o ránu menší rozdíl, než s jakým se počítá vítěz jamky. Scorekarta
+navíc umí tečky ukázat ve dvou vztažných soustavách: **Hřiště** jsou skutečně
+přidělené rány (totéž, co ukazuje zápis skóre), **Nejlepší hráč** je rozdíl
+proti nejnižšímu hracímu handicapu ve flightu, jak se rozdíl tradičně zapisuje
+na kartu. Ani jedno nemění skóre, jsou to jen dva pohledy na totéž.
+
 Platí jedno pravidlo, ze kterého se odvozuje všechno ostatní: **rozdané rány
 mění, kdo jamku vyhrál, ne to, jak se zahrála.**
 
