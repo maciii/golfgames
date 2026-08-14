@@ -5,31 +5,43 @@ patří konkrétní cíl, rozhodnutí a ověřitelný výsledek.
 
 ## Cíl
 
-Doplnit zbylé jamkovkové varianty pro čtyři hráče: Foursome (dvojice jedním
-míčem) a dvě samostatné jamkovky 1 na 1 v jednom flightu.
+Dvojice na vlastní obrazovce, pohyb mezi kroky zakládání kola bez ztráty dat
+a čitelný zápis skóre i s dlouhými jmény a dvěma zápasy ve flightu.
 
 ## Úkoly
 
-- [x] Vytáhnout jádro jamkovky do `src/games/match.ts`
-- [x] Přidat Foursome se zápisem jednoho skóre na dvojici a HCP z poloviny součtu
-- [x] Přidat dvě jamkovky 1 na 1 s vyrovnáním peněz za každý zápas zvlášť
-- [x] Upravit zápis skóre, scorekartu a volbu soupeřů v zakládání kola
-- [x] Testy pravidel, handicapu dvojice a peněz obou her
-- [x] Doplnit překlady, dokumentaci, changelog a rozhodnutí #33 a #34
-- [x] Odladit v Playwrightu na telefonních profilech a spustit kompletní kontrolu
+- [x] Vytáhnout dvojice a změnu hry z obrazovek do `src/roundSetup.ts`
+- [x] Volba dvojic jako vlastní krok (`SetupPairingScreen`), odkaz na ni v kroku Hra
+- [x] Hru a dvojice jde otevřít i z rozehraného kola, změna se uplatní hned
+- [x] Zpět/swipe z rozehraného kola nesmí přistát na kroku, který už neplatí
+- [x] Dlouhé jméno nesmí vytlačit tečky HCP a značky v řádku hráče
+- [x] Hlavička jamky: jeden řádek na zápas, dormie u svého zápasu, krátká jména
+- [x] Testy `roundSetup`, hlavičky dvou jamkovek a krátkého jména
+- [x] Playwright: `e2e/setupNav.spec.ts` a úprava kroků v existujících testech
+- [x] Dokumentace, rozhodnutí #35 a #36, nepřekročitelné pravidlo 11
 
 ## Rozhodnutí
 
-- Společný míč se ukládá **oběma partnerům**; model kola se nemění a starý
-  archiv nepotřebuje migraci (rozhodnutí #33).
-- `Round.teams` u dvou jamkovek znamená soupeře jednoho zápasu, ne partnery
-  (`pairingKind: 'opponents'`).
-- Nezávislé zápasy se vyrovnávají přes `settleGroups()`, ne `settleRound()`;
-  rozehraná jamka je vlastnost zápasu, ne flightu (rozhodnutí #34).
+- **Zapsané skóre se nikdy nesmaže** - nové nepřekročitelné pravidlo 11
+  v `AGENTS.md`. Změna nastavení kolo přepočítá, nemaže.
+- Krok zakládání platí jen pro svůj stav; `NavSnapshot.setupRoundId` odlišuje
+  rozepsané nové kolo od úpravy rozehraného (rozhodnutí #35).
+- V rozehraném kole čtou obrazovky kroků přímo `Round`, ne rozepsaný stav -
+  nemají se s čím rozejít.
+- V hlavičce jamky je jeden řádek na zápas s krátkým jménem vedoucího;
+  soupeře ukazuje blok zápasu (rozhodnutí #36).
+
+## Co zbývá
+
+- **Jména, handicapy a odpaliště v rozehraném kole.** Kroky Hráči a Odpaliště
+  staví hrací handicapy z katalogu hřišť a z výřezu devítek, který si kolo
+  nepamatuje - viz otevřené otázky v `docs/decisions.md`.
+- **Sázka v rozehraném kole.** Změna `pointValue` je bezpečná (peníze se
+  počítají až při zobrazení), chybí jen krok v úpravě nastavení kola.
 
 ## Ověření
 
-- `npx vitest run src/games/foursome.test.ts src/games/singlesMatches.test.ts`
-- `npx playwright test games4 --project=phone-chrome-android --project=phone-safari-ios`
+- `npx vitest run src/roundSetup.test.ts src/games/singlesMatches.test.ts src/types.test.ts`
+- `npx playwright test setupNav games4 responsive --project=phone-chrome-android`
 - `npm run check`
-- `npx vite build`
+- `npm run test:e2e:phone`

@@ -164,6 +164,13 @@ const STEP_TITLE: Record<SetupStep, RegExp> = {
   bet: /Sázka|Stake/i,
 }
 
+/**
+ * Krok s dvojicemi má vlastní obrazovku a v řadě kroků se objeví jen u her ve
+ * dvojicích, takže do `SETUP_STEPS` nepatří. Vzor je ukotvený - „Hra a dvojice"
+ * je jiný krok a samotné „dvojice" by v něm taky sedělo.
+ */
+export const PAIRING_TITLE = /^(Dvojice|Soupeři|Pairs|Teams|Opponents)$/i
+
 /** Čeká, až je vidět daný krok zakládání kola. */
 export async function expectSetupStep(page: Page, step: SetupStep): Promise<void> {
   await expect(page.locator('.app-header h1')).toHaveText(STEP_TITLE[step])
@@ -196,9 +203,19 @@ export async function openSetup(page: Page, step: SetupStep = 'players'): Promis
   const target = SETUP_STEPS.indexOf(step)
   for (let i = 0; i < target; i += 1) {
     await page.locator('.app-footer .primary-button').click()
+    // Dvojice mají vlastní krok, ale jen u her, které se ve dvojicích hrají -
+    // pro ostatní kroky je to průchod, ne cíl.
+    if (await isPairingStep(page))
+      await page.locator('.app-footer .primary-button').click()
     const next = SETUP_STEPS[i + 1]
     if (next) await expectSetupStep(page, next)
   }
+}
+
+/** Je vidět krok s dvojicemi? */
+export async function isPairingStep(page: Page): Promise<boolean> {
+  const title = await page.locator('.app-header h1').first().textContent()
+  return PAIRING_TITLE.test(title ?? '')
 }
 
 /**
@@ -402,15 +419,21 @@ export async function openArchivedRoundDetail(page: Page): Promise<void> {
 
 /** Rozehrané kolo tak, jak ho appka uložila - kontrola, co ze zakládání vzešlo. */
 export async function currentRound(page: Page): Promise<{
+  id: string
+  gameId: string
   holeCount: number
   scores: Record<string, (number | null)[]>
+  teams: { id: string; playerIds: string[] }[]
 }> {
   const raw = await page.evaluate(() =>
     window.localStorage.getItem('golfgames.currentRound.v1'),
   )
   expect(raw, 'rozehrané kolo není v úložišti').not.toBeNull()
   return JSON.parse(raw!) as {
+    id: string
+    gameId: string
     holeCount: number
     scores: Record<string, (number | null)[]>
+    teams: { id: string; playerIds: string[] }[]
   }
 }

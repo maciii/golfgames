@@ -676,6 +676,28 @@ export function playerName(round: Round, playerId: PlayerId): string {
   return round.players.find((p) => p.id === playerId)?.name ?? '?'
 }
 
+/**
+ * Krátké jméno hráče do těsných míst - hlavička jamky.
+ *
+ * Bere první slovo jména, protože „Alexandra Pániková 2 UP" se vedle druhého
+ * zápasu do hlavičky nevejde a uříznuté „Alexandra Pánik…" je horší než
+ * „Alexandra". Když se dva hráči v kole na prvním slově shodnou, přibere
+ * ještě první písmeno toho dalšího - jinak by se stavy zápasů popletly.
+ */
+export function shortPlayerName(round: Round, playerId: PlayerId): string {
+  const full = playerName(round, playerId)
+  const [first, ...rest] = full.trim().split(/\s+/)
+  if (!first || rest.length === 0) return full
+
+  const shared = round.players.some(
+    (other) => other.id !== playerId && other.name.trim().split(/\s+/)[0] === first,
+  )
+  if (!shared) return first
+
+  const initial = rest[0]?.[0]
+  return initial ? `${first} ${initial}.` : full
+}
+
 export function scoreAt(round: Round, playerId: PlayerId, hole: number): number | null {
   return round.scores[playerId]?.[hole] ?? null
 }

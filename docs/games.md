@@ -54,6 +54,16 @@ bodů za pořadí a obě tabulky mají tři místa (9 bodů 5-3-1, 6 bodů 4-2-0
 **Stableford jako jediný zvládne jednoho hráče**, protože se boduje proti paru,
 ne proti soupeři.
 
+**Dvojice se vybírají ve vlastním kroku** zakládání kola a jde je změnit i
+uprostřed rozehraného kola (rozhodnutí #35) - hráči se na jamce přeskupí
+častěji, než by se čekalo. Změna přepíše `Round.teams` a **kolo se přepočítá
+od první jamky**: výsledek i peníze se počítají ze zapsaného skóre až při
+zobrazení, takže i jamky zapsané dřív platí pro nové dvojice. Zapsané skóre se
+při tom nikdy nemaže. U **Foursome** má změna dvojic zvláštní důsledek: míč
+dvojice je uložený u obou partnerů (rozhodnutí #33), takže nová dvojice čte na
+už zapsaných jamkách ránu svého prvního hráče. U **Levé-Pravé** se dvojice
+takhle měnit nedají vůbec - určují se znovu na každé jamce podle první rány.
+
 ## Vzdaná jamka vs. nehraná jamka
 
 Chybějící zápis znamená dvě různé věci a aplikace je rozlišuje podle toho,

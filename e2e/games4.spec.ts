@@ -7,6 +7,7 @@ import {
   expectTappable,
   isLandscapeScorecard,
   openSetup,
+  PAIRING_TITLE,
   scrollContentToEnd,
 } from './helpers'
 
@@ -34,6 +35,9 @@ async function startFourPlayerRound(page: Page, gameName: RegExp): Promise<void>
   await page.locator('.app-footer .primary-button').click()
 
   await page.locator('.game-card', { hasText: gameName }).first().click()
+  // Hra -> dvojice -> sázka -> start; dvojice mají u čtyř hráčů vlastní krok.
+  await page.locator('.app-footer .primary-button').click()
+  await expect(page.locator('.app-header h1')).toHaveText(PAIRING_TITLE)
   await page.locator('.app-footer .primary-button').click()
   await page.locator('.app-footer .primary-button').click()
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
@@ -96,8 +100,12 @@ test('dvě jamkovky drží každý zápas ve vlastním bloku', async ({ page }) 
   await first.locator('.player-row').nth(1).locator('.score-value').click()
   await first.locator('.player-row').nth(1).locator('.step-button').last().click()
 
-  await expect(first.locator('.team-summary')).toContainText('Mac 1 UP')
-  await expect(blocks.nth(1).locator('.team-summary')).toContainText('AS')
+  // Stav zápasu je v hlavičce jamky, u každého zápasu na svém řádku - v bloku
+  // by se s dlouhými jmény jen lámal na dva řádky.
+  const header = page.locator('.game-header-summary .game-header-entry')
+  await expect(header.first()).toContainText('Mac')
+  await expect(header.first()).toContainText('1 UP')
+  await expect(header.nth(1)).toContainText('AS')
 })
 
 test('dvě jamkovky vyrovnávají peníze zvlášť za každý zápas', async ({ page }) => {

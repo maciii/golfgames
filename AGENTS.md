@@ -96,6 +96,14 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
     pod 700 px (iPhone SE) se čtyři hráči nevejdou zhruba o 200 px už dlouho;
     test to drží jako `fixme`, aby se na to nezapomnělo.
 
+11. **Zapsané skóre se nikdy nesmaže.** Jediný, kdo smí zápis na jamce zrušit,
+    je hráč sám (přidržení čísla v zápisu skóre). Žádná jiná změna - dvojice,
+    hra, soupeři, par, nastavení bodování, oprava archivního kola - nesmí
+    `Round.scores` vyprázdnit ani zkrátit. Když nové nastavení znamená jiný
+    výsledek, kolo se **přepočítá** ze zapsaného skóre; hry ho počítají až při
+    zobrazení, takže přepočet nic ukládat nemusí. Hraje se o peníze a zápis
+    z jamky se zpětně nedohledá.
+
 ## Nejčastější zdroje chyb
 
 - **Vzdaná vs. nehraná jamka.** `scores[player][hole] === null` znamená buď

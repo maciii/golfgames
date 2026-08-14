@@ -11,6 +11,7 @@ import {
   parTotalBetween,
   roundCompleteness,
   setHolePar,
+  shortPlayerName,
   strokeTotal,
   strokeTotalBetween,
   toggleBonus,
@@ -349,5 +350,33 @@ describe('mezisoučet po devíti jamkách', () => {
 
     expect(turnHole(fromTen)).toBe(9)
     expect(strokeTotalBetween(fromTen, 'p1', 0, 9)).toBe(45)
+  })
+})
+
+describe('Krátké jméno do hlavičky', () => {
+  const round = (names: string[]) =>
+    makeRound({
+      gameId: 'skins',
+      players: names,
+      pars: [4],
+      scores: names.map(() => [4]),
+    })
+
+  it('z celého jména nechá první slovo', () => {
+    const flight = round(['Alexandra Pániková', 'Michal Švarc'])
+
+    expect(shortPlayerName(flight, 'p1')).toBe('Alexandra')
+    expect(shortPlayerName(flight, 'p2')).toBe('Michal')
+  })
+
+  it('jednoslovné jméno nechá být', () => {
+    expect(shortPlayerName(round(['Mac', 'Petr']), 'p1')).toBe('Mac')
+  })
+
+  it('při shodě jmen přibere iniciálu, ať se stavy nepopletou', () => {
+    const flight = round(['Martin Kubečka', 'Martin Novák'])
+
+    expect(shortPlayerName(flight, 'p1')).toBe('Martin K.')
+    expect(shortPlayerName(flight, 'p2')).toBe('Martin N.')
   })
 })

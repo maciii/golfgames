@@ -8,6 +8,7 @@ import {
   loadArchive,
   loadCourses,
   loadCurrentRound,
+  loadGameOptions,
   loadSettings,
   saveCurrentRound,
   updateArchivedRound,
@@ -27,7 +28,9 @@ import PlayersScreen from './screens/PlayersScreen'
 import SetupTeeScreen from './screens/SetupTeeScreen'
 import SetupPlayersScreen from './screens/SetupPlayersScreen'
 import SetupGameScreen from './screens/SetupGameScreen'
+import SetupPairingScreen from './screens/SetupPairingScreen'
 import SetupBetScreen from './screens/SetupBetScreen'
+import { applyRoundGame, pairingIndexOf, pairingLabel } from './roundSetup'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 import { useSwipeBack } from './swipeBack'
@@ -54,6 +57,7 @@ type View =
   | 'setupTee'
   | 'setupPlayers'
   | 'setupGame'
+  | 'setupPairing'
   | 'setupBet'
   | 'play'
   | 'results'
@@ -68,7 +72,13 @@ type View =
   | 'players'
 
 /** Kroky zakládání kola v pořadí, ve kterém se prochází - hřiště je krok 1, `CoursePickerScreen`. */
-const SETUP_STEP_VIEWS: View[] = ['setupTee', 'setupPlayers', 'setupGame', 'setupBet']
+const SETUP_STEP_VIEWS: View[] = [
+  'setupTee',
+  'setupPlayers',
+  'setupGame',
+  'setupPairing',
+  'setupBet',
+]
 
 /**
  * Kam obrazovka patří podle stavu kola.
@@ -95,6 +105,48 @@ function viewForRound(round: Round | null): View {
 interface NavSnapshot {
   view: View
   openArchiveId: string | null
+  /**
+   * Id kola, jehož nastavení se na kroku zakládání upravuje; `null` znamená
+   * rozepsané nové kolo.
+   *
+   * Bez toho by zpět z rozehraného kola přistálo na krocích s **vynulovaným**
+   * rozepsaným kolem (`startRound` ho po založení uklidí) a tlačítko „Začít
+   * kolo" by rozehrané kolo i se zapsaným skóre přepsalo prázdným.
+   */
+  setupRoundId: string | null
+}
+
+/**
+ * Obrazovka, na které má zpět/swipe skutečně přistát.
+ *
+ * Zakládání kola nemůže platit navěky. Jakmile kolo běží, `startRound` rozepsané
+ * kolo uklidí, takže krok z historie by ukázal prázdná jména a výchozí hru -
+ * a „Začít kolo" by rozehrané kolo i se zapsaným skóre přepsalo prázdným.
+ * Krok zakládání proto platí jen tehdy, když sedí na dnešní stav:
+ *
+ *   `setupRoundId === null` - rozepsané nové kolo, tedy dokud žádné neběží
+ *   `setupRoundId === id`   - úprava nastavení kola, dokud to kolo běží
+ *
+ * Neplatný krok skončí tam, kam patří stav kola (zápis skóre, výsledky,
+ * domovská obrazovka). Krok v historii zůstává, takže další zpět pokračuje
+ * dál a appka jde nakonec opustit.
+ */
+function navTarget(
+  snapshot: NavSnapshot,
+  round: Round | null,
+  pickerMode: 'start' | 'browse',
+): View {
+  const startsNewRound =
+    SETUP_STEP_VIEWS.includes(snapshot.view) ||
+    (snapshot.view === 'coursePicker' && pickerMode === 'start')
+  if (!startsNewRound) return snapshot.view
+
+  // Rozepsané kolo platí, dokud žádné jiné neexistuje - ani dohrané, protože
+  // i to by „Začít kolo" přebilo prázdným.
+  if (snapshot.setupRoundId === null) return round ? viewForRound(round) : snapshot.view
+
+  const live = round && !round.finishedAt ? round : null
+  return snapshot.setupRoundId === live?.id ? snapshot.view : viewForRound(round)
 }
 
 /**
@@ -142,6 +194,17 @@ function AppShell() {
       ? archive.find((r) => r.id === openArchiveId)
       : undefined
 
+  /**
+   * Kolo, jehož nastavení se právě upravuje na krocích zakládání; `null`
+   * znamená rozepsané nové kolo.
+   *
+   * Dvojice se na jamce mění (hráči se přeskupí, někdo dojde později), takže
+   * se ke krokům dá vrátit i z rozehraného kola. Volba se pak uplatní rovnou
+   * na kolo a všechno se přepočítá od první jamky - zapsané skóre se přitom
+   * nikdy nemaže (viz `AGENTS.md`).
+   */
+  const [setupRoundId, setSetupRoundId] = useState<string | null>(null)
+
   // --- rozepsané založení kola ---------------------------------------------
   const [gameId, setGameId] = useState(DEFAULT_GAME_ID)
   const [playerCount, setPlayerCount] = useState(
@@ -174,6 +237,7 @@ function AppShell() {
 
   /** Vrátí rozepsané založení kola na výchozí hodnoty - po startu i po zahození kola. */
   const resetSetupState = useCallback(() => {
+    setSetupRoundId(null)
     setGameId(DEFAULT_GAME_ID)
     setPlayerCount(getGame(DEFAULT_GAME_ID).playerCounts[0] ?? 2)
     setNames(Array(MAX_PLAYERS).fill(''))
@@ -243,9 +307,16 @@ function AppShell() {
   // z historie) od běžné navigace vpřed (stav se zapíše jako nový krok).
   const isPoppingHistory = useRef(false)
   const hasPushedInitialHistory = useRef(false)
+  /**
+   * Aktuální stav pro obsluhu `popstate`. Ta se registruje jednou a musí
+   * vidět dnešní kolo i režim výběru hřiště, aniž by se kvůli každému
+   * zápisu skóre přepisoval posluchač.
+   */
+  const navContext = useRef({ round, pickerMode })
+  navContext.current = { round, pickerMode }
 
   useEffect(() => {
-    const snapshot: NavSnapshot = { view, openArchiveId }
+    const snapshot: NavSnapshot = { view, openArchiveId, setupRoundId }
     if (isPoppingHistory.current) {
       isPoppingHistory.current = false
       return
@@ -258,7 +329,7 @@ function AppShell() {
       return
     }
     window.history.pushState(snapshot, '')
-  }, [view, openArchiveId])
+  }, [view, openArchiveId, setupRoundId])
 
   // Tažení od levého okraje jako „zpět" - v nainstalované PWA není systémové
   // gesto ani lišta prohlížeče. Na výchozí obrazovce dané stavem kola se
@@ -272,9 +343,12 @@ function AppShell() {
       // opravdu opustit, o to se postará prohlížeč sám.
       if (!snapshot) return
       isPoppingHistory.current = true
-      setView(snapshot.view)
+      const { round: current, pickerMode: picker } = navContext.current
+      const target = navTarget(snapshot, current, picker)
+      setView(target)
       setOpenArchiveId(snapshot.openArchiveId)
-      if (SETUP_STEP_VIEWS.includes(snapshot.view)) restoreSetupScroll.current = true
+      setSetupRoundId(target === snapshot.view ? snapshot.setupRoundId : null)
+      if (SETUP_STEP_VIEWS.includes(target)) restoreSetupScroll.current = true
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
@@ -372,6 +446,65 @@ function AppShell() {
       })
     },
     [updateRound],
+  )
+
+  /**
+   * Kolo, jehož nastavení se upravuje na krocích zakládání.
+   *
+   * Odvozuje se, ne drží ve vlastním stavu: po zpět/swipe se obnovuje jen
+   * `NavSnapshot`, takže odvozená hodnota se nemůže rozejít s tím, co je vidět.
+   */
+  const setupRound =
+    setupRoundId && round?.id === setupRoundId && !round.finishedAt ? round : undefined
+
+  /** Otevře nastavení rozehraného kola - třeba když se hráči přeskupili. */
+  const openRoundSetup = useCallback(() => {
+    if (!round || round.finishedAt) return
+    setSetupRoundId(round.id)
+    setView('setupGame')
+  }, [round])
+
+  /** Zavře nastavení kola a vrátí se k zápisu skóre. */
+  const leaveRoundSetup = useCallback(() => {
+    setSetupRoundId(null)
+    setView(viewForRound(round))
+  }, [round])
+
+  /**
+   * Volba hry: u nového kola do rozepsaného stavu, u rozehraného kola rovnou
+   * na kolo. Kolo se pak přepočítá celé - všechny hry počítají výsledek ze
+   * zapsaného skóre, které se nikdy nemaže.
+   */
+  const changeGame = useCallback(
+    (nextGameId: string) => {
+      if (!setupRound) {
+        setGameId(nextGameId)
+        return
+      }
+      updateRound((prev) =>
+        applyRoundGame(
+          prev,
+          nextGameId,
+          pairingIndexOf(prev),
+          loadGameOptions(nextGameId),
+        ),
+      )
+    },
+    [setupRound, updateRound],
+  )
+
+  /** Volba dvojic; v rozehraném kole se uplatní hned. */
+  const changePairing = useCallback(
+    (value: number) => {
+      if (!setupRound) {
+        setPairing(value)
+        return
+      }
+      updateRound((prev) =>
+        applyRoundGame(prev, prev.gameId, value, loadGameOptions(prev.gameId)),
+      )
+    },
+    [setupRound, updateRound],
   )
 
   const setBonus = useCallback(
@@ -702,21 +835,52 @@ function AppShell() {
     )
   }
 
+  // Hra a dvojice - u nového kola z rozepsaného stavu, u rozehraného kola
+  // rovnou z kola, takže se volba nemá s čím rozejít.
+  const setupPlayerCount = setupRound?.players.length ?? playerCount
+  const setupNames = setupRound
+    ? setupRound.players.map((player) => player.name)
+    : names.slice(0, playerCount)
+  const setupGameId = setupRound?.gameId ?? gameId
+  const setupPairing = setupRound ? pairingIndexOf(setupRound) : pairing
+  const setupNeedsPairing =
+    setupPlayerCount === 4 && getGame(setupGameId).usesTeams(setupPlayerCount)
+
   if (view === 'setupGame') {
     return (
       <SetupGameScreen
-        playerCount={playerCount}
-        names={names}
-        gameId={gameId}
-        onGameIdChange={setGameId}
-        pairing={pairing}
-        onPairingChange={setPairing}
+        playerCount={setupPlayerCount}
+        gameId={setupGameId}
+        onGameIdChange={changeGame}
+        {...(setupNeedsPairing
+          ? { pairingLabel: pairingLabel(setupGameId, setupNames, setupPairing) }
+          : {})}
+        onOpenPairing={() => setView('setupPairing')}
         onOpenGameSettings={(id) => {
           setSettingsGameId(id)
           openSetupSubscreen('gameSettings')
         }}
+        {...(setupRound ? { editing: true } : {})}
         onBack={() => window.history.back()}
-        onNext={() => setView('setupBet')}
+        onNext={() =>
+          setupRound
+            ? leaveRoundSetup()
+            : setView(setupNeedsPairing ? 'setupPairing' : 'setupBet')
+        }
+      />
+    )
+  }
+
+  if (view === 'setupPairing') {
+    return (
+      <SetupPairingScreen
+        names={setupNames}
+        gameId={setupGameId}
+        pairing={setupPairing}
+        onPairingChange={changePairing}
+        {...(setupRound ? { editing: true } : {})}
+        onBack={() => window.history.back()}
+        onNext={() => (setupRound ? leaveRoundSetup() : setView('setupBet'))}
       />
     )
   }
@@ -769,6 +933,7 @@ function AppShell() {
   return (
     <PlayScreen
       round={round}
+      onOpenSetup={openRoundSetup}
       onSetScore={setScore}
       onToggleBonus={setBonus}
       onSetPar={setPar}

@@ -268,3 +268,82 @@ describe('Dvě jamkovky ve flightu - netto', () => {
     expect(second?.state.halved).toBe(1)
   })
 })
+
+describe('Dvě jamkovky ve flightu - hlavička jamky', () => {
+  /**
+   * Zápas Adam-Bára je po dvou jamkách dormie (Adam 1 UP, zbývá jedna),
+   * zápas Cyril-Dana nerozhodně. Přesně ten stav, kdy se v hlavičce nesmí
+   * splést, koho se dormie týká.
+   */
+  const round = flightRound({
+    pars: [4, 4, 4],
+    scores: [
+      [4, 4, null],
+      [5, 4, null],
+      [4, 4, null],
+      [4, 4, null],
+    ],
+  })
+
+  it('u stavu nepíše, kdo s kým hraje - jen kdo vede', () => {
+    const header = singlesMatches.headerSummary?.(round, 2)
+
+    expect(header?.entries.map((entry) => [entry.label, entry.value])).toEqual([
+      ['Adam', '1 UP'],
+      ['Cyril', 'AS'],
+    ])
+  })
+
+  it('dormie hlásí u toho zápasu, kterého se týká', () => {
+    const header = singlesMatches.headerSummary?.(round, 2)
+
+    expect(header?.entries.map((entry) => entry.note)).toEqual(['dormie', ''])
+  })
+
+  it('zbývající jamky jsou jednou pod stavy, ne u každého zápasu', () => {
+    const header = singlesMatches.headerSummary?.(round, 2)
+
+    expect(header?.note).toBe('zbývá 1 jamka')
+  })
+
+  it('krátké jméno bere z celého jména hráče', () => {
+    const named = makeRound({
+      gameId: 'singles-matches',
+      players: ['Alexandra Pániková', 'Michal Švarc', 'Martin Kubečka', 'Petr'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[4], [5], [4], [4]],
+    })
+    const header = singlesMatches.headerSummary?.(named, 0)
+
+    expect(header?.entries.map((entry) => entry.label)).toEqual(['Alexandra', 'Martin'])
+  })
+
+  it('rozhodnutý zápas hlásí výsledek, dohraný flight konec', () => {
+    const decided = flightRound({
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [5, 5],
+        [4, 5],
+        [5, 4],
+      ],
+    })
+    const header = singlesMatches.headerSummary?.(decided, 1)
+
+    // Adam vyhrál oba, Cyril s Danou jednu a jednu - první zápas je rozhodnutý.
+    expect(header?.entries[0]?.note).toBe('konec · 2 UP')
+    expect(header?.note).toBe('konec')
+  })
+
+  it('stav zápasu se v bloku jamky neopakuje', () => {
+    const summaries = singlesMatches.holeSummary?.(round, 1) ?? []
+
+    expect(
+      summaries.map((summary) => summary.entries.map((entry) => entry.label)),
+    ).toEqual([['Jamku bere'], ['Jamku bere']])
+  })
+})

@@ -709,6 +709,13 @@ button {
   font-weight: 550;
 }
 
+/* Dva samostatné zápasy ve flightu: každý na svém řádku, bez „vs" mezi nimi. */
+.pairing-line.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
 .pairing-vs {
   font-size: 13px;
   font-weight: 400;
@@ -1103,6 +1110,46 @@ button {
   gap: 2px 8px;
 }
 
+/* Víc samostatných zápasů v jednom kole: každý stav na svém řádku, ať je
+   poznat, kterého z nich se dormie nebo konec týká. */
+.game-header-score.stacked {
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Jeden zápas = jeden řádek: jméno a poznámka se umí zkrátit, samotný stav
+   (2 UP, AS) nikdy - ten se nesmí zalomit ani schovat. */
+.game-header-score.stacked .game-header-entry {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.game-header-score.stacked .game-header-entry > span:first-child {
+  max-width: none;
+  flex: 0 1 auto;
+}
+
+.game-header-score.stacked .game-header-entry strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Poznámka u jednoho stavu (dormie, konec zápasu). */
+.game-header-hint {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.game-header-summary.dormie .game-header-hint,
+.game-header-summary.decided .game-header-hint {
+  color: inherit;
+}
+
 .game-header-entry {
   display: inline-flex;
   align-items: baseline;
@@ -1112,7 +1159,8 @@ button {
   font-size: 13px;
 }
 
-.game-header-entry span {
+/* Jméno strany zápasu; jen ono se zkracuje, hodnota a poznámka za ním ne. */
+.game-header-entry > span:first-child {
   max-width: 72px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1281,6 +1329,10 @@ button {
 }
 
 .team-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1326,9 +1378,19 @@ button {
   min-width: 0;
 }
 
+/* Jméno se zkracuje, značky za ním ne: dřív bylo celé jméno i se značkami
+   v jednom oříznutém prvku, takže u dlouhého jména zmizely tečky handicapu
+   i zisk z jamky - tedy právě to, co při zápisu skóre potřebuješ vidět. */
 .player-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
   font-size: 17px;
   font-weight: 600;
+}
+
+.player-name-text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2351,6 +2413,8 @@ button {
 /* Značky u jména hráče: L / N pro Longest a Nearest, ×2 pro double. */
 .player-mark {
   display: inline-flex;
+  /* Značky se nesmí zmenšit ani zmizet, když je jméno dlouhé. */
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   min-width: 18px;
@@ -2818,6 +2882,7 @@ div.course-item {
    se bez `min-width: 0` odmítají zmenšit pod obsah. */
 .player-info,
 .player-name,
+.player-name-text,
 .standing-name,
 .settlement-name,
 .game-header-entry,
@@ -2826,7 +2891,6 @@ div.course-item {
   min-width: 0;
 }
 
-.player-name,
 .standing-name,
 .settlement-name {
   overflow-wrap: anywhere;

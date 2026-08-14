@@ -65,6 +65,8 @@ interface Props {
   onGoToHole: (hole: number) => void
   onFinish: () => void
   onShowResults: () => void
+  /** Nastavení rozehraného kola - hra a dvojice. Chybí při opravě archivu. */
+  onOpenSetup?: () => void
   onOpenAccount: () => void
 }
 
@@ -84,6 +86,7 @@ export default function PlayScreen({
   onGoToHole,
   onFinish,
   onShowResults,
+  onOpenSetup,
   onOpenAccount,
 }: Props) {
   const t = useT()
@@ -113,6 +116,16 @@ export default function PlayScreen({
   const sharedBall = game.sharedBall === true && round.teams.length > 0
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
+  /**
+   * Popisek odkazu na nastavení kola. Pojmenovává to, co se za ním dá změnit -
+   * a je krátký záměrně: „Hra a dvojice" zalomí řádek odkazů na dva a zápis
+   * skóre se pak u čtyř hráčů přestane vejít na jednu obrazovku.
+   */
+  const setupLabel = game.usesTeams(round.players.length)
+    ? game.pairingKind === 'opponents'
+      ? t('singles.opponents')
+      : t('setup.pairs')
+    : t('setup.game')
 
   useEffect(() => {
     // Výběr bonusu by v přehledu překryl scorekartu a nejde v něm pokračovat
@@ -220,8 +233,10 @@ export default function PlayScreen({
     return (
       <li key={player.id} className="player-row">
         <div className="player-info">
+          {/* Jméno se zkracuje, značky ne: u dlouhého jména by se jinak tečky
+              handicapu ani zisk z jamky nevešly a zmizely by úplně. */}
           <span className="player-name">
-            {player.name}
+            <span className="player-name-text">{player.name}</span>
             {marks.map((mark) => (
               <span key={mark.key} className={`player-mark ${mark.tone}`}>
                 {mark.text}
@@ -338,7 +353,9 @@ export default function PlayScreen({
       <li key={team.id} className="player-row">
         <div className="player-info">
           <span className="player-name">
-            {game.teamLabel?.(round, team) ?? teamName(round, team)}
+            <span className="player-name-text">
+              {game.teamLabel?.(round, team) ?? teamName(round, team)}
+            </span>
             {holeGain?.entries.map((entry) => (
               <span
                 key={entry.label}
@@ -444,7 +461,14 @@ export default function PlayScreen({
             </div>
             {headerSummary && (
               <div className={`game-header-summary ${headerSummary.tone ?? 'normal'}`}>
-                <div className="game-header-score">
+                {/* Vlastní poznámka u stavu znamená víc samostatných zápasů
+                    (dva zápasy ve flightu) - pak stojí každý na svém řádku,
+                    aby bylo poznat, koho se dormie týká. */}
+                <div
+                  className={`game-header-score${
+                    headerSummary.entries.some((entry) => entry.note) ? ' stacked' : ''
+                  }`}
+                >
                   {headerSummary.entries.map((entry, index) => (
                     <span
                       key={`${entry.label}-${index}`}
@@ -454,6 +478,9 @@ export default function PlayScreen({
                     >
                       <span>{entry.label}</span>
                       <strong>{entry.value}</strong>
+                      {entry.note && (
+                        <span className="game-header-hint">{entry.note}</span>
+                      )}
                     </span>
                   ))}
                 </div>
@@ -630,6 +657,13 @@ export default function PlayScreen({
             <button type="button" className="link-button" onClick={onShowResults}>
               {t('play.standings')}
             </button>
+            {/* Dvojice se na jamce mění, takže se k jejich volbě dá vrátit
+                i z rozehraného kola. */}
+            {onOpenSetup && (
+              <button type="button" className="link-button" onClick={onOpenSetup}>
+                {setupLabel}
+              </button>
+            )}
             {/* Kolo může skončit kdykoli - třeba když přijde bouřka. */}
             {!isLastHole && anyScore && (
               <button type="button" className="link-button" onClick={finish}>

@@ -819,6 +819,87 @@ a archiv společné, a skutečný výsledek zápasu je hned u řádku (`1 UP`, `
 včetně jména soupeře. Dvě samostatné tabulky by tuhle informaci rozdělily a
 peněžní vyrovnání by ztratilo jediný podklad.
 
+## 35. Dvojice mají vlastní krok a jdou změnit i v rozehraném kole
+
+**Kontext.** Volba dvojic byla sekce pod seznamem her v kroku „Hra a dvojice"
+(#29). Na telefonu se pod sedm her nevešla bez rolování, a hlavně: jakmile
+kolo začalo, nedalo se k ní vrátit. Přitom se dvojice na jamce mění častěji
+než cokoli jiného - někdo dojde později, hráči se přeskupí po první devítce.
+
+Zpět z rozehraného kola navíc **mazalo data**. Kroky zakládání zůstaly
+v historii prohlížeče, ale `startRound()` po založení rozepsané kolo uklidí,
+takže zpět/swipe přistálo na kroku s prázdnými jmény a výchozí hrou - a
+tlačítko „Začít kolo" pak rozehrané kolo i se zapsaným skóre přepsalo novým
+prázdným. Gesto zpět a tlačítko zpět na tom byly stejně, protože obojí končí
+v `history.back()`.
+
+**Rozhodnutí.** Tři věci dohromady:
+
+1. **Dvojice jsou vlastní krok** (`SetupPairingScreen`), v řadě kroků mezi
+   hrou a sázkou. Objeví se jen tam, kde je co dělit (čtyři hráči a hra ve
+   dvojicích), takže u dvou hráčů řada kroků zůstává stejná. Krok „Hra"
+   ukazuje zvolené dvojice na řádku a odkazuje na ně.
+2. **Kroky se dají otevřít i z rozehraného kola** - odkazem „Dvojice"
+   (u dvou jamkovek „Soupeři", u her jednotlivců „Hra") pod zápisem skóre.
+   Obrazovky pak nečtou rozepsané kolo, ale **přímo `Round`**: volba se
+   uplatní hned na kolo a nemá s čím se rozejít. Patička nekončí krokem
+   „Další", ale „Zpět ke hře".
+3. **Krok zakládání platí jen pro svůj stav.** `NavSnapshot` si nese
+   `setupRoundId`: `null` znamená rozepsané nové kolo (platí jen dokud žádné
+   jiné neexistuje), id znamená úpravu nastavení toho kola (platí, dokud kolo
+   běží). Neplatný krok z historie skončí tam, kam patří stav kola - zápis
+   skóre, výsledky, domovská obrazovka. Krok v historii zůstává, takže další
+   zpět pokračuje dál a appka jde nakonec opustit.
+
+**Změna dvojic přepočítá kolo od začátku a nikdy nesmaže skóre.** Všechny hry
+počítají výsledek ze `Round.scores` až při zobrazení, takže „přepočítat" tady
+neznamená žádnou migraci dat: stačí přepsat `Round.teams` a výsledek i peníze
+se spočítají znovu, i pro jamky zapsané dřív. Zapsané skóre je při tom
+nedotknutelné (nepřekročitelné pravidlo 11 v `AGENTS.md`) - `applyRoundGame()`
+mění jen `gameId`, `teams` a nastavení bodování nové hry.
+
+**Změna hry ano, změna hráčů a hřiště ne.** Hra se v rozehraném kole měnit dá
+(„říkali jsme skins, ale hrajeme jamkovku") a je to bezpečné - skóre zůstává,
+dvojice se podle nové hry postaví nebo zruší. Jména, handicapy, odpaliště,
+hřiště a počet jamek se zatím měnit nedají: obrazovky hráčů a odpališť staví
+handicapy z katalogu hřišť a z výřezu devítek, který si kolo nepamatuje
+(`Round.course` je snímek, ne volba). Ubrání hráče by navíc znamenalo smazat
+jeho skóre, což pravidlo 11 zakazuje. Je to otevřená otázka níž, ne opomenutí.
+
+**Proč `PAIRINGS` a přepočet nejsou v obrazovce.** `src/roundSetup.ts` drží
+rozdělení hráčů do dvojic, jejich čtení z kola (`pairingIndexOf()`) i změnu
+nastavení rozehraného kola. Dřív byla tabulka dvojic v `SetupGameScreen` a
+uplatňovala se v `SetupBetScreen` - dvě obrazovky se tak musely shodnout na
+významu jednoho indexu. Teď je to čistá funkce nad `Round`, otestovaná
+v `roundSetup.test.ts`, a obrazovky ji jen volají.
+
+## 36. Krátké jméno a jeden řádek na zápas v hlavičce jamky
+
+**Kontext.** Hlavička jamky ukazovala u dvou jamkovek ve flightu „kdo s kým
+hraje → kdo vede": `Alexandra vs. M… → Alexandra 2 UP`. S opravdovými jmény
+se to uřízlo na obojí straně a poznámka pod stavy (`dormie · zbývají 2 jamky`)
+patřila jednomu z zápasů, ale nebylo poznat kterému. Dlouhé jméno navíc
+v řádku hráče vytlačilo tečky handicapu a zisk z jamky úplně mimo displej,
+protože jméno i značky byly v jednom oříznutém prvku.
+
+**Rozhodnutí.** V hlavičce je jeden řádek na zápas: `Alexandra 2 UP dormie`.
+Soupeře ukazuje blok zápasu pod tím, takže se v hlavičce nemusí opakovat -
+a stav zápasu se naopak přestal opakovat v bloku. Poznámka je součástí řádku
+zápasu (`HeaderSummary.entries[].note`), zbývající jamky platí pro celý flight
+a zůstávají jednou pod nimi.
+
+**Jméno se zkracuje, informace ne.** `shortPlayerName()` bere první slovo
+jména (a při shodě přidá iniciálu dalšího), protože „Alexandra" je čitelnější
+než „Alexandra Pánik…". V řádku hráče se zkracuje jen text jména; tečky
+handicapu, značky bonusů a zisk z jamky mají `flex: 0 0 auto` a nezmizí nikdy -
+právě ony jsou při zápisu skóre ta informace, kvůli které se na řádek koukáš.
+
+**Odkazy pod zápisem skóre jsou kratší.** Přidání odkazu na nastavení kola by
+řádek odkazů zalomilo na dva a zápis čtyř hráčů by přerostl displej
+(nepřekročitelné pravidlo 10). Místo výjimky z pravidla se zkrátily popisky:
+„Výsledky", „Dvojice", „Ukončit", „Účet". Čtyři odkazy se tak vejdou na jeden
+řádek i se zapsaným skóre - dřív se na dva lámaly už tři.
+
 ---
 
 ## Otevřené otázky
@@ -834,6 +915,11 @@ Věci, o kterých padlo rozhodnutí je odložit:
 - **Extra body v dalších hrách.** Best + Součet a Skins je vyhodnocují,
   Match play je záměrně nepoužívá. Nová hra musí rozsah deklarovat přes
   `GameDefinition.scoringOptions`.
+- **Změna hráčů a hřiště v rozehraném kole.** Hra a dvojice se změnit dají
+  (#35), jména, handicapy a odpaliště ne. Kolo si nepamatuje volbu devítek ani
+  odkaz do katalogu hřišť, ze kterých se hrací handicapy počítaly, takže by se
+  musely brát ze snímku `Round.course` - a ubrání hráče by znamenalo smazat
+  jeho skóre, což pravidlo 11 zakazuje.
 - **Sdílená kola mezi hráči.** Synchronizace dnes zálohuje data jednoho účtu.
   Aby viděli kolo všichni zúčastnění, potřebovalo by se řešit pozvání,
   oprávnění a souběžný zápis – to je řádově větší úloha než dnešní zrcadlo.

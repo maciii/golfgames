@@ -1,5 +1,5 @@
 import type { PlayerId, Round, Team } from '../types'
-import { playerName, scoreAt } from '../types'
+import { playerName, scoreAt, shortPlayerName } from '../types'
 import { netScoreAt } from '../handicap'
 import type {
   GameDefinition,
@@ -13,10 +13,10 @@ import { t } from '../i18n'
 import { CONCEDED } from './shared'
 import type { MatchSide, MatchState, SideScore } from './match'
 import {
-  compactHeaderNote,
   headerTone,
   holeWinner,
   isOutOfPlay,
+  matchStateNote,
   matchStateOf,
   sideValueLabel,
 } from './match'
@@ -85,17 +85,6 @@ function matchOf(round: Round, playerId: PlayerId): FlightMatch | undefined {
   return flightMatches(round).find((match) => match.team.playerIds.includes(playerId))
 }
 
-/** Stav zápasu očima vedoucího hráče: „Mac 2 UP", nebo „AS". */
-function leaderLabel(match: FlightMatch): string {
-  const { state } = match
-  if (state.leaderIndex === null) return t('match.allSquare')
-  const name = match.sides[state.leaderIndex]?.name ?? '?'
-  return t('singles.leaderState', {
-    name,
-    state: sideValueLabel(state, state.leaderIndex),
-  })
-}
-
 export const singlesMatches: GameDefinition = {
   id: 'singles-matches',
   playerCounts: [4],
@@ -155,25 +144,48 @@ export const singlesMatches: GameDefinition = {
     return team.playerIds.map((id) => playerName(round, id)).join(t('singles.versusJoin'))
   },
 
+  /**
+   * Stav obou zápasů v hlavičce jamky.
+   *
+   * Každý zápas dostane jeden řádek „kdo vede a jak", ne „kdo s kým hraje" -
+   * soupeře je vidět v bloku zápasu pod tím a v hlavičce se dvě dlouhá jména
+   * stejně nevešla. Poznámka (dormie, konec) patří ke svému zápasu, protože
+   * jedna společná by netvrdila, kterého z nich se týká.
+   */
   headerSummary(round: Round, hole: number): HeaderSummary {
     const matches = flightMatches(round)
     // Mimo hru je jamka jen tehdy, když už je rozhodnutý každý zápas -
     // dokud jeden běží, hraje se dál a hlavička to nesmí přebít.
     const outOfPlay =
       matches.length > 0 && matches.every((match) => isOutOfPlay(match.state, hole))
-    // Krátká zpráva pod stavy patří zápasu, který ještě běží - ten určuje,
-    // co se na jamce vlastně děje.
-    const noteState =
-      matches.find((match) => !match.state.decided)?.state ?? matches[0]?.state
+    // Zápas, který se pořád hraje. Nerozhodný zápas po poslední jamce není
+    // „rozhodnutý", ale hrát se v něm už taky nedá - jinak by hlavička na
+    // osmnáctce hlásila „zbývá 0 jamek".
+    const running = matches.find(
+      (match) => !match.state.decided && match.state.remaining > 0,
+    )?.state
 
     return {
-      entries: matches.map((match) => ({
-        label: match.label,
-        value: leaderLabel(match),
-        tone: match.state.leaderIndex === null ? 'neutral' : 'positive',
-      })),
-      note: noteState ? compactHeaderNote(noteState, outOfPlay) : '',
-      tone: noteState ? headerTone(noteState, outOfPlay) : 'normal',
+      entries: matches.map((match) => {
+        const { state } = match
+        // Bez vedoucího není koho jmenovat, ale zápas musí být poznat -
+        // za nerozhodného stavu ho zastoupí první ze soupeřů.
+        const side = match.sides[state.leaderIndex ?? 0]
+        return {
+          label: side ? shortPlayerName(round, side.id) : '?',
+          value:
+            state.leaderIndex === null
+              ? t('match.allSquare')
+              : sideValueLabel(state, state.leaderIndex),
+          tone: state.leaderIndex === null ? ('neutral' as const) : ('positive' as const),
+          note: matchStateNote(state, isOutOfPlay(state, hole)),
+        }
+      }),
+      // Zbývající jamky platí pro celý flight, takže jsou jednou pod stavy.
+      note: running
+        ? t('match.remainingShort', { count: running.remaining })
+        : t('match.finishedShort'),
+      tone: headerTone(running ?? matches[0]?.state, outOfPlay),
     }
   },
 
@@ -215,12 +227,11 @@ export const singlesMatches: GameDefinition = {
             : (match.sides[winner]?.name ?? t('common.dash'))
       }
 
+      // Stav zápasu je v hlavičce jamky u každého zápasu zvlášť; druhý zápis
+      // by tady jen lámal řádek dlouhými jmény.
       return {
         id: match.team.id,
-        entries: [
-          { label: t('match.takesHole'), value },
-          { label: t('singles.state'), value: leaderLabel(match) },
-        ],
+        entries: [{ label: t('match.takesHole'), value }],
       }
     })
   },

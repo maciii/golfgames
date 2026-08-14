@@ -162,6 +162,31 @@ export function compactHeaderNote(state: MatchState, outOfPlay: boolean): string
   return t('match.remainingShort', { count: state.remaining })
 }
 
+/**
+ * Stav **jednoho** zápasu, když jich v kole běží víc.
+ *
+ * Na rozdíl od `compactHeaderNote()` vynechává zbývající jamky: ty jsou pro
+ * všechny zápasy ve flightu stejné, takže patří jednou pod ně, ne dvakrát na
+ * jejich řádky - v hlavičce jamky není místo. Zůstává jen to, co platí právě
+ * pro tenhle zápas: dormie, výsledek, jamka mimo hru.
+ */
+export function matchStateNote(state: MatchState, outOfPlay: boolean): string {
+  if (outOfPlay) return t('match.outOfPlayShort')
+  if (state.decided) {
+    return state.remaining > 0
+      ? t('match.resultShort', { lead: state.lead, remaining: state.remaining })
+      : t('match.finalShort', { lead: state.lead })
+  }
+  if (
+    state.leaderIndex !== null &&
+    state.remaining > 0 &&
+    state.lead === state.remaining
+  ) {
+    return t('match.dormieOnly')
+  }
+  return ''
+}
+
 /** Je jamka už mimo hru, protože zápas byl rozhodnutý dřív? */
 export function isOutOfPlay(state: MatchState, hole: number): boolean {
   return state.decisionHole !== null && hole > state.decisionHole
@@ -197,10 +222,11 @@ export function sideTone(
 
 /** Vzhled hlavičky podle toho, jak daleko zápas je. */
 export function headerTone(
-  state: MatchState,
+  state: MatchState | undefined,
   outOfPlay: boolean,
 ): 'normal' | 'dormie' | 'decided' | 'outOfPlay' {
   if (outOfPlay) return 'outOfPlay'
+  if (!state) return 'normal'
   if (state.decided) return 'decided'
   if (state.leaderIndex !== null && state.lead === state.remaining) return 'dormie'
   return 'normal'

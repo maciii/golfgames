@@ -126,6 +126,12 @@ export interface HeaderSummary {
     value: string
     highlight?: boolean
     tone?: 'positive' | 'negative' | 'neutral'
+    /**
+     * Krátká poznámka jen k tomuhle stavu (dormie, konec zápasu). Patří sem,
+     * když v kole běží víc samostatných zápasů - společná poznámka pod nimi
+     * by netvrdila, kterého z nich se týká.
+     */
+    note?: string
   }[]
   note?: string
   tone?: 'normal' | 'dormie' | 'decided' | 'outOfPlay'

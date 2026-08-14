@@ -12,6 +12,7 @@ import {
   openScorecard,
   openSetup,
   openArchivedRoundDetail,
+  PAIRING_TITLE,
   openSetupWithCourse,
   scrollContentToEnd,
   scrollContentToTopOf,
@@ -81,6 +82,9 @@ test('zpět prochází kroky zakládání kola pozpátku', async ({ page }) => {
   // to znamená, že se gesto zpět vrací o krok, ne rovnou z appky ven.
   await openSetup(page, 'bet')
   await page.goBack()
+  // Dvojice jsou vlastní krok, takže cesta zpět vede přes ně.
+  await expect(page.locator('.app-header h1')).toHaveText(PAIRING_TITLE)
+  await page.goBack()
   await expectSetupStep(page, 'game')
   await page.goBack()
   await expectSetupStep(page, 'players')
@@ -92,8 +96,8 @@ test('kolo bez hřiště si nese zvolený počet jamek', async ({ page }) => {
   await openSetup(page, 'tee')
   await page.locator('.segment', { hasText: /^9$/ }).click()
 
-  // Zbylé tři kroky a pak samotné založení kola.
-  for (let click = 0; click < 4; click += 1) {
+  // Zbylé kroky (hráči, hra, dvojice, sázka) a pak samotné založení kola.
+  for (let click = 0; click < 5; click += 1) {
     await page.locator('.app-footer .primary-button').click()
   }
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()
@@ -238,7 +242,7 @@ test('scorekarta ukazuje mezisoučet po první devítce jen na osmnáctce', asyn
 test('scorekarta devítijamkového kola mezisoučet nemá', async ({ page }) => {
   await openSetup(page, 'tee')
   await page.locator('.segment', { hasText: /^9$/ }).click()
-  for (let click = 0; click < 4; click += 1) {
+  for (let click = 0; click < 5; click += 1) {
     await page.locator('.app-footer .primary-button').click()
   }
   await expect(page.locator('.hole-header, .landscape-scorecard').first()).toBeVisible()

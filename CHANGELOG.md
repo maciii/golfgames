@@ -7,6 +7,38 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.45.0] – 2026-08-13
+
+### Přidáno
+
+- **Dvojice mají vlastní obrazovku a jdou změnit i během kola.** Volba dvojic
+  (u dvou jamkovek Soupeři) byla přilepená pod seznamem her, kde na telefonu
+  nebyla vidět bez rolování. Teď je to samostatný krok zakládání kola a
+  hlavně: dá se k němu vrátit i z rozehraného kola odkazem **Dvojice** pod
+  zápisem skóre. Změna se uplatní hned, kolo se přepočítá od první jamky a
+  zapsané skóre zůstává (nové nepřekročitelné pravidlo 11 v `AGENTS.md`).
+  Stejnou cestou jde v rozehraném kole změnit i hru.
+
+### Opraveno
+
+- **Zpět z rozehraného kola mazalo zadaná data.** Kroky zakládání zůstávaly
+  v historii prohlížeče, ale rozepsané kolo se po založení uklízí, takže zpět
+  nebo swipe přistálo na kroku s prázdnými jmény a výchozí hrou - a „Začít
+  kolo" pak rozehrané kolo i se zapsaným skóre přepsalo prázdným. Krok
+  zakládání teď platí jen pro stav, ke kterému patří; neplatný skončí tam,
+  kam patří kolo (zápis skóre, výsledky, domovská obrazovka).
+- **Dlouhé jméno schovalo tečky HCP a další značky.** Jméno i značky byly
+  v jednom oříznutém prvku, takže „Alexandra Pániková" spolkla tečky
+  handicapu i zisk z jamky. Zkracuje se teď jen jméno, značky zůstávají vždy.
+- **U dvou jamkovek nebylo poznat, koho se dormie týká.** Hlavička jamky má
+  teď jeden řádek na zápas se stavem i poznámkou (`Alexandra 2 UP dormie`) a
+  zbývající jamky jednou pod nimi. Místo „kdo s kým hraje" je v řádku jen
+  vedoucí hráč - soupeře ukazuje blok zápasu pod hlavičkou a stav zápasu se
+  v něm už neopakuje.
+- **Zápis skóre čtyř hráčů přerůstal displej.** Odkazy pod zápisem se lámaly
+  na dva řádky; kratší popisky (Výsledky, Dvojice, Ukončit, Účet) je vejdou
+  na jeden i se zapsaným skóre.
+
 ## [0.44.1] – 2026-08-13
 
 ### Opraveno

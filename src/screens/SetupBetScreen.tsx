@@ -14,8 +14,8 @@ import { useAccount } from '../sync/AccountContext'
 import { useT } from '../i18n'
 import { BackIcon } from './icons'
 import { resolveCourseSetup } from './setupCourse'
-// Dvojice se vybírají v kroku Hra; tady se jen uplatní podle vybraného indexu.
-import { PAIRINGS } from './SetupGameScreen'
+// Dvojice se vybírají ve vlastním kroku; tady se jen uplatní podle indexu.
+import { pairingTeamIndices } from '../roundSetup'
 
 const CURRENCIES: Currency[] = ['CZK', 'EUR']
 const CURRENCY_LABEL: Record<Currency, string> = { CZK: 'Kč', EUR: '€' }
@@ -153,11 +153,7 @@ export default function SetupBetScreen({
   }
 
   function start() {
-    const teamIndices = usesTeams
-      ? playerCount === 4
-        ? PAIRINGS[pairing]
-        : [[0, 1]]
-      : undefined
+    const teamIndices = usesTeams ? pairingTeamIndices(playerCount, pairing) : undefined
     const gameOptions = loadGameOptions(gameId)
     const effective: RoundSettings = {
       ...settings,
