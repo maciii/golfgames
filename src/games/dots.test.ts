@@ -215,17 +215,22 @@ describe('Dots - netto HCP', () => {
     expect(points(r)).toEqual([5, 2, 2])
   })
 
-  it('birdie ke smetení se posuzuje netto', () => {
-    const r = round([4, 6, 7], {
-      sweepOnTwoStrokes: true,
-      doubleSweepOnBirdie: true,
-    })
-    r.netScoring = true
-    r.course = { name: 'Testovací hřiště', strokeIndex: [1] }
-    // S ranou k dobru je čtyřka na paru 4 netto birdie.
-    r.players[0]!.playingHandicap = 1
+  it('birdie ke smetení se posuzuje netto jen s volbou Uplatňovat HCP', () => {
+    function sweepRound(multipliersWithHandicap: boolean) {
+      const r = round([4, 6, 7], {
+        sweepOnTwoStrokes: true,
+        doubleSweepOnBirdie: true,
+        multipliersWithHandicap,
+      })
+      r.netScoring = true
+      r.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+      // S ranou k dobru je čtyřka na paru 4 netto birdie, brutto ale par.
+      r.players[0]!.playingHandicap = 1
+      return r
+    }
 
-    expect(points(r)).toEqual([18, 0, 0])
+    expect(points(sweepRound(false))).toEqual([9, 0, 0])
+    expect(points(sweepRound(true))).toEqual([18, 0, 0])
   })
 })
 

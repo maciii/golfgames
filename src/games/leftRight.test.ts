@@ -186,17 +186,24 @@ describe('Levá-Pravá - body', () => {
   })
 
   it('použije pro dynamické dvojice stejné netto výpočty jako Best + Součet', () => {
-    const round = pairedRound([[5], [5], [4], [4]])
-    round.netScoring = true
-    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
-    round.players[0]!.playingHandicap = 3
-    round.players[1]!.playingHandicap = 3
+    function netRound(multipliersWithHandicap: boolean) {
+      const round = pairedRound([[5], [5], [4], [4]])
+      round.netScoring = true
+      round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+      round.players[0]!.playingHandicap = 3
+      round.players[1]!.playingHandicap = 3
+      round.settings.options = { ...round.settings.options, multipliersWithHandicap }
+      return round
+    }
 
-    // Levá dvojice má po odečtu HCP dvě netto eagly: BEST, Součet a 2 × eagle.
-    expect(totalPlayerPoints(round, 'p1')).toBe(8)
-    expect(totalPlayerPoints(round, 'p2')).toBe(8)
-    expect(totalPlayerPoints(round, 'p3')).toBe(0)
-    expect(totalPlayerPoints(round, 'p4')).toBe(0)
+    // Kdo jamku vyhrál, se počítá netto: levá dvojice má BEST i Součet.
+    expect(totalPlayerPoints(netRound(false), 'p1')).toBe(2)
+    expect(totalPlayerPoints(netRound(false), 'p3')).toBe(0)
+
+    // Netto eagle se přizná až s volbou Uplatňovat HCP: 2 × eagle navíc.
+    expect(totalPlayerPoints(netRound(true), 'p1')).toBe(8)
+    expect(totalPlayerPoints(netRound(true), 'p2')).toBe(8)
+    expect(totalPlayerPoints(netRound(true), 'p3')).toBe(0)
   })
 
   it('změna dvojic mezi jamkami změní i adresáta bodů', () => {

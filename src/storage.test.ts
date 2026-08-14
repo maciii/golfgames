@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   addToRoster,
   loadGameOptions,
+  normalizeRound,
   saveGameOptions,
   archiveRound,
   loadArchive,
@@ -190,5 +191,42 @@ describe('Výchozí hodnoty extra bodů', () => {
     const options = loadGameOptions('match-play')
     expect(options.bonusValues.bunker).toBe(20)
     expect(options.bonusValues.longest).toBe(0)
+  })
+})
+
+describe('Volba Uplatňovat HCP ve starších kolech', () => {
+  /** Kolo uložené v době, kdy volba neexistovala. */
+  function storedRound(finished: boolean): Round {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Bára'],
+      pars: [4],
+      scores: [[4], [5]],
+    })
+    if (finished) round.finishedAt = '2026-08-01T12:00:00.000Z'
+    const options = { ...round.settings.options } as Record<string, unknown>
+    delete options.multipliersWithHandicap
+    round.settings.options = options as unknown as typeof round.settings.options
+    return round
+  }
+
+  it('dohrané kolo si nechá netto birdie, se kterými se hrálo', () => {
+    // Archiv se nesmí zpětně přepočítat jinak, než jak se za kolo zaplatilo.
+    expect(
+      normalizeRound(storedRound(true))?.settings.options.multipliersWithHandicap,
+    ).toBe(true)
+  })
+
+  it('rozehrané kolo se řídí novým výchozím stavem', () => {
+    expect(
+      normalizeRound(storedRound(false))?.settings.options.multipliersWithHandicap,
+    ).toBe(false)
+  })
+
+  it('uloženou volbu nikdy nepřepíše', () => {
+    const round = storedRound(true)
+    round.settings.options = { ...round.settings.options, multipliersWithHandicap: false }
+
+    expect(normalizeRound(round)?.settings.options.multipliersWithHandicap).toBe(false)
   })
 })

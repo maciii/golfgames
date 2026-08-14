@@ -220,6 +220,19 @@ v tom, jestli je hra umí vzít do svého bodování:
 Pravidla samotné hodnoty jsou v obou případech stejná – násobič podle výsledku,
 potvrzování Longestu a Nearestu i dvojnásobná jamka fungují identicky.
 
+### Rozpis bodů u jamky
+
+Body dvojice na jamce se skládají z několika zdrojů a z čísel v hlavičce se to
+přečíst nedá. Vedle `Best`, `Součet` a `Body` proto stojí modré **i**, které
+otevře přesný rozpis: každý zdroj s hodnotou, ze které se rozhodovalo
+(`netto 3 proti 4`), včetně bonusů, které se **nepočítaly** - „Water · netto 5
+→ 0" je pro hráče stejně důležitá odpověď jako přiznaný bod.
+
+V řádku samotném zdroje nejsou schválně: s názvy jako „Bunker (sandie)" se
+zalomil na dva řádky a zápis skóre se u čtyř hráčů přestal vejít na jednu
+obrazovku (nepřekročitelné pravidlo 10). Rozpis dodává hra
+(`GameDefinition.holeBreakdown()`), obrazovka ho jen vypíše.
+
 ### Komu bonus připadne
 
 Příjemce extra bodu určuje konkrétní hra. V týmových hrách se extra bod
@@ -260,8 +273,23 @@ výsledku se násobič bere:
 Vypnuto je výchozí stav, protože rozdané rány mění to, kdo jamku vyhrál, ne to,
 jak se zahrála - jinak by hráč s tečkou na jamce dostal za bunker na par dva
 body místo jednoho a se dvěma tečkami rovnou tři. Na brutto kolo volba nemá
-žádný vliv, tam osobní par neexistuje. Platí pro extra body ve všech hrách,
-včetně vedlejší sázky; potvrzování Longestu má vlastní volbu.
+žádný vliv, tam osobní par neexistuje.
+
+Volba platí pro **všechny bonusy za výsledek**, ne jen pro násobič extra bodů:
+
+| Kde                       | Co se změní                                 |
+| ------------------------- | ------------------------------------------- |
+| Best + Součet, Levá-Pravá | body za **birdie a eagle** partnerů         |
+| všechny hry               | násobič extra bodů (bunker, water, barkie…) |
+| Dots                      | „birdie" u výhry o dvě rány (volba Smetení) |
+
+Co volba **nemění**: kdo jamku vyhrál. `BEST`, součet, skin, jamkovka, pořadí
+v Dots i body ve Stablefordu se v netto kole počítají z netto ran vždycky - to
+je pravidlo hry, ne bonus. Potvrzování Longestu má vlastní volbu.
+
+**Dohraná kola v archivu** si nechávají pravidlo, se kterým se hrála: kolo
+odehrané dřív, než volba existovala, se dál počítá s netto birdie, protože se
+za něj tak zaplatilo.
 
 Příklad: bunker za 1 bod zahraný na birdie dá v Best + Součet dvojici
 2 body, ve Skins hráči 2 body; stejný bunker zahraný na bogey nedá nic.

@@ -178,6 +178,7 @@ export const cs = {
   'setup.offlineShort': 'bez připojení',
 
   // --- zápis skóre --------------------------------------------------------
+  'play.backToSetup': 'Zpět na nastavení kola',
   'play.previousHole': 'Předchozí jamka',
   'play.nextHole': 'Další jamka',
   'play.hole': 'Jamka {number}',
@@ -526,6 +527,22 @@ export const cs = {
     'Hra pro tři hráče. Na každé jamce je v sázce pevný počet bodů a rozdělí se podle pořadí. Nine Dot (Devítka) rozdává 9 bodů: 5-3-1, při shodě dvou nejlepších 4-4-1, při shodě dvou nejhorších 5-2-2 a při remíze všech 3-3-3. Six Dot (Šestka) rozdává 6 bodů: 4-2-0, 3-3-0, 4-1-1 a 2-2-2. Variantu i obě nadstavby zapneš v nastavení bodování hry.',
 
   // Best + Součet
+  // --- rozpis bodů jamky ---------------------------------------------------
+  'breakdown.title': 'Rozpis bodů',
+  'breakdown.subtitle': '{name} · jamka {hole}',
+  'breakdown.open': 'Rozpis bodů: {name}',
+  'breakdown.versus': '{own} proti {other}',
+  'breakdown.net': 'netto {value}',
+  'breakdown.gross': 'brutto {value}',
+  'breakdown.total': 'Body za jamku',
+  'breakdown.empty': 'Na téhle jamce ještě není co rozepisovat.',
+  'breakdown.doubled': 'Jamka se počítá za dvojnásobek.',
+  'breakdown.pending': 'zapsal {name} – zatím nepotvrzeno',
+  'breakdown.forfeited': 'propadlo, zapsal {name}',
+  'breakdown.handicapOn': 'Birdie a eagle se posuzují netto (volba Uplatňovat HCP).',
+  'breakdown.handicapOff': 'Birdie a eagle se posuzují z brutto ran.',
+  'best.doubleBest': 'Double Best',
+  'best.doubleBestNote': 'oba míče lepší než soupeřovy',
   'best.points': 'Body',
   'best.headerNote': 'Průběžné skóre',
   'best.pointsDescription':

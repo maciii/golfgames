@@ -1,10 +1,11 @@
 import type { HolePairings, HoleSide, PlayerId, Round, Team } from '../types'
 import { holesPlayed, isHoleStarted, strokeTotal, teamName } from '../types'
 import { t } from '../i18n'
-import { holePointsForTeams } from './bestAggregate'
+import { holeBreakdownForTeams, holePointsForTeams } from './bestAggregate'
 import type {
   GameDefinition,
   HeaderSummary,
+  HoleBreakdown,
   HoleSetup,
   HoleSetupSelection,
   HoleSummary,
@@ -249,6 +250,12 @@ export const leftRight: GameDefinition = {
         })),
       },
     ]
+  },
+
+  /** Rozpis bodů obou dnešních dvojic - stejná pravidla jako Best + Součet. */
+  holeBreakdown(round: Round, hole: number): HoleBreakdown[] {
+    const teams = teamsForHole(round, hole)
+    return teams.length === 2 ? holeBreakdownForTeams(round, teams, hole) : []
   },
 
   /** Označí první z aktuálních dvojic; druhá je zřejmá z neoznačených buněk. */

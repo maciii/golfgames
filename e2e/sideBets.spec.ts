@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { currentRound, expectSetupStep, isLandscapeScorecard, openSetup } from './helpers'
+import {
+  currentRound,
+  expectSetupStep,
+  isLandscapeScorecard,
+  openSetup,
+  startRound,
+} from './helpers'
 
 /**
  * Extra body jako vedlejší sázka u hry, která si je nepočítá do svých bodů.
@@ -122,4 +128,28 @@ test('násobiče mají volbu Uplatňovat HCP a ve výchozím stavu je vypnutá',
     return all['best-aggregate']?.multipliersWithHandicap
   })
   expect(stored).toBe(true)
+})
+
+test('modré „i" u shrnutí jamky otevře rozpis bodů', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('.screen')).toBeVisible()
+  // Best + Součet se čtyřmi hráči je výchozí hra, takže stačí projít kroky.
+  await startRound(page)
+  test.skip(await isLandscapeScorecard(page), 'na šířku zapisuje scorekarta')
+
+  // Dokud na jamce nikdo nezapsal, není co rozepisovat - a přesto se rozpis
+  // nabízí, protože ukáže i nuly.
+  await page.locator('.player-row').first().locator('.score-value').click()
+  const info = page.locator('.team-header .info-button')
+  await expect(info).toHaveCount(2)
+
+  await info.first().click()
+  const sheet = page.locator('.sheet')
+  await expect(sheet).toContainText(/Rozpis bodů|Points breakdown/i)
+  await expect(sheet).toContainText(/Best/i)
+  await expect(sheet).toContainText(/Součet|Aggregate/i)
+  await expect(sheet).toContainText(/Body za jamku|Points for the hole/i)
+
+  await sheet.locator('.primary-button').click()
+  await expect(sheet).toHaveCount(0)
 })

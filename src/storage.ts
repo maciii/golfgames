@@ -126,6 +126,15 @@ export function normalizeRound(round: Round): Round {
         ...('doubleClosingHoles' in settings
           ? { doubleClosingHoles: Boolean(settings.doubleClosingHoles) }
           : {}),
+        // Dohrané kolo bez volby „Uplatňovat HCP" se hrálo v době, kdy se
+        // birdie a eagle počítaly z netto ran vždycky. Archiv musí zůstat
+        // takový, jak se hrálo a jak se za něj zaplatilo - nová výchozí
+        // hodnota (brutto) platí až pro kola založená potom.
+        ...(settings.options !== undefined &&
+        !('multipliersWithHandicap' in settings.options) &&
+        round.finishedAt !== undefined
+          ? { multipliersWithHandicap: true }
+          : {}),
         ...(settings.options ?? {}),
         resultMultipliers: {
           ...DEFAULT_RESULT_MULTIPLIERS,

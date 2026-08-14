@@ -108,3 +108,22 @@ test('dvojice se dají změnit i po zahájení kola', async ({ page }) => {
   // Nepřekročitelné pravidlo: zapsané skóre se nikdy nemaže.
   expect(after.scores).toEqual(before.scores)
 })
+
+test('šipka zpět vede z první jamky na nastavení kola', async ({ page }) => {
+  await startFlight(page)
+  test.skip(await isLandscapeScorecard(page), 'na šířku zapisuje scorekarta')
+
+  // Na první jamce není kam listovat, takže šipka místo toho otevře kroky.
+  const back = page.locator('.hole-nav .nav-arrow').first()
+  await expect(back).toBeEnabled()
+  await back.click()
+  await expectSetupStep(page, 'game')
+
+  // Z druhé jamky listuje dál po jamkách jako dosud.
+  await page.locator('.app-footer .primary-button').click()
+  await expect(page.locator('.hole-header')).toBeVisible()
+  await page.locator('.app-footer .primary-button').click()
+  await expect(page.locator('.hole-number')).toHaveText('2')
+  await page.locator('.hole-nav .nav-arrow').first().click()
+  await expect(page.locator('.hole-number')).toHaveText('1')
+})

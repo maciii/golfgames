@@ -111,15 +111,16 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   `isHoleStarted()`: když na jamce zapsal aspoň jeden hráč, jamka běží a komu
   zápis chybí, ten ji vzdal. Každá nová hra to musí ošetřit. Ve výpočtech se
   vzdaná hodnota reprezentuje jako `CONCEDED` (`Infinity`).
-- **Netto se promítá do vítěze jamky, ne do hodnoty extra bodů.** Kdo jamku
-  vyhrál (skin, `BEST`, součet, match play), se počítá z `netScoreAt()`.
-  Násobič extra bodu podle výsledku se ale bere z **brutto** `diffToPar()` -
-  jinak by hráč s tečkou dostal za bunker na par dva body. Rozhoduje o tom
-  jediná funkce `bonusDiffToPar()` v `handicap.ts`; volba **Uplatňovat HCP**
-  (`multipliersWithHandicap`, výchozí vypnuto) ji přepne na osobní par. Nový
-  výpočet extra bodů se musí ptát jí, ne `diffToPar()` napřímo. Potvrzení
-  **Longestu** má vlastní volbu (`exclusiveBonusOutcome()`); Nearest se
-  potvrzuje vždycky brutto.
+- **Netto rozhoduje o vítězi jamky, ne o tom, co je birdie.** Kdo jamku vyhrál
+  (skin, `BEST`, součet, match play, pořadí v Dots), se počítá z `netScoreAt()`
+  vždycky - to je pravidlo hry. **Bonus za výsledek** (birdie a eagle v Best +
+  Součtu a Levé-Pravé, násobič extra bodů, birdie ke smetení v Dots) se ale bere
+  z **brutto** ran, jinak by hráč s tečkou dostal za bunker na par dva body.
+  Rozhoduje o tom jediná funkce `bonusDiffToPar()` v `handicap.ts` a volba
+  **Uplatňovat HCP** (`multipliersWithHandicap`, výchozí vypnuto), která ji
+  přepne na osobní par. Každý nový výpočet bonusu za výsledek se musí ptát jí,
+  ne `diffToPar()` ani `netDiffToPar()` napřímo. Potvrzení **Longestu** má
+  vlastní volbu (`exclusiveBonusOutcome()`); Nearest se potvrzuje vždycky brutto.
 - **Číslo jamky není `hole + 1`.** Kolo se nehraje vždycky na celé hřiště:
   osmnáctku jde hrát jen na jednu devítku a resort s 27 jamkami osmnáctku
   teprve skládá ze dvou svých devítek. Kolo pak má `holeCount` hraných jamek,

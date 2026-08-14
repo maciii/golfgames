@@ -163,6 +163,7 @@ export const en: Record<MessageKey, Message> = {
   'setup.offlineShort': 'offline',
 
   // --- playing ------------------------------------------------------------
+  'play.backToSetup': 'Back to round setup',
   'play.previousHole': 'Previous hole',
   'play.nextHole': 'Next hole',
   'play.hole': 'Hole {number}',
@@ -500,6 +501,22 @@ export const en: Record<MessageKey, Message> = {
     'A game for three players. Every hole puts a fixed number of points at stake and splits them by rank. Nine Dot awards 9 points: 5-3-1, 4-4-1 when the two best tie, 5-2-2 when the two worst tie and 3-3-3 when all three tie. Six Dot awards 6 points: 4-2-0, 3-3-0, 4-1-1 and 2-2-2. The variant and both extra rules are set in the scoring settings.',
 
   // Best Aggregate
+  // --- hole points breakdown ----------------------------------------------
+  'breakdown.title': 'Points breakdown',
+  'breakdown.subtitle': '{name} · hole {hole}',
+  'breakdown.open': 'Points breakdown: {name}',
+  'breakdown.versus': '{own} against {other}',
+  'breakdown.net': 'net {value}',
+  'breakdown.gross': 'gross {value}',
+  'breakdown.total': 'Points for the hole',
+  'breakdown.empty': 'Nothing to break down on this hole yet.',
+  'breakdown.doubled': 'This hole counts double.',
+  'breakdown.pending': 'recorded by {name} – not confirmed yet',
+  'breakdown.forfeited': 'forfeited, recorded by {name}',
+  'breakdown.handicapOn': 'Birdies and eagles are judged net (Apply handicap).',
+  'breakdown.handicapOff': 'Birdies and eagles are judged from gross strokes.',
+  'best.doubleBest': 'Double Best',
+  'best.doubleBestNote': 'both balls better than the opponents',
   'best.points': 'Points',
   'best.headerNote': 'Current score',
   'best.pointsDescription':

@@ -1,26 +1,28 @@
-import type { Round, Team } from '../types'
+import type { PlayerId, Round, Team } from '../types'
 import {
   bonusMultiplier,
   bonusesAt,
   getBonus,
   holeMultiplier,
   isHoleStarted,
+  scoreAt,
   teamName,
   teamPlayers,
 } from '../types'
 import type {
   GameDefinition,
   HeaderSummary,
+  HoleBreakdown,
   HoleSummary,
   ScorecardColumn,
   StandingsSection,
 } from './types'
 import { rankRows } from './types'
-import { t } from '../i18n'
+import { dynamicKey, t } from '../i18n'
 import {
   bonusDiffToPar,
   exclusiveBonusOutcome,
-  netDiffToPar,
+  isNetRound,
   netScoreAt,
 } from '../handicap'
 import {
@@ -188,11 +190,18 @@ function doubleBestWinner(round: Round, hole: number, teams: Team[]): 0 | 1 | nu
   return null
 }
 
-/** Bonusové body dvojice za birdie a eagly na jedné jamce. */
+/**
+ * Bonusové body dvojice za birdie a eagly na jedné jamce.
+ *
+ * Co je birdie, rozhoduje volba **Uplatňovat HCP** (`bonusDiffToPar()`): bez ní
+ * platí jen skutečná rána pod par jamky, s ní i netto birdie hráče, který na
+ * jamce dostává ránu. Kdo jamku vyhrál (BEST, součet), se počítá netto vždycky -
+ * to je pravidlo hry, ne bonus.
+ */
 function bonusPoints(round: Round, team: Team, hole: number): number {
   let bonus = 0
   for (const player of teamPlayers(round, team)) {
-    const diff = netDiffToPar(round, player.id, hole)
+    const diff = bonusDiffToPar(round, player.id, hole)
     if (diff === null) continue
     if (diff <= -2) bonus += POINTS.eagle
     else if (diff === -1) bonus += POINTS.birdie
@@ -280,6 +289,163 @@ function settledHoles(round: Round, team: Team): number {
     if (teamBestBall(round, team, hole) !== null) count += 1
   }
   return count
+}
+
+/**
+ * Rozpis bodů dvojice na jamce - odpověď na „proč máme tři body".
+ *
+ * Staví na stejných funkcích jako `holePointsForTeams()`, jen místo součtu
+ * vypíše každý zdroj zvlášť včetně čísel, ze kterých se rozhodovalo. Řádky
+ * s nulou zůstávají, protože „bunker se nepočítá, bylo to bogey" je pro
+ * hráče stejně důležitá informace jako přiznaný bod.
+ */
+export function holeBreakdownForTeams(
+  round: Round,
+  teams: Team[],
+  hole: number,
+): HoleBreakdown[] {
+  const points = holePointsForTeams(round, teams, hole)
+  const [teamA, teamB] = teams
+  if (!teamA || !teamB) return []
+
+  const { doubleBest: doubleBestValue, noDoubleBonuses } = round.settings.options
+  const multiplier = holeMultiplier(round, hole)
+  const extraMultiplier = noDoubleBonuses ? 1 : multiplier
+  const net = isNetRound(round)
+  /** Číslo tak, jak o něm rozhodovala hra - v netto kole netto. */
+  const scoreNote = (value: string) =>
+    net ? t('breakdown.net', { value }) : t('breakdown.gross', { value })
+
+  return teams.map((team, index) => {
+    const other = index === 0 ? teamB : teamA
+    const own = points[index] ?? EMPTY_POINTS
+    const lines: HoleBreakdown['lines'] = [
+      {
+        kind: 'best',
+        label: t('best.best'),
+        note: scoreNote(
+          t('breakdown.versus', {
+            own: formatSideScore(teamBestBall(round, team, hole)),
+            other: formatSideScore(teamBestBall(round, other, hole)),
+          }),
+        ),
+        points: own.best,
+      },
+      {
+        kind: 'aggregate',
+        label: t('best.aggregate'),
+        note: scoreNote(
+          t('breakdown.versus', {
+            own: formatAggregate(teamAggregate(round, team, hole)),
+            other: formatAggregate(teamAggregate(round, other, hole)),
+          }),
+        ),
+        points: own.aggregate,
+      },
+    ]
+
+    if (doubleBestValue > 0) {
+      lines.push({
+        kind: 'doubleBest',
+        label: t('best.doubleBest'),
+        note: t('best.doubleBestNote'),
+        points: own.doubleBest,
+      })
+    }
+
+    // Birdie a eagle podle toho, co je v tomhle kole birdie (volba HCP).
+    for (const player of teamPlayers(round, team)) {
+      const diff = bonusDiffToPar(round, player.id, hole)
+      if (diff === null || diff > -1) continue
+      const eagle = diff <= -2
+      lines.push({
+        kind: 'result',
+        label: t(eagle ? 'tier.eagle.name' : 'tier.birdie.name'),
+        note: `${player.name} · ${resultNote(round, player.id, hole)}`,
+        points: (eagle ? POINTS.eagle : POINTS.birdie) * multiplier,
+      })
+    }
+
+    lines.push(...extraLines(round, teams, index, hole, extraMultiplier))
+
+    return { id: team.id, name: teamName(round, team), lines, total: own.total }
+  })
+}
+
+/** Číslo, ze kterého se u hráče posuzoval výsledek jamky pro bonusy. */
+function resultNote(round: Round, playerId: PlayerId, hole: number): string {
+  const withHandicap = round.settings.options.multipliersWithHandicap && isNetRound(round)
+  const value = withHandicap
+    ? (netScoreAt(round, playerId, hole) ?? 0)
+    : (scoreAt(round, playerId, hole) ?? 0)
+  return withHandicap
+    ? t('breakdown.net', { value: `${value}` })
+    : t('breakdown.gross', { value: `${value}` })
+}
+
+/** Rozpis extra bodů dvojice: který bonus, komu a kolik vynesl. */
+function extraLines(
+  round: Round,
+  teams: Team[],
+  index: number,
+  hole: number,
+  extraMultiplier: number,
+): HoleBreakdown['lines'] {
+  const { bonusValues } = round.settings.options
+  const team = teams[index]
+  if (!team) return []
+  const lines: HoleBreakdown['lines'] = []
+
+  // Běžné extra body drží hráč, který je zapsal, a násobí se výsledkem jamky.
+  for (const player of teamPlayers(round, team)) {
+    const diff = bonusDiffToPar(round, player.id, hole)
+    for (const bonusId of bonusesAt(round, player.id, hole)) {
+      const bonus = getBonus(bonusId)
+      const value = bonusValues[bonusId] ?? 0
+      if (!bonus || bonus.kind !== 'points' || bonus.exclusive || value <= 0) continue
+      const multiplier =
+        diff === null
+          ? 0
+          : bonusMultiplier(diff, round.settings.options.resultMultipliers)
+      lines.push({
+        kind: 'extra',
+        label: t(dynamicKey('bonus', bonusId, 'name')),
+        note: `${player.name} · ${resultNote(round, player.id, hole)}`,
+        points: value * multiplier * extraMultiplier,
+      })
+    }
+  }
+
+  // Longest a Nearest drží na jamce jediný hráč a mohou propadnout soupeřům.
+  for (const bonusId of ['longest', 'nearest'] as const) {
+    const value = bonusValues[bonusId] ?? 0
+    if (value <= 0) continue
+    const holder = round.players.find((p) =>
+      bonusesAt(round, p.id, hole).includes(bonusId),
+    )
+    if (!holder) continue
+    const holderTeam = teams.findIndex((t) => t.playerIds.includes(holder.id))
+    if (holderTeam < 0) continue
+
+    const outcome = exclusiveBonusOutcome(round, holder.id, hole, bonusId)
+    const winner = outcome === 'own' ? holderTeam : 1 - holderTeam
+    const mine = holderTeam === index
+    if (outcome !== 'pending' && winner !== index) continue
+
+    lines.push({
+      kind: 'extra',
+      label: t(dynamicKey('bonus', bonusId, 'name')),
+      note:
+        outcome === 'pending'
+          ? t('breakdown.pending', { name: holder.name })
+          : mine
+            ? holder.name
+            : t('breakdown.forfeited', { name: holder.name }),
+      points: outcome === 'pending' ? 0 : value * extraMultiplier,
+    })
+  }
+
+  return lines
 }
 
 export const bestAggregate: GameDefinition = {
@@ -402,8 +568,15 @@ export const bestAggregate: GameDefinition = {
           value: formatAggregate(teamAggregate(round, team, hole)),
           highlight: aggWinner === index,
         },
+        // Zdroje bodů (birdie, Double Best, extra body) tady nejsou schválně:
+        // s dlouhými názvy se řádek zalomil na dva a zápis skóre přerostl
+        // displej. Celý rozpis je za modrým „i" (`holeBreakdown()`).
         { label: t('best.holePoints'), value: `${points[index]?.total ?? 0}` },
       ],
     }))
+  },
+
+  holeBreakdown(round: Round, hole: number): HoleBreakdown[] {
+    return holeBreakdownForTeams(round, round.teams, hole)
   },
 }

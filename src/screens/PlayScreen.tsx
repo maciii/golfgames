@@ -21,7 +21,7 @@ import {
 } from '../types'
 import type { Team } from '../types'
 import { getGame } from '../games'
-import type { HoleSetup, HoleSetupSelection } from '../games'
+import type { HoleBreakdown, HoleSetup, HoleSetupSelection } from '../games'
 import {
   exclusiveBonusOutcome,
   pairStrokesReceived,
@@ -29,6 +29,7 @@ import {
   strokesReceived,
 } from '../handicap'
 import BonusSheet from './BonusSheet'
+import PointsSheet from './PointsSheet'
 import Scorecard from './Scorecard'
 import { useT } from '../i18n'
 
@@ -103,6 +104,8 @@ export default function PlayScreen({
   })
   // Hráč, pro kterého je otevřený výběr extra bodů.
   const [bonusFor, setBonusFor] = useState<Player | null>(null)
+  // Strana, pro kterou je otevřený rozpis bodů jamky.
+  const [breakdownFor, setBreakdownFor] = useState<string | null>(null)
   const showLandscapeScorecard = useMobileLandscape()
   const game = getGame(round.gameId)
   const hole = round.currentHole
@@ -130,6 +133,15 @@ export default function PlayScreen({
   const sharedBall = game.sharedBall === true && round.teams.length > 0
   // Shrnutí, které nepatří konkrétní dvojici, ale celé jamce (Skins, singles).
   const gameSummary = summaries.find((s) => s.id === '_game')
+  /**
+   * Rozpis bodů jamky, pokud ho hra umí. „Proč máme tři body" se z hlavičky
+   * dvojice přečíst nedá, takže vedle ní stojí modré „i".
+   */
+  // Z první jamky nevede šipka na předchozí jamku, ale na nastavení kola.
+  // U opravy archivního kola se nikam neodbočuje, tam zůstává nečinná.
+  const backToSetup = hole === 0 && onOpenSetup !== undefined
+  const breakdowns: HoleBreakdown[] = game.holeBreakdown?.(round, hole) ?? []
+  const openedBreakdown = breakdowns.find((entry) => entry.id === breakdownFor)
   /**
    * Popisek odkazu na nastavení kola. Pojmenovává to, co se za ním dá změnit -
    * a je krátký záměrně: „Hra a dvojice" zalomí řádek odkazů na dva a zápis
@@ -455,12 +467,14 @@ export default function PlayScreen({
         }`}
       >
         <div className="hole-nav">
+          {/* Na první jamce není kam listovat, ale zpět z ní vede - na krok
+              zakládání kola, odkud se dá změnit hra i dvojice. */}
           <button
             type="button"
             className="nav-arrow"
-            onClick={() => onGoToHole(hole - 1)}
-            disabled={hole === 0}
-            aria-label={t('play.previousHole')}
+            onClick={() => (backToSetup ? onOpenSetup?.() : onGoToHole(hole - 1))}
+            disabled={hole === 0 && !backToSetup}
+            aria-label={backToSetup ? t('play.backToSetup') : t('play.previousHole')}
           >
             ‹
           </button>
@@ -622,6 +636,19 @@ export default function PlayScreen({
                 {entry.label} <strong>{entry.value}</strong>
               </span>
             ))}
+            {/* U dynamických dvojic patří rozpis k celé jamce, ne k bloku. */}
+            {breakdowns.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                className="info-button"
+                onClick={() => setBreakdownFor(entry.id)}
+                aria-label={t('breakdown.open', { name: entry.name })}
+                title={entry.name}
+              >
+                i
+              </button>
+            ))}
           </div>
         )}
 
@@ -649,6 +676,20 @@ export default function PlayScreen({
                           {entry.label} <strong>{entry.value}</strong>
                         </span>
                       ))}
+                      {/* Odkud se body vzaly, se z čísel přečíst nedá. */}
+                      {breakdowns.some((entry) => entry.id === team.id) && (
+                        <button
+                          type="button"
+                          className="info-button"
+                          onClick={() => setBreakdownFor(team.id)}
+                          aria-label={t('breakdown.open', {
+                            name: game.teamLabel?.(round, team) ?? teamName(round, team),
+                          })}
+                          title={t('breakdown.title')}
+                        >
+                          i
+                        </button>
+                      )}
                     </span>
                   )}
                 </div>
@@ -710,6 +751,15 @@ export default function PlayScreen({
           </button>
         )}
       </footer>
+
+      {openedBreakdown && (
+        <PointsSheet
+          round={round}
+          hole={hole}
+          breakdown={openedBreakdown}
+          onClose={() => setBreakdownFor(null)}
+        />
+      )}
 
       {bonusFor && (
         <BonusSheet

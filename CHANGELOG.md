@@ -7,6 +7,32 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.47.0] – 2026-08-14
+
+### Změněno
+
+- **Volba „Uplatňovat HCP" teď rozhoduje i o birdie a eagle v bodování hry.**
+  Dřív platila jen pro násobič extra bodů, zatímco body za birdie a eagle
+  v Best + Součtu a Levé-Pravé se počítaly z netto ran vždycky. Dvě různá
+  pravidla pro „co je birdie" v jedné hře se nedala uhádnout: dvojice měla za
+  jamku, kde nikdo birdie nedal, tři body. Bez zaškrtnutí (výchozí stav) se
+  teď birdie i eagle posuzují **z brutto ran** – tedy proti paru jamky – a to
+  včetně „birdie" u smetení v Dots. Se zaškrtnutím platí netto jako dosud.
+  Co se nemění: kdo jamku vyhrál (BEST, součet, skin, jamkovka, pořadí v Dots,
+  body ve Stablefordu) se v netto kole počítá z netto ran dál.
+- **Dohraná kola v archivu si nechávají pravidlo, se kterým se hrála.** Kolo
+  odehrané dřív, než volba existovala, se dál počítá s netto birdie – jinak by
+  se zpětně změnily body i dávno vyrovnané peníze.
+
+### Přidáno
+
+- **Šipka zpět u čísla jamky vede z první jamky na nastavení kola.** Dřív byla
+  na první jamce nečinná; teď otevře krok s hrou a dvojicemi.
+- **Modré „i" u shrnutí jamky otevře přesný rozpis bodů.** Každý zdroj zvlášť
+  i s číslem, ze kterého se rozhodovalo (`netto 3 proti 4`), a s nulami
+  u bonusů, které se nepočítaly – „Water · netto 5 → 0" je stejně důležitá
+  odpověď jako přiznaný bod.
+
 ## [0.46.0] – 2026-08-14
 
 ### Přidáno

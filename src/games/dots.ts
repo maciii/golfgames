@@ -1,6 +1,6 @@
 import type { PlayerId, Round } from '../types'
 import { holeMultiplier, holesPlayed, isHoleStarted, strokeTotal } from '../types'
-import { netDiffToPar, netScoreAt } from '../handicap'
+import { bonusDiffToPar, netScoreAt } from '../handicap'
 import { CONCEDED } from './shared'
 import type {
   GameDefinition,
@@ -161,7 +161,9 @@ function sweepPoints(
   if (!Number.isFinite(first.score) || !Number.isFinite(second.score)) return null
   if (second.score - first.score < 2) return null
 
-  const diff = netDiffToPar(round, first.id, hole)
+  // Co je birdie, rozhoduje volba „Uplatňovat HCP" - stejně jako u ostatních
+  // bonusů za výsledek. Samotné pořadí na jamce se počítá netto vždycky.
+  const diff = bonusDiffToPar(round, first.id, hole)
   const birdie = options.doubleSweepOnBirdie && diff !== null && diff <= -1
 
   return { winnerId: first.id, points: birdie ? table.birdieSweep : table.sweep }

@@ -39,6 +39,7 @@ export type {
   GameDefinition,
   GameScoringOptions,
   HeaderSummary,
+  HoleBreakdown,
   HoleSetupChoice,
   HoleSetupSelection,
   HoleSetup,

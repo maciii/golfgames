@@ -840,7 +840,9 @@ v `history.back()`.
    dvojicích), takže u dvou hráčů řada kroků zůstává stejná. Krok „Hra"
    ukazuje zvolené dvojice na řádku a odkazuje na ně.
 2. **Kroky se dají otevřít i z rozehraného kola** - odkazem „Dvojice"
-   (u dvou jamkovek „Soupeři", u her jednotlivců „Hra") pod zápisem skóre.
+   (u dvou jamkovek „Soupeři", u her jednotlivců „Hra") pod zápisem skóre,
+   nebo šipkou zpět u čísla jamky: na první jamce není kam listovat, takže
+   místo nečinné šipky vede na nastavení kola.
    Obrazovky pak nečtou rozepsané kolo, ale **přímo `Round`**: volba se
    uplatní hned na kolo a nemá s čím se rozejít. Patička nekončí krokem
    „Další", ale „Zpět ke hře".
@@ -938,16 +940,37 @@ takže „jamka za 50 a Longest za 100" by znamenalo druhou hodnotu v modelu
 kola a migraci. Stejného výsledku se dosáhne hodnotou extra bodu: Longest za
 dvojnásobek jamky je prostě `2`.
 
-**Volba „Uplatňovat HCP".** Násobič za výsledek stál odjakživa na brutto
-výsledku (viz nejčastější zdroje chyb v `AGENTS.md`) a nedalo se to změnit.
-Pro flighty, které hrají netto „na tečky", to ale znamená, že slabší hráč za
-stejně zahranou jamku nikdy násobič nedostane. Přibyla proto volba
-`multipliersWithHandicap` (v nastavení bodování hry pod násobiči, **výchozí
-vypnuto**), která v netto kole přepne násobič na osobní par. Rozhoduje o tom
-jediná funkce `bonusDiffToPar()` v `handicap.ts`, kterou se ptají všechny tři
-cesty extra bodů - dvojice v Best + Součet a Levé-Pravé, vedlejší sázka
-a odznak u zápisu skóre. Kvůli tomu se `playerBonusPoints()` přestěhoval
-z `types.ts` do `handicap.ts`: osobní par se bez rozdělení ran spočítat nedá.
+**Volba „Uplatňovat HCP" a co všechno je bonus za výsledek.** Násobič za
+výsledek stál odjakživa na brutto výsledku (viz nejčastější zdroje chyb
+v `AGENTS.md`), zatímco body za birdie a eagle v Best + Součtu se počítaly
+netto. Dvě různá pravidla pro „co je birdie" v jedné hře nikdo neuhádne -
+otázka „proč má dvojice tři body, když nikdo nedal birdie?" přišla hned při
+prvním netto kole. Volba `multipliersWithHandicap` (v nastavení bodování hry
+pod násobiči, **výchozí vypnuto**) proto rozhoduje o **všech** bonusech za
+výsledek: birdie a eagle dvojice, násobič extra bodů i „birdie" u smetení
+v Dots. Rozhoduje o tom jediná funkce `bonusDiffToPar()` v `handicap.ts`;
+každý další výpočet bonusu se musí ptát jí. Kvůli tomu se `playerBonusPoints()`
+přestěhoval z `types.ts` do `handicap.ts`: osobní par se bez rozdělení ran
+spočítat nedá.
+
+**Co volba nemění.** Kdo jamku vyhrál - `BEST`, součet, skin, jamkovka, pořadí
+v Dots, body ve Stablefordu - se v netto kole počítá z netto ran vždycky. Netto
+je způsob, jak hrát proti sobě s různým handicapem; bonus za výsledek je
+naopak odměna za skutečně zahranou jamku, a právě tam se hráči rozcházejí.
+
+**Archiv si nechává pravidlo, se kterým se hrálo.** Dohrané kolo bez volby
+v uložených datech se hrálo v době, kdy se birdie počítalo netto vždycky -
+`normalizeRound()` mu proto volbu doplní jako zapnutou. Nová výchozí hodnota
+platí pro kola založená potom. Bez toho by se archivu zpětně změnily body
+i peníze, které jsou dávno vyrovnané.
+
+**Rozpis bodů u jamky.** Aby se stejná otázka nemusela luštit znovu, dodává hra
+`holeBreakdown()`: každý zdroj bodů zvlášť, s číslem, ze kterého se rozhodovalo,
+a s nulami u bonusů, které se nepočítaly. V řádku u jamky zůstávají jen tři
+čísla (BEST, součet, body) a modré „i" vedle nich otevře celý rozpis - názvy
+jako „Bunker (sandie)" řádek zalomily na dva a zápis skóre pak u čtyř hráčů
+přerostl displej. Obrazovka o pravidlech pořád nic neví - jen vykreslí, co
+dostane.
 
 **Nepotvrzený Longest u vedlejší sázky propadá.** V týmové hře přechází na
 soupeřovu dvojici, ale ve Stablefordu nebo Dots žádná soupeřova strana není -

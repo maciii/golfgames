@@ -17,6 +17,9 @@ vedlejší sázka s nulovými výchozími hodnotami.
 - [x] Tlačítko extra bodů se nenabízí, když se o žádný nehraje
 - [x] Testy hodnoty, součtů, peněz a výchozích nul; `e2e/sideBets.spec.ts`
 - [x] Volba „Uplatňovat HCP" pod násobiči (výchozí vypnuto) přes `bonusDiffToPar()`
+- [x] Volba rozhoduje o **všech** bonusech za výsledek včetně birdie a eagle hry
+- [x] Archiv si nechává pravidlo, se kterým se hrálo (`normalizeRound()`)
+- [x] Rozpis bodů jamky (`holeBreakdown()`), zdroje vedle BESTu a modré „i"
 - [x] Dokumentace, rozhodnutí #37, changelog
 
 ## Předchozí cíl (hotový)

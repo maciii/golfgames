@@ -8,6 +8,8 @@
   --accent: #4ade80;
   --accent-dark: #16a34a;
   --under: #7dd3fc;
+  /* Informace, ne výsledek - bledě modrá, ať se nemíchá se skóre. */
+  --info: #7dd3fc;
   --over: #fca5a5;
 
   /* Barvy výsledků na jamce. Značka je barevný štítek, číslo v ní má tmavý
@@ -1342,9 +1344,92 @@ button {
 
 .team-summary {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-width: 0;
   font-size: 13px;
   color: var(--text-dim);
+}
+
+/* Bledě modré „i": otevře rozpis bodů jamky. Není to výsledek, takže má
+   vlastní barvu a nesoutěží s hodnotami vedle sebe. */
+.info-button {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--info) 55%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--info) 16%, transparent);
+  color: var(--info);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* --- rozpis bodů jamky --------------------------------------------------- */
+
+.breakdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.breakdown-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.breakdown-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.breakdown-note {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* Nezískaný bod je vidět, ale nekřičí - „bunker se nepočítal" je taky odpověď. */
+.breakdown-points {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown-row.earned .breakdown-points {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.breakdown-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.breakdown-total strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
 .team-metric strong {

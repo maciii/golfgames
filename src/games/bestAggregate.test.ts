@@ -6,7 +6,12 @@ import {
   availableBonuses,
   toggleBonus,
 } from '../types'
-import { bestAggregate, holePoints, totalPoints } from './bestAggregate'
+import {
+  bestAggregate,
+  holeBreakdownForTeams,
+  holePoints,
+  totalPoints,
+} from './bestAggregate'
 import { makeRound } from './fixtures'
 
 import { beforeAll } from 'vitest'
@@ -164,7 +169,8 @@ describe('Best + Součet - vzdané jamky', () => {
 })
 
 describe('Best + Součet - netto HCP', () => {
-  it('odečte HCP rány před porovnáním Best i Součtu', () => {
+  /** Netto kolo, kde dvojice A dostává tři rány na jedinou jamku. */
+  function netRound(multipliersWithHandicap: boolean) {
     const round = makeRound({
       gameId: 'best-aggregate',
       players: ['Adam', 'Alena', 'Bára', 'Bořek'],
@@ -175,7 +181,7 @@ describe('Best + Součet - netto HCP', () => {
       pars: [4],
       // Brutto vyhrává dvojice B: 4 je méně než 5 a 8 méně než 10.
       scores: [[5], [5], [4], [4]],
-      settings: { options: BASE_OPTIONS },
+      settings: { options: { ...BASE_OPTIONS, multipliersWithHandicap } },
     })
     round.netScoring = true
     round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
@@ -183,16 +189,32 @@ describe('Best + Součet - netto HCP', () => {
     round.players[1]!.playingHandicap = 3
     round.players[2]!.playingHandicap = 0
     round.players[3]!.playingHandicap = 0
+    return round
+  }
 
+  it('odečte HCP rány před porovnáním Best i Součtu', () => {
+    // Kdo jamku vyhrál, se počítá netto vždycky - to je pravidlo hry.
+    const round = netRound(false)
     const points = holePoints(round, 0)
-    // Po odečtu tří ran má A 2/2: Best 2, Součet 4 a dva eagle bonusy.
-    expect(points[0]).toMatchObject({ best: 1, aggregate: 1, bonus: 6, total: 8 })
+
+    expect(points[0]).toMatchObject({ best: 1, aggregate: 1 })
     expect(points[1]).toMatchObject({ best: 0, aggregate: 0 })
     expect(bestAggregate.holeSummary?.(round, 0)[0]?.entries).toEqual([
       { label: 'Best', value: '2', highlight: true },
       { label: 'Součet', value: '4', highlight: true },
-      { label: 'Body', value: '8' },
+      { label: 'Body', value: '2' },
     ])
+  })
+
+  it('bez volby Uplatňovat HCP nejsou netto birdie ani eagle', () => {
+    // Oba hráči dvojice A zapsali bogey; netto je to eagle, ale bonus za
+    // výsledek stojí na skutečné ráně, dokud se volba nezapne.
+    expect(holePoints(netRound(false), 0)[0]).toMatchObject({ bonus: 0, total: 2 })
+  })
+
+  it('s volbou Uplatňovat HCP se netto eagle počítá', () => {
+    // Po odečtu tří ran má A 2/2, tedy dva eagly po třech bodech.
+    expect(holePoints(netRound(true), 0)[0]).toMatchObject({ bonus: 6, total: 8 })
   })
 
   it('v brutto kole ponechá Best i Součet beze změny', () => {
@@ -916,5 +938,103 @@ describe('Best + Součet - násobiče za výsledek', () => {
   it('potvrzování Longestu i Nearestu je ve výchozím stavu zapnuté', () => {
     expect(DEFAULT_GAME_OPTIONS.confirmLongest).toBe(true)
     expect(DEFAULT_GAME_OPTIONS.confirmNearest).toBe(true)
+  })
+})
+
+describe('Best + Součet - rozpis bodů jamky', () => {
+  /**
+   * Kolo z reálné hlášky „proč máme tři body": par 4, Alexandra zapsala 7
+   * se čtyřmi ranami k dobru (netto 3), ostatní 5. Netto tedy BEST 3 proti 4
+   * a součet 8 proti 9.
+   */
+  function reportedRound(multipliersWithHandicap: boolean) {
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Alexandra', 'Luděk', 'Michal', 'Martin'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[7], [5], [5], [5]],
+      settings: { options: { ...BASE_OPTIONS, multipliersWithHandicap } },
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 4
+    round.players[3]!.playingHandicap = 1
+    return round
+  }
+
+  it('vypíše, z čeho se body vzaly, včetně čísel', () => {
+    const round = reportedRound(true)
+    const [first] = holeBreakdownForTeams(round, round.teams, 0)
+
+    expect(first?.total).toBe(3)
+    expect(first?.lines.map((line) => [line.kind, line.label, line.points])).toEqual([
+      ['best', 'Best', 1],
+      ['aggregate', 'Součet', 1],
+      ['result', 'Birdie', 1],
+    ])
+    expect(first?.lines[0]?.note).toBe('netto 3 proti 4')
+    expect(first?.lines[2]?.note).toBe('Alexandra · netto 3')
+  })
+
+  it('bez volby Uplatňovat HCP žádné birdie nevypíše', () => {
+    const round = reportedRound(false)
+    const [first] = holeBreakdownForTeams(round, round.teams, 0)
+
+    expect(first?.total).toBe(2)
+    expect(first?.lines.map((line) => line.kind)).toEqual(['best', 'aggregate'])
+  })
+
+  it('shrnutí jamky drží tři čísla, rozpis je za ikonou', () => {
+    // Zdroje bodů se do řádku nevypisují: s dlouhými názvy se zalomil na dva
+    // řádky a zápis skóre se přestal vejít na jednu obrazovku.
+    const entries = bestAggregate.holeSummary?.(reportedRound(true), 0)[0]?.entries ?? []
+
+    expect(entries.map((entry) => [entry.label, entry.value])).toEqual([
+      ['Best', '3'],
+      ['Součet', '8'],
+      ['Body', '3'],
+    ])
+  })
+
+  it('nezískaný extra bod je v rozpisu vidět s nulou', () => {
+    const round = reportedRound(true)
+    round.settings.options = {
+      ...round.settings.options,
+      bonusValues: { ...round.settings.options.bonusValues, water: 1 },
+    }
+    // Michal zahrál bogey, takže se jeho voda nepočítá - a musí to být vidět.
+    round.bonuses.p3 = [['water']]
+    const second = holeBreakdownForTeams(round, round.teams, 0)[1]
+
+    expect(second?.lines.map((line) => [line.label, line.points])).toEqual([
+      ['Best', 0],
+      ['Součet', 0],
+      ['Water', 0],
+    ])
+    expect(second?.total).toBe(0)
+  })
+
+  it('propadlý Longest je vidět u dvojice, která ho dostala', () => {
+    const round = reportedRound(true)
+    round.settings.options = {
+      ...round.settings.options,
+      bonusValues: { ...round.settings.options.bonusValues, longest: 5 },
+      confirmLongest: true,
+    }
+    round.pars = [5]
+    // Michal má Longest, ale jamku zahrál na bogey, takže bod propadá soupeřům.
+    round.scores.p3 = [6]
+    round.bonuses.p3 = [['longest']]
+    const [first, second] = holeBreakdownForTeams(round, round.teams, 0)
+
+    expect(second?.lines.some((line) => line.label === 'Longest')).toBe(false)
+    expect(first?.lines.find((line) => line.label === 'Longest')).toMatchObject({
+      note: 'propadlo, zapsal Michal',
+      points: 5,
+    })
   })
 })

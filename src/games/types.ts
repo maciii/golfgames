@@ -129,6 +129,32 @@ export interface GameScoringOptions {
   bonusesAsSideBet?: boolean
 }
 
+/**
+ * Přesný rozpis bodů jedné strany na jedné jamce - „proč mám tři body".
+ *
+ * Hra ho dodá, když se její body skládají z víc zdrojů (BEST, součet, birdie,
+ * extra body). Obrazovka ho jen vypíše, takže se nemusí ptát na pravidla.
+ */
+export interface HoleBreakdown {
+  /** Id dvojice nebo hráče, ke kterému rozpis patří. */
+  id: string
+  name: string
+  lines: {
+    /**
+     * Druh zdroje. Shrnutí jamky vypisuje vedle BESTu a součtu právě ty
+     * ostatní, aby bylo vidět, o jaké body navíc jde.
+     */
+    kind: 'best' | 'aggregate' | 'doubleBest' | 'result' | 'extra'
+    /** Z čeho bod je: „BEST", „Birdie", „Bunker (sandie)". */
+    label: string
+    /** Čím je to podložené: „netto 3 proti 4", „Alexandra, netto 3". */
+    note?: string
+    /** Kolik to vyneslo; nula znamená „nezískáno". */
+    points: number
+  }[]
+  total: number
+}
+
 /** Průběžné skóre, které hra zobrazí vedle hlavičky aktuální jamky. */
 export interface HeaderSummary {
   entries: {
@@ -229,6 +255,12 @@ export interface GameDefinition {
   holeSetup?(round: Round, hole: number): HoleSetup
   setHoleSetup?(round: Round, hole: number, selection: HoleSetupSelection): Round
   holeSummary?(round: Round, hole: number): HoleSummary[]
+  /**
+   * Rozpis bodů jamky do posledního bodu. Bez něj se u shrnutí jamky
+   * nenabízí odkaz na podrobnosti - u hry, kde jamka jen padne nebo nepadne,
+   * není co rozepisovat.
+   */
+  holeBreakdown?(round: Round, hole: number): HoleBreakdown[]
   headerSummary?(round: Round, hole: number): HeaderSummary
   scorecardPlayerCell?(round: Round, playerId: string, hole: number): ScorecardPlayerCell
   scorecardPlayerTotal?(round: Round, playerId: string): ScorecardPlayerTotal
