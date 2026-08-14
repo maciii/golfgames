@@ -11,6 +11,7 @@ import type {
 import { rankRows } from './types'
 import { t } from '../i18n'
 import { CONCEDED, formatSideScore } from './shared'
+import { SIDE_BET_BONUSES, sideBetSection, withSideBets } from './sideBets'
 import type { MatchSide, MatchState, SideScore } from './match'
 import {
   compactHeaderNote,
@@ -73,18 +74,30 @@ export function foursomePairStrokes(
   return team ? pairStrokesReceived(round, team.playerIds, hole) : 0
 }
 
+/** Strany pro vedlejší sázku - u foursome vždycky dvojice. */
+function betSides(round: Round) {
+  return matchSides(round).map((side) => ({
+    id: side.id,
+    name: side.name,
+    playerIds: side.playerIds,
+  }))
+}
+
 export const foursome: GameDefinition = {
   id: 'foursome',
   playerCounts: [4],
   usesTeams: () => true,
   sharedBall: true,
   scoringOptions: {
-    bonusIds: [],
-    resultMultipliers: false,
+    // Extra body jsou tady vedlejší sázka: ve výchozím stavu nulové, takže
+    // dokud si je někdo nezapne, hra se chová jako dřív (`sideBets.ts`).
+    bonusIds: SIDE_BET_BONUSES,
+    resultMultipliers: true,
     doubleBest: false,
     noDoubleBonuses: false,
-    confirmLongest: false,
-    confirmNearest: false,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusesAsSideBet: true,
     bonusScope: 'team',
   },
   supportsDoubleHoles: false,
@@ -110,6 +123,10 @@ export const foursome: GameDefinition = {
       }
     })
 
+    // Extra body patří celé dvojici (jeden míč, jeden zápis) a do tabulky
+    // zápasu se přičíst nemohou - mají vlastní a do peněz vstupují níž.
+    const sideBets = sideBetSection(round, betSides(round))
+
     return [
       {
         id: 'match',
@@ -117,7 +134,19 @@ export const foursome: GameDefinition = {
         description: state.label,
         rows: rankRows(rows, 'highest'),
       },
+      ...(sideBets ? [sideBets] : []),
     ]
+  },
+
+  settlementParties(round: Round) {
+    const state = foursomeState(round)
+    return withSideBets(
+      round,
+      betSides(round).map((side, index) => ({
+        ...side,
+        units: state.won[index === 0 ? 0 : 1],
+      })),
+    )
   },
 
   headerSummary(round: Round, hole: number): HeaderSummary {

@@ -5,6 +5,22 @@ patří konkrétní cíl, rozhodnutí a ověřitelný výsledek.
 
 ## Cíl
 
+Extra body ve všech hrách. Kde je hra neumí vzít do svého bodování, jsou
+vedlejší sázka s nulovými výchozími hodnotami.
+
+## Úkoly (extra body)
+
+- [x] Společný výpočet extra bodů v `src/games/sideBets.ts` (Skins ho používá taky)
+- [x] Vlastní tabulka „Extra body" u jamkovky, Foursome, dvou jamkovek, Stablefordu a Dots
+- [x] Body do peněz přes nový `GameDefinition.settlementParties()`
+- [x] Nulové výchozí hodnoty podle `scoringOptions.bonusesAsSideBet`
+- [x] Tlačítko extra bodů se nenabízí, když se o žádný nehraje
+- [x] Testy hodnoty, součtů, peněz a výchozích nul; `e2e/sideBets.spec.ts`
+- [x] Volba „Uplatňovat HCP" pod násobiči (výchozí vypnuto) přes `bonusDiffToPar()`
+- [x] Dokumentace, rozhodnutí #37, changelog
+
+## Předchozí cíl (hotový)
+
 Dvojice na vlastní obrazovce, pohyb mezi kroky zakládání kola bez ztráty dat
 a čitelný zápis skóre i s dlouhými jmény a dvěma zápasy ve flightu.
 
@@ -41,6 +57,8 @@ a čitelný zápis skóre i s dlouhými jmény a dvěma zápasy ve flightu.
 
 ## Ověření
 
+- `npx vitest run src/games/sideBets.test.ts src/storage.test.ts`
+- `npx playwright test sideBets --project=phone-chrome-android`
 - `npx vitest run src/roundSetup.test.ts src/games/singlesMatches.test.ts src/types.test.ts`
 - `npx playwright test setupNav games4 responsive --project=phone-chrome-android`
 - `npm run check`

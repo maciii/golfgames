@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   addToRoster,
+  loadGameOptions,
+  saveGameOptions,
   archiveRound,
   loadArchive,
   loadRoster,
@@ -160,5 +162,33 @@ describe('dodatečná oprava archivního kola', () => {
     archiveRound(oldest!)
 
     expect(loadArchive().map((r) => r.id)).toEqual(['round-a', 'round-c', 'round-b'])
+  })
+})
+
+describe('Výchozí hodnoty extra bodů', () => {
+  it('hra s vedlejší sázkou začíná na nule', () => {
+    // Nabídnout se extra body mají u každé hry, ale hrát se o ně začne teprve
+    // tehdy, když si někdo hodnotu zadá.
+    const options = loadGameOptions('match-play')
+
+    expect(Object.values(options.bonusValues).every((value) => value === 0)).toBe(true)
+  })
+
+  it('hra, která extra body počítá do bodů, si nechává katalogové hodnoty', () => {
+    const options = loadGameOptions('best-aggregate')
+
+    expect(options.bonusValues.longest).toBe(1)
+  })
+
+  it('zadaná hodnota přebije nulu i po znovunačtení', () => {
+    const stored = loadGameOptions('match-play')
+    saveGameOptions('match-play', {
+      ...stored,
+      bonusValues: { ...stored.bonusValues, bunker: 20 },
+    })
+
+    const options = loadGameOptions('match-play')
+    expect(options.bonusValues.bunker).toBe(20)
+    expect(options.bonusValues.longest).toBe(0)
   })
 })

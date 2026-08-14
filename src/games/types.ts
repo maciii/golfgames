@@ -117,6 +117,16 @@ export interface GameScoringOptions {
   doubleSweepOnBirdie?: boolean
   /** Komu připadne běžný bonus: celé dvojici, nebo jednotlivci. */
   bonusScope: 'team' | 'player'
+  /**
+   * Jsou extra body **vedlejší sázka** mimo bodování hry?
+   *
+   * Hry, které samy rozdávají body (Best + Součet, Levá-Pravá, Skins), si je
+   * počítají do svých bodů. Jamkovka, Stableford ani Dots to nemohou - přičtení
+   * bonusu k vyhraným jamkám by rozbilo stav zápasu. U nich stojí extra body
+   * zvlášť (`sideBets.ts`): vlastní tabulka, body do vyrovnání kola a hodnoty
+   * **ve výchozím stavu nulové**, takže se o ně hraje teprve po zapnutí.
+   */
+  bonusesAsSideBet?: boolean
 }
 
 /** Průběžné skóre, které hra zobrazí vedle hlavičky aktuální jamky. */
@@ -207,6 +217,14 @@ export interface GameDefinition {
    * jako jedna hra. Dva zápasy ve flightu si takhle nemíchají peníze.
    */
   settlementGroups?(round: Round): string[][]
+  /**
+   * Strany peněžního vyrovnání, když se nekryjí s hlavní tabulkou.
+   *
+   * Bez hodnoty se vyrovnává první tabulka podle `row.value`. Hry s vedlejší
+   * sázkou (`bonusesAsSideBet`) tady k jednotkám hry přidají extra body -
+   * do tabulky se přičíst nemohou, protože ta drží pořadí podle pravidel hry.
+   */
+  settlementParties?(round: Round): { id: string; name: string; units: number }[]
   computeStandings(round: Round): StandingsSection[]
   holeSetup?(round: Round, hole: number): HoleSetup
   setHoleSetup?(round: Round, hole: number, selection: HoleSetupSelection): Round

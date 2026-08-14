@@ -1,9 +1,5 @@
-import type { BonusId, PlayerId, Round } from '../types'
+import type { PlayerId, Round } from '../types'
 import {
-  bonusMultiplier,
-  bonusesAt,
-  diffToPar,
-  getBonus,
   holeMultiplier,
   holeNumber,
   holesPlayed,
@@ -13,8 +9,9 @@ import {
   scoreAt,
   strokeTotal,
 } from '../types'
-import { exclusiveBonusOutcome, netScoreAt } from '../handicap'
+import { netScoreAt } from '../handicap'
 import { CONCEDED } from './shared'
+import { holeSideBetPoints } from './sideBets'
 import type {
   GameDefinition,
   HeaderSummary,
@@ -60,46 +57,14 @@ interface PendingSkin {
   skins: number
 }
 
-const POINT_BONUSES: BonusId[] = [
-  'longest',
-  'nearest',
-  'bunker',
-  'doubleBunker',
-  'water',
-  'barkie',
-  'arnie',
-]
-
-/** Body, které hráč získá na jedné jamce mimo samotný skin. */
-export function skinExtraPoints(round: Round, playerId: PlayerId, hole: number): number {
-  const diff = diffToPar(round, playerId, hole)
-  if (diff === null) return 0
-
-  const resultMultiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
-  if (resultMultiplier === 0) return 0
-
-  let total = 0
-  for (const bonusId of bonusesAt(round, playerId, hole)) {
-    if (!POINT_BONUSES.includes(bonusId)) continue
-    const bonus = getBonus(bonusId)
-    const value = round.settings.options.bonusValues[bonusId] ?? 0
-    if (!bonus || bonus.kind !== 'points' || value <= 0) continue
-
-    if (bonus.exclusive) {
-      // U jednotlivců propadne nepotvrzený Longest/Nearest, nemá komu
-      // připadnout jako soupeřova dvojice.
-      if (exclusiveBonusOutcome(round, playerId, hole, bonusId) !== 'own') continue
-      total += value
-    } else {
-      total += value * resultMultiplier
-    }
-  }
-
-  const multiplier = round.settings.options.noDoubleBonuses
-    ? 1
-    : holeMultiplier(round, hole)
-  return total * multiplier
-}
+/**
+ * Body, které hráč získá na jedné jamce mimo samotný skin.
+ *
+ * Skins si extra body počítá do svých bodů, protože sám body rozdává; hry,
+ * které to nedělají, je berou jako vedlejší sázku (`sideBets.ts`). Pravidlo je
+ * v obou případech totéž, proto je i výpočet jeden.
+ */
+export const skinExtraPoints = holeSideBetPoints
 
 function skinCount(
   round: Round,

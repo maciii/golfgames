@@ -2,7 +2,6 @@ import type { Round, Team } from '../types'
 import {
   bonusMultiplier,
   bonusesAt,
-  diffToPar,
   getBonus,
   holeMultiplier,
   isHoleStarted,
@@ -18,7 +17,12 @@ import type {
 } from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
-import { exclusiveBonusOutcome, netDiffToPar, netScoreAt } from '../handicap'
+import {
+  bonusDiffToPar,
+  exclusiveBonusOutcome,
+  netDiffToPar,
+  netScoreAt,
+} from '../handicap'
 import {
   CONCEDED,
   aggregateWins,
@@ -91,15 +95,17 @@ const EMPTY_POINTS: TeamHolePoints = {
  *
  * Násobí se **brutto** výsledek, i když se kolo hraje netto. Rozdané rány mění
  * to, kdo jamku vyhrál, ne to, jak se zahrála - jinak by hráč s ranou na jamce
- * dostal za bunker na par dva body místo jednoho. Jediná výjimka je potvrzení
- * Longestu, který může v netto kole stát na osobním paru.
+ * dostal za bunker na par dva body místo jednoho. Kdo to chce jinak, zapne
+ * volbu „Uplatňovat HCP" a násobič pak stojí na osobním paru
+ * (`bonusDiffToPar()`); stejně tak může na osobním paru stát potvrzení
+ * Longestu.
  */
 function extraPoints(round: Round, team: Team, hole: number): number {
   const values = round.settings.options.bonusValues
   let total = 0
 
   for (const player of teamPlayers(round, team)) {
-    const diff = diffToPar(round, player.id, hole)
+    const diff = bonusDiffToPar(round, player.id, hole)
     if (diff === null) continue
     const multiplier = bonusMultiplier(diff, round.settings.options.resultMultipliers)
     if (multiplier === 0) continue

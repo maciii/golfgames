@@ -10,6 +10,7 @@ import type {
 } from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
+import { SIDE_BET_BONUSES, sideBetSection, withSideBets } from './sideBets'
 
 /**
  * Stableford - hra jednotlivců na body, ne na rány.
@@ -42,6 +43,15 @@ export function totalPoints(round: Round, playerId: PlayerId): number {
   return total
 }
 
+/** Strany pro vedlejší sázku - hra jednotlivců, takže každý sám za sebe. */
+function betSides(round: Round) {
+  return round.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    playerIds: [player.id],
+  }))
+}
+
 export const stableford: GameDefinition = {
   id: 'stableford',
   playerCounts: [1, 2, 3, 4],
@@ -52,12 +62,15 @@ export const stableford: GameDefinition = {
   // odměňuje lepší výsledek na jamce, takže by se násobiče překrývaly. Model
   // je na ně připravený, kdyby se to ukázalo jako žádané.
   scoringOptions: {
-    bonusIds: [],
-    resultMultipliers: false,
+    // Extra body jsou tady vedlejší sázka: ve výchozím stavu nulové, takže
+    // dokud si je někdo nezapne, hra se chová jako dřív (`sideBets.ts`).
+    bonusIds: SIDE_BET_BONUSES,
+    resultMultipliers: true,
     doubleBest: false,
     noDoubleBonuses: false,
-    confirmLongest: false,
-    confirmNearest: false,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusesAsSideBet: true,
     bonusScope: 'player',
   },
 
@@ -85,6 +98,10 @@ export const stableford: GameDefinition = {
       }
     })
 
+    // Extra body nejsou stablefordové body - proti paru se nepočítají, takže
+    // mají vlastní tabulku a k penězům se přidají v `settlementParties()`.
+    const sideBets = sideBetSection(round, betSides(round))
+
     return [
       {
         id: 'stableford',
@@ -92,7 +109,18 @@ export const stableford: GameDefinition = {
         description: net ? t('stableford.netDescription') : t('stableford.description'),
         rows: rankRows(rows, 'highest'),
       },
+      ...(sideBets ? [sideBets] : []),
     ]
+  },
+
+  settlementParties(round: Round) {
+    return withSideBets(
+      round,
+      betSides(round).map((side) => ({
+        ...side,
+        units: totalPoints(round, side.playerIds[0] ?? ''),
+      })),
+    )
   },
 
   /** Sloupec s body u každého hráče, aby stál hned vedle jeho ran. */

@@ -238,6 +238,9 @@ export const en: Record<MessageKey, Message> = {
   'gameSettings.multipliers': 'Result multipliers',
   'gameSettings.multipliersHint':
     'How many times the extra point counts when the hole is played under par. Par always counts once.',
+  'gameSettings.multipliersWithHandicap': 'Apply handicap',
+  'gameSettings.multipliersWithHandicapNote':
+    'Unchecked, the multiplier follows the actual score - a birdie means one under the hole par. Checked, a net round uses personal par, so a player who gets a stroke on the hole only needs a par.',
   'gameSettings.multiplierFor': 'Multiplier for {name}',
   'gameSettings.otherOptions': 'Other options',
   'gameSettings.doubleClosing': 'Holes 9 and 18 count double',
@@ -718,6 +721,13 @@ export const en: Record<MessageKey, Message> = {
   'singles.opponents': 'Opponents',
 
   // --- money settlement ---------------------------------------------------
+  // --- extra points as a side bet -----------------------------------------
+  'sideBets.title': 'Extra points',
+  'sideBets.description':
+    'A side bet outside the rules of the game; points are added to the round settlement.',
+  'sideBets.settingsHint':
+    'Extra points are a side bet: they start at zero and count only once you set a value.',
+
   'money.perGroup': 'Each match settles on its own.',
   'money.nobodyOwes': 'Nobody owes anybody anything.',
   'money.eachOpponent': 'Every extra point is paid by each opponent separately.',

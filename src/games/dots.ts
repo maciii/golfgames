@@ -11,6 +11,7 @@ import type {
 } from './types'
 import { rankRows } from './types'
 import { t } from '../i18n'
+import { SIDE_BET_BONUSES, sideBetSection, withSideBets } from './sideBets'
 
 /**
  * Dots - bodová hra pro tři hráče ve dvou variantách.
@@ -199,20 +200,32 @@ export function totalPoints(round: Round, playerId: PlayerId): number {
   return total
 }
 
+/** Strany pro vedlejší sázku - hra jednotlivců, takže každý sám za sebe. */
+function betSides(round: Round) {
+  return round.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    playerIds: [player.id],
+  }))
+}
+
 export const dots: GameDefinition = {
   id: 'dots',
   playerCounts: [3],
   usesTeams: () => false,
   scoringOptions: {
-    bonusIds: [],
-    resultMultipliers: false,
+    // Extra body jsou tady vedlejší sázka: ve výchozím stavu nulové, takže
+    // dokud si je někdo nezapne, hra se chová jako dřív (`sideBets.ts`).
+    bonusIds: SIDE_BET_BONUSES,
+    resultMultipliers: true,
     doubleBest: false,
     noDoubleBonuses: false,
-    confirmLongest: false,
-    confirmNearest: false,
+    confirmLongest: true,
+    confirmNearest: true,
     dotVariant: true,
     sweepOnTwoStrokes: true,
     doubleSweepOnBirdie: true,
+    bonusesAsSideBet: true,
     bonusScope: 'player',
   },
   supportsDoubleHoles: true,
@@ -230,6 +243,10 @@ export const dots: GameDefinition = {
       }
     })
 
+    // Body za pořadí na jamce rozdává hra sama; extra body jsou vedle nich
+    // vedlejší sázka, takže mají vlastní tabulku a vstupují až do peněz.
+    const sideBets = sideBetSection(round, betSides(round))
+
     return [
       {
         id: 'dots',
@@ -240,7 +257,18 @@ export const dots: GameDefinition = {
         }),
         rows: rankRows(rows, 'highest'),
       },
+      ...(sideBets ? [sideBets] : []),
     ]
+  },
+
+  settlementParties(round: Round) {
+    return withSideBets(
+      round,
+      betSides(round).map((side) => ({
+        ...side,
+        units: totalPoints(round, side.playerIds[0] ?? ''),
+      })),
+    )
   },
 
   headerSummary(round: Round): HeaderSummary {

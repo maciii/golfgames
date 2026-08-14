@@ -46,12 +46,17 @@ export default function ResultsScreen({
 
   // Peníze se počítají z hlavní tabulky hry - body, skiny i vyhrané jamky
   // fungují stejně. Bez sázky nebo bez soupeře vyjde 'none' a sekce se skryje.
+  // Hry s vedlejší sázkou (extra body u jamkovky, Stablefordu a Dots) dodají
+  // strany samy: do tabulky se extra body přičíst nedají, protože ta drží
+  // pořadí podle pravidel hry.
   const mainRows = sections[0]?.rows ?? []
-  const parties = mainRows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    units: row.value,
-  }))
+  const parties =
+    game.settlementParties?.(round) ??
+    mainRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      units: row.value,
+    }))
   // Dvě jamkovky ve flightu jsou dvě hry v jednom kole: každá se vyrovnává
   // sama za sebe, jinak by si platili hráči z různých zápasů.
   const groups = game.settlementGroups?.(round)

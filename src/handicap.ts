@@ -1,5 +1,5 @@
 import type { BonusId, PlayerId, Round, RoundTee } from './types'
-import { diffToPar, parAt, scoreAt } from './types'
+import { bonusMultiplier, bonusesAt, diffToPar, getBonus, parAt, scoreAt } from './types'
 import { localeTag } from './i18n'
 
 /**
@@ -355,6 +355,56 @@ export function netDiffToPar(
  * podle **brutto** výsledku, protože rozdané rány nemají s tím, jak se jamka
  * zahrála, nic společného.
  */
+/**
+ * Výsledek jamky, podle kterého se **násobí extra body**.
+ *
+ * Ve výchozím stavu brutto: rozdané rány mění to, kdo jamku vyhrál, ne to, jak
+ * se zahrála, takže hráč s ranou na jamce nemá za bunker na par dostat dva
+ * body. Volba „Uplatňovat HCP" (`multipliersWithHandicap`) to obrací - v netto
+ * kole se pak násobí podle osobního paru, takže kdo dostane ránu a zahraje par,
+ * má netto birdie. Na brutto kolo volba vliv nemá, tam žádný osobní par není.
+ */
+export function bonusDiffToPar(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+): number | null {
+  return round.settings.options.multipliersWithHandicap && isNetRound(round)
+    ? netDiffToPar(round, playerId, hole)
+    : diffToPar(round, playerId, hole)
+}
+
+/**
+ * Kolik bodů má hráč na jamce zapsáno v extra bodech - do odznaku u zápisu.
+ * Longest a Nearest se počítají v základní hodnotě, protože o jejich přiznání
+ * rozhoduje až potvrzovací pravidlo.
+ *
+ * Bydlí tady, ne v `types.ts`, protože násobič může stát na osobním paru -
+ * a ten se bez rozdělení ran spočítat nedá.
+ */
+export function playerBonusPoints(
+  round: Round,
+  playerId: PlayerId,
+  hole: number,
+): number {
+  const values = round.settings.options.bonusValues
+  const diff = bonusDiffToPar(round, playerId, hole)
+
+  let total = 0
+  for (const bonusId of bonusesAt(round, playerId, hole)) {
+    const bonus = getBonus(bonusId)
+    if (!bonus || bonus.kind === 'multiplier') continue
+    const value = values[bonusId] ?? 0
+    total += bonus.exclusive
+      ? value
+      : value *
+        (diff === null
+          ? 0
+          : bonusMultiplier(diff, round.settings.options.resultMultipliers))
+  }
+  return total
+}
+
 export function confirmDiffToPar(
   round: Round,
   playerId: PlayerId,

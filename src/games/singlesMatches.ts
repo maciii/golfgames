@@ -11,6 +11,7 @@ import type {
 import { rankRows } from './types'
 import { t } from '../i18n'
 import { CONCEDED } from './shared'
+import { SIDE_BET_BONUSES, sideBetSection, withSideBets } from './sideBets'
 import type { MatchSide, MatchState, SideScore } from './match'
 import {
   headerTone,
@@ -85,18 +86,30 @@ function matchOf(round: Round, playerId: PlayerId): FlightMatch | undefined {
   return flightMatches(round).find((match) => match.team.playerIds.includes(playerId))
 }
 
+/** Strany pro vedlejší sázku: každý hráč sám za sebe, jako jeho zápas. */
+function betSides(round: Round) {
+  return round.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    playerIds: [player.id],
+  }))
+}
+
 export const singlesMatches: GameDefinition = {
   id: 'singles-matches',
   playerCounts: [4],
   usesTeams: () => true,
   pairingKind: 'opponents',
   scoringOptions: {
-    bonusIds: [],
-    resultMultipliers: false,
+    // Extra body jsou tady vedlejší sázka: ve výchozím stavu nulové, takže
+    // dokud si je někdo nezapne, hra se chová jako dřív (`sideBets.ts`).
+    bonusIds: SIDE_BET_BONUSES,
+    resultMultipliers: true,
     doubleBest: false,
     noDoubleBonuses: false,
-    confirmLongest: false,
-    confirmNearest: false,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusesAsSideBet: true,
     bonusScope: 'player',
   },
   supportsDoubleHoles: false,
@@ -123,6 +136,10 @@ export const singlesMatches: GameDefinition = {
       }),
     )
 
+    // Extra body stojí mimo zápasy - drží si vlastní tabulku a do peněz
+    // vstupují v `settlementParties()`, každý ve svém zápase.
+    const sideBets = sideBetSection(round, betSides(round))
+
     return [
       {
         id: 'matches',
@@ -132,7 +149,22 @@ export const singlesMatches: GameDefinition = {
         description: matches.map((match) => match.state.label).join(' · '),
         rows: rankRows(rows, 'highest'),
       },
+      ...(sideBets ? [sideBets] : []),
     ]
+  },
+
+  settlementParties(round: Round) {
+    const won = new Map<PlayerId, number>()
+    for (const match of flightMatches(round)) {
+      match.sides.forEach((side, index) => {
+        won.set(side.id, match.state.won[index === 0 ? 0 : 1])
+      })
+    }
+
+    return withSideBets(
+      round,
+      betSides(round).map((side) => ({ ...side, units: won.get(side.id) ?? 0 })),
+    )
   },
 
   /** Každý zápas se vyrovnává zvlášť - soupeř je jen jeden. */

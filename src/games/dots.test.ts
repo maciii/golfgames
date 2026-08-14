@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
+import { SIDE_BET_BONUSES } from './sideBets'
 import type { DotVariant, Round } from '../types'
 import { DEFAULT_GAME_OPTIONS } from '../types'
 import { dots, holePoints, totalPoints } from './dots'
@@ -318,6 +319,12 @@ describe('Dots - kolo a výsledky', () => {
   it('hraje se ve třech a bez dvojic', () => {
     expect(dots.playerCounts).toEqual([3])
     expect(dots.usesTeams(3)).toBe(false)
-    expect(dots.scoringOptions.bonusIds).toEqual([])
+  })
+
+  it('extra body nabízí jako vedlejší sázku', () => {
+    // Body za pořadí na jamce rozdává hra sama, extra body jsou vedle nich -
+    // proto vlastní tabulka a nulové výchozí hodnoty.
+    expect(dots.scoringOptions.bonusIds).toEqual(SIDE_BET_BONUSES)
+    expect(dots.scoringOptions.bonusesAsSideBet).toBe(true)
   })
 })

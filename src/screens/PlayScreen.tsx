@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import type { BonusId, Player, PlayerId, Round } from '../types'
 import {
   MAX_STROKES,
+  availableBonuses,
   bonusesAt,
   formatHoleList,
   getBonus,
-  playerBonusPoints,
   formatToPar,
   holeNumber,
   holesPlayed,
@@ -22,7 +22,12 @@ import {
 import type { Team } from '../types'
 import { getGame } from '../games'
 import type { HoleSetup, HoleSetupSelection } from '../games'
-import { exclusiveBonusOutcome, pairStrokesReceived, strokesReceived } from '../handicap'
+import {
+  exclusiveBonusOutcome,
+  pairStrokesReceived,
+  playerBonusPoints,
+  strokesReceived,
+} from '../handicap'
 import BonusSheet from './BonusSheet'
 import Scorecard from './Scorecard'
 import { useT } from '../i18n'
@@ -110,7 +115,16 @@ export default function PlayScreen({
   const headerSummary = game.headerSummary?.(round, hole)
   const holeSetup: HoleSetup | undefined = game.holeSetup?.(round, hole)
   const scoreEntryEnabled = holeSetup?.complete ?? true
-  const hasBonusOptions = game.scoringOptions.bonusIds.length > 0
+  /**
+   * Nabízí se na téhle jamce vůbec nějaký extra bod?
+   *
+   * Nestačí, že je hra zná: u her, kde jsou extra body vedlejší sázka, mají
+   * ve výchozím stavu nulovou hodnotu, takže by tlačítko otevíralo prázdný
+   * panel a v zápisu čtyř hráčů by zabíralo místo pro nic.
+   */
+  const hasBonusOptions = availableBonuses(round, hole).some((bonus) =>
+    game.scoringOptions.bonusIds.includes(bonus.id),
+  )
   // Foursome zapisuje jedno skóre za dvojici, ne za hráče - řádek je proto
   // jeden na dvojici a ovládá společný míč.
   const sharedBall = game.sharedBall === true && round.teams.length > 0

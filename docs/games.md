@@ -190,13 +190,48 @@ u jména hráče.
 | **Arnie**             | –      | 1 b.    | vždy          | dobrý výsledek, aniž by míč byl na fairwayi    |
 
 Hodnota `0` znamená vypnuto – takový bonus se při zápisu vůbec nenabídne.
+Sloupec „Výchozí" v tabulce platí pro hry, které si extra body počítají do
+svých bodů (Best + Součet, Levá-Pravá, Skins). **U ostatních her jsou výchozí
+hodnoty nulové** – viz vedlejší sázka níž.
+
+### O extra body jde hrát v každé hře
+
+Extra body nejsou pravidlem žádné hry, hraje se o ně vedle ní. Rozdíl je jen
+v tom, jestli je hra umí vzít do svého bodování:
+
+| Hra                                | Extra body                                      |
+| ---------------------------------- | ----------------------------------------------- |
+| Best + Součet, Levá-Pravá, Skins   | součást bodů hry, výchozí hodnoty z tabulky výš |
+| Match play, Foursome, dvě jamkovky | **vedlejší sázka**, výchozí hodnoty nulové      |
+| Stableford, Dots                   | **vedlejší sázka**, výchozí hodnoty nulové      |
+
+**Vedlejší sázka** (`src/games/sideBets.ts`) znamená, že extra body:
+
+- mají ve výsledcích **vlastní tabulku „Extra body"** – do hlavní tabulky se
+  přičíst nedají, protože ta drží pořadí podle pravidel hry (vyhrané jamky
+  v jamkovce, body proti paru ve Stablefordu),
+- **přidávají se do peněžního vyrovnání** té samé hry, protože hodnota bodu je
+  v kole jedna: vyhraná jamka a extra bod mají stejnou cenu. U dvou jamkovek ve
+  flightu se vyrovnávají v rámci zápasu, u dvojic mezi dvojicemi,
+- začínají **na nule**, takže dokud si někdo hodnotu nezadá v nastavení
+  bodování hry, appka se chová jako dřív a tlačítko s hvězdičkou se u zápisu
+  vůbec nenabídne.
+
+Pravidla samotné hodnoty jsou v obou případech stejná – násobič podle výsledku,
+potvrzování Longestu a Nearestu i dvojnásobná jamka fungují identicky.
 
 ### Komu bonus připadne
 
 Příjemce extra bodu určuje konkrétní hra. V týmových hrách se extra bod
-uhraný jedním hráčem počítá celé jeho dvojici. Ve hře Skins, která se hraje
-za jednotlivce, se počítá hráči, který ho uhrál. Nová hra tenhle rozsah
+uhraný jedním hráčem počítá celé jeho dvojici (u Foursome tedy dvojici, která
+hraje jedním míčem). Ve hrách jednotlivců se počítá hráči, který ho uhrál;
+u vedlejší sázky pak vstupuje do jeho vyrovnání. Nová hra tenhle rozsah
 deklaruje v `GameDefinition.scoringOptions`.
+
+U vedlejší sázky **nepotvrzený Longest nebo Nearest propadá** – nedostane ho
+nikdo. V týmové hře, která extra body počítá do svých bodů, přechází na
+soupeřovu dvojici; ve vedlejší sázce žádná „soupeřova strana" být nemusí
+(Stableford, Dots), takže by pravidlo nemělo komu bod přiznat.
 
 ### Násobení podle výsledku
 
@@ -213,6 +248,20 @@ extra bod vůbec nepřizná:
 | Bogey a horší     | ×0 – nepočítá se  |
 
 Násobiče kromě paru jsou konfigurovatelné v nastavení bodování hry.
+
+**Uplatňovat HCP** (pod násobiči, ve výchozím stavu vypnuto) rozhoduje, z jakého
+výsledku se násobič bere:
+
+| Volba       | Co se počítá                                                                   |
+| ----------- | ------------------------------------------------------------------------------ |
+| **vypnuto** | skutečný výsledek: birdie je rána pod **par jamky** (brutto)                   |
+| **zapnuto** | v netto kole **osobní par**: kdo dostává na jamce ránu, má za par netto birdie |
+
+Vypnuto je výchozí stav, protože rozdané rány mění to, kdo jamku vyhrál, ne to,
+jak se zahrála - jinak by hráč s tečkou na jamce dostal za bunker na par dva
+body místo jednoho a se dvěma tečkami rovnou tři. Na brutto kolo volba nemá
+žádný vliv, tam osobní par neexistuje. Platí pro extra body ve všech hrách,
+včetně vedlejší sázky; potvrzování Longestu má vlastní volbu.
 
 Příklad: bunker za 1 bod zahraný na birdie dá v Best + Součet dvojici
 2 body, ve Skins hráči 2 body; stejný bunker zahraný na bogey nedá nic.

@@ -237,6 +237,30 @@ describe('Best + Součet - netto HCP', () => {
     expect(holePoints(roundWithHandicap(2), 0)[0]?.extra).toBe(1)
   })
 
+  it('se zapnutým Uplatňovat HCP se násobí podle osobního paru', () => {
+    // Volba obrací pravidlo výš: kdo dostane na jamce ránu a zahraje par, má
+    // netto birdie, takže se mu extra bod znásobí. Výchozí stav je vypnuto.
+    const round = makeRound({
+      gameId: 'best-aggregate',
+      players: ['Adam', 'Alena', 'Bára', 'Bořek'],
+      teams: [
+        [0, 1],
+        [2, 3],
+      ],
+      pars: [4],
+      scores: [[4], [5], [5], [5]],
+      settings: {
+        options: { ...BASE_OPTIONS, multipliersWithHandicap: true },
+      },
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1] }
+    round.players[0]!.playingHandicap = 1
+    round.bonuses.p1 = [['bunker']]
+
+    expect(holePoints(round, 0)[0]?.extra).toBe(2)
+  })
+
   it('brutto birdie extra bod násobí i v netto kole', () => {
     const round = makeRound({
       gameId: 'best-aggregate',

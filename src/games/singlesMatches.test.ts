@@ -4,6 +4,7 @@ import { makeRound } from './fixtures'
 import { setActiveLocale } from '../i18n'
 import { settleGroups } from '../money'
 import { strokesReceived } from '../handicap'
+import { toggleBonus } from '../types'
 import type { Round } from '../types'
 
 beforeAll(() => setActiveLocale('cs'))
@@ -345,5 +346,59 @@ describe('Dvě jamkovky ve flightu - hlavička jamky', () => {
     expect(
       summaries.map((summary) => summary.entries.map((entry) => entry.label)),
     ).toEqual([['Jamku bere'], ['Jamku bere']])
+  })
+})
+
+describe('Dvě jamkovky ve flightu - vedlejší sázka', () => {
+  /**
+   * Adam vede svůj zápas 1 UP a navíc uhrál bunker za 5 bodů; druhý zápas je
+   * po jedné jamce nerozhodně. Extra body se nesmí přelít do cizího zápasu.
+   */
+  function betRound(): Round {
+    const round = flightRound({
+      pars: [4],
+      scores: [[4], [5], [4], [4]],
+      pointValue: 10,
+    })
+    round.settings.options = {
+      ...round.settings.options,
+      bonusValues: { ...round.settings.options.bonusValues, bunker: 5 },
+    }
+    return toggleBonus(round, 'p1', 0, 'bunker')
+  }
+
+  it('extra body mají vlastní tabulku, zápasy zůstávají čisté', () => {
+    const sections = singlesMatches.computeStandings(betRound())
+
+    expect(sections[0]?.rows.map((row) => row.valueLabel)).toEqual([
+      '1 UP',
+      'AS',
+      'AS',
+      '1 DOWN',
+    ])
+    expect(sections[1]?.title).toBe('Extra body')
+    expect(sections[1]?.rows.map((row) => [row.name, row.value])).toEqual([
+      ['Adam', 5],
+      ['Bára', 0],
+      ['Cyril', 0],
+      ['Dana', 0],
+    ])
+  })
+
+  it('platí se za ně jen ve svém zápase', () => {
+    const round = betRound()
+    const parties = singlesMatches.settlementParties?.(round) ?? []
+    const groups = singlesMatches.settlementGroups?.(round) ?? []
+    const settlement = settleGroups(
+      round,
+      groups.map((ids) => ids.flatMap((id) => parties.filter((p) => p.id === id))),
+    )
+    if (settlement.kind !== 'balances') throw new Error('čekáme zůstatky jednotlivců')
+
+    // Adam: 1 jamka + 5 bodů = 6 jednotek, Bára 0 -> 60 Kč. Druhý zápas je
+    // nerozhodný a bunker prvního zápasu s ním nemá nic společného.
+    expect(settlement.transfers.map((tr) => [tr.fromName, tr.toName, tr.amount])).toEqual(
+      [['Bára', 'Adam', 60]],
+    )
   })
 })

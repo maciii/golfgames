@@ -10,6 +10,7 @@ import type {
 import { rankRows } from './types'
 import { t } from '../i18n'
 import { formatSideScore } from './shared'
+import { SIDE_BET_BONUSES, sideBetSection, withSideBets } from './sideBets'
 import type { MatchSide, MatchState, SideScore } from './match'
 import {
   bestBallScore,
@@ -62,17 +63,29 @@ export function matchState(round: Round): MatchState {
   return matchStateOf(round, matchSides(round), sideScore)
 }
 
+/** Strany pro vedlejší sázku: u čtyř hráčů dvojice, u dvou jednotlivci. */
+function betSides(round: Round) {
+  return matchSides(round).map((side) => ({
+    id: side.id,
+    name: side.name,
+    playerIds: side.playerIds,
+  }))
+}
+
 export const matchPlay: GameDefinition = {
   id: 'match-play',
   playerCounts: [2, 4],
   usesTeams: (playerCount) => playerCount === 4,
   scoringOptions: {
-    bonusIds: [],
-    resultMultipliers: false,
+    // Extra body jsou tady vedlejší sázka: ve výchozím stavu nulové, takže
+    // dokud si je někdo nezapne, hra se chová jako dřív (`sideBets.ts`).
+    bonusIds: SIDE_BET_BONUSES,
+    resultMultipliers: true,
     doubleBest: false,
     noDoubleBonuses: false,
-    confirmLongest: false,
-    confirmNearest: false,
+    confirmLongest: true,
+    confirmNearest: true,
+    bonusesAsSideBet: true,
     bonusScope: 'player',
   },
   supportsDoubleHoles: false,
@@ -94,6 +107,11 @@ export const matchPlay: GameDefinition = {
       }
     })
 
+    // Extra body nemůžou vstoupit do tabulky zápasu - pořadí v ní drží
+    // vyhrané jamky, ne bunkery. Mají proto vlastní tabulku a do peněz se
+    // přidají v `settlementParties()`.
+    const sideBets = sideBetSection(round, betSides(round))
+
     return [
       {
         id: 'match',
@@ -101,7 +119,19 @@ export const matchPlay: GameDefinition = {
         description: state.label,
         rows: rankRows(rows, 'highest'),
       },
+      ...(sideBets ? [sideBets] : []),
     ]
+  },
+
+  settlementParties(round: Round) {
+    const state = matchState(round)
+    return withSideBets(
+      round,
+      betSides(round).map((side, index) => ({
+        ...side,
+        units: state.won[index === 0 ? 0 : 1],
+      })),
+    )
   },
 
   headerSummary(round: Round, hole: number): HeaderSummary {

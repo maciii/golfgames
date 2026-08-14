@@ -258,6 +258,9 @@ export const cs = {
   'gameSettings.multipliers': 'Násobiče za výsledek',
   'gameSettings.multipliersHint':
     'Kolikrát se hodnota extra bodu počítá, když hráč jamku zahraje pod par. Par platí vždy jednou.',
+  'gameSettings.multipliersWithHandicap': 'Uplatňovat HCP',
+  'gameSettings.multipliersWithHandicapNote':
+    'Bez zaškrtnutí se násobič počítá ze skutečného výsledku - birdie znamená ránu pod par jamky. Se zaškrtnutím se v netto kole bere osobní par, takže hráči, který na jamce dostává ránu, stačí par.',
   'gameSettings.multiplierFor': 'Násobič za {name}',
   'gameSettings.otherOptions': 'Další volby',
   'gameSettings.doubleClosing': '9. a 18. jamka za dvojnásobek',
@@ -760,6 +763,13 @@ export const cs = {
   'singles.versusJoin': ' vs. ',
   'singles.versusDetail': 'vs. {name} · vyhrané {won} · dělené {halved}',
   'singles.opponents': 'Soupeři',
+
+  // --- extra body jako vedlejší sázka --------------------------------------
+  'sideBets.title': 'Extra body',
+  'sideBets.description':
+    'Vedlejší sázka mimo pravidla hry; body se přidávají do vyrovnání kola.',
+  'sideBets.settingsHint':
+    'Extra body jsou vedlejší sázka: ve výchozím stavu jsou nulové, hraje se o ně teprve po zadání hodnoty.',
 
   // --- peněžní vyrovnání --------------------------------------------------
   'money.perGroup': 'Každý zápas se vyrovnává zvlášť.',

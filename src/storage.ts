@@ -1,10 +1,12 @@
-import type { GameOptions, Round, RoundSettings } from './types'
+import type { BonusId, GameOptions, Round, RoundSettings } from './types'
 import {
+  BONUSES,
   DEFAULT_GAME_OPTIONS,
   DEFAULT_RESULT_MULTIPLIERS,
   DEFAULT_SETTINGS,
   firstHoleNumber,
 } from './types'
+import { getGame } from './games'
 import type { Course } from './courses/types'
 import { isValidCourse, normalizeCourse } from './courses/types'
 import { localeTag } from './i18n'
@@ -238,6 +240,24 @@ export function saveSettings(settings: RoundSettings): void {
  * Volby bodování se pamatují zvlášť pro každou hru - Best + Součet a Skins
  * mají jiné extra body a nemá smysl je přepisovat jedno druhým.
  */
+/**
+ * Výchozí hodnoty extra bodů pro hru.
+ *
+ * U her, kde jsou extra body **vedlejší sázka** (jamkovka, Stableford, Dots),
+ * jsou nulové: nabídnout je má appka všude, ale hrát se o ně začne teprve
+ * tehdy, když si někdo hodnotu zadá. Hry, které je mají v bodování odjakživa,
+ * si nechávají hodnoty z katalogu.
+ */
+function defaultBonusValues(gameId: string): Record<BonusId, number> {
+  if (!getGame(gameId).scoringOptions.bonusesAsSideBet) {
+    return DEFAULT_GAME_OPTIONS.bonusValues
+  }
+  return Object.fromEntries(BONUSES.map((bonus) => [bonus.id, 0])) as Record<
+    BonusId,
+    number
+  >
+}
+
 export function loadGameOptions(gameId: string): GameOptions {
   const all = read<Record<string, GameOptions>>(GAME_OPTIONS_KEY) ?? {}
   const stored: Partial<GameOptions> = all[gameId] ?? {}
@@ -245,7 +265,7 @@ export function loadGameOptions(gameId: string): GameOptions {
     ...DEFAULT_GAME_OPTIONS,
     ...stored,
     bonusValues: {
-      ...DEFAULT_GAME_OPTIONS.bonusValues,
+      ...defaultBonusValues(gameId),
       ...(stored.bonusValues ?? {}),
     },
     resultMultipliers: {

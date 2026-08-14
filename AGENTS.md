@@ -114,9 +114,12 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
 - **Netto se promítá do vítěze jamky, ne do hodnoty extra bodů.** Kdo jamku
   vyhrál (skin, `BEST`, součet, match play), se počítá z `netScoreAt()`.
   Násobič extra bodu podle výsledku se ale bere z **brutto** `diffToPar()` -
-  jinak by hráč s tečkou dostal za bunker na par dva body. Jediná výjimka je
-  potvrzení **Longestu** (`exclusiveBonusOutcome()` v `handicap.ts`), které
-  stojí na osobním paru; Nearest se potvrzuje vždycky brutto.
+  jinak by hráč s tečkou dostal za bunker na par dva body. Rozhoduje o tom
+  jediná funkce `bonusDiffToPar()` v `handicap.ts`; volba **Uplatňovat HCP**
+  (`multipliersWithHandicap`, výchozí vypnuto) ji přepne na osobní par. Nový
+  výpočet extra bodů se musí ptát jí, ne `diffToPar()` napřímo. Potvrzení
+  **Longestu** má vlastní volbu (`exclusiveBonusOutcome()`); Nearest se
+  potvrzuje vždycky brutto.
 - **Číslo jamky není `hole + 1`.** Kolo se nehraje vždycky na celé hřiště:
   osmnáctku jde hrát jen na jednu devítku a resort s 27 jamkami osmnáctku
   teprve skládá ze dvou svých devítek. Kolo pak má `holeCount` hraných jamek,

@@ -900,6 +900,60 @@ právě ony jsou při zápisu skóre ta informace, kvůli které se na řádek k
 „Výsledky", „Dvojice", „Ukončit", „Účet". Čtyři odkazy se tak vejdou na jeden
 řádek i se zapsaným skóre - dřív se na dva lámaly už tři.
 
+## 37. Extra body jako vedlejší sázka
+
+**Kontext.** O extra body (Longest, Nearest, bunker, voda, barkie, arnie) se
+dalo hrát jen u her, které samy rozdávají body: Best + Součet, Levá-Pravá
+a Skins si je počítaly do svého skóre. Jamkovka, Foursome, dvě jamkovky,
+Stableford ani Dots je nenabízely vůbec, protože do jejich jednotek přičíst
+nejdou - bunker přilepený k vyhraným jamkám by rozbil stav zápasu (`2 UP` už
+by neznamenalo dvě jamky) a ve Stablefordu by tvrdil, že hráč nastřílel body
+proti paru. Na hřišti se přitom o Longest hraje bez ohledu na to, jaká hra
+zrovna běží.
+
+**Rozhodnutí.** Extra body se od téhle verze nabízejí **u každé hry**. Tam,
+kde je hra neumí vzít do svého bodování, jsou **vedlejší sázka**
+(`src/games/sideBets.ts`):
+
+1. **Vlastní tabulka „Extra body"** ve výsledcích. Hlavní tabulka zůstává tím,
+   co spočítala hra - pořadí v jamkovce drží vyhrané jamky, ne bunkery.
+2. **Body vstupují do peněžního vyrovnání** té samé hry přes nový
+   `GameDefinition.settlementParties()`. Hodnota bodu je v kole jedna, takže
+   vyhraná jamka a extra bod mají stejnou cenu; u dvou jamkovek ve flightu se
+   sázka vyrovnává v rámci zápasu (rozhodnutí #34 platí dál), u dvojic mezi
+   dvojicemi.
+3. **Výchozí hodnoty jsou nulové.** `loadGameOptions()` je u her s vedlejší
+   sázkou nastaví na nulu, takže dokud si někdo hodnotu nezadá, appka se chová
+   úplně jako dřív - tlačítko s hvězdičkou se u zápisu skóre ani nenabídne.
+   Hry, které extra body počítaly odjakživa, si nechávají hodnoty z katalogu,
+   aby se nikomu nezměnilo rozehrané ani archivní kolo.
+
+**Proč ne přičtení do hlavní tabulky.** Bylo by to o jeden soubor méně, ale
+tabulka by lhala: `rankRows()` řadí podle `row.value`, takže hráč, který zápas
+prohrál a nasbíral bunkery, by v jamkovce skončil první. `valueLabel` navíc
+u jamkovky ukazuje `2 UP` - text a číslo by si přestaly odpovídat.
+
+**Proč jedna hodnota bodu na všechno.** Kolo má jedinou sázku (`pointValue`),
+takže „jamka za 50 a Longest za 100" by znamenalo druhou hodnotu v modelu
+kola a migraci. Stejného výsledku se dosáhne hodnotou extra bodu: Longest za
+dvojnásobek jamky je prostě `2`.
+
+**Volba „Uplatňovat HCP".** Násobič za výsledek stál odjakživa na brutto
+výsledku (viz nejčastější zdroje chyb v `AGENTS.md`) a nedalo se to změnit.
+Pro flighty, které hrají netto „na tečky", to ale znamená, že slabší hráč za
+stejně zahranou jamku nikdy násobič nedostane. Přibyla proto volba
+`multipliersWithHandicap` (v nastavení bodování hry pod násobiči, **výchozí
+vypnuto**), která v netto kole přepne násobič na osobní par. Rozhoduje o tom
+jediná funkce `bonusDiffToPar()` v `handicap.ts`, kterou se ptají všechny tři
+cesty extra bodů - dvojice v Best + Součet a Levé-Pravé, vedlejší sázka
+a odznak u zápisu skóre. Kvůli tomu se `playerBonusPoints()` přestěhoval
+z `types.ts` do `handicap.ts`: osobní par se bez rozdělení ran spočítat nedá.
+
+**Nepotvrzený Longest u vedlejší sázky propadá.** V týmové hře přechází na
+soupeřovu dvojici, ale ve Stablefordu nebo Dots žádná soupeřova strana není -
+a rozdávat propadlý bod „všem ostatním" by z vedlejší sázky udělalo další
+pravidlo. Výpočet je proto stejný jako u Skins, které to řeší od začátku.
+
 ---
 
 ## Otevřené otázky

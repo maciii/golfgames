@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
+import { SIDE_BET_BONUSES } from './sideBets'
 import { foursome, foursomeState } from './foursome'
 import { makeRound } from './fixtures'
 import { setActiveLocale } from '../i18n'
@@ -77,9 +78,12 @@ describe('Foursome - jeden míč na dvojici', () => {
     expect(foursome.sharedBall).toBe(true)
   })
 
-  it('nenabízí dvojnásobné jamky ani extra body', () => {
+  it('nenabízí dvojnásobné jamky, extra body ano jako vedlejší sázku', () => {
     expect(foursome.supportsDoubleHoles).toBe(false)
-    expect(foursome.scoringOptions.bonusIds).toEqual([])
+    expect(foursome.scoringOptions.bonusIds).toEqual(SIDE_BET_BONUSES)
+    expect(foursome.scoringOptions.bonusesAsSideBet).toBe(true)
+    // Jeden míč na dvojici znamená i jeden extra bod pro dvojici.
+    expect(foursome.scoringOptions.bonusScope).toBe('team')
   })
 })
 

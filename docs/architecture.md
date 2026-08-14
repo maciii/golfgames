@@ -245,6 +245,13 @@ která z kola spočítá ránu strany – lepší míč u four-ballu, jediný m�
 u Foursome, vlastní skóre u jednotlivců. Match play, Foursome a dvě jamkovky
 tak sdílí jedno pravidlo místo tří kopií.
 
+**Extra body mimo bodování hry:** hry, které samy body nerozdávají (jamkovka,
+Foursome, dvě jamkovky, Stableford, Dots), berou extra body jako **vedlejší
+sázku** – `src/games/sideBets.ts` z nich postaví vlastní tabulku a přidá je
+k jednotkám hry v `settlementParties()`, protože do hlavní tabulky se přičíst
+nedají (rozhodnutí #37). Výchozí hodnoty jsou u těchhle her nulové; nastaví je
+`loadGameOptions()` podle `scoringOptions.bonusesAsSideBet`.
+
 **Řazení** obstarává `rankRows(rows, 'highest' | 'lowest')`: doplní pozice,
 při shodě je sdílí (1, 1, 3) a strany bez jediné započítané jamky odsune na
 konec, aby nikdo nevedl jen proto, že ještě nic nezapsal.
@@ -254,6 +261,8 @@ konec, aby nikdo nevedl jen proto, že ještě nic nezapsal.
 1. Nový soubor `src/games/<hra>.ts` s objektem typu `GameDefinition`.
 2. Zápis do pole `GAMES` v `src/games/index.ts`.
 3. Testy `src/games/<hra>.test.ts` (fixtura `makeRound` je v `fixtures.ts`).
+   Deklaruj i extra body: buď je hra počítá do svých bodů, nebo je vezme jako
+   vedlejší sázku (`bonusesAsSideBet` + `settlementParties()`, viz `sideBets.ts`).
 4. Kapitola v [`games.md`](games.md) včetně rozhodnutí tam, kde pravidla mlčí.
 5. Záznam v [`../CHANGELOG.md`](../CHANGELOG.md) a `npm run bump:minor`.
 
@@ -640,6 +649,7 @@ v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
 | rozdělení ran a netto výsledky   | `src/handicap.ts`                       |
 | přidělení Longestu a Nearestu    | `src/handicap.ts`                       |
 | lepší míč a součet dvojice       | `src/games/shared.ts`                   |
+| extra body jako vedlejší sázka   | `src/games/sideBets.ts`                 |
 | rozdělení hráčů do dvojic        | `src/roundSetup.ts`                     |
 | změna hry v rozehraném kole      | `src/roundSetup.ts`                     |
 | model hřiště a jeho kontrola     | `src/courses/types.ts`                  |

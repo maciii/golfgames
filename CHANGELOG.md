@@ -7,6 +7,27 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.46.0] – 2026-08-14
+
+### Přidáno
+
+- **O extra body jde hrát v každé hře.** Longest, Nearest, bunker, voda,
+  barkie i arnie nabízela dřív jen Best + Součet, Levá-Pravá a Skins - tedy
+  hry, které samy rozdávají body. Jamkovka, Foursome, dvě jamkovky ve flightu,
+  Stableford a Dots je teď nabízejí jako **vedlejší sázku**: mají vlastní
+  tabulku „Extra body" ve výsledcích a body se přidávají do peněžního
+  vyrovnání kola (u dvou jamkovek v rámci zápasu). Do hlavní tabulky se
+  nepřičítají, aby `2 UP` pořád znamenalo dvě vyhrané jamky.
+- **Ve výchozím stavu jsou nulové**, takže se nikomu nic nemění: dokud si
+  hodnotu nezadáš v nastavení bodování hry, tlačítko s hvězdičkou se u zápisu
+  skóre vůbec nenabídne. Hry, které extra body počítaly odjakživa, si nechávají
+  své dosavadní hodnoty.
+- **Volba „Uplatňovat HCP" pod násobiči za výsledek.** Bez zaškrtnutí
+  (výchozí stav) platí násobič jen za **skutečné** birdie, eagle a lepší, tedy
+  proti paru jamky. Se zaškrtnutím se v netto kole bere osobní par, takže
+  hráči, který na jamce dostává ránu, stačí par. Volba se ukládá ke hře jako
+  ostatní nastavení bodování a platí pro extra body ve všech hrách.
+
 ## [0.45.0] – 2026-08-13
 
 ### Přidáno

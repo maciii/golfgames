@@ -185,6 +185,15 @@ export interface GameOptions {
   /** Nearest platí jen při paru a lepším, jinak bod bere soupeř. */
   confirmNearest: boolean
   /**
+   * Násobí se extra body podle **netto** výsledku jamky?
+   *
+   * Ve výchozím stavu ne: rozdané rány mění to, kdo jamku vyhrál, ne to, jak
+   * se zahrála, takže násobič stojí na skutečném birdie (brutto). Se zapnutou
+   * volbou se v netto kole násobí podle osobního paru - kdo dostane na jamce
+   * ránu a zahraje par, má netto birdie a extra bod se mu znásobí.
+   */
+  multipliersWithHandicap: boolean
+  /**
    * V netto kole se **Longest** potvrzuje osobním parem - parem jamky plus
    * ranami, které na ní hráč podle handicapu dostává.
    *
@@ -217,6 +226,8 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   noDoubleBonuses: false,
   confirmLongest: true,
   confirmNearest: true,
+  // Násobič stojí na skutečném výsledku; osobní par je volba, ne výchozí stav.
+  multipliersWithHandicap: false,
   confirmByPersonalPar: true,
   dotVariant: 'nine',
   // Obě nadstavby jsou volitelné pravidlo, ne základ hry - proto vypnuté.
@@ -568,34 +579,6 @@ export function availableBonuses(round: Round, hole: number): BonusDefinition[] 
       (round.settings.options.bonusValues[bonus.id] ?? 0) > 0 &&
       (bonus.onlyPar === undefined || bonus.onlyPar === par),
   ).sort((a, b) => (a.onlyPar ? -1 : 0) - (b.onlyPar ? -1 : 0))
-}
-
-/**
- * Kolik bodů má hráč na jamce zapsáno v extra bodech - do odznaku u zápisu.
- * Longest a Nearest se počítají v základní hodnotě, protože o jejich přiznání
- * rozhoduje až potvrzovací pravidlo.
- */
-export function playerBonusPoints(
-  round: Round,
-  playerId: PlayerId,
-  hole: number,
-): number {
-  const values = round.settings.options.bonusValues
-  const diff = diffToPar(round, playerId, hole)
-
-  let total = 0
-  for (const bonusId of bonusesAt(round, playerId, hole)) {
-    const bonus = getBonus(bonusId)
-    if (!bonus || bonus.kind === 'multiplier') continue
-    const value = values[bonusId] ?? 0
-    total += bonus.exclusive
-      ? value
-      : value *
-        (diff === null
-          ? 0
-          : bonusMultiplier(diff, round.settings.options.resultMultipliers))
-  }
-  return total
 }
 
 /** Extra body, které má hráč zapsané na jamce. */

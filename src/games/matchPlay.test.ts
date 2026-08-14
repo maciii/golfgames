@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { SIDE_BET_BONUSES } from './sideBets'
 import { matchPlay, matchState } from './matchPlay'
 import { makeRound } from './fixtures'
+import { settleRound } from '../money'
+import { toggleBonus } from '../types'
+import type { Round } from '../types'
 
 import { beforeAll } from 'vitest'
 import { setActiveLocale } from '../i18n'
@@ -226,9 +230,11 @@ describe('Match play - four-ball dvojic', () => {
     expect(matchPlay.usesTeams(4)).toBe(true)
   })
 
-  it('deklaruje, že nepoužívá extra bodovací volby', () => {
-    expect(matchPlay.scoringOptions.bonusIds).toEqual([])
-    expect(matchPlay.scoringOptions.resultMultipliers).toBe(false)
+  it('extra body nabízí jako vedlejší sázku, ne jako body zápasu', () => {
+    expect(matchPlay.scoringOptions.bonusIds).toEqual(SIDE_BET_BONUSES)
+    expect(matchPlay.scoringOptions.bonusesAsSideBet).toBe(true)
+    // Dvojnásobná jamka by rozbila stav zápasu, ta zůstává vypnutá.
+    expect(matchPlay.supportsDoubleHoles).toBe(false)
   })
 })
 
@@ -283,5 +289,82 @@ describe('Match play - netto HCP', () => {
     round.players[3]!.playingHandicap = 1
 
     expect(matchState(round).won).toEqual([0, 1])
+  })
+})
+
+describe('Match play - vedlejší sázka', () => {
+  /** Zápas o jednu jamku, ve kterém Adam navíc uhrál bunker za 5 bodů. */
+  function betRound(): Round {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [5, 4],
+      ],
+      settings: { pointValue: 10 },
+    })
+    round.settings.options = {
+      ...round.settings.options,
+      bonusValues: { ...round.settings.options.bonusValues, bunker: 5 },
+    }
+    return toggleBonus(round, 'p1', 0, 'bunker')
+  }
+
+  it('stav zápasu se extra body nemíchá', () => {
+    const section = matchPlay.computeStandings(betRound())[0]
+
+    expect(section?.rows.map((row) => [row.name, row.valueLabel])).toEqual([
+      ['Adam', '1 UP'],
+      ['Bára', '1 DOWN'],
+    ])
+  })
+
+  it('extra body mají vlastní tabulku', () => {
+    const sections = matchPlay.computeStandings(betRound())
+
+    expect(sections[1]?.title).toBe('Extra body')
+    expect(sections[1]?.rows.map((row) => [row.name, row.value])).toEqual([
+      ['Adam', 5],
+      ['Bára', 0],
+    ])
+  })
+
+  it('do peněz se přidají k vyhraným jamkám', () => {
+    const round = betRound()
+    const parties = matchPlay.settlementParties?.(round) ?? []
+    const settlement = settleRound(round, parties)
+    if (settlement.kind !== 'balances') throw new Error('čekáme zůstatky jednotlivců')
+
+    // Adam vede 1 UP (1 jamka) a má 5 bodů z bunkeru: 6 jednotek po 10 Kč.
+    expect(parties.map((party) => party.units)).toEqual([6, 0])
+    expect(settlement.transfers.map((tr) => [tr.fromName, tr.toName, tr.amount])).toEqual(
+      [['Bára', 'Adam', 60]],
+    )
+  })
+
+  it('bez zadané hodnoty se o extra body nehraje', () => {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [5, 4],
+      ],
+      settings: { pointValue: 10 },
+    })
+    // Kolo z `makeRound()` nese katalogové hodnoty, takže se nula musí nastavit
+    // stejně jako to dělá `loadGameOptions()` u her s vedlejší sázkou.
+    round.settings.options = {
+      ...round.settings.options,
+      bonusValues: Object.fromEntries(
+        Object.keys(round.settings.options.bonusValues).map((id) => [id, 0]),
+      ) as typeof round.settings.options.bonusValues,
+    }
+
+    expect(matchPlay.computeStandings(round)).toHaveLength(1)
+    expect(matchPlay.settlementParties?.(round)?.map((p) => p.units)).toEqual([1, 0])
   })
 })

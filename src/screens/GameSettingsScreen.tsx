@@ -196,6 +196,10 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
           </p>
         )}
 
+        {/* U her, kde extra body nejsou součástí bodování, je potřeba říct,
+            že se o ně hraje teprve po zadání hodnoty - nula znamená vypnuto. */}
+        {scoring.bonusesAsSideBet && <p className="hint">{t('sideBets.settingsHint')}</p>}
+
         {scoring.dotVariant && (
           <section className="section">
             <h2 className="section-title">{t('gameSettings.dotVariant')}</h2>
@@ -304,6 +308,20 @@ export default function GameSettingsScreen({ gameId, onBack }: Props) {
                 />
               </label>
             ))}
+
+            {/* Bez zaškrtnutí platí násobič jen za skutečné birdie a lepší;
+                se zaškrtnutím se v netto kole bere osobní par. */}
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={options.multipliersWithHandicap}
+                onChange={(e) =>
+                  update({ ...options, multipliersWithHandicap: e.target.checked })
+                }
+              />
+              <span>{t('gameSettings.multipliersWithHandicap')}</span>
+            </label>
+            <p className="hint">{t('gameSettings.multipliersWithHandicapNote')}</p>
           </section>
         )}
 

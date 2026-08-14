@@ -13,9 +13,11 @@ import {
   strokesReceived,
   strokesRelativeToBest,
   netDiffToPar,
+  bonusDiffToPar,
+  playerBonusPoints,
 } from './handicap'
 import type { Round, RoundCourse } from './types'
-import { DEFAULT_GAME_OPTIONS, createRound } from './types'
+import { DEFAULT_GAME_OPTIONS, createRound, toggleBonus } from './types'
 import { makeRound } from './games/fixtures'
 import { setActiveLocale } from './i18n'
 
@@ -525,5 +527,64 @@ describe('Potvrzování osobním parem', () => {
     round.scores.p1 = [4]
 
     expect(exclusiveBonusOutcome(round, 'p1', 0, 'nearest')).toBe('own')
+  })
+})
+
+describe('násobič extra bodů a handicap', () => {
+  /**
+   * Netto kolo, ve kterém Bára dostává na první jamce ránu. Oba zahrají par
+   * jamky, takže brutto nemá birdie ani jeden - netto ho má Bára.
+   */
+  function betRound(withHandicap: boolean): Round {
+    const round = makeRound({
+      gameId: 'match-play',
+      players: ['Adam', 'Bára'],
+      pars: [4, 4],
+      scores: [
+        [4, 4],
+        [4, 4],
+      ],
+    })
+    round.netScoring = true
+    round.course = { name: 'Testovací hřiště', strokeIndex: [1, 2] }
+    round.players[1]!.playingHandicap = 1
+    round.settings.options = {
+      ...DEFAULT_GAME_OPTIONS,
+      multipliersWithHandicap: withHandicap,
+      bonusValues: { ...DEFAULT_GAME_OPTIONS.bonusValues, bunker: 5 },
+    }
+    return toggleBonus(toggleBonus(round, 'p1', 0, 'bunker'), 'p2', 0, 'bunker')
+  }
+
+  it('bez zaškrtnutí platí násobič jen za skutečné birdie', () => {
+    const round = betRound(false)
+
+    // Oba zahráli par jamky, takže ani jeden nemá násobič.
+    expect(bonusDiffToPar(round, 'p1', 0)).toBe(0)
+    expect(bonusDiffToPar(round, 'p2', 0)).toBe(0)
+    expect(playerBonusPoints(round, 'p1', 0)).toBe(5)
+    expect(playerBonusPoints(round, 'p2', 0)).toBe(5)
+  })
+
+  it('se zaškrtnutím se v netto kole bere osobní par', () => {
+    const round = betRound(true)
+
+    // Bára dostává na jamce ránu, takže par jamky je pro ni netto birdie.
+    expect(bonusDiffToPar(round, 'p1', 0)).toBe(0)
+    expect(bonusDiffToPar(round, 'p2', 0)).toBe(-1)
+    expect(playerBonusPoints(round, 'p1', 0)).toBe(5)
+    expect(playerBonusPoints(round, 'p2', 0)).toBe(10)
+  })
+
+  it('na brutto kolo volba vliv nemá', () => {
+    const round = betRound(true)
+    round.netScoring = false
+
+    expect(bonusDiffToPar(round, 'p2', 0)).toBe(0)
+    expect(playerBonusPoints(round, 'p2', 0)).toBe(5)
+  })
+
+  it('ve výchozím nastavení je volba vypnutá', () => {
+    expect(DEFAULT_GAME_OPTIONS.multipliersWithHandicap).toBe(false)
   })
 })

@@ -42,6 +42,7 @@ function makeBaseOptions() {
     noDoubleBonuses: false,
     confirmLongest: false,
     confirmNearest: false,
+    multipliersWithHandicap: false,
     confirmByPersonalPar: true,
     confirmSkinsByPar: false,
     dotVariant: 'nine' as const,
