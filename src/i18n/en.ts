@@ -23,7 +23,7 @@ export const en: Record<MessageKey, Message> = {
   // --- home screen and menu ------------------------------------------------
   'home.openMenu': 'Menu',
   'home.newRound': 'New round',
-  'home.lastRound': 'Last round',
+  'home.recentRounds': 'Recent rounds',
   'home.seeArchive': 'Archive',
   'home.favoritePlayers': 'Favorite players',
   'home.favoriteCourses': 'Favorite courses',
@@ -63,6 +63,9 @@ export const en: Record<MessageKey, Message> = {
   'players.removeConfirm': 'Remove {name} from the list?',
   'players.addFavorite': 'Highlight {name} on the home screen',
   'players.removeFavorite': 'Stop highlighting {name} on the home screen',
+  'players.teeFor': 'Default tee for {name}',
+  'players.defaultTee': 'Default tee',
+  'players.noTeePreference': 'No default tee',
 
   // --- setup --------------------------------------------------------------
   'setup.subtitle': 'New round',

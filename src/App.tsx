@@ -748,7 +748,6 @@ function AppShell() {
         onGoToHole={goToHole}
         onFinish={() => window.history.back()}
         onShowResults={() => window.history.back()}
-        onOpenAccount={() => setView('account')}
       />
     )
   }
@@ -941,7 +940,6 @@ function AppShell() {
       onGoToHole={goToHole}
       onFinish={finishRound}
       onShowResults={() => setView('results')}
-      onOpenAccount={() => setView('account')}
     />
   )
 }

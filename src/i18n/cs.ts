@@ -29,7 +29,7 @@ export const cs = {
   // --- domovská obrazovka a menu -------------------------------------------
   'home.openMenu': 'Menu',
   'home.newRound': 'Nová hra',
-  'home.lastRound': 'Poslední hra',
+  'home.recentRounds': 'Poslední hry',
   'home.seeArchive': 'Archiv',
   'home.favoritePlayers': 'Oblíbení hráči',
   'home.favoriteCourses': 'Oblíbená hřiště',
@@ -73,6 +73,9 @@ export const cs = {
   'players.removeConfirm': 'Smazat hráče {name} ze seznamu?',
   'players.addFavorite': 'Zvýraznit {name} na domovské obrazovce',
   'players.removeFavorite': 'Přestat zvýrazňovat {name} na domovské obrazovce',
+  'players.teeFor': 'Výchozí odpaliště hráče {name}',
+  'players.defaultTee': 'Výchozí odpaliště',
+  'players.noTeePreference': 'Bez výchozího odpaliště',
 
   // --- úvodní obrazovka ---------------------------------------------------
   'setup.subtitle': 'Nové kolo',

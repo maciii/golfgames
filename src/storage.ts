@@ -406,13 +406,21 @@ export function toggleRosterFavorite(entryId: string): RosterEntry[] {
   return roster
 }
 
-/** Zapamatuje si odpaliště u uloženého hráče. */
+/**
+ * Zapamatuje si odpaliště u uloženého hráče. `undefined` znamená "nic
+ * neměň" (kolo bez hřiště žádné odpaliště nemá a nesmí smazat dřívější
+ * volbu), prázdný řetězec naopak uloženou preferenci smaže.
+ */
 export function setRosterTee(entryId: string, teeId: string | undefined): RosterEntry[] {
-  const roster = loadRoster().map((entry) =>
-    entry.id === entryId
-      ? { ...entry, ...(teeId === undefined ? {} : { preferredTeeId: teeId }) }
-      : entry,
-  )
+  const roster = loadRoster().map((entry) => {
+    if (entry.id !== entryId || teeId === undefined) return entry
+    if (teeId === '') {
+      const next = { ...entry }
+      delete next.preferredTeeId
+      return next
+    }
+    return { ...entry, preferredTeeId: teeId }
+  })
   write(ROSTER_KEY, roster)
   return roster
 }

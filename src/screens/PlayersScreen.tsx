@@ -5,11 +5,14 @@ import {
   loadRoster,
   removeFromRoster,
   setRosterHandicap,
+  setRosterTee,
   toggleRosterFavorite,
 } from '../storage'
-import { useT } from '../i18n'
+import { localizedTeeName, useT } from '../i18n'
 import { formatHandicapIndex, parseHandicapIndex } from '../handicap'
-import { BackIcon } from './icons'
+import { BackIcon, TeeFlagIcon } from './icons'
+import PickSheet from './PickSheet'
+import { TEE_COLORS, teeColorClass } from './TeeSheet'
 
 interface Props {
   onBack: () => void
@@ -33,9 +36,15 @@ export default function PlayersScreen({ onBack }: Props) {
   )
   const [newName, setNewName] = useState('')
   const [newHandicap, setNewHandicap] = useState('')
+  const [teeSheetFor, setTeeSheetFor] = useState<RosterEntry | null>(null)
 
   function toggleFavorite(entryId: string) {
     setRoster(toggleRosterFavorite(entryId))
+  }
+
+  function chooseTee(entryId: string, teeId: string) {
+    setRoster(setRosterTee(entryId, teeId))
+    setTeeSheetFor(null)
   }
 
   function commitHandicap(entryId: string) {
@@ -161,6 +170,19 @@ export default function PlayersScreen({ onBack }: Props) {
                 />
                 <button
                   type="button"
+                  className={`tee-dot tee-option-${teeColorClass(entry.preferredTeeId ?? '')}`}
+                  onClick={() => setTeeSheetFor(entry)}
+                  aria-label={t('players.teeFor', { name: entry.name })}
+                  title={
+                    entry.preferredTeeId
+                      ? localizedTeeName(entry.preferredTeeId, entry.preferredTeeId)
+                      : t('players.noTeePreference')
+                  }
+                >
+                  <TeeFlagIcon />
+                </button>
+                <button
+                  type="button"
                   className="players-remove"
                   onClick={() => remove(entry)}
                   aria-label={t('players.remove', { name: entry.name })}
@@ -172,6 +194,30 @@ export default function PlayersScreen({ onBack }: Props) {
           </ul>
         )}
       </main>
+
+      {teeSheetFor && (
+        <PickSheet
+          title={t('players.defaultTee')}
+          selectedId={teeSheetFor.preferredTeeId ?? ''}
+          onSelect={(teeId) => chooseTee(teeSheetFor.id, teeId)}
+          onClose={() => setTeeSheetFor(null)}
+          options={[
+            { id: '', label: t('players.noTeePreference') },
+            ...TEE_COLORS.map((color) => ({
+              id: color,
+              label: localizedTeeName(color, color),
+              icon: (
+                <span
+                  className={`pick-row-tee-icon tee-option-${color}`}
+                  aria-hidden="true"
+                >
+                  <TeeFlagIcon />
+                </span>
+              ),
+            })),
+          ]}
+        />
+      )}
     </div>
   )
 }

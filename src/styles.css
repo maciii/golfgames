@@ -381,6 +381,12 @@ button {
 
 /* O odstín světlejší než karta Home, do které je vnořené (`--bg-input`
    místo `--bg-elevated`) - jinak by splynulo s podkladem. */
+.home-round-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .home-card {
   display: flex;
   flex-direction: column;
@@ -580,8 +586,10 @@ button {
 }
 
 .players-hcp {
-  flex: 0 0 64px;
+  flex: 0 0 46px;
   min-width: 0;
+  padding: 0 6px;
+  text-align: center;
 }
 
 .players-remove {
@@ -835,6 +843,13 @@ button {
   width: 22px;
   height: 22px;
   color: var(--tee-color);
+}
+
+/* Černá vlaječka na tmavém pozadí appky splývala do neviditelna - u
+   odpaliště, které má definovaný kontrastní odstín (zatím jen černá),
+   se ikona obrátí do něj. */
+.tee-dot.tee-option-black svg {
+  color: var(--tee-contrast);
 }
 
 /* HCP stojí mezi jménem a odpalištěm, takže musí zůstat úzké - růst má jen
@@ -1161,9 +1176,12 @@ button {
   font-size: 13px;
 }
 
-/* Jméno strany zápasu; jen ono se zkracuje, hodnota a poznámka za ním ne. */
+/* Jméno strany zápasu; jen ono se zkracuje, hodnota a poznámka za ním ne.
+   Jedna šipka pro předchozí/další jamku zmizela z hlavičky (je v patičce),
+   takže tu je teď víc místa - jméno se ořezávalo na 72px i tam, kde se
+   celé pohodlně vejde. */
 .game-header-entry > span:first-child {
-  max-width: 72px;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2798,6 +2816,18 @@ button {
 .pick-row-label {
   flex: 1;
   min-width: 0;
+}
+
+/* Barevná vlaječka u volby odpaliště v PickSheetu (výchozí odpaliště
+   hráče) - stejná barevná logika jako .tee-dot, jen bez rámečku. */
+.pick-row-tee-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--tee-color, var(--text-dim));
+}
+
+.pick-row-tee-icon.tee-option-black {
+  color: var(--tee-contrast);
 }
 
 .sr-only {

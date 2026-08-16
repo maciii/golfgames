@@ -34,7 +34,8 @@ interface Props {
   onClose: () => void
 }
 
-const TEE_COLOR_IDS = new Set([
+/** Barvy odpališť, které appka umí zobrazit; jiné id dostane neutrální. */
+export const TEE_COLORS = [
   'black',
   'blue',
   'bronze',
@@ -53,9 +54,10 @@ const TEE_COLOR_IDS = new Set([
   'tournament',
   'white',
   'yellow',
-])
+] as const
 
-/** Barevná třída odpaliště; neznámé id dostane neutrální. */
+const TEE_COLOR_IDS = new Set<string>(TEE_COLORS)
+
 export function teeColorClass(teeId: string): string {
   return TEE_COLOR_IDS.has(teeId) ? teeId : 'neutral'
 }

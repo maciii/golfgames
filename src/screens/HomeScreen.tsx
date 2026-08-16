@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Course } from '../courses/types'
 import type { Round } from '../types'
-import { formatRoundDate } from '../types'
-import { getGame } from '../games'
+import { formatRoundDate, teamName } from '../types'
 import { formatHandicapIndex } from '../handicap'
 import type { RosterEntry } from '../storage'
 import { loadCourses, loadFavoriteCourseIds, loadRoster } from '../storage'
@@ -73,7 +72,7 @@ export default function HomeScreen({
   const [favoriteCourseIds] = useState<string[]>(() => loadFavoriteCourseIds())
 
   const showInstall = !isStandalone && (canInstall || isIOS || isMobile)
-  const lastRound = archive[0]
+  const recentRounds = archive.slice(0, 5)
 
   const favoritePlayers = useMemo(
     () => roster.filter((entry) => entry.favorite),
@@ -89,12 +88,12 @@ export default function HomeScreen({
     if (result === 'unavailable') setInstallHelp(true)
   }
 
-  function lastRoundLine(round: Round): string {
-    const sections = getGame(round.gameId).computeStandings(round)
-    const rows = sections[0]?.rows ?? []
-    const winners = rows.filter((r) => r.position === 1 && r.holesPlayed > 0)
-    if (winners.length === 0) return t('archive.noResult')
-    return winners.map((w) => w.name).join(', ')
+  /** Kdo proti komu - dvojice u týmových her, jinak všichni hráči. */
+  function matchupLine(round: Round): string {
+    if (round.teams.length > 0) {
+      return round.teams.map((team) => teamName(round, team)).join(' × ')
+    }
+    return round.players.map((p) => p.name).join(', ')
   }
 
   return (
@@ -177,26 +176,32 @@ export default function HomeScreen({
           </section>
         )}
 
-        {lastRound && (
+        {recentRounds.length > 0 && (
           <section className="card home-section">
             <div className="home-section-head">
-              <h2>{t('home.lastRound')}</h2>
+              <h2>{t('home.recentRounds')}</h2>
               <button type="button" className="link-button" onClick={onOpenArchive}>
                 {t('home.seeArchive')}
               </button>
             </div>
-            <button
-              type="button"
-              className="home-card"
-              onClick={() => onOpenRound(lastRound.id)}
-            >
-              <span className="home-card-title">
-                {t(`games.${lastRound.gameId}.name` as MessageKey)}
-                {' · '}
-                {formatRoundDate(lastRound)}
-              </span>
-              <span className="home-card-meta">{lastRoundLine(lastRound)}</span>
-            </button>
+            <div className="home-round-list">
+              {recentRounds.map((round) => (
+                <button
+                  key={round.id}
+                  type="button"
+                  className="home-card"
+                  onClick={() => onOpenRound(round.id)}
+                >
+                  <span className="home-card-title">
+                    {t(`games.${round.gameId}.name` as MessageKey)}
+                    {' · '}
+                    {formatRoundDate(round)}
+                    {round.course && ` · ${round.course.name}`}
+                  </span>
+                  <span className="home-card-meta">{matchupLine(round)}</span>
+                </button>
+              ))}
+            </div>
           </section>
         )}
 

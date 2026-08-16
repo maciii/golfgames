@@ -7,6 +7,31 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.48.0] – 2026-08-14
+
+### Přidáno
+
+- **Výchozí odpaliště uloženého hráče.** Obrazovka Hráči má u každého
+  hráče stejnou vlaječku jako zakládání kola - klepnutím se vybere
+  barva odpaliště, ze kterého hráč obvykle hraje, a rovnou se uloží.
+  Bez preference je vlaječka neutrálně šedá.
+- **Domů: Poslední hry místo Poslední hra.** Zobrazuje posledních 5 kol
+  místo jednoho, u každého hra, datum a hřiště v titulku a kdo proti
+  komu hrál (u týmových her dvojice, jinak všichni hráči) v popisku.
+- **Zápis skóre: Předchozí/Další v patičce.** Vedle hlavního tlačítka
+  (Další jamka/Dokončit) je teď i Předchozí - na první jamce chybí,
+  jinak jde jamkami listovat oběma směry i bez šipky v hlavičce.
+
+### Změněno
+
+- **Zápis skóre: odkaz „Účet a záloha" pryč.** Do zápisu skóre nepatřil,
+  na účet a zálohu vede menu.
+
+### Opraveno
+
+- **Černá vlaječka odpaliště nebyla na tmavém pozadí appky vidět.**
+  Barva ikony se u černého odpaliště obrátí do světlého odstínu.
+
 ## [0.47.0] – 2026-08-14
 
 ### Změněno
@@ -220,6 +245,46 @@ jen verze s věcnou změnou.
   přesně jako turnajová scorekarta. Kratší kolo se nedělí - mezisoučet po
   devíti jamkách z dvanáctky nic neříká. Sloupce her (skiny, body) se
   nesčítají: jejich průběžná hodnota nemusí jít rozdělit na poloviny kola.
+
+## [0.40.8] – 2026-08-11
+
+### Přidáno
+
+- **Výchozí odpaliště uloženého hráče.** Obrazovka Hráči má teď u
+  každého hráče stejnou vlaječku jako zakládání kola - klepnutím se
+  vybere barva odpaliště, ze kterého hráč obvykle hraje, a rovnou se
+  uloží. Bez preference je vlaječka neutrálně šedá.
+
+### Změněno
+
+- **Domů: Poslední hry místo Poslední hra (jednotné číslo).** Zobrazuje
+  posledních 5 kol místo jednoho, u každého hra, datum a hřiště
+  v titulku a kdo proti komu hrál (u týmových her dvojice, jinak
+  všichni hráči) v popisku.
+- **HCP pole v Hráčích zúženo** na míru dvěma číslicím a desetině,
+  stejně jako v kroku Hráči při zakládání kola.
+
+## [0.40.7] – 2026-08-11
+
+### Změněno
+
+- **HCP pole hráče je vedle jména, ne na vlastním řádku pod ním.** Krok
+  Hráči vypadal po zapnutí „Hrát na rány s handicapem" opticky rozpadnutě
+  - jméno na jednom řádku, velké HCP pole daleko od něj na dalším. Teď
+    jsou jméno, HCP a odpaliště na jednom řádku, počet ran zůstává jako
+    malá poznámka pod ním.
+- **Zápis skóre: šipky na předchozí/další jamku zmizely z hlavičky.**
+  Uvolnily místo pro průběžné skóre, které se tam předtím oříznuté na
+  72px skoro nedalo přečíst - teď má 160px. Navigace mezi jamkami je
+  nově v patičce jako tlačítka Předchozí/Další: na první jamce jen
+  Další, jinak obojí.
+- **Zápis skóre: odkaz „Účet a záloha" pryč.** Do zápisu skóre nepatřil,
+  na účet a zálohu vede menu.
+
+### Opraveno
+
+- **Černá vlaječka odpaliště nebyla na tmavém pozadí appky vidět.**
+  Barva ikony se teď u černého odpaliště obrátí do světlého odstínu.
 
 ## [0.40.6] – 2026-08-10
 
