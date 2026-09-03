@@ -110,7 +110,7 @@ firestore.rules       pravidla zabezpečení databáze (nasazují se z konzole)
 .env.example          vzor konfigurace Firebase pro lokální vývoj
 scripts/
   bump-version.mjs    zvedání verze
-  gen-icons.mjs       generátor PWA ikon (bez závislostí)
+  gen-icons.mjs       generátor PWA ikon se značkou Fairsome (bez závislostí)
 docs/
   architecture.md     jak je aplikace poskládaná, datový model, invarianty
   sync.md             účet, synchronizace a nastavení Firebase
@@ -177,7 +177,8 @@ peníze nejvyšší a chyba v bodování je nejdražší.
 - `src/i18n/i18n.test.ts` – úplnost katalogů a chování překladu
 - `src/theme.test.ts` – shoda `src/theme.tsx` se skriptem v `index.html`
   (klíč v localStorage, jména schémat, barva lišty proti `--bg`)
-- `src/branding.test.ts` – jméno aplikace na místech mimo React
+- `src/branding.test.ts` – jméno aplikace a značka na místech mimo React
+  (manifest, titulky, favicon, generátor ikon)
 
 Testy, které ověřují konkrétní znění textu, si musí nastavit jazyk
 (`setActiveLocale('cs')` v `beforeAll`) – Node jinak hlásí angličtinu.

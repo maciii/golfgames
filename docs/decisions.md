@@ -682,7 +682,15 @@ počet hráčů ve skupině), „Fair" na fairway i na poctivou hru.
 `<title>` a `apple-mobile-web-app-title` v `index.html`, úvodní obrazovka
 před načtením appky, texty v `src/i18n/` (nabídka instalace, chybová hláška
 u zálohy, kredit katalogu hřišť), obrazovka soukromí a `public/soukromi.html`.
-Wordmark na `HomeScreen` je jediné místo, kde jméno není text, ale značka.
+
+**Značku nese i ikona na ploše.** Dva kruhy z wordmarku kreslí tři místa
+nezávisle na sobě: `BrandMark` v `HomeScreen.tsx` (React), `public/favicon.svg`
+a generátor PWA ikon `scripts/gen-icons.mjs` (pixely, bez závislostí). Dřív
+byla na ploše telefonu kresba golfového míčku - popisovala, co appka dělá,
+stejně jako to dělalo jméno „Golf Games", a se značkou uvnitř appky neměla nic
+společného. Ikona je to první, co uživatel vidí, takže má ukazovat značku.
+Že se ta tři místa nerozejdou v barvě ani v průsvitu zadního kruhu, hlídá
+`branding.test.ts` - stejný důvod, jako má u jména.
 
 **Co se nepřejmenovává.** `BACKUP_FORMAT` v `backup.ts` zůstává
 `'golfgames-backup'` - je to marker uvnitř souboru zálohy a přejmenování by

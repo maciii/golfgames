@@ -1,6 +1,11 @@
-// Generuje PWA ikony (golfový míček na tmavě zeleném pozadí) bez externích
+// Generuje PWA ikony (značka Fairsome na tmavě zeleném pozadí) bez externích
 // závislostí - jen Node + zlib. Spouští se ručně přes `npm run icons`,
 // výstup se commituje do public/.
+//
+// Značka je ta samá, co nese wordmark v aplikaci (`BrandMark`
+// v `src/screens/HomeScreen.tsx`) a favicon: dva překrývající se kruhy
+// narážející na „-some" ve jméně. Když se změní jedno, musí se změnit
+// všechna tři místa - nic je nesváže.
 import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -55,29 +60,28 @@ function encodePng(width, height, rgba) {
 
 const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t))
 
-/**
- * @param size hrana ikony v px
- * @param ballRatio poloměr míčku vůči hraně - u maskable ikon menší,
- *        aby se vešel do bezpečné zóny, kterou si iOS/Android ořízne.
- */
-function drawIcon(size, ballRatio) {
-  const out = Buffer.alloc(size * size * 4)
-  const cx = size / 2
-  const cy = size / 2
-  const r = size * ballRatio
-  const ss = 3 // supersampling kvůli hladkým hranám
+/** Pozadí appky (svislý gradient) a její akcentní zelená. */
+const BG_TOP = [22, 48, 31]
+const BG_BOTTOM = [11, 21, 15]
+const ACCENT = [74, 222, 128]
 
-  // Dimply v šestiúhelníkové mřížce, ať to vypadá jako golfový míček.
-  const dimples = []
-  const step = r * 0.29
-  for (let row = -5; row <= 5; row++) {
-    for (let col = -5; col <= 5; col++) {
-      const dx = (col + (row % 2 ? 0.5 : 0)) * step
-      const dy = row * step * 0.87
-      if (Math.hypot(dx, dy) < r * 0.84) dimples.push([cx + dx, cy + dy])
-    }
-  }
-  const dimpleR = step * 0.3
+/**
+ * Značka Fairsome: dva stejně velké kruhy na úhlopříčce, zadní průsvitný,
+ * přední plný. Poměr je převzatý ze SVG wordmarku, kde mají kruhy `r=6`
+ * a středy v `9,9` a `15,15` - posun je tedy půl poloměru na každou osu.
+ *
+ * @param size hrana ikony v px
+ * @param rRatio poloměr kruhu vůči hraně. U maskable ikony menší: Android si
+ *        z dlaždice nechá jen kruh o průměru 80 %, a nejvzdálenější bod
+ *        značky je `1,71 × r` od středu.
+ */
+function drawIcon(size, rRatio) {
+  const out = Buffer.alloc(size * size * 4)
+  const r = size * rRatio
+  const offset = r / 2
+  const back = [size / 2 - offset, size / 2 - offset]
+  const front = [size / 2 + offset, size / 2 + offset]
+  const ss = 4 // supersampling kvůli hladkým hranám kruhů
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -87,23 +91,13 @@ function drawIcon(size, ballRatio) {
           const px = x + (sx + 0.5) / ss
           const py = y + (sy + 0.5) / ss
 
-          // pozadí: svislý gradient
-          let color = mix([22, 48, 31], [11, 21, 15], py / size)
-
-          const d = Math.hypot(px - cx, py - cy)
-          if (d < r) {
-            // míček se stínováním zleva nahoře
-            const shade =
-              ((px - cx + r) / (2 * r)) * 0.5 + ((py - cy + r) / (2 * r)) * 0.5
-            let ball = mix([255, 255, 255], [206, 216, 208], shade)
-            for (const [dx, dy] of dimples) {
-              if (Math.hypot(px - dx, py - dy) < dimpleR) {
-                ball = mix(ball, [186, 198, 189], 0.85)
-                break
-              }
-            }
-            color = ball
+          let color = mix(BG_TOP, BG_BOTTOM, py / size)
+          // Pořadí je stejné jako v SVG: zadní kruh, pak přední přes něj.
+          if (Math.hypot(px - back[0], py - back[1]) < r) {
+            color = mix(color, ACCENT, 0.35)
           }
+          if (Math.hypot(px - front[0], py - front[1]) < r) color = ACCENT
+
           acc = acc.map((v, i) => v + color[i])
         }
       }
@@ -120,11 +114,11 @@ function drawIcon(size, ballRatio) {
 
 mkdirSync(publicDir, { recursive: true })
 const files = [
-  ['icon-192.png', 192, 0.34],
-  ['icon-512.png', 512, 0.34],
+  ['icon-192.png', 192, 0.235],
+  ['icon-512.png', 512, 0.235],
   // maskable: obsah musí zůstat v centrálních ~80 % plochy
-  ['icon-512-maskable.png', 512, 0.26],
-  ['apple-touch-icon.png', 180, 0.34],
+  ['icon-512-maskable.png', 512, 0.21],
+  ['apple-touch-icon.png', 180, 0.235],
 ]
 for (const [name, size, ratio] of files) {
   writeFileSync(join(publicDir, name), drawIcon(size, ratio))

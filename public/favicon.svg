@@ -1,10 +1,10 @@
+<!-- Značka Fairsome: dva překrývající se kruhy, stejné jako wordmark
+     v aplikaci (BrandMark v src/screens/HomeScreen.tsx) a jako PWA ikony
+     ze scripts/gen-icons.mjs. Když se změní jedno, změň všechna tři. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#0f1c14" />
-  <circle cx="32" cy="32" r="20" fill="#f4f7f4" />
-  <g fill="#c3cec5">
-    <circle cx="32" cy="21" r="2.2" /><circle cx="24" cy="26" r="2.2" />
-    <circle cx="40" cy="26" r="2.2" /><circle cx="32" cy="32" r="2.2" />
-    <circle cx="22" cy="35" r="2.2" /><circle cx="42" cy="35" r="2.2" />
-    <circle cx="26" cy="42" r="2.2" /><circle cx="38" cy="42" r="2.2" />
+  <g fill="#4ade80">
+    <circle cx="24" cy="24" r="16" opacity="0.35" />
+    <circle cx="40" cy="40" r="16" />
   </g>
 </svg>

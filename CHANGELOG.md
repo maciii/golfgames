@@ -7,6 +7,18 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.1] – 2026-09-03
+
+### Změněno
+
+- **Ikona na ploše telefonu je značka Fairsome.** iOS i Android teď ukazují
+  dva překrývající se kruhy, tedy to samé, co je vidět nahoře v aplikaci.
+  Dosavadní kresba golfového míčku popisovala, co appka dělá, ale se značkou
+  uvnitř neměla nic společného. Změnil se i favicon v prohlížeči.
+- **Nainstalovaná aplikace si novou ikonu nevezme sama.** Systém si ji uložil
+  při přidání na plochu; kdo ji chce mít novou, musí appku z plochy smazat
+  a přidat znovu. Data zůstávají v prohlížeči, ale radši až po dohraném kole.
+
 ## [0.49.0] – 2026-09-03
 
 ### Přidáno
