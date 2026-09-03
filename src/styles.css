@@ -1,4 +1,18 @@
+/**
+ * Barevná schémata.
+ *
+ * Tmavé je původní vzhled appky a drží se v `:root` jako základ; světlé je jen
+ * sada jiných hodnot těch samých proměnných v `[data-theme='light']`. Zbytek
+ * stylopisu o schématu neví a vědět nemá - kdo sáhne po natvrdo zapsané barvě,
+ * udělá pravidlo, které v druhém schématu nebude fungovat.
+ *
+ * Schéma nastavuje atribut na `<html>` (viz `src/theme.tsx` a skript
+ * v `index.html`), ne media query - volba uživatele musí přebít nastavení
+ * systému.
+ */
 :root {
+  color-scheme: dark;
+
   --bg: #0f1c14;
   --bg-elevated: #17281d;
   --bg-input: #1e3326;
@@ -11,9 +25,18 @@
   /* Informace, ne výsledek - bledě modrá, ať se nemíchá se skóre. */
   --info: #7dd3fc;
   --over: #fca5a5;
+  /* Chyba a nevratná akce. Odvozené od červené za birdie, ať se v appce
+     nezavádí druhá červená; ve světlém schématu se musí ztmavit, jinak je
+     na bílé nečitelná. */
+  --danger: var(--score-birdie);
+
+  /* Ztmavení pod výsuvným panelem a listem zespodu. */
+  --scrim: rgba(0, 0, 0, 0.55);
 
   /* Barvy výsledků na jamce. Značka je barevný štítek, číslo v ní má tmavý
-     nebo bílý inkoust podle světlosti podkladu. */
+     nebo bílý inkoust podle světlosti podkladu. Ty se mezi schématy nemění:
+     je to barevná řeč scorekarty, kterou hráč zná nazpaměť, a na světlém
+     i tmavém podkladu funguje stejně. */
   --score-eagle: #f2c14e;
   --score-eagle-ink: #14210f;
   --score-birdie: #e8402a;
@@ -34,6 +57,42 @@
      soupeřil se značkami skóre, které jsou to hlavní. */
   --scorecard-summary: #24402e;
   --tap: 48px;
+}
+
+/**
+ * Světlé schéma.
+ *
+ * Podklad je papírově světlý se zeleným nádechem, ne čistě bílý - appka má
+ * i za slunce vypadat jako golfová scorekarta, ne jako prázdný formulář.
+ * Zelená se musí ztmavit: `#4ade80` je na bílé nečitelná, sytější odstín drží
+ * stejnou roli i kontrast.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #eef2ea;
+  --bg-elevated: #ffffff;
+  --bg-input: #e6ede2;
+  --line: #ccd8c7;
+  --text: #14241a;
+  --text-dim: #5a6f60;
+  --accent: #15803d;
+  --accent-dark: #15803d;
+  --under: #0b6ea8;
+  --info: #0b6ea8;
+  --over: #b4342a;
+  --danger: #b4342a;
+
+  /* Nad světlým podkladem stačí ztmavení slabší - plná černá jako v tmavém
+     schématu by z listu udělala reflektor. */
+  --scrim: rgba(15, 28, 20, 0.4);
+
+  /* Na světlém podkladu je černá značka vidět sama; mezery v obrysu proto
+     můžou být světlé jako papír, jak se trojbogey píše na papírové kartě. */
+  --score-triple-gap: #eef0ec;
+  /* Součtový pruh vystupuje z bílého listu opačně než v tmavém schématu -
+     tmavším, ne světlejším tónem. */
+  --scorecard-summary: #dde7d8;
 }
 
 * {
@@ -419,7 +478,7 @@ button {
   inset: 0;
   z-index: 10;
   display: flex;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--scrim);
   animation: menu-fade 150ms ease-out;
 }
 
@@ -509,11 +568,51 @@ button {
   background: var(--line);
 }
 
+/* Patička menu: volba vzhledu a verze. `margin: auto` ji drží u spodní hrany
+   panelu, ať je nabídka nahoře krátká, nebo dlouhá. */
 .menu-drawer-foot {
   margin: auto 0 0;
   padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-drawer-version {
+  margin: 0;
   font-size: 12px;
   color: var(--text-dim);
+}
+
+/* Barevné schéma se nastaví jednou a pak se na něj nesahá, takže patří pod
+   navigaci, ne mezi ni. Popisek je nad přepínačem, ne vedle - do panelu
+   širokého 320 px se dvě slova a dvě tlačítka na jeden řádek nevejdou. */
+.menu-drawer-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-drawer-setting-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Přepínač leží v panelu se stejnou barvou, jakou má `.segmented` sám - bez
+   ztmavení by nebyl vidět a dvě tlačítka by nevypadala jako jedna volba. */
+.menu-drawer-setting .segmented {
+  background: var(--bg-input);
+}
+
+.menu-drawer-setting .segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
 }
 
 /* --- hráči ------------------------------------------------------------------ */
@@ -613,8 +712,8 @@ button {
 }
 
 .notice.error {
-  background: color-mix(in srgb, var(--score-birdie) 18%, var(--bg-elevated));
-  color: var(--score-birdie);
+  background: color-mix(in srgb, var(--danger) 18%, var(--bg-elevated));
+  color: var(--danger);
 }
 
 /* Nevratná akce (smazání účtu) se musí lišit od běžných tlačítek. */
@@ -624,8 +723,8 @@ button {
   border-radius: 12px;
   font-weight: 600;
   font-size: 17px;
-  background: color-mix(in srgb, var(--score-birdie) 22%, var(--bg-elevated));
-  color: var(--score-birdie);
+  background: color-mix(in srgb, var(--danger) 22%, var(--bg-elevated));
+  color: var(--danger);
 }
 
 .account-name {
@@ -1000,6 +1099,42 @@ button {
 
 .tee-option-white {
   --tee-color: #f8fafc;
+}
+
+/**
+ * Odpaliště ve světlém schématu.
+ *
+ * Barva odpaliště je jeho jméno, takže se měnit nesmí - jenže bílé, stříbrné
+ * a zlaté by na světlém listu zmizely úplně stejně, jako mizí černé na tmavém
+ * (proto ta výjimka u `.tee-option-black` výš). Praporek i kolečko se proto
+ * přimíchají k barvě textu: odstín zůstane poznat, hrana se objeví.
+ *
+ * Platí to pro všechny tři místa, kde se vlaječka objevuje: kolečko u hráče
+ * (`.tee-dot`), řádek ve výběru odpaliště (`.tee-swatch`) i volba výchozího
+ * odpaliště v PickSheetu (`.pick-row-tee-icon`).
+ */
+:root[data-theme='light'] .tee-dot svg,
+:root[data-theme='light'] .pick-row-tee-icon {
+  color: color-mix(in srgb, var(--tee-color, var(--text-dim)) 62%, var(--text));
+}
+
+:root[data-theme='light'] .tee-dot {
+  border-color: color-mix(in srgb, var(--tee-color) 45%, var(--line));
+}
+
+:root[data-theme='light'] .tee-swatch {
+  border-color: color-mix(in srgb, var(--tee-color) 60%, var(--text));
+}
+
+:root[data-theme='light'] .tee-row.selected {
+  border-color: color-mix(in srgb, var(--tee-color) 62%, var(--text));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tee-color) 62%, var(--text));
+}
+
+/* Černé odpaliště je naopak vidět samo - obrys, kterým se v tmavém schématu
+   odlepuje od pozadí, tady jen ztmavne, ať nesvítí bílý kroužek na bílé. */
+:root[data-theme='light'] .tee-option-black {
+  --tee-contrast: #475569;
 }
 
 /* --- jména hráčů -------------------------------------------------------- */
@@ -2402,7 +2537,7 @@ button {
   z-index: 10;
   display: flex;
   align-items: flex-end;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--scrim);
 }
 
 .sheet {
@@ -2693,11 +2828,11 @@ button {
 /* Chyba i nevratná akce používají stejnou barvu jako ostatní varování
    v aplikaci (viz .danger-button), ať se nezavádí druhá červená. */
 .hint.error {
-  color: var(--score-birdie);
+  color: var(--danger);
 }
 
 .link-button.danger {
-  color: var(--score-birdie);
+  color: var(--danger);
 }
 
 /**

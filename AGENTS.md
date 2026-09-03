@@ -127,6 +127,11 @@ Tohle nejsou preference, ale věci, které v projektu drží konzistenci:
   výřez parů a SI a `startHole` podle hrané části. Číslo pro hráče dává
   výhradně `holeNumber(round, hole)` - v UI, ve výpisech jamek i v pravidle
   o dvojnásobné 9. a 18. jamce.
+- **Barva se do CSS nepíše natvrdo.** Aplikace má tmavé i světlé schéma
+  (rozhodnutí #38) a obě jsou jen jiné hodnoty týchž proměnných v `:root`,
+  resp. `:root[data-theme='light']`. Pravidlo s vlastním `#hex` v jednom
+  schématu funguje a v druhém ne - a všimne si toho až uživatel. Výjimkou jsou
+  barvy značek skóre a odpališť, které jsou v obou schématech stejné záměrně.
 - **Názvy tříd v CSS jsou globální.** `src/styles.css` je jediný stylopis bez
   modulů, takže obecné jméno jako `.player-row` si dvě obrazovky snadno
   přebijou – a projeví se to až na té, kterou zrovna nikdo nezkoumá. Řádek
@@ -195,6 +200,7 @@ src/
   money.ts     přepočet bodů na peníze
   backup.ts    export a import dat do souboru JSON
   pwa.ts       detekce standalone režimu a instalace PWA na plochu
+  theme.tsx    barevné schéma (tmavé/světlé) a jeho uložení
   swipeBack.ts tažení od levého okraje jako „zpět" (v PWA není systémové)
   sync/        nepovinná záloha do Firestore (líné načtení SDK)
   i18n/        překlady: cs.ts je zdroj pravdy pro klíče, en.ts musí sedět

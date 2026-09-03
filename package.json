@@ -1,6 +1,6 @@
 {
   "name": "golfgames",
-  "version": "0.48.0",
+  "version": "0.49.0",
   "description": "Zápis golfového skóre po jamkách pro 1-4 hráče podle zvolené hry a vyhodnocení různých typů golfových her",
   "private": true,
   "type": "module",

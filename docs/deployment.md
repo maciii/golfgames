@@ -144,6 +144,17 @@ Hláška „Aplikaci se nepodařilo načíst" je záměrná pojistka v
 vysvětlení místo prázdné obrazovky. Je dvojjazyčná natvrdo – běží dřív, než se
 načte aplikace, takže v ní zvolený jazyk ještě není k dispozici.
 
+Ve stejném souboru běží i druhý předstartovní skript: nastaví **barevné
+schéma** (atribut `data-theme` a `<meta name="theme-color">`) dřív, než se
+vykreslí první pixel. Bez něj by uživateli se světlým schématem při každém
+spuštění probliklo tmavé pozadí úvodní obrazovky. Klíč v `localStorage`
+i barvy musí sedět se `src/theme.tsx`, což hlídá `src/theme.test.ts`.
+
+**Manifest PWA zůstává tmavý.** `theme_color` a `background_color` ve
+`vite.config.ts` jsou statické – vybírají barvu úvodní obrazovky při spouštění
+nainstalované aplikace a za běhu se změnit nedají. Lišta prohlížeče na volbu
+schématu reaguje, splash screen instalované PWA ne.
+
 ## Lokální ověření produkčního buildu
 
 ```bash

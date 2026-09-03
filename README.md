@@ -83,6 +83,8 @@ Přesné vyhodnocení včetně okrajových situací popisuje
   není potřeba
 - **Česky i anglicky** – jazyk se vybere podle prohlížeče a přepíná se
   vlajkami v pravém horním rohu; datum, částky i řazení jmen se řídí volbou
+- **Tmavý i světlý vzhled** – přepíná se v menu, ve výchozím stavu se řídí
+  nastavením telefonu; světlý je čitelnější za ostrého slunce
 - **Rozehrané kolo přežije** zavření aplikace i restart telefonu
 
 ## Instalace do telefonu

@@ -69,7 +69,8 @@ src/
     AccountContext.tsx  stav účtu a synchronizace pro celou aplikaci
   version.ts          verze vpečená při buildu
   pwa.ts              detekce standalone režimu a instalace PWA na plochu
-  styles.css          jediný stylopis, barvy jako CSS proměnné
+  theme.tsx           barevné schéma (tmavé/světlé), kontext a uložení volby
+  styles.css          jediný stylopis; barvy jsou proměnné, obě schémata z nich
   games/              pravidla jednotlivých her
     types.ts          rozhraní GameDefinition + řazení pořadí
     shared.ts         výpočty sdílené víc hrami (lepší míč, součet dvojice)
@@ -133,6 +134,11 @@ nový soubor v `src/games/`, zápis do registru, testy, odstavec v dokumentaci.
 - Kód, identifikátory i komentáře jsou anglicky/česky jako dosud - překládají
   se jen texty, které uvidí uživatel.
 - Komentáře vysvětlují **proč**, ne co – co dělá řádek, je vidět z kódu.
+- **Barva se do CSS nepíše natvrdo.** Aplikace má tmavé i světlé schéma a obě
+  jsou jen jiné hodnoty týchž proměnných (`:root`, resp.
+  `:root[data-theme='light']`). Pravidlo s vlastním `#hex` v jednom schématu
+  funguje a v druhém ne – a všimne si toho až uživatel. Výjimkou jsou barvy
+  značek skóre a odpališť, které jsou v obou schématech stejné záměrně.
 - Pravidla her žijí výhradně v `src/games/`. Obrazovky o konkrétní hře nic
   nevědí, jen vykreslí, co dostanou z `computeStandings()`.
 - `Round` musí zůstat serializovatelný do JSON – ukládá se tak, jak je.
@@ -169,6 +175,9 @@ peníze nejvyšší a chyba v bodování je nejdražší.
 - `src/sync/document.test.ts` – tvar dokumentu pro Firestore (žádné pole
   uvnitř pole)
 - `src/i18n/i18n.test.ts` – úplnost katalogů a chování překladu
+- `src/theme.test.ts` – shoda `src/theme.tsx` se skriptem v `index.html`
+  (klíč v localStorage, jména schémat, barva lišty proti `--bg`)
+- `src/branding.test.ts` – jméno aplikace na místech mimo React
 
 Testy, které ověřují konkrétní znění textu, si musí nastavit jazyk
 (`setActiveLocale('cs')` v `beforeAll`) – Node jinak hlásí angličtinu.

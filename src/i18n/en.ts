@@ -45,6 +45,9 @@ export const en: Record<MessageKey, Message> = {
   },
   'menu.backup': 'Backup',
   'menu.account': 'Account',
+  'menu.appearance': 'Appearance',
+  'menu.themeDark': 'Dark',
+  'menu.themeLight': 'Light',
 
   // --- players (roster management) -----------------------------------------
   'players.title': 'Players',

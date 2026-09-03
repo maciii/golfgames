@@ -54,6 +54,9 @@ export const cs = {
   },
   'menu.backup': 'Záloha dat',
   'menu.account': 'Účet',
+  'menu.appearance': 'Vzhled',
+  'menu.themeDark': 'Tmavý',
+  'menu.themeLight': 'Světlý',
 
   // --- hráči (správa seznamu) ----------------------------------------------
   'players.title': 'Hráči',

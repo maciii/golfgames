@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import { LocaleProvider } from './i18n'
+import { ThemeProvider } from './theme'
 import './styles.css'
 
 // Offline-first: service worker se registruje hned a novou verzi si vezme
@@ -13,9 +14,11 @@ const container = document.getElementById('root')
 if (container) {
   createRoot(container).render(
     <StrictMode>
-      <LocaleProvider>
-        <App />
-      </LocaleProvider>
+      <ThemeProvider>
+        <LocaleProvider>
+          <App />
+        </LocaleProvider>
+      </ThemeProvider>
     </StrictMode>,
   )
 }

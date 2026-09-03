@@ -351,6 +351,8 @@ Všechno je v `localStorage` pod klíči s verzí:
 | `golfgames.gameOptions.v1`     | volby bodování, mapa `gameId → GameOptions` |
 | `golfgames.favoriteCourses.v1` | oblíbená hřiště podle stabilního id         |
 | `golfgames.deletedRounds.v1`   | místní tombstony explicitně zahozených kol  |
+| `golfgames.locale.v1`          | zvolený jazyk (píše `i18n/index.tsx`)       |
+| `golfgames.theme.v1`           | zvolené barevné schéma (píše `theme.tsx`)   |
 
 Pravidla:
 
@@ -363,6 +365,11 @@ Pravidla:
 - **Poškozený záznam se zahodí**, ne aby aplikace spadla (`isValidRound()`).
 - Suffix `.v1` je připravený na nekompatibilní změnu tvaru dat; při ní se
   zvedne na `.v2` a přidá se převod (a `npm run bump:major`).
+- **Poslední dva klíče nepatří `storage.ts`.** Jazyk a barevné schéma si píšou
+  vlastní moduly, protože je potřebují dřív a jinde než data kola - schéma
+  dokonce ještě před spuštěním Reactu. Nejsou to data hráče, takže se ani
+  nezálohují do souboru, ani nesynchronizují: jsou to nastavení zařízení,
+  na kterém se zrovna hraje.
 
 ## Synchronizace (nepovinná)
 
@@ -407,6 +414,40 @@ Dvě věci, které se snadno přehlédnou:
   neověří.
 
 Volba jazyka: uložená předvolba → jazyk prohlížeče → angličtina.
+
+## Barevná schémata
+
+Aplikace má **tmavé** (původní vzhled) a **světlé** schéma. Obě jsou jen jiné
+hodnoty týchž CSS proměnných: tmavé sedí v `:root`, světlé v bloku
+`:root[data-theme='light']`. Zbytek stylopisu o schématu neví - kdo si napíše
+vlastní `#hex`, udělá pravidlo, které v druhém schématu nefunguje a nikdo si
+toho nevšimne, dokud to neuvidí uživatel (rozhodnutí #38).
+
+| Kde                 | Role                                                              |
+| ------------------- | ----------------------------------------------------------------- |
+| `src/theme.tsx`     | `ThemeProvider`, `useTheme()`, detekce a uložení volby            |
+| `src/styles.css`    | obě palety jako proměnné v `:root` a `[data-theme='light']`       |
+| `index.html`        | skript, který schéma nastaví **před** vykreslením první obrazovky |
+| `src/theme.test.ts` | hlídá, že se ty dva zdroje pravdy nerozejdou                      |
+
+Tři věci, které se snadno přehlédnou:
+
+- **Schéma nese atribut na `<html>`, ne React.** Proměnné se tak přepnou naráz
+  pro celou aplikaci včetně úvodní obrazovky, která se vykreslí dřív, než se
+  React vůbec načte. Proto ten skript v `index.html` - bez něj by uživateli se
+  světlým schématem při každém spuštění probliklo tmavé pozadí. Skript tím
+  duplikuje klíč v localStorage i barvy `<meta name="theme-color">`, což hlídá
+  test (stejný důvod jako `branding.test.ts` u jména aplikace).
+- **Systém se čte jen při startu.** Bez uložené volby rozhoduje
+  `prefers-color-scheme`, pak tmavé. Živé sledování by aplikaci přehodilo
+  vzhled uprostřed kola, až telefon sám přepne na noční režim.
+- **Barvy značek skóre a odpališť se mezi schématy nemění.** Je to barevná řeč
+  scorekarty a identita odpaliště; barevný štítek s vlastním inkoustem funguje
+  na světlém i tmavém podkladu stejně. Výjimky jsou jen tam, kde by barva na
+  podkladu zmizela úplně - mezery v trojitém obrysu a obrys světlých odpališť
+  ve světlém schématu (tmavé to samé řeší u černého odpaliště).
+
+Volba schématu: uložená předvolba → nastavení systému → tmavé.
 
 ## Stav a navigace
 
@@ -554,9 +595,11 @@ Vychází z toho, že aplikace se ovládá palcem jedné ruky:
 `scoreCategory(score, par)` vrací jednu ze šesti kategorií (`eagle`, `birdie`,
 `par`, `bogey`, `double`, `triple`), která je zároveň názvem CSS třídy. Stejná
 značka se používá ve scorekartě i při zápisu, takže barva výsledku je vidět
-hned. Barvy jsou proměnné `--score-*` v `styles.css`, vícenásobné obrysy se
-kreslí `inset` box-shadow **dovnitř**, aby všechny značky měly stejný vnější
-rozměr a mřížka scorekarty zůstala pravidelná.
+hned. Barvy jsou proměnné `--score-*` v `styles.css` a v obou barevných schématech
+jsou stejné. Vícenásobné obrysy se kreslí `inset` box-shadow **dovnitř**, aby
+všechny značky měly stejný vnější rozměr a mřížka scorekarty zůstala
+pravidelná; mezery v nich mají barvu podkladu, takže se o schéma postarají
+samy.
 
 Značky u jména hráče (`.player-mark`) mají čtyři tóny: `own` (zeleně – bonus
 zůstává vlastní dvojici), `opponent` (červeně – propadá soupeřům), `pending`
@@ -659,6 +702,7 @@ v [`../CONTRIBUTING.md`](../CONTRIBUTING.md#rozvržení-playwright).
 | výběr odpaliště hráče            | `src/screens/TeeSheet.tsx`              |
 | zadání hřiště                    | `src/screens/CourseEditScreen.tsx`      |
 | barvy a tvary značek skóre       | `src/styles.css` (`--score-*`, `.mark`) |
+| barevné schéma a jeho volbu      | `src/theme.tsx` + palety v `styles.css` |
 | co se ukládá do telefonu         | `src/storage.ts`                        |
 | tvar souboru se zálohou          | `src/backup.ts`                         |
 | slučování při synchronizaci      | `src/sync/merge.ts`                     |

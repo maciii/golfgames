@@ -979,6 +979,58 @@ pravidlo. Výpočet je proto stejný jako u Skins, které to řeší od začátk
 
 ---
 
+## 38. Tmavé a světlé schéma, jedna paleta
+
+**Kontext.** Aplikace byla od začátku tmavá - zelený podklad odkazuje na
+hřiště a v podvečerním kole svítí do očí míň. Za ostrého slunce je to ale
+opačně: tmavý displej se v odlescích čte hůř než světlý a hráč na jamce nemá
+čas s telefonem hledat úhel.
+
+**Rozhodnutí.** Schémata jsou dvě a jsou to **jen jiné hodnoty týchž
+proměnných**. Tmavé zůstává v `:root` jako základ (žádná barva se nemění),
+světlé je blok `:root[data-theme='light']`, který přepíše podklady, text
+a akcent. Zbytek stylopisu o schématu neví - kdyby si jedno pravidlo napsalo
+vlastní `#hex`, v druhém schématu by přestalo fungovat a nikdo by si toho
+nevšiml, dokud to neuvidí uživatel.
+
+**Zelená se ve světlém musí ztmavit, barvy skóre ne.** `--accent: #4ade80` je
+na bílé nečitelná, takže má světlé schéma svůj sytější odstín. Značky skóre
+(eagle, birdie, par, bogey...) naopak zůstávají v obou schématech stejné: je
+to barevná řeč scorekarty, kterou hráč zná nazpaměť, a barevný štítek s vlastním
+inkoustem funguje na světlém i tmavém podkladu stejně. Mění se u nich jediné -
+mezery v trojitém obrysu, které jsou nově světlé jako papír, protože černá
+značka se na světlém listu neztratí.
+
+**Odpaliště dostala ve světlém obrys.** Barva odpaliště je jeho jméno, takže se
+měnit nesmí - jenže bílá, stříbrná a zlatá na světlém podkladu zmizí úplně
+stejně, jako mizí černá na tmavém (což tmavé schéma řešilo výjimkou už dřív).
+Praporek i kolečko se proto ve světlém přimíchají k tmavé: odstín zůstane
+poznat a hrana se objeví.
+
+**Volba je uživatelova, ne systémová.** Kdo si nic nezvolil, dostane schéma
+podle nastavení telefonu; jakmile si vybere, platí jeho volba. Systém se čte
+jen při startu - živé sledování `prefers-color-scheme` by appce přehodilo
+vzhled uprostřed kola, až telefon sám přepne na noční režim.
+
+**Schéma nastavuje skript v `index.html`, ne až React.** Atribut `data-theme`
+musí být na `<html>` dřív, než se vykreslí první pixel; jinak by uživateli se
+světlým schématem při každém spuštění probliklo tmavé pozadí úvodní obrazovky.
+Skript tím pádem duplikuje klíč v localStorage i barvy lišty prohlížeče, což
+hlídá `src/theme.test.ts` - stejný důvod, jako má `branding.test.ts` u jména
+aplikace.
+
+**Přepínač je v menu, ne v hlavičce.** Vzhled se nastaví jednou a pak se na něj
+nesahá, takže patří mezi věci, které se dělají zřídka a záměrně (#28).
+Hlavička domovské obrazovky navíc jazykový přepínač už má a na telefonu se
+druhý vedle značky nevejde.
+
+**Manifest PWA zůstává tmavý.** `theme_color` a `background_color` v manifestu
+jsou statické - vybírají barvu úvodní obrazovky při spouštění nainstalované
+appky a za běhu se změnit nedají. Lištu prohlížeče přepíná `<meta
+name="theme-color">`, ta na volbu reaguje.
+
+---
+
 ## Otevřené otázky
 
 Věci, o kterých padlo rozhodnutí je odložit:

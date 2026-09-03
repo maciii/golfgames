@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 import { useT } from '../i18n'
+import type { MessageKey } from '../i18n'
+import type { Theme } from '../theme'
+import { THEMES, useTheme } from '../theme'
 import { APP_VERSION } from '../version'
 
 interface Props {
@@ -111,6 +114,42 @@ function AccountIcon() {
   )
 }
 
+/** Vzhled se vybírá podle obrázku dřív než podle slova - měsíc a slunce. */
+function DarkThemeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function LightThemeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <g
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" />
+      </g>
+    </svg>
+  )
+}
+
+const THEME_LABEL: Record<Theme, MessageKey> = {
+  dark: 'menu.themeDark',
+  light: 'menu.themeLight',
+}
+
 interface ItemProps {
   icon: ReactNode
   label: string
@@ -149,6 +188,7 @@ export default function MenuSheet({
   archiveCount,
 }: Props) {
   const t = useT()
+  const { theme, setTheme } = useTheme()
 
   function go(action: () => void) {
     onClose()
@@ -222,9 +262,35 @@ export default function MenuSheet({
           />
         </nav>
 
-        <p className="menu-drawer-foot">
-          {t('common.version', { version: APP_VERSION })}
-        </p>
+        <div className="menu-drawer-foot">
+          <div className="menu-drawer-setting">
+            <span className="menu-drawer-setting-label" id="menu-appearance-label">
+              {t('menu.appearance')}
+            </span>
+            <div
+              className="segmented"
+              role="group"
+              aria-labelledby="menu-appearance-label"
+            >
+              {THEMES.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`segment${option === theme ? ' selected' : ''}`}
+                  onClick={() => setTheme(option)}
+                  aria-pressed={option === theme}
+                >
+                  {option === 'dark' ? <DarkThemeIcon /> : <LightThemeIcon />}
+                  <span>{t(THEME_LABEL[option])}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <p className="menu-drawer-version">
+            {t('common.version', { version: APP_VERSION })}
+          </p>
+        </div>
       </div>
     </div>
   )

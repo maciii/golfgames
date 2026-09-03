@@ -7,6 +7,30 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.0] – 2026-09-03
+
+### Přidáno
+
+- **Barevné schéma se dá přepnout: tmavé, nebo světlé.** Tmavé je původní
+  vzhled a nic se v něm nemění; světlé má papírově světlý podklad se zeleným
+  nádechem a je čitelnější za ostrého slunce, kdy se tmavý displej v odlescích
+  čte hůř. Přepíná se v menu pod položkou **Vzhled**.
+- **Bez vlastní volby se schéma řídí nastavením telefonu** - stejně jako se
+  jazyk řídí prohlížečem. Jakmile si uživatel vybere, platí jeho volba a drží
+  se i po zavření aplikace. Schéma se nastaví ještě před vykreslením, takže
+  při spuštění nic neprobliká.
+
+### Změněno
+
+- **Značky skóre vypadají v obou schématech stejně** - barevná řeč scorekarty
+  se nemění. Jediný rozdíl je trojitý obrys u trojbogey, který má ve světlém
+  schématu mezery barvy papíru.
+- **Světlá odpaliště (bílé, stříbrné, zlaté) mají ve světlém schématu tmavý
+  obrys**, aby na světlém listu nezmizela - stejně jako má černé odpaliště
+  světlý obrys v tmavém schématu.
+- **Chybová hláška a nevratná akce mají ve světlém schématu tmavší červenou.**
+  Červená za birdie je na bílém podkladu na hranici čitelnosti.
+
 ## [0.48.0] – 2026-08-14
 
 ### Přidáno
