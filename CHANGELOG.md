@@ -7,6 +7,16 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.3] – 2026-09-06
+
+### Opraveno
+
+- **V seznamu hráčů je vidět celý handicap.** Políčko bylo užší než hodnota
+  v něm, takže se index ořezával – nejvíc u plusových handicapů („-10,5“)
+  a u dvouciferných s desetinou („30,1“). Pole je teď širší, čísla drží pod
+  sebou zarovnaná a na úzkých telefonech se místo bere z mezer a vlaječky,
+  ne z čísla. Jméno se zkrátí tečkami, jak se zkracovalo dosud.
+
 ## [0.49.2] – 2026-09-06
 
 ### Opraveno

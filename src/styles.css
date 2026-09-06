@@ -630,9 +630,21 @@ button {
   min-width: 0;
 }
 
-.players-add-row .value-input {
-  flex: 0 0 64px;
+/* Vyšší specificita než `.players-hcp` je schválně: obecné `.value-input`
+   stojí v souboru níž a se stejnou vahou by ho přebilo (zarovnání doprava).
+   Pole na HCP musí uvézt pět znaků: plusový handicap se zápornou hodnotou
+   a desetinou ("-10,5") je nejširší, co se do něj reálně dostane. S užším
+   polem a odsazením `.name-input` se index ořezával. Šířka je vedená přes
+   obsah, ne přes odhad: písmo drží 16 px kvůli iOS (menší spustí zoom při
+   zaostření), takže se místo muselo najít jinde. Tabulkové číslice drží
+   hodnoty pod sebou zarovnané. */
+.players-add-row .value-input,
+.players-row .players-hcp {
+  flex: 0 0 72px;
   min-width: 0;
+  padding: 0 4px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .players-add-button {
@@ -682,13 +694,6 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.players-hcp {
-  flex: 0 0 46px;
-  min-width: 0;
-  padding: 0 6px;
-  text-align: center;
 }
 
 .players-remove {
@@ -3186,6 +3191,18 @@ div.course-item {
   .segment {
     padding-inline: 6px;
     font-size: 14px;
+  }
+
+  /* HCP si drží šířku i tady - radši ubereme mezerám a vlaječce, protože
+     jméno se dá zkrátit tečkami, ale useknuté číslo nikdo nepřečte. */
+  .players-row {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .players-row .tee-dot {
+    width: 36px;
+    height: 36px;
   }
 }
 
