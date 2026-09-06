@@ -52,6 +52,15 @@ dokumentu, aby zařízení, které ještě má starou lokální kopii, kolo znov
 nenahrálo. Bez přihlášení se tombstone drží jen v `localStorage`; po návratu
 signálu se synchronizace zopakuje.
 
+Stejně se chová seznam hráčů. Slučuje se sjednocením, takže smazaný hráč se
+bez tombstonu vrátil z cloudu při první synchronizaci. Jeho záznam je ale
+v `deletedPlayerKeys` vedený **podle jména** (bez ohledu na velikost písmen),
+ne podle `id`: to si každé zařízení generuje samo, takže stejný hráč má na dvou
+telefonech dvě různá id a tombstone podle id by na druhém neplatil – páruje se
+tak i `mergeRosters()`. Odehraná kola smazaného hráče zůstávají v archivu
+netknutá; mizí jen z nabídky spoluhráčů. Přidání hráče zpátky (ručně nebo
+založením kola) tombstone ruší.
+
 Obnova ze zálohy tombstone **přebíjí**. Id všech kol ze souboru se zapíšou do
 `golfgames.revivedRounds.v1` a `activeDeletedIds()` je před slučováním ze
 seznamu tombstonů vyškrtne – včetně toho v cloudu, který se pak přepíše. Bez
@@ -78,15 +87,16 @@ funkce bez jediného odkazu na Firebase, takže ji pokrývají běžné testy.
 
 ## Kdy se zapisuje
 
-| Událost                           | Co se stane                                                            |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| Přihlášení                        | stáhnou se všechna vzdálená kola, sloučí s místními, rozdíl se nahraje |
-| Start aplikace s účtem            | totéž, aby se zachytily změny z jiného zařízení                        |
-| Změna zápisu                      | kolo se zařadí do fronty a odešle **s odkladem 10 s**                  |
-| Smazání kola (archiv i rozehrané) | uloží se tombstone, místní kolo zmizí hned, cloudový dokument se smaže |
-| Obnova ze zálohy                  | tombstony obnovených kol se zruší a hned se synchronizuje              |
-| Odchod z aplikace                 | fronta se odešle hned (`visibilitychange`)                             |
-| Návrat signálu                    | synchronizace zopakuje i čekající mazání (`online`)                    |
+| Událost                           | Co se stane                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| Přihlášení                        | stáhnou se všechna vzdálená kola, sloučí s místními, rozdíl se nahraje      |
+| Start aplikace s účtem            | totéž, aby se zachytily změny z jiného zařízení                             |
+| Změna zápisu                      | kolo se zařadí do fronty a odešle **s odkladem 10 s**                       |
+| Smazání kola (archiv i rozehrané) | uloží se tombstone, místní kolo zmizí hned, cloudový dokument se smaže      |
+| Smazání hráče ze seznamu          | uloží se tombstone na jméno, hráč zmizí i v cloudu; kola v archivu zůstanou |
+| Obnova ze zálohy                  | tombstony obnovených kol a hráčů se zruší a hned se synchronizuje           |
+| Odchod z aplikace                 | fronta se odešle hned (`visibilitychange`)                                  |
+| Návrat signálu                    | synchronizace zopakuje i čekající mazání (`online`)                         |
 
 Odklad je důležitý kvůli kvótám: bez něj by osmnáctijamkové kolo znamenalo
 osmnáct zápisů, s ním vyjde na jednotky. Denní limit bezplatného plánu je tak
@@ -96,7 +106,9 @@ Neodeslané změny čekají v `golfgames.syncQueue.v1`, takže přežijí i zav�
 aplikace bez signálu. Čekající zahození kol je v
 `golfgames.deletedRounds.v1`; při další synchronizaci má přednost před
 nahráním kola. Opačný seznam `golfgames.revivedRounds.v1` drží kola vrácená
-ze zálohy a má přednost před tombstonem.
+ze zálohy a má přednost před tombstonem. Hráči mají stejnou dvojici seznamů
+(`golfgames.deletedPlayers.v1` a `golfgames.revivedPlayers.v1`), jen klíčem
+není id, ale jméno.
 
 ## Zabezpečení
 

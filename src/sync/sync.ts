@@ -1,14 +1,18 @@
 import type { Round } from '../types'
 import { roundTimestamp } from '../types'
 import {
+  clearDeletedPlayerKeys,
   clearDeletedRoundIds,
+  clearRevivedPlayerKeys,
   clearRevivedRoundIds,
   isValidRound,
   loadAllGameOptions,
   loadArchive,
   loadCourses,
   loadCurrentRound,
+  loadDeletedPlayerKeys,
   loadDeletedRoundIds,
+  loadRevivedPlayerKeys,
   loadRevivedRoundIds,
   loadRoster,
   loadSettings,
@@ -21,7 +25,7 @@ import {
   saveSettings,
 } from '../storage'
 import { isValidCourse, normalizeCourse } from '../courses/types'
-import { mergeCourses, mergeRosters } from '../backup'
+import { mergeCourses, mergeRosters, removeDeletedPlayers } from '../backup'
 import { forFirestore, fromDocument, toDocument } from './document'
 import {
   activeDeletedIds,
@@ -147,6 +151,8 @@ interface PrefsDocument {
   courses?: unknown[]
   /** Id kol, která uživatel výslovně zahodil; brání jejich návratu na jiném zařízení. */
   deletedRoundIds?: unknown
+  /** Jména hráčů smazaných ze seznamu; stejná pojistka jako u kol. */
+  deletedPlayerKeys?: unknown
   updatedAt?: string
 }
 
@@ -188,11 +194,14 @@ function sameIds(a: string[], b: string[]): boolean {
  * vyškrtnou. Bez toho by tombstone v cloudu obnovené kolo při první
  * synchronizaci zase smazal.
  */
-async function syncPrefs(
-  uid: string,
-  deletedRoundIds: string[],
-  revivedRoundIds: string[],
-): Promise<void> {
+interface DeletionState {
+  deletedRoundIds: string[]
+  revivedRoundIds: string[]
+  deletedPlayerKeys: string[]
+  revivedPlayerKeys: string[]
+}
+
+async function syncPrefs(uid: string, deletions: DeletionState): Promise<void> {
   const { db } = await loadFirebase()
   const { doc, setDoc } = await import('firebase/firestore')
 
@@ -200,14 +209,25 @@ async function syncPrefs(
   const remote = await fetchPrefs(uid)
   const remoteDeleted = stringIds(remote.deletedRoundIds)
   const mergedDeleted = activeDeletedIds(
-    [...remoteDeleted, ...deletedRoundIds],
-    revivedRoundIds,
+    [...remoteDeleted, ...deletions.deletedRoundIds],
+    deletions.revivedRoundIds,
   )
-  // Seznam se může i zkrátit, takže na porovnání délek se spolehnout nedá.
-  const deletedChanged = !sameIds(mergedDeleted, remoteDeleted)
+  const remoteDeletedPlayers = stringIds(remote.deletedPlayerKeys)
+  const mergedDeletedPlayers = activeDeletedIds(
+    [...remoteDeletedPlayers, ...deletions.deletedPlayerKeys],
+    deletions.revivedPlayerKeys,
+  )
+  // Seznamy se můžou i zkrátit, takže na porovnání délek se spolehnout nedá.
+  const deletedChanged =
+    !sameIds(mergedDeleted, remoteDeleted) ||
+    !sameIds(mergedDeletedPlayers, remoteDeletedPlayers)
 
-  // Hráči se vždy sjednotí - seznam spoluhráčů nemá důvod se zmenšovat.
-  const roster = mergeRosters(loadRoster(), remote.roster ?? [])
+  // Hráči se jinak vždy sjednotí - seznam spoluhráčů nemá důvod se zmenšovat
+  // sám od sebe. Ubrat z něj smí jedině výslovné smazání uživatelem.
+  const roster = removeDeletedPlayers(
+    mergeRosters(loadRoster(), remote.roster ?? []),
+    mergedDeletedPlayers,
+  )
   saveRoster(roster)
 
   // Hřiště taky: doplněné pary, SI a normy jsou ruční práce, o kterou nemá
@@ -251,6 +271,7 @@ async function syncPrefs(
       gameOptions: loadAllGameOptions(),
       courses,
       deletedRoundIds: mergedDeleted,
+      deletedPlayerKeys: mergedDeletedPlayers,
       updatedAt: stamp,
     }),
   )
@@ -295,6 +316,8 @@ export interface SyncResult {
 export async function syncAll(uid: string): Promise<SyncResult> {
   const localDeleted = loadDeletedRoundIds()
   const localRevived = loadRevivedRoundIds()
+  const localDeletedPlayers = loadDeletedPlayerKeys()
+  const localRevivedPlayers = loadRevivedPlayerKeys()
   const [remoteRounds, remoteDeleted] = await Promise.all([
     fetchRounds(uid),
     fetchDeletedRoundIds(uid),
@@ -320,12 +343,19 @@ export async function syncAll(uid: string): Promise<SyncResult> {
   saveArchive(finishedRounds(plan.local))
   saveCurrentRound(nextCurrent)
 
-  await syncPrefs(uid, deletedRoundIds, localRevived)
+  await syncPrefs(uid, {
+    deletedRoundIds,
+    revivedRoundIds: localRevived,
+    deletedPlayerKeys: localDeletedPlayers,
+    revivedPlayerKeys: localRevivedPlayers,
+  })
   await deleteRounds(uid, deletedRoundIds)
   await uploadRounds(uid, plan.push)
   clearDeletedRoundIds(localDeleted)
-  // Tombstony v cloudu jsou zrušené, seznam oživených došel účelu.
+  clearDeletedPlayerKeys(localDeletedPlayers)
+  // Tombstony v cloudu jsou zrušené, seznamy oživených došly účelu.
   clearRevivedRoundIds(localRevived)
+  clearRevivedPlayerKeys(localRevivedPlayers)
   writeQueue([])
 
   return {

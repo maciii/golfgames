@@ -7,6 +7,20 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.4] – 2026-09-06
+
+### Opraveno
+
+- **Smazaný hráč se už nevrací do seznamu po synchronizaci.** Seznam
+  spoluhráčů se s cloudem slučoval sjednocením, takže hráč smazaný v telefonu
+  se při nejbližším zálohování objevil zpátky – stejná chyba, jaká byla
+  u smazaných kol. Smazání se teď pamatuje a platí i na ostatních zařízeních.
+  **Odehraná kola zůstávají v archivu netknutá**, hráč mizí jen z nabídky
+  spoluhráčů. Kdo se takhle vrátil, stačí smazat znovu.
+- **Hráč přidaný zpátky zůstane.** Ať už ho přidáš ručně, nebo založíš kolo
+  s jeho jménem – dřívější smazání se tím ruší, takže ho synchronizace zase
+  neodklidí. Totéž platí pro obnovu ze zálohy.
+
 ## [0.49.3] – 2026-09-06
 
 ### Opraveno

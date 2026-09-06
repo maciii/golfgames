@@ -14,8 +14,10 @@ import {
   loadFavoriteCourseIds,
   loadRoster,
   loadSettings,
+  markPlayersRevived,
   markRoundsRevived,
   normalizeRound,
+  playerKey,
   saveAllGameOptions,
   saveArchive,
   saveCourses,
@@ -148,6 +150,21 @@ export function mergeRosters(
   }
 
   return merged.sort((a, b) => a.name.localeCompare(b.name, localeTag()))
+}
+
+/**
+ * Vyřadí hráče, které uživatel smazal ze seznamu.
+ *
+ * Porovnává se podle jména stejně jako v `mergeRosters()` - `id` si každé
+ * zařízení generuje samo, takže by napříč telefony neplatilo.
+ */
+export function removeDeletedPlayers(
+  roster: RosterEntry[],
+  deletedKeys: string[],
+): RosterEntry[] {
+  if (deletedKeys.length === 0) return roster
+  const deleted = new Set(deletedKeys)
+  return roster.filter((entry) => !deleted.has(playerKey(entry.name)))
 }
 
 /**
@@ -310,9 +327,10 @@ export function applyBackup(backup: BackupFile, mode: ImportMode): ImportSummary
   // by ho nejbližší synchronizace obnovené kolo zase odstranila. Obnova ze
   // zálohy je jasný pokyn "chci to zpátky", takže tombstone přebije.
   markRoundsRevived([
-    ...archive.map((round) => round.id),
+    ...backup.data.archive.map((round) => round.id),
     ...(takeCurrent && backup.data.currentRound ? [backup.data.currentRound.id] : []),
   ])
+  markPlayersRevived(backup.data.roster.map((entry) => entry.name))
 
   if (mode === 'replace') {
     saveSettings(backup.data.settings)

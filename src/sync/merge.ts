@@ -22,12 +22,13 @@ export interface MergePlan {
 }
 
 /**
- * Které tombstony po započtení vzkříšených kol ještě platí.
+ * Které záznamy o smazání po započtení vzkříšených ještě platí.
  *
- * Smazání kola se pamatuje napořád, jinak by se kolo vrátilo z prvního
- * zařízení, které o něm ještě neví. Obnova ze zálohy je ale opačný pokyn -
- * a musí být silnější, jinak by se obnovené kolo hned zase ztratilo a nešlo
- * by ho vrátit nikdy.
+ * Používá se pro kola i pro hráče, proto pracuje s holými klíči. Smazání se
+ * pamatuje napořád, jinak by se položka vrátila z prvního zařízení, které
+ * o něm ještě neví. Opětovné přidání - obnovou ze zálohy nebo novým kolem -
+ * je ale opačný pokyn a musí být silnější, jinak by se vrácená položka hned
+ * zase ztratila a nešlo by ji dostat zpátky nikdy.
  */
 export function activeDeletedIds(deletedIds: string[], revivedIds: string[]): string[] {
   const unique = [...new Set(deletedIds)]

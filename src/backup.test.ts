@@ -8,6 +8,7 @@ import {
   mergeCourses,
   mergeRosters,
   parseBackup,
+  removeDeletedPlayers,
 } from './backup'
 import type { Course } from './courses/types'
 import type { Round } from './types'
@@ -128,6 +129,37 @@ describe('Záloha - slučování hráčů', () => {
     const merged = mergeRosters([], [{ id: 'r9', name: 'Eva', favorite: true }])
 
     expect(merged[0]?.favorite).toBe(true)
+  })
+})
+
+describe('Smazaní hráči', () => {
+  it('smazaný hráč ze seznamu zmizí', () => {
+    const roster = [
+      { id: 'r1', name: 'Adam' },
+      { id: 'r2', name: 'Bára' },
+    ]
+
+    expect(removeDeletedPlayers(roster, ['adam']).map((e) => e.name)).toEqual(['Bára'])
+  })
+
+  it('porovnává podle jména, ne podle id', () => {
+    // Id si každé zařízení generuje samo, takže stejný hráč má na dvou
+    // telefonech dvě různá - podle id by smazání na druhém neplatilo.
+    const fromOtherDevice = [{ id: 'r-jiné-zařízení', name: 'Adam' }]
+
+    expect(removeDeletedPlayers(fromOtherDevice, ['adam'])).toEqual([])
+  })
+
+  it('velikost písmen ani mezery nerozhodují', () => {
+    const roster = [{ id: 'r1', name: '  ADAM ' }]
+
+    expect(removeDeletedPlayers(roster, ['adam'])).toEqual([])
+  })
+
+  it('bez smazaných se seznam nemění', () => {
+    const roster = [{ id: 'r1', name: 'Adam' }]
+
+    expect(removeDeletedPlayers(roster, [])).toBe(roster)
   })
 })
 

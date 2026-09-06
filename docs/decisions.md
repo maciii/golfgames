@@ -119,6 +119,13 @@ každém zařízení. Platí pro každé smazání kola potvrzené uživatelem, 
 mazání v archivu – bez toho by se kolo smazané v archivu vracelo z cloudu po
 každé synchronizaci a nešlo by se ho zbavit.
 
+**Hráči mají tombstony taky, ale podle jména.** Seznam spoluhráčů se slučuje
+sjednocením, takže bez tombstonu se smazaný hráč vracel z cloudu. Klíčem je
+jméno, ne `id`: id si každé zařízení generuje samo, takže stejný hráč má na
+dvou telefonech dvě různá a podle id by smazání na druhém zařízení neplatilo.
+Podle jména se páruje i `mergeRosters()`, takže je to konzistentní. Odehraná
+kola se nemažou - hráč mizí z nabídky spoluhráčů, ne z historie.
+
 **Proč jde tombstone zrušit.** Obnova ze zálohy je stejně výslovný pokyn jako
 smazání, jen opačný, a je pozdější. Kdyby tombstone vyhrával, obnovené kolo by
 při první synchronizaci zase zmizelo – bez vysvětlení a bez cesty zpět. Id kol

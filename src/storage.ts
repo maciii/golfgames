@@ -30,6 +30,8 @@ const COURSES_KEY = 'golfgames.courses.v1'
 const FAVORITE_COURSES_KEY = 'golfgames.favoriteCourses.v1'
 const DELETED_ROUNDS_KEY = 'golfgames.deletedRounds.v1'
 const REVIVED_ROUNDS_KEY = 'golfgames.revivedRounds.v1'
+const DELETED_PLAYERS_KEY = 'golfgames.deletedPlayers.v1'
+const REVIVED_PLAYERS_KEY = 'golfgames.revivedPlayers.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -158,64 +160,112 @@ export function saveCurrentRound(round: Round | null): void {
   else write(CURRENT_KEY, round)
 }
 
-/** Ids kol, která uživatel výslovně zahodil a nesmí se vrátit ze synchronizace. */
-export function loadDeletedRoundIds(): string[] {
-  const ids = read<unknown>(DELETED_ROUNDS_KEY)
+/**
+ * Seznamy klíčů, podle kterých synchronizace pozná, co uživatel smazal.
+ *
+ * Smazání se musí pamatovat: kdyby se jen zmizelo z úložiště, nejbližší
+ * synchronizace by položku stáhla z cloudu zpátky, protože slučování nic
+ * nezahazuje. Ke každému seznamu smazaných patří i opačný seznam
+ * "vzkříšených" - obnova ze zálohy nebo opětovné přidání hráče je pozdější
+ * a stejně výslovný pokyn, který musí smazání přebít. Oba seznamy jsou
+ * dočasné, po úspěšné synchronizaci je přebere cloud.
+ */
+function loadKeys(storageKey: string): string[] {
+  const ids = read<unknown>(storageKey)
   if (!Array.isArray(ids)) return []
   return [
     ...new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0)),
   ]
 }
 
+function addKeys(storageKey: string, ids: string[]): void {
+  const added = ids.filter((id) => id.length > 0)
+  if (added.length === 0) return
+  write(storageKey, [...new Set([...loadKeys(storageKey), ...added])])
+}
+
+function removeKeys(storageKey: string, ids: string[]): void {
+  if (ids.length === 0) return
+  const dropped = new Set(ids)
+  write(
+    storageKey,
+    loadKeys(storageKey).filter((id) => !dropped.has(id)),
+  )
+}
+
+/** Ids kol, která uživatel výslovně zahodil a nesmí se vrátit ze synchronizace. */
+export function loadDeletedRoundIds(): string[] {
+  return loadKeys(DELETED_ROUNDS_KEY)
+}
+
 export function markRoundDeleted(roundId: string): void {
-  if (!roundId) return
-  write(DELETED_ROUNDS_KEY, [...new Set([...loadDeletedRoundIds(), roundId])])
+  addKeys(DELETED_ROUNDS_KEY, [roundId])
+  removeKeys(REVIVED_ROUNDS_KEY, [roundId])
 }
 
 /** Po úspěšné synchronizaci odstraní lokální tombstony, které už cloud zná. */
 export function clearDeletedRoundIds(roundIds: string[]): void {
-  if (roundIds.length === 0) return
-  const deleted = new Set(roundIds)
-  write(
-    DELETED_ROUNDS_KEY,
-    loadDeletedRoundIds().filter((roundId) => !deleted.has(roundId)),
-  )
+  removeKeys(DELETED_ROUNDS_KEY, roundIds)
 }
 
-/**
- * Ids kol, která uživatel vrátil obnovou ze zálohy.
- *
- * Tombstone smazaného kola žije dál v cloudu, takže by obnovené kolo při
- * nejbližší synchronizaci zase zmizelo - a uživatel by nevěděl proč. Tenhle
- * seznam je protipól tombstonů: říká "tohle kolo chci zpátky" a synchronizace
- * podle něj tombstone v cloudu zruší.
- *
- * Seznam je dočasný, hned po synchronizaci se zase vyprázdní.
- */
+/** Ids kol, která uživatel vrátil obnovou ze zálohy. */
 export function loadRevivedRoundIds(): string[] {
-  const ids = read<unknown>(REVIVED_ROUNDS_KEY)
-  if (!Array.isArray(ids)) return []
-  return [
-    ...new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0)),
-  ]
+  return loadKeys(REVIVED_ROUNDS_KEY)
 }
 
 /** Obnovená kola zapíše k oživení a zároveň zruší jejich místní tombstony. */
 export function markRoundsRevived(roundIds: string[]): void {
-  const ids = roundIds.filter((roundId) => roundId.length > 0)
-  if (ids.length === 0) return
-  write(REVIVED_ROUNDS_KEY, [...new Set([...loadRevivedRoundIds(), ...ids])])
-  clearDeletedRoundIds(ids)
+  addKeys(REVIVED_ROUNDS_KEY, roundIds)
+  removeKeys(DELETED_ROUNDS_KEY, roundIds)
 }
 
 /** Po úspěšné synchronizaci: cloud už tombstony zrušil, seznam došel účelu. */
 export function clearRevivedRoundIds(roundIds: string[]): void {
-  if (roundIds.length === 0) return
-  const revived = new Set(roundIds)
-  write(
-    REVIVED_ROUNDS_KEY,
-    loadRevivedRoundIds().filter((roundId) => !revived.has(roundId)),
-  )
+  removeKeys(REVIVED_ROUNDS_KEY, roundIds)
+}
+
+/**
+ * Klíč hráče pro porovnávání napříč zařízeními.
+ *
+ * Hráči se párují podle jména bez ohledu na velikost písmen, ne podle `id` -
+ * to si každé zařízení generuje samo, takže stejný hráč má na dvou telefonech
+ * dvě různá. Smazání se proto musí pamatovat taky podle jména, jinak by na
+ * druhém zařízení neplatilo. Viz `mergeRosters()`.
+ */
+export function playerKey(name: string): string {
+  return name.trim().toLowerCase()
+}
+
+/** Hráči, které uživatel smazal ze seznamu; nesmí se vrátit ze synchronizace. */
+export function loadDeletedPlayerKeys(): string[] {
+  return loadKeys(DELETED_PLAYERS_KEY)
+}
+
+/** Hráči vrácení do seznamu - ručně, novým kolem nebo obnovou ze zálohy. */
+export function loadRevivedPlayerKeys(): string[] {
+  return loadKeys(REVIVED_PLAYERS_KEY)
+}
+
+/** Zapamatuje si, že hráč má zmizet i v cloudu a na ostatních zařízeních. */
+export function markPlayersDeleted(names: string[]): void {
+  const keys = names.map(playerKey)
+  addKeys(DELETED_PLAYERS_KEY, keys)
+  removeKeys(REVIVED_PLAYERS_KEY, keys)
+}
+
+/** Hráč je zpátky: zruší jeho smazání místně i (po synchronizaci) v cloudu. */
+export function markPlayersRevived(names: string[]): void {
+  const keys = names.map(playerKey)
+  addKeys(REVIVED_PLAYERS_KEY, keys)
+  removeKeys(DELETED_PLAYERS_KEY, keys)
+}
+
+export function clearDeletedPlayerKeys(keys: string[]): void {
+  removeKeys(DELETED_PLAYERS_KEY, keys)
+}
+
+export function clearRevivedPlayerKeys(keys: string[]): void {
+  removeKeys(REVIVED_PLAYERS_KEY, keys)
 }
 
 // --- archiv odehraných kol ------------------------------------------------
@@ -530,12 +580,20 @@ export function addToRoster(
 
   const sorted = roster.sort((a, b) => a.name.localeCompare(b.name, localeTag()))
   write(ROSTER_KEY, sorted)
+  // Přidání hráče je pozdější pokyn než dřívější smazání, takže ho ruší -
+  // jinak by hráč přidaný znovu při první synchronizaci zase zmizel.
+  markPlayersRevived(names)
   return sorted
 }
 
 export function removeFromRoster(entryId: string): RosterEntry[] {
+  const removed = loadRoster().find((e) => e.id === entryId)
   const roster = loadRoster().filter((e) => e.id !== entryId)
   write(ROSTER_KEY, roster)
+  // Bez záznamu o smazání by hráče nejbližší synchronizace stáhla z cloudu
+  // zpátky - slučování seznamu hráčů nic nezahazuje. Odehraná kola s ním
+  // zůstávají v archivu, mizí jen z nabídky spoluhráčů.
+  if (removed) markPlayersDeleted([removed.name])
   return roster
 }
 

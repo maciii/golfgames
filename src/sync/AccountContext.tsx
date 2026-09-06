@@ -19,7 +19,7 @@ import {
   watchAccount,
 } from './auth'
 import { isSyncConfigured } from './firebase'
-import { loadDeletedRoundIds, markRoundDeleted } from '../storage'
+import { loadDeletedPlayerKeys, loadDeletedRoundIds, markRoundDeleted } from '../storage'
 import {
   cancelScheduledPush,
   deleteCloudData,
@@ -177,7 +177,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function flush() {
       if (!uid.current) return
-      if (loadDeletedRoundIds().length > 0) void runSync(uid.current)
+      // Čekající smazání se musí odbavit celou synchronizací; fronta umí jen
+      // nahrávat, takže by se smazané kolo ani hráč do cloudu nikdy nedostali.
+      const pendingDeletions =
+        loadDeletedRoundIds().length > 0 || loadDeletedPlayerKeys().length > 0
+      if (pendingDeletions) void runSync(uid.current)
       else void flushQueue(uid.current)
     }
     function onVisibility() {

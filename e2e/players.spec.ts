@@ -54,6 +54,53 @@ test('řádek hráče se vejde do displeje', async ({ page }) => {
   expect(name!.width, 'na jméno nezbylo místo').toBeGreaterThan(60)
 })
 
+test('smazaný hráč se poznamená pro synchronizaci', async ({ page }) => {
+  await openPlayers(page)
+
+  page.on('dialog', (dialog) => void dialog.accept())
+  await page.locator('.players-remove').first().click()
+  await expect(page.locator('.players-row')).toHaveCount(ROSTER.length - 1)
+
+  // Bez tohohle záznamu by hráče nejbližší synchronizace stáhla z cloudu
+  // zpátky - přesně to se dělo u smazaných kol.
+  const state = await page.evaluate(() => ({
+    roster: JSON.parse(window.localStorage.getItem('golfgames.roster.v1') ?? '[]'),
+    deleted: JSON.parse(
+      window.localStorage.getItem('golfgames.deletedPlayers.v1') ?? '[]',
+    ),
+  }))
+
+  expect(state.deleted).toEqual(['adam novotný'])
+  expect(state.roster.map((e: { name: string }) => e.name)).not.toContain('Adam Novotný')
+})
+
+test('přidání hráče zpátky ruší jeho smazání', async ({ page }) => {
+  await openPlayers(page)
+
+  page.on('dialog', (dialog) => void dialog.accept())
+  await page.locator('.players-remove').first().click()
+  await expect(page.locator('.players-row')).toHaveCount(ROSTER.length - 1)
+
+  await page.locator('.players-add-row .name-input').first().fill('Adam Novotný')
+  await page.locator('.players-add-button').click()
+  await expect(page.locator('.players-row')).toHaveCount(ROSTER.length)
+
+  const state = await page.evaluate(() => ({
+    deleted: JSON.parse(
+      window.localStorage.getItem('golfgames.deletedPlayers.v1') ?? '[]',
+    ),
+    revived: JSON.parse(
+      window.localStorage.getItem('golfgames.revivedPlayers.v1') ?? '[]',
+    ),
+  }))
+
+  expect(
+    state.deleted,
+    'smazání musí zmizet, jinak hráč po synchronizaci odejde',
+  ).toEqual([])
+  expect(state.revived).toEqual(['adam novotný'])
+})
+
 test('náhled seznamu hráčů pro vizuální kontrolu', async ({ page }, testInfo) => {
   await openPlayers(page)
   await testInfo.attach(`players-${testInfo.project.name}.png`, {

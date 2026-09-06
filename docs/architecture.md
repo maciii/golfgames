@@ -352,6 +352,8 @@ Všechno je v `localStorage` pod klíči s verzí:
 | `golfgames.favoriteCourses.v1` | oblíbená hřiště podle stabilního id            |
 | `golfgames.deletedRounds.v1`   | místní tombstony explicitně zahozených kol     |
 | `golfgames.revivedRounds.v1`   | kola vrácená obnovou ze zálohy; ruší tombstone |
+| `golfgames.deletedPlayers.v1`  | jména hráčů smazaných ze seznamu               |
+| `golfgames.revivedPlayers.v1`  | hráči vrácení do seznamu; ruší tombstone       |
 | `golfgames.locale.v1`          | zvolený jazyk (píše `i18n/index.tsx`)          |
 | `golfgames.theme.v1`           | zvolené barevné schéma (píše `theme.tsx`)      |
 
