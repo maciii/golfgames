@@ -14,6 +14,7 @@ import {
   loadFavoriteCourseIds,
   loadRoster,
   loadSettings,
+  markRoundsRevived,
   normalizeRound,
   saveAllGameOptions,
   saveArchive,
@@ -304,6 +305,14 @@ export function applyBackup(backup: BackupFile, mode: ImportMode): ImportSummary
   const localCurrent = loadCurrentRound()
   const takeCurrent = mode === 'replace' || localCurrent === null
   if (takeCurrent) saveCurrentRound(backup.data.currentRound)
+
+  // Kolo, které uživatel kdysi smazal, má v cloudu tombstone - bez tohohle
+  // by ho nejbližší synchronizace obnovené kolo zase odstranila. Obnova ze
+  // zálohy je jasný pokyn "chci to zpátky", takže tombstone přebije.
+  markRoundsRevived([
+    ...archive.map((round) => round.id),
+    ...(takeCurrent && backup.data.currentRound ? [backup.data.currentRound.id] : []),
+  ])
 
   if (mode === 'replace') {
     saveSettings(backup.data.settings)

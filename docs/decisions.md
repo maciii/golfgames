@@ -115,7 +115,14 @@ zrovna hraje - a to je přímá cesta ke ztrátě skóre.
 **Proč tombstone.** Samotné smazání dokumentu nestačí: zařízení, které ještě
 má starou lokální kopii, by ji při příštím slučování znovu nahrálo. Tombstone
 proto zůstává v `users/{uid}/prefs/app` a filtruje kolo před slučováním na
-každém zařízení.
+každém zařízení. Platí pro každé smazání kola potvrzené uživatelem, tedy i pro
+mazání v archivu – bez toho by se kolo smazané v archivu vracelo z cloudu po
+každé synchronizaci a nešlo by se ho zbavit.
+
+**Proč jde tombstone zrušit.** Obnova ze zálohy je stejně výslovný pokyn jako
+smazání, jen opačný, a je pozdější. Kdyby tombstone vyhrával, obnovené kolo by
+při první synchronizaci zase zmizelo – bez vysvětlení a bez cesty zpět. Id kol
+ze souboru proto jdou do `revivedRounds` a tombstone se jim ruší i v cloudu.
 
 ---
 

@@ -166,7 +166,12 @@ function navTarget(
  * a nikdy se neodpojí, takže není co ztratit.
  */
 function AppShell() {
-  const { noteRoundChange, dataVersion, discardRound: discardSyncedRound } = useAccount()
+  const {
+    noteRoundChange,
+    dataVersion,
+    discardRound: discardSyncedRound,
+    syncNow,
+  } = useAccount()
   // Rozehrané kolo přežije zavření aplikace i restart telefonu.
   const [round, setRound] = useState<Round | null>(() => loadCurrentRound())
   const persistedDataVersion = useRef(dataVersion)
@@ -614,6 +619,16 @@ function AppShell() {
     setOpenArchiveId(null)
   }, [])
 
+  /**
+   * Po obnově ze zálohy synchronizujeme hned. Obnova umí kolo i vzkřísit,
+   * a dokud se to nedostane do cloudu, drží tam pořád záznam o smazání -
+   * první synchronizace na jiném zařízení by kolo zase odklidila.
+   */
+  const importedFromBackup = useCallback(() => {
+    reloadFromStorage()
+    void syncNow()
+  }, [reloadFromStorage, syncNow])
+
   // Když synchronizace přinesla data z cloudu, načteme je do obrazovky.
   // Zůstáváme přitom tam, kde uživatel je - jen se pod ním obnoví obsah.
   useEffect(() => {
@@ -722,7 +737,10 @@ function AppShell() {
 
   if (view === 'backup') {
     return (
-      <BackupScreen onImported={reloadFromStorage} onBack={() => window.history.back()} />
+      <BackupScreen
+        onImported={importedFromBackup}
+        onBack={() => window.history.back()}
+      />
     )
   }
 

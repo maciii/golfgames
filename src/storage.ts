@@ -29,6 +29,7 @@ const GAME_OPTIONS_KEY = 'golfgames.gameOptions.v1'
 const COURSES_KEY = 'golfgames.courses.v1'
 const FAVORITE_COURSES_KEY = 'golfgames.favoriteCourses.v1'
 const DELETED_ROUNDS_KEY = 'golfgames.deletedRounds.v1'
+const REVIVED_ROUNDS_KEY = 'golfgames.revivedRounds.v1'
 
 /** Kolik odehraných kol se drží v archivu. */
 export const ARCHIVE_LIMIT = 100
@@ -178,6 +179,42 @@ export function clearDeletedRoundIds(roundIds: string[]): void {
   write(
     DELETED_ROUNDS_KEY,
     loadDeletedRoundIds().filter((roundId) => !deleted.has(roundId)),
+  )
+}
+
+/**
+ * Ids kol, která uživatel vrátil obnovou ze zálohy.
+ *
+ * Tombstone smazaného kola žije dál v cloudu, takže by obnovené kolo při
+ * nejbližší synchronizaci zase zmizelo - a uživatel by nevěděl proč. Tenhle
+ * seznam je protipól tombstonů: říká "tohle kolo chci zpátky" a synchronizace
+ * podle něj tombstone v cloudu zruší.
+ *
+ * Seznam je dočasný, hned po synchronizaci se zase vyprázdní.
+ */
+export function loadRevivedRoundIds(): string[] {
+  const ids = read<unknown>(REVIVED_ROUNDS_KEY)
+  if (!Array.isArray(ids)) return []
+  return [
+    ...new Set(ids.filter((id): id is string => typeof id === 'string' && id.length > 0)),
+  ]
+}
+
+/** Obnovená kola zapíše k oživení a zároveň zruší jejich místní tombstony. */
+export function markRoundsRevived(roundIds: string[]): void {
+  const ids = roundIds.filter((roundId) => roundId.length > 0)
+  if (ids.length === 0) return
+  write(REVIVED_ROUNDS_KEY, [...new Set([...loadRevivedRoundIds(), ...ids])])
+  clearDeletedRoundIds(ids)
+}
+
+/** Po úspěšné synchronizaci: cloud už tombstony zrušil, seznam došel účelu. */
+export function clearRevivedRoundIds(roundIds: string[]): void {
+  if (roundIds.length === 0) return
+  const revived = new Set(roundIds)
+  write(
+    REVIVED_ROUNDS_KEY,
+    loadRevivedRoundIds().filter((roundId) => !revived.has(roundId)),
   )
 }
 

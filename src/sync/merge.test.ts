@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  activeDeletedIds,
   finishedRounds,
   mergeRounds,
   pickCurrentRound,
@@ -123,5 +124,25 @@ describe('Synchronizace - rozehrané kolo', () => {
     const rounds = [round('hotove', LATER), round('rozehrane', DRIVE, false)]
 
     expect(finishedRounds(rounds).map((r) => r.id)).toEqual(['hotove'])
+  })
+})
+
+describe('activeDeletedIds', () => {
+  it('sjednotí záznamy o smazání a odstraní duplicity', () => {
+    expect(activeDeletedIds(['a', 'b', 'a'], [])).toEqual(['a', 'b'])
+  })
+
+  it('obnova ze zálohy záznam o smazání ruší', () => {
+    expect(activeDeletedIds(['a', 'b'], ['b'])).toEqual(['a'])
+  })
+
+  it('vzkříšené kolo, které nikdo nemazal, nic nemění', () => {
+    expect(activeDeletedIds(['a'], ['c'])).toEqual(['a'])
+  })
+
+  it('vzkříšené kolo projde sloučením místních i vzdálených záznamů', () => {
+    // Přesně tohle dělá syncAll: seznamy z cloudu i z telefonu jdou dohromady
+    // a teprve pak se z nich vyškrtnou kola vrácená ze zálohy.
+    expect(activeDeletedIds(['a', 'b'], ['a', 'b'])).toEqual([])
   })
 })

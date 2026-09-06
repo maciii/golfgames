@@ -342,17 +342,18 @@ jamky násobí.
 
 Všechno je v `localStorage` pod klíči s verzí:
 
-| Klíč                           | Obsah                                       |
-| ------------------------------ | ------------------------------------------- |
-| `golfgames.currentRound.v1`    | rozehrané kolo (přežije zavření aplikace)   |
-| `golfgames.archive.v1`         | až 100 odehraných kol, nejnovější první     |
-| `golfgames.roster.v1`          | uložení spoluhráči                          |
-| `golfgames.settings.v1`        | naposledy použitá sázka (předvyplnění)      |
-| `golfgames.gameOptions.v1`     | volby bodování, mapa `gameId → GameOptions` |
-| `golfgames.favoriteCourses.v1` | oblíbená hřiště podle stabilního id         |
-| `golfgames.deletedRounds.v1`   | místní tombstony explicitně zahozených kol  |
-| `golfgames.locale.v1`          | zvolený jazyk (píše `i18n/index.tsx`)       |
-| `golfgames.theme.v1`           | zvolené barevné schéma (píše `theme.tsx`)   |
+| Klíč                           | Obsah                                          |
+| ------------------------------ | ---------------------------------------------- |
+| `golfgames.currentRound.v1`    | rozehrané kolo (přežije zavření aplikace)      |
+| `golfgames.archive.v1`         | až 100 odehraných kol, nejnovější první        |
+| `golfgames.roster.v1`          | uložení spoluhráči                             |
+| `golfgames.settings.v1`        | naposledy použitá sázka (předvyplnění)         |
+| `golfgames.gameOptions.v1`     | volby bodování, mapa `gameId → GameOptions`    |
+| `golfgames.favoriteCourses.v1` | oblíbená hřiště podle stabilního id            |
+| `golfgames.deletedRounds.v1`   | místní tombstony explicitně zahozených kol     |
+| `golfgames.revivedRounds.v1`   | kola vrácená obnovou ze zálohy; ruší tombstone |
+| `golfgames.locale.v1`          | zvolený jazyk (píše `i18n/index.tsx`)          |
+| `golfgames.theme.v1`           | zvolené barevné schéma (píše `theme.tsx`)      |
 
 Pravidla:
 

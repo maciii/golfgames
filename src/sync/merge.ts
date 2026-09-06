@@ -21,6 +21,21 @@ export interface MergePlan {
   push: Round[]
 }
 
+/**
+ * Které tombstony po započtení vzkříšených kol ještě platí.
+ *
+ * Smazání kola se pamatuje napořád, jinak by se kolo vrátilo z prvního
+ * zařízení, které o něm ještě neví. Obnova ze zálohy je ale opačný pokyn -
+ * a musí být silnější, jinak by se obnovené kolo hned zase ztratilo a nešlo
+ * by ho vrátit nikdy.
+ */
+export function activeDeletedIds(deletedIds: string[], revivedIds: string[]): string[] {
+  const unique = [...new Set(deletedIds)]
+  if (revivedIds.length === 0) return unique
+  const revived = new Set(revivedIds)
+  return unique.filter((roundId) => !revived.has(roundId))
+}
+
 /** Vyřadí kola, která uživatel explicitně smazal a nesmí se znovu objevit. */
 export function removeDeletedRounds(rounds: Round[], deletedIds: string[]): Round[] {
   if (deletedIds.length === 0) return rounds

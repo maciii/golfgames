@@ -24,6 +24,12 @@ jen verze s věcnou změnou.
   Nově se smazání poznamená stejně jako u rozehraného kola a kolo zmizí
   i z cloudu a z ostatních zařízení. Kola, která se takhle vrátila, stačí
   smazat znovu.
+- **Kolo obnovené ze zálohy už nezmizí kvůli dřívějšímu smazání.** Cloud si
+  smazání pamatuje napořád, takže obnova ze souboru sice kolo vrátila, ale
+  první synchronizace ho zase odklidila – a znovu vrátit ho nešlo. Obnova ze
+  zálohy teď záznam o smazání ruší, protože je to pozdější a stejně výslovný
+  pokyn. Po obnově se navíc rovnou synchronizuje, ať se to dozvědí i ostatní
+  zařízení.
 
 ## [0.49.1] – 2026-09-03
 
