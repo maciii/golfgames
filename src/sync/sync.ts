@@ -25,7 +25,13 @@ import {
   saveSettings,
 } from '../storage'
 import { isValidCourse, normalizeCourse } from '../courses/types'
-import { mergeCourses, mergeRosters, removeDeletedPlayers } from '../backup'
+import {
+  coursesDiffer,
+  mergeCourses,
+  mergeRosters,
+  removeDeletedPlayers,
+  rosterDiffers,
+} from '../backup'
 import { forFirestore, fromDocument, toDocument } from './document'
 import {
   activeDeletedIds,
@@ -222,29 +228,42 @@ async function syncPrefs(uid: string, deletions: DeletionState): Promise<void> {
     !sameIds(mergedDeleted, remoteDeleted) ||
     !sameIds(mergedDeletedPlayers, remoteDeletedPlayers)
 
+  // Která strana je novější. Rozhoduje o nastavení i o tom, čí verze hráče
+  // vyhraje, když se u téhož jména liší.
+  const remoteTime = Date.parse(remote.updatedAt ?? '')
+  const localTime = Date.parse(loadPrefsStamp() ?? '')
+  const remoteWins =
+    !Number.isNaN(remoteTime) && (Number.isNaN(localTime) || remoteTime > localTime)
+
   // Hráči se jinak vždy sjednotí - seznam spoluhráčů nemá důvod se zmenšovat
   // sám od sebe. Ubrat z něj smí jedině výslovné smazání uživatelem.
+  //
+  // Při shodě jména má přednost novější strana (`mergeRosters()` dává přednost
+  // prvnímu seznamu). Kdyby vyhrávala vždycky místní, zařízení pozadu by cizí
+  // opravu handicapu nepřevzalo, pořád by ji přepisovalo tou svou a obě by si
+  // ji donekonečna přeposílala.
+  const remoteRoster = remote.roster ?? []
   const roster = removeDeletedPlayers(
-    mergeRosters(loadRoster(), remote.roster ?? []),
+    remoteWins
+      ? mergeRosters(remoteRoster, loadRoster())
+      : mergeRosters(loadRoster(), remoteRoster),
     mergedDeletedPlayers,
   )
   saveRoster(roster)
 
   // Hřiště taky: doplněné pary, SI a normy jsou ruční práce, o kterou nemá
   // smysl přijít jen proto, že na druhém zařízení bylo nastavení novější.
-  const courses = mergeCourses(
-    loadCourses(),
-    (remote.courses ?? []).filter(isValidCourse).map(normalizeCourse),
-  )
+  const remoteCourses = (remote.courses ?? []).filter(isValidCourse).map(normalizeCourse)
+  const courses = mergeCourses(loadCourses(), remoteCourses)
   saveCourses(courses)
+
+  // Máme hráče nebo hřiště, které cloud nezná? Sloučení je doplnilo jen do
+  // zařízení; do cloudu se dostanou, jedině když se dokument předvoleb zapíše.
+  const cloudMissesData =
+    rosterDiffers(roster, remoteRoster) || coursesDiffer(courses, remoteCourses)
 
   // Sázka a volby bodování jsou jedno nastavení, takže se přebírá celé to
   // novější; míchat je po polích by dalo kombinaci, kterou nikdo nenastavil.
-  const remoteTime = Date.parse(remote.updatedAt ?? '')
-  const localTime = Date.parse(loadPrefsStamp() ?? '')
-  const remoteWins =
-    !Number.isNaN(remoteTime) && (Number.isNaN(localTime) || remoteTime > localTime)
-
   const remoteSettings = remoteWins
     ? (remote.settings as ReturnType<typeof loadSettings> | undefined)
     : undefined
@@ -255,7 +274,11 @@ async function syncPrefs(uid: string, deletions: DeletionState): Promise<void> {
     }
   }
 
-  if (remoteSettings && !deletedChanged) {
+  // Zápis se vynechá jen tehdy, když cloud drží všechno, co máme my: novější
+  // nastavení jsme právě převzali, nic jsme neubrali a ani nepřidali. Jinak by
+  // se hráč přidaný v telefonu nebo upravený handicap na druhé zařízení nikdy
+  // nedostal - vzdálené nastavení bývá novější skoro pokaždé.
+  if (remoteSettings && !deletedChanged && !cloudMissesData) {
     savePrefsStamp(remote.updatedAt ?? new Date().toISOString())
     return
   }

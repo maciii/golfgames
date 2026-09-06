@@ -7,6 +7,19 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.5] – 2026-09-06
+
+### Opraveno
+
+- **Nový hráč i upravený handicap se dostanou i na druhé zařízení.**
+  Synchronizace zápis předvoleb vynechávala pokaždé, když bylo nastavení
+  v cloudu novější – a to bývá skoro vždycky. Hráč přidaný v telefonu, změněný
+  handicap nebo doplněné hřiště tak zůstaly jen v něm. Zápis se teď vynechá
+  jedině tehdy, když cloud opravdu drží všechno, co má zařízení.
+- **Oprava handicapu se propíše i na druhý telefon.** Při shodě jména dosud
+  vyhrával vždycky hráč z telefonu, takže zařízení, které bylo pozadu, cizí
+  opravu nepřevzalo. Nově rozhoduje novější strana.
+
 ## [0.49.4] – 2026-09-06
 
 ### Opraveno

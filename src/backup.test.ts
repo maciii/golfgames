@@ -6,9 +6,11 @@ import {
   backupFileName,
   mergeArchives,
   mergeCourses,
+  coursesDiffer,
   mergeRosters,
   parseBackup,
   removeDeletedPlayers,
+  rosterDiffers,
 } from './backup'
 import type { Course } from './courses/types'
 import type { Round } from './types'
@@ -125,10 +127,87 @@ describe('Záloha - slučování hráčů', () => {
     expect(merged[0]?.id).toBe('r1')
   })
 
+  it('přednost má první seznam - synchronizace tím řídí, čí verze vyhraje', () => {
+    // syncPrefs prohodí pořadí podle toho, která strana je novější. Bez toho
+    // by zařízení pozadu cizí opravu handicapu nikdy nepřevzalo.
+    const stale = [{ id: 'r1', name: 'Adam', handicapIndex: 11 }]
+    const fresh = [{ id: 'r9', name: 'Adam', handicapIndex: 12 }]
+
+    expect(mergeRosters(fresh, stale)[0]?.handicapIndex).toBe(12)
+    expect(mergeRosters(stale, fresh)[0]?.handicapIndex).toBe(11)
+  })
+
   it('přenese zvýraznění na domovské obrazovce', () => {
     const merged = mergeRosters([], [{ id: 'r9', name: 'Eva', favorite: true }])
 
     expect(merged[0]?.favorite).toBe(true)
+  })
+})
+
+describe('Co cloud ještě nemá', () => {
+  it('shodné seznamy hráčů se nehlásí jako změna', () => {
+    const roster = [{ id: 'r1', name: 'Adam', handicapIndex: 12.3 }]
+
+    expect(
+      rosterDiffers(roster, [{ id: 'jiné', name: 'Adam', handicapIndex: 12.3 }]),
+    ).toBe(false)
+  })
+
+  it('jiné pořadí není změna', () => {
+    // Seznamy se řadí podle jazyka aplikace, takže dvě zařízení s různým
+    // jazykem mají stejné hráče v jiném pořadí.
+    const a = [
+      { id: 'r1', name: 'Adam' },
+      { id: 'r2', name: 'Čeněk' },
+    ]
+    const b = [
+      { id: 'r2', name: 'Čeněk' },
+      { id: 'r1', name: 'Adam' },
+    ]
+
+    expect(rosterDiffers(a, b)).toBe(false)
+  })
+
+  it('hráč navíc je změna', () => {
+    expect(rosterDiffers([{ id: 'r1', name: 'Adam' }], [])).toBe(true)
+  })
+
+  it('změněný handicap je změna', () => {
+    const before = [{ id: 'r1', name: 'Adam', handicapIndex: 12.3 }]
+    const after = [{ id: 'r1', name: 'Adam', handicapIndex: 11.8 }]
+
+    expect(rosterDiffers(after, before)).toBe(true)
+  })
+
+  it('změněné odpaliště i zvýraznění jsou změna', () => {
+    const base = [{ id: 'r1', name: 'Adam' }]
+
+    expect(rosterDiffers([{ id: 'r1', name: 'Adam', preferredTeeId: 'red' }], base)).toBe(
+      true,
+    )
+    expect(rosterDiffers([{ id: 'r1', name: 'Adam', favorite: true }], base)).toBe(true)
+  })
+
+  it('hřiště se porovnávají podle id a času změny', () => {
+    const course = (id: string, updatedAt: string): Course => ({
+      id,
+      name: 'Testovací',
+      holeCount: 3,
+      pars: [4, 3, 5],
+      strokeIndex: [1, 2, 3],
+      tees: [],
+      source: 'manual',
+      updatedAt,
+    })
+    const local = [course('local:1', '2026-05-02T10:00:00.000Z')]
+
+    expect(coursesDiffer(local, [course('local:1', '2026-05-02T10:00:00.000Z')])).toBe(
+      false,
+    )
+    expect(coursesDiffer(local, [course('local:1', '2026-05-01T10:00:00.000Z')])).toBe(
+      true,
+    )
+    expect(coursesDiffer(local, [])).toBe(true)
   })
 })
 

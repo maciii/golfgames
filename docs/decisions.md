@@ -119,6 +119,13 @@ každém zařízení. Platí pro každé smazání kola potvrzené uživatelem, 
 mazání v archivu – bez toho by se kolo smazané v archivu vracelo z cloudu po
 každé synchronizaci a nešlo by se ho zbavit.
 
+**U hráče se stejným jménem vyhrává novější strana.** `mergeRosters()` dává
+přednost prvnímu seznamu a synchronizace mu podle časového razítka předvoleb
+podstrčí ten novější. Kdyby vyhrávala vždycky místní verze, zařízení pozadu by
+cizí opravu handicapu nepřevzalo, přepisovalo by ji tou svou a obě zařízení by
+si ji donekonečna přeposílala. Obnova ze zálohy si přednost místních dat drží -
+tam je to správně, protože záloha se přidává k tomu, co v telefonu je.
+
 **Hráči mají tombstony taky, ale podle jména.** Seznam spoluhráčů se slučuje
 sjednocením, takže bez tombstonu se smazaný hráč vracel z cloudu. Klíčem je
 jméno, ne `id`: id si každé zařízení generuje samo, takže stejný hráč má na

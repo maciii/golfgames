@@ -168,6 +168,44 @@ export function removeDeletedPlayers(
 }
 
 /**
+ * Liší se sloučený seznam hráčů od toho, co má cloud?
+ *
+ * Porovnává se obsah, ne pořadí: seznamy se řadí podle jazyka aplikace, takže
+ * dvě zařízení s různým jazykem mají stejné hráče v jiném pořadí a porovnání
+ * podle pořadí by hlásilo změnu při každé synchronizaci. Kromě jména se dívá
+ * i na handicap, odpaliště a zvýraznění - jsou to jediná pole, která se u hráče
+ * dají změnit, a jejich úprava se musí do cloudu dostat stejně jako nový hráč.
+ */
+export function rosterDiffers(merged: RosterEntry[], remote: RosterEntry[]): boolean {
+  const signature = (roster: RosterEntry[]) =>
+    JSON.stringify(
+      roster
+        .map((entry) => [
+          playerKey(entry.name ?? ''),
+          entry.handicapIndex ?? null,
+          entry.preferredTeeId ?? null,
+          entry.favorite === true,
+        ])
+        .sort(),
+    )
+
+  return signature(merged) !== signature(remote)
+}
+
+/**
+ * Liší se sloučená hřiště od těch v cloudu?
+ *
+ * Stačí id a čas změny - podle nich se hřiště slučují, takže shoda obojího
+ * znamená, že cloud drží tutéž verzi.
+ */
+export function coursesDiffer(merged: Course[], remote: Course[]): boolean {
+  const signature = (courses: Course[]) =>
+    JSON.stringify(courses.map((course) => [course.id, course.updatedAt ?? null]).sort())
+
+  return signature(merged) !== signature(remote)
+}
+
+/**
  * Sloučí hřiště podle id; při shodě vyhrává novější podle času změny.
  *
  * Ruční doplnění SI nebo normy je práce, kterou obnova nesmí zahodit, takže

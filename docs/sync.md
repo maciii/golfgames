@@ -52,6 +52,18 @@ dokumentu, aby zařízení, které ještě má starou lokální kopii, kolo znov
 nenahrálo. Bez přihlášení se tombstone drží jen v `localStorage`; po návratu
 signálu se synchronizace zopakuje.
 
+Když se u téhož jména liší handicap, odpaliště nebo zvýraznění, vyhrává
+novější strana podle razítka předvoleb – synchronizace kvůli tomu prohodí
+pořadí seznamů, které dává `mergeRosters()`.
+
+Dokument předvoleb se zapisuje, jakmile v zařízení je něco, co cloud nemá –
+nový hráč, upravený handicap, doplněné hřiště. Novější vzdálené nastavení se
+sice převezme, ale zápis se kvůli němu **nevynechá**: sjednocení doplnilo hráče
+a hřiště jen do zařízení a bez zápisu by se na druhý telefon nikdy nedostali.
+Porovnává se obsah, ne pořadí (`rosterDiffers()`, `coursesDiffer()`) – seznamy
+se řadí podle jazyka aplikace, takže dvě zařízení s různým jazykem mají stejná
+data v jiném pořadí. Když cloud drží všechno, co máme my, zápis se vynechá.
+
 Stejně se chová seznam hráčů. Slučuje se sjednocením, takže smazaný hráč se
 bez tombstonu vrátil z cloudu při první synchronizaci. Jeho záznam je ale
 v `deletedPlayerKeys` vedený **podle jména** (bez ohledu na velikost písmen),
@@ -92,6 +104,7 @@ funkce bez jediného odkazu na Firebase, takže ji pokrývají běžné testy.
 | Přihlášení                        | stáhnou se všechna vzdálená kola, sloučí s místními, rozdíl se nahraje      |
 | Start aplikace s účtem            | totéž, aby se zachytily změny z jiného zařízení                             |
 | Změna zápisu                      | kolo se zařadí do fronty a odešle **s odkladem 10 s**                       |
+| Přidání hráče nebo hřiště         | předvolby se zapíšou, i když je vzdálené nastavení novější                  |
 | Smazání kola (archiv i rozehrané) | uloží se tombstone, místní kolo zmizí hned, cloudový dokument se smaže      |
 | Smazání hráče ze seznamu          | uloží se tombstone na jméno, hráč zmizí i v cloudu; kola v archivu zůstanou |
 | Obnova ze zálohy                  | tombstony obnovených kol a hráčů se zruší a hned se synchronizuje           |
