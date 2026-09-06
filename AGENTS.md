@@ -41,10 +41,15 @@ npm run check    # typy + testy + formát – tohle musí projít před commitem
 1. Změna kódu.
 2. **Testy k pravidlům her a výpočtům jsou povinné.** UI se netestuje.
 3. `npm run check` musí projít (přesně tohle běží v CI).
-4. Věcnou změnu zapiš do `CHANGELOG.md` a zvedni verzi
-   (`npm run bump:minor` u nové funkce, `bump:major` u nekompatibilní změny
-   uložených dat; patch se zvedá sám při buildu).
-5. Když se mění pravidlo hry nebo chování, aktualizuj i `docs/games.md`;
+4. **Zvedni verzi. Vždycky, u každé změny, ještě před commitem.**
+   `node scripts/bump-version.mjs` u opravy, `npm run bump:minor` u nové
+   funkce, `npm run bump:major` u nekompatibilní změny uložených dat.
+   Nespoléhej na automatický bump v `prebuild` – ten se v CI přeskakuje, takže
+   po commitu bez ručního bumpu zůstane nasazená stará verze a uživatel nepozná,
+   že opravu vůbec dostal.
+5. Věcnou změnu zapiš do `CHANGELOG.md`. Číslo v nadpisu nové sekce musí sedět
+   s verzí v `package.json`.
+6. Když se mění pravidlo hry nebo chování, aktualizuj i `docs/games.md`;
    když se mění důvod nějakého rozhodnutí, `docs/decisions.md`.
 
 ### Testování rozhraní
