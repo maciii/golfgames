@@ -574,10 +574,15 @@ function AppShell() {
   const removeArchived = useCallback(
     (roundId: string) => {
       deleteArchivedRound(roundId)
+      // Bez tohohle by kolo zmizelo jen v telefonu a nejbližší synchronizace
+      // by ho stáhla z cloudu zpátky - a protože o smazání nikdo nevěděl,
+      // vracelo by se donekonečna. `discardSyncedRound` si smazání poznamená
+      // a kolo zahodí i v cloudu.
+      discardSyncedRound(roundId)
       setArchive(loadArchive())
       if (openArchiveId === roundId) setOpenArchiveId(null)
     },
-    [openArchiveId],
+    [openArchiveId, discardSyncedRound],
   )
 
   const openArchive = useCallback(() => {

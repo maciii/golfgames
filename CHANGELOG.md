@@ -18,6 +18,12 @@ jen verze s věcnou změnou.
   teď nabídku účtů ukáže pokaždé.
 - **Po smazání účtu se aplikace odhlásí i tehdy, když mazání selže.** Dřív
   mohla zůstat viset na účtu, který už neexistuje.
+- **Smazané kolo z archivu se už nevrací ze zálohy v cloudu.** Mazání v archivu
+  kolo odstranilo jen z telefonu a nejbližší synchronizace ho stáhla zpátky.
+  Protože o smazání nikdo nevěděl, vracelo se donekonečna a nešlo se ho zbavit.
+  Nově se smazání poznamená stejně jako u rozehraného kola a kolo zmizí
+  i z cloudu a z ostatních zařízení. Kola, která se takhle vrátila, stačí
+  smazat znovu.
 
 ## [0.49.1] – 2026-09-03
 
