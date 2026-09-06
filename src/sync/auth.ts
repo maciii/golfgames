@@ -17,6 +17,21 @@ import { loadFirebase } from './firebase'
 
 type AuthModule = typeof import('firebase/auth')
 
+/**
+ * Poskytovatel Google s vynuceným výběrem účtu.
+ *
+ * Bez parametru `prompt` Google přihlášení tiše potvrdí účtem, který má
+ * zrovna v prohlížeči otevřený - uživatel pak nikdy neuvidí nabídku a jiný
+ * účet si nevybere. Na iPhonu je to nejvíc vidět: relace u Googlu přežije
+ * i odhlášení z aplikace i smazání účtu, takže se pořád vrací ten první.
+ * `select_account` nabídku vynutí pokaždé.
+ */
+function googleProvider(module: AuthModule) {
+  const provider = new module.GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  return provider
+}
+
 /** Připravené SDK. Dokud je null, popup se otevřít nedá. */
 let ready: { auth: Auth; module: AuthModule } | null = null
 let loading: Promise<{ auth: Auth; module: AuthModule }> | null = null
@@ -119,7 +134,7 @@ export function signInWithGoogle(): Promise<Account | null> {
   }
 
   const { auth, module } = ready
-  const provider = new module.GoogleAuthProvider()
+  const provider = googleProvider(module)
 
   // Žádné `await` před tímhle řádkem. Tady se otevírá okno.
   return module.signInWithPopup(auth, provider).then(
@@ -161,20 +176,31 @@ export async function watchAccount(
  * Smaže účet i s daty.
  *
  * Firebase u citlivých operací vyžaduje nedávné přihlášení; když ho postrádá,
- * uživatele nejdřív znovu přihlásíme a zkusíme to podruhé.
+ * uživatele nejdřív znovu přihlásíme a zkusíme to podruhé. Na rozdíl od
+ * přihlášení tady výběr účtu **nechceme** - ověřuje se právě mazaný účet,
+ * takže mu okno napovíme přes `login_hint`.
+ *
+ * Nakonec se ještě odhlásíme. Smazání sice přihlášeného uživatele zruší, ale
+ * když ho něco přežije (třeba selhalo až po smazání dat), zůstala by aplikace
+ * viset na účtu, který už neexistuje.
  */
 export async function deleteAccount(): Promise<void> {
   const { auth } = await loadFirebase()
-  const { deleteUser, reauthenticateWithPopup, GoogleAuthProvider } =
-    await import('firebase/auth')
+  const module = await import('firebase/auth')
   const user = auth.currentUser
   if (!user) return
 
   try {
-    await deleteUser(user)
-  } catch (error) {
-    if (codeOf(error) !== 'auth/requires-recent-login') throw error
-    await reauthenticateWithPopup(user, new GoogleAuthProvider())
-    await deleteUser(user)
+    try {
+      await module.deleteUser(user)
+    } catch (error) {
+      if (codeOf(error) !== 'auth/requires-recent-login') throw error
+      const provider = new module.GoogleAuthProvider()
+      if (user.email) provider.setCustomParameters({ login_hint: user.email })
+      await module.reauthenticateWithPopup(user, provider)
+      await module.deleteUser(user)
+    }
+  } finally {
+    await module.signOut(auth).catch(() => undefined)
   }
 }

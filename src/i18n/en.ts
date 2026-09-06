@@ -374,7 +374,7 @@ export const en: Record<MessageKey, Message> = {
   'account.syncNow': 'Sync now',
   'account.signOutTitle': 'Sign out',
   'account.signOutHint':
-    'After signing out the rounds stay on this device and stop being backed up. Data in the cloud is not deleted – it reappears once you sign in again.',
+    'After signing out the rounds stay on this device and stop being backed up. Data in the cloud is not deleted – it reappears once you sign in again. The next sign-in lets you pick a different Google account.',
   'account.signOut': 'Sign out',
   'account.deleteTitle': 'Delete account',
   'account.deleteHint':

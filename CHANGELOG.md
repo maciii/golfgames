@@ -7,6 +7,18 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.2] – 2026-09-06
+
+### Opraveno
+
+- **Jde se přihlásit jiným účtem Google.** Přihlašovací okno se dosud
+  neptalo, kterým účtem se hlásíš – Google tiše potvrdil ten, který měl
+  zrovna v prohlížeči otevřený. Kdo se jednou přihlásil, dostal pak pořád
+  ten samý účet, i po odhlášení a i po smazání účtu a dat v cloudu. Okno
+  teď nabídku účtů ukáže pokaždé.
+- **Po smazání účtu se aplikace odhlásí i tehdy, když mazání selže.** Dřív
+  mohla zůstat viset na účtu, který už neexistuje.
+
 ## [0.49.1] – 2026-09-03
 
 ### Změněno

@@ -401,7 +401,7 @@ export const cs = {
   'account.syncNow': 'Synchronizovat teď',
   'account.signOutTitle': 'Odhlášení',
   'account.signOutHint':
-    'Po odhlášení zůstanou kola v tomhle zařízení a přestanou se zálohovat. Data v cloudu se nemažou – po přihlášení se zase objeví.',
+    'Po odhlášení zůstanou kola v tomhle zařízení a přestanou se zálohovat. Data v cloudu se nemažou – po přihlášení se zase objeví. Při dalším přihlášení si můžeš vybrat i jiný účet Google.',
   'account.signOut': 'Odhlásit se',
   'account.deleteTitle': 'Smazání účtu',
   'account.deleteHint':
