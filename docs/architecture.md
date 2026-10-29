@@ -522,6 +522,10 @@ a **zapsané skóre se nemaže** (nepřekročitelné pravidlo 11). Aby zpět/swi
 nemohlo přistát na kroku, který už neplatí, nese si `NavSnapshot` i
 `setupRoundId` – `null` je rozepsané nové kolo, id je úprava nastavení toho
 kola; neplatný krok skončí tam, kam patří stav kola (`navTarget()` v `App.tsx`).
+Bodování hry (`GameSettingsScreen`) i odtud ukládá jen předvolby; do kola se
+změna dostane až po dotazu při odchodu z obrazovky přes
+`applyRoundGameOptions()` – efekt v `App.tsx` hlídá odchod jakoukoli cestou,
+tedy i gestem zpět.
 
 `ResultsScreen` slouží zároveň jako detail archivního kola (`readOnly`).
 Z detailu se dá kolo **dodatečně opravit** (rozhodnutí #31): „Upravit skóre"

@@ -1,11 +1,13 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import {
   applyRoundGame,
+  applyRoundGameOptions,
   pairingIndexOf,
   pairingLabel,
   pairingTeamIndices,
 } from './roundSetup'
 import { makeRound } from './games/fixtures'
+import { getGame } from './games'
 import { DEFAULT_GAME_OPTIONS } from './types'
 import { setActiveLocale } from './i18n'
 import type { Round } from './types'
@@ -152,6 +154,82 @@ describe('Změna nastavení rozehraného kola', () => {
     round.updatedAt = '2020-01-01T00:00:00.000Z'
     const changed = applyRoundGame(round, round.gameId, 1, DEFAULT_GAME_OPTIONS)
 
+    expect(changed.updatedAt).not.toBe(round.updatedAt)
+  })
+})
+
+describe('Změna bodování rozehraného kola', () => {
+  /** Skins na devíti jamkách: poslední jamku bere Adam, vše ostatní nehrané. */
+  function skinsRound(): Round {
+    const middle = [null, null, null, null, null, null, null]
+    return makeRound({
+      gameId: 'skins',
+      players: ['Adam', 'Bára'],
+      pars: Array<number>(9).fill(4),
+      scores: [
+        [4, ...middle, 3],
+        [5, ...middle, 4],
+      ],
+      settings: { options: { ...DEFAULT_GAME_OPTIONS, doubleClosingHoles: true } },
+    })
+  }
+
+  function adamSkins(round: Round): number | undefined {
+    const section = getGame('skins').computeStandings(round)[0]
+    return section?.rows.find((row) => row.name === 'Adam')?.value
+  }
+
+  it('vypnutá dvojnásobná poslední jamka kolo přepočítá a skóre nechá', () => {
+    const round = skinsRound()
+    expect(adamSkins(round)).toBe(3)
+
+    const changed = applyRoundGameOptions(round, {
+      ...DEFAULT_GAME_OPTIONS,
+      doubleClosingHoles: false,
+    })
+
+    expect(changed.settings.options.doubleClosingHoles).toBe(false)
+    expect(changed.scores).toEqual(round.scores)
+    expect(adamSkins(changed)).toBe(2)
+  })
+
+  it('beze změny vrátí totéž kolo, ať se zbytečně neptá', () => {
+    const round = skinsRound()
+    const same = { ...DEFAULT_GAME_OPTIONS, doubleClosingHoles: true }
+
+    expect(applyRoundGameOptions(round, same)).toBe(round)
+  })
+
+  it('pořadí klíčů v uloženém kole na shodu nemá vliv', () => {
+    const round = skinsRound()
+    const reordered = Object.fromEntries(
+      Object.entries(round.settings.options).reverse(),
+    ) as typeof round.settings.options
+    round.settings = { ...round.settings, options: reordered }
+
+    expect(
+      applyRoundGameOptions(round, { ...DEFAULT_GAME_OPTIONS, doubleClosingHoles: true }),
+    ).toBe(round)
+  })
+
+  it('hra bez dvojnásobných jamek si je nezapne ani z předvoleb', () => {
+    const round = startedRound('match-play')
+    const changed = applyRoundGameOptions(round, {
+      ...DEFAULT_GAME_OPTIONS,
+      doubleClosingHoles: true,
+      doubleBest: 5,
+    })
+
+    expect(changed.settings.options.doubleClosingHoles).toBe(false)
+  })
+
+  it('kolo dostane vlastní kopii a nový čas úpravy', () => {
+    const round = skinsRound()
+    round.updatedAt = '2020-01-01T00:00:00.000Z'
+    const options = { ...DEFAULT_GAME_OPTIONS, doubleClosingHoles: false }
+    const changed = applyRoundGameOptions(round, options)
+
+    expect(changed.settings.options.bonusValues).not.toBe(options.bonusValues)
     expect(changed.updatedAt).not.toBe(round.updatedAt)
   })
 })

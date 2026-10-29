@@ -7,6 +7,17 @@ Patch verzi zvedá `scripts/bump-version.mjs` automaticky při každém lokáln�
 buildu, takže čísla patch verzí mezi záznamy nejsou souvislá. Zapisují se sem
 jen verze s věcnou změnou.
 
+## [0.49.6] – 2026-10-29
+
+### Opraveno
+
+- **Změna bodování se dá uplatnit i na rozehrané kolo.** Úprava nastavení hry
+  otevřená z rozehraného kola (třeba vypnutí dvojnásobné 9. a 18. jamky) se
+  dosud uložila jen pro příští kola a kolo počítalo dál podle starých voleb.
+  Po odchodu z obrazovky Bodování se teď appka zeptá, jestli kolo podle nového
+  nastavení přepočítat. Zapsané skóre zůstává, mění se jen body a peníze.
+  Dohrané kolo jde přepočítat po „Pokračovat ve hře“ z výsledků.
+
 ## [0.49.5] – 2026-09-06
 
 ### Opraveno

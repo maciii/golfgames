@@ -119,7 +119,6 @@ export function applyRoundGame(
   pairing: number,
   gameOptions: GameOptions,
 ): Round {
-  const game = getGame(gameId)
   const teams = teamsFor(round, gameId, pairing)
   const sameGame = round.gameId === gameId
 
@@ -129,18 +128,54 @@ export function applyRoundGame(
     ...round,
     gameId,
     teams,
-    // Kolo si nese vlastní kopii nastavení (nepřekročitelné pravidlo #4).
     settings: sameGame
       ? round.settings
-      : {
-          ...round.settings,
-          options: {
-            ...gameOptions,
-            bonusValues: { ...gameOptions.bonusValues },
-            resultMultipliers: { ...gameOptions.resultMultipliers },
-            doubleClosingHoles:
-              game.supportsDoubleHoles && gameOptions.doubleClosingHoles,
-          },
-        },
+      : { ...round.settings, options: roundGameOptions(gameId, gameOptions) },
   })
+}
+
+/**
+ * Nastavení bodování tak, jak si ho kolo uloží.
+ *
+ * Kolo si nese vlastní kopii (nepřekročitelné pravidlo #4) - sdílený objekt
+ * předvoleb by po pozdější úpravě nastavení tiše přepočítal i archivní kola.
+ */
+function roundGameOptions(gameId: string, gameOptions: GameOptions): GameOptions {
+  return {
+    ...gameOptions,
+    bonusValues: { ...gameOptions.bonusValues },
+    resultMultipliers: { ...gameOptions.resultMultipliers },
+    doubleClosingHoles:
+      getGame(gameId).supportsDoubleHoles && gameOptions.doubleClosingHoles,
+  }
+}
+
+/** Shoda nastavení bodování bez ohledu na pořadí klíčů. */
+export function sameGameOptions(a: GameOptions, b: GameOptions): boolean {
+  return sameValue(a, b)
+}
+
+/** Shoda hodnot bez ohledu na pořadí klíčů - uložené kolo ho má jiné než předvolby. */
+function sameValue(a: unknown, b: unknown): boolean {
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+    return a === b
+  }
+  const left = a as Record<string, unknown>
+  const right = b as Record<string, unknown>
+  const keys = new Set([...Object.keys(left), ...Object.keys(right)])
+  return [...keys].every((key) => sameValue(left[key], right[key]))
+}
+
+/**
+ * Přenese změněné nastavení bodování do **rozehraného** kola.
+ *
+ * Úprava bodování hry mění jen předvolby pro příští kola; do kola, které už
+ * běží, se dostane teprve tímhle - a jen na výslovný dotaz, protože mění
+ * výsledek, o který se hraje. Skóre zůstává, kolo se přepočítá při zobrazení.
+ * Vrací totéž kolo, když se nastavení nemění, ať se zbytečně neptá.
+ */
+export function applyRoundGameOptions(round: Round, gameOptions: GameOptions): Round {
+  const options = roundGameOptions(round.gameId, gameOptions)
+  if (sameValue(options, round.settings.options)) return round
+  return touchRound({ ...round, settings: { ...round.settings, options } })
 }

@@ -380,6 +380,14 @@ nemá. Nastavení jedné hry proto nezobrazuje ani nemění volby jiné hry.
 pozdější změna předvoleb nepřepočítá už odehraná kola v archivu. Ve výsledcích
 je proto u každého kola sekce „Bodování kola“ s tím, jak se počítalo.
 
+**Rozehrané kolo se dá přepočítat na dotaz.** Když se bodování hry upraví
+z nastavení rozehraného kola (odkaz pod zápisem skóre → Hra → ozubené
+tlačítko) a nastavení se tím opravdu změnilo, appka se při odchodu z obrazovky
+zeptá, jestli ho uplatnit i na tohle kolo. Po potvrzení si kolo vezme kopii
+nových voleb a přepočítá se od první jamky – zapsané skóre zůstává. Po
+odmítnutí platí změna jen pro příští kola. Dohrané kolo jde takhle přepočítat
+po „Pokračovat ve hře“ z výsledků.
+
 ## Sázka a peněžní vyrovnání
 
 Před kolem se nastavuje měna a hodnota jednoho bodu. Předvolby se pamatují do

@@ -256,6 +256,8 @@ export const cs = {
     'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším se extra bod nepočítá. Bonus vždy získává celá dvojice.',
   'gameSettings.introPlayer':
     'Nula znamená vypnuto – takový extra bod se při zápisu vůbec nenabídne. Hodnota platí za par, lepší výsledek ji znásobí podle nastavení níž; při bogey a horším se extra bod nepočítá. Bonus získává hráč, který ho zapsal.',
+  'gameSettings.recalculateConfirm':
+    'Nastavení bodování se změnilo. Přepočítat podle něj i rozehrané kolo? Zapsané skóre zůstane, změní se jen body a peníze.',
   'gameSettings.noOptions': 'Tahle hra nemá další volby bodování.',
   'gameSettings.extraPoints': 'Extra body',
   'gameSettings.bonusValue': 'Hodnota bonusu {name}',

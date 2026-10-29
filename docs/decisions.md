@@ -292,6 +292,14 @@ Změna předvoleb po odehrání kola nepřepočítá archiv – historické kolo
 navždy počítá tak, jak se hrálo. `ResultsScreen` proto umí vypsat sekci
 „Bodování kola" i u archivního záznamu.
 
+**Výjimka na výslovný dotaz.** Úprava bodování otevřená z rozehraného kola
+se po odchodu z obrazovky nabídne i tomuhle kolu (`applyRoundGameOptions()`
+v `src/roundSetup.ts`). Dřív se změna tiše uložila jen do předvoleb a kolo
+počítalo dál podle starých – hráči přitom čekali opak, protože nastavení
+otevřeli právě z kola. Automaticky se to nedělá, protože jde o peníze a změna
+předvoleb může mířit jen na příští kola. Ptá se jen po skutečné změně, jinak
+by dotaz otravoval při každé návštěvě.
+
 ---
 
 ## 13. Zápis skóre: par doprostřed, birdie a bogey na tlačítka

@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { BonusId, CreateRoundOptions, PlayerId, Round, RoundSettings } from './types'
+import type {
+  BonusId,
+  CreateRoundOptions,
+  GameOptions,
+  PlayerId,
+  Round,
+  RoundSettings,
+} from './types'
 import { createRound, setHolePar, teamOf, toggleBonus, touchRound } from './types'
 import {
   addToRoster,
@@ -30,12 +37,19 @@ import SetupPlayersScreen from './screens/SetupPlayersScreen'
 import SetupGameScreen from './screens/SetupGameScreen'
 import SetupPairingScreen from './screens/SetupPairingScreen'
 import SetupBetScreen from './screens/SetupBetScreen'
-import { applyRoundGame, pairingIndexOf, pairingLabel } from './roundSetup'
+import {
+  applyRoundGame,
+  applyRoundGameOptions,
+  pairingIndexOf,
+  pairingLabel,
+  sameGameOptions,
+} from './roundSetup'
 import { findCourse } from './storage'
 import { AccountProvider, useAccount } from './sync/AccountContext'
 import { useSwipeBack } from './swipeBack'
 import { DEFAULT_GAME_ID, getGame } from './games'
 import type { HoleSetupSelection } from './games'
+import { t } from './i18n'
 
 const MAX_PLAYERS = 4
 
@@ -498,6 +512,34 @@ function AppShell() {
     [setupRound, updateRound],
   )
 
+  /**
+   * Nastavení bodování, jak bylo při otevření obrazovky Bodování. Ptát se na
+   * přepočet kola má smysl jen po skutečné změně - jinak by se dotaz vracel
+   * při každé návštěvě, i když hráči novou předvolbu do kola chtít nemusí.
+   */
+  const gameOptionsOnOpen = useRef<GameOptions | null>(null)
+  const previousView = useRef(view)
+
+  /**
+   * Bodování hry ukládá předvolby pro příští kola. Když se upravuje z
+   * rozehraného kola, nabídne se po odchodu z obrazovky i přepočet tohohle
+   * kola - hlídá se odchod jakoukoli cestou, tlačítkem i gestem zpět.
+   */
+  useEffect(() => {
+    const left = previousView.current === 'gameSettings' && view !== 'gameSettings'
+    previousView.current = view
+    if (!left) return
+    const before = gameOptionsOnOpen.current
+    gameOptionsOnOpen.current = null
+    if (!before || !setupRound || setupRound.gameId !== settingsGameId) return
+
+    const options = loadGameOptions(setupRound.gameId)
+    if (sameGameOptions(before, options)) return
+    if (applyRoundGameOptions(setupRound, options) === setupRound) return
+    if (!confirm(t('gameSettings.recalculateConfirm'))) return
+    updateRound((prev) => applyRoundGameOptions(prev, options))
+  }, [view, setupRound, settingsGameId, updateRound])
+
   /** Volba dvojic; v rozehraném kole se uplatní hned. */
   const changePairing = useCallback(
     (value: number) => {
@@ -880,6 +922,7 @@ function AppShell() {
         onOpenPairing={() => setView('setupPairing')}
         onOpenGameSettings={(id) => {
           setSettingsGameId(id)
+          gameOptionsOnOpen.current = loadGameOptions(id)
           openSetupSubscreen('gameSettings')
         }}
         {...(setupRound ? { editing: true } : {})}

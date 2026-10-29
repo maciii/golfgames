@@ -236,6 +236,8 @@ export const en: Record<MessageKey, Message> = {
     'Zero means off – such an extra point is not offered at all. The value applies to par, a better result multiplies it according to the settings below; a bogey or worse scores nothing. A bonus always counts for the whole pair.',
   'gameSettings.introPlayer':
     'Zero means off – such an extra point is not offered at all. The value applies to par, a better result multiplies it according to the settings below; a bogey or worse scores nothing. A bonus counts for the player who entered it.',
+  'gameSettings.recalculateConfirm':
+    'Scoring settings have changed. Recalculate the current round with them too? Entered scores stay, only points and money change.',
   'gameSettings.noOptions': 'This game has no additional scoring options.',
   'gameSettings.extraPoints': 'Extra points',
   'gameSettings.bonusValue': 'Value of the {name} bonus',
